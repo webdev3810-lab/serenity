@@ -1,0 +1,6 @@
+# Replace this placeholder before running `supabase link`.
+project_id = "YOUR_PROJECT_REF"
+
+[storage]
+enabled = true
+file_size_limit = "20MiB"

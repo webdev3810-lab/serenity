@@ -1,0 +1,965 @@
+
+--- ViewFile output ---
+Created At: 2026-08-20T14:33:00+08:00
+Completed At: 2026-08-20T14:33:00+08:00
+File Path: `file:///d:/My%20Work/serenity/app/page.tsx`
+Total Lines: 242
+Total Bytes: 15895
+Showing lines 1 to 242
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import {
+2:   BriefcaseBusiness,
+3:   Building2,
+4:   Car,
+5:   CheckCircle2,
+6:   Dog,
+7:   Home as HomeIcon,
+8:   KeyRound,
+9:   PawPrint,
+10:   ShieldCheck,
+11:   Users,
+12:   UtensilsCrossed,
+13:   Wifi,
+14: } from "lucide-react";
+15: import type { LucideIcon } from "lucide-react";
+16: import {
+17:   HomepageHeroSection,
+18:   HomepageIntroSection,
+19:   HomepageFeaturedHousesSection,
+20:   HomepageBenefitsSection,
+21:   HomepageCorporateSection,
+22:   HomepageReviewsSection,
+23:   HomepageLocationSection,
+24:   HomepageFaqSection,
+25:   HomepageFinalCtaSection,
+26:   HomepageServicesSection,
+27: } from "@/src/components/homepage";
+28: import type { BenefitItem, FaqItem, HomepageReview, LocationFact } from "@/src/components/homepage";
+29: import { getHomepageContent, getPublicProperties } from "@/src/lib/supabase/content";
+30: import { todayIso } from "@/src/lib/booking";
+31: import { lodgingBusinessJsonLd, pageMetadata } from "@/src/lib/seo";
+32: 
+33: export const metadata = pageMetadata("Furnished whole-house stays in Pakenham, Victoria");
+34: export const dynamic = "force-dynamic";
+35: 
+36: // ─── Helpers ────────────────────────────────────────────────────────────────
+37: 
+38: /** Strips the " - Whole" suffix that raw property names contain. */
+39: const displayName = (name: string) => name.replace(" - Whole", "");
+40: 
+41: const textValue = (value: unknown, fallback: string): string =>
+42:   typeof value === "string" && value.trim() ? value : fallback;
+43: 
+44: const isRecord = (value: unknown): value is Record<string, unknown> =>
+45:   Boolean(value) && typeof value === "object";
+46: 
+47: // ─── Default content (used when CMS returns nothing) ─────────────────────────
+48: 
+49: const DEFAULT_BENEFITS: BenefitItem[] = [
+50:   { icon: HomeIcon,          title: "Private whole-house accommodation",  description: "Enjoy the full home, living areas, bedrooms, and outdoor space exclusively for your stay." },
+51:   { icon: Building2,         title: "Three houses beside each other",     description: "Book one home or keep a larger family, team, or project group close together when available." },
+52:   { icon: KeyRound,          title: "Simple self check-in",               description: "Arrive with a secure key-safe code and settle in without waiting for a handover." },
+53:   { icon: Wifi,              title: "Wi-Fi for work and downtime",        description: "Stay connected for video calls, streaming, travel planning, and everyday communication." },
+54:   { icon: UtensilsCrossed,   title: "Kitchen and laundry facilities",     description: "Cook comfortably, wash clothes in-house, and enjoy the practicalities of a real home." },
+55:   { icon: Car,               title: "Parking for everyday travel",        description: "Use driveway or nearby street parking for cars, work vehicles, and longer stays." },
+56:   { icon: Dog,               title: "Pet-friendly options",               description: "Declared family pets are welcome at suitable houses with secure outdoor space." },
+57:   { icon: Users,             title: "Family-friendly space",              description: "Separate bedrooms and generous shared areas make longer family stays easier." },
+58:   { icon: BriefcaseBusiness, title: "Corporate and contractor stays",     description: "Practical furnished bases for project teams, consultants, and work crews." },
+59:   { icon: ShieldCheck,       title: "Weekly and monthly stays",           description: "Ask about longer-stay rates for relocation, insurance, and extended accommodation needs." },
+60:   { icon: PawPrint,          title: "Insurance accommodation",            description: "A calm, furnished home while repairs, relocations, or temporary arrangements are underway." },
+61:   { icon: CheckCircle2,      title: "Direct local support",               description: "Work with a responsive Serenity team before arrival and throughout your stay." },
+62: ];
+63: 
+64: const DEFAULT_FAQS: FaqItem[] = [
+65:   { question: "What is included in the stay?",           answer: "Each Serenity house is furnished for practical living with a kitchen, laundry facilities, Wi-Fi, living and dining areas, bedrooms, and parking. The full amenity list is shown on each house page." },
+66:   { question: "Are the houses private?",                 answer: "Yes. Every listing is a whole furnished house for the booking party, rather than a room in a shared home." },
+67:   { question: "Are pets allowed?",                       answer: "Pets are welcome at suitable pet-friendly houses when declared before arrival. Please include pets in your booking details so we can confirm the right home." },
+68:   { question: "What are the check-in and checkout times?", answer: "Standard check-in is after 3:00 pm and checkout is before 11:00 am. House-specific details are confirmed with your booking." },
+69:   { question: "What is the minimum stay?",               answer: "Minimum stays vary by house and dates. The live availability calendar will show whether your selected dates meet the house minimum." },
+70:   { question: "Can I book multiple houses?",             answer: "Yes. Serenity 7, Serenity 9, and Serenity 11 are beside each other and can be requested separately or together when the dates are available." },
+71:   { question: "Do you accept corporate bookings?",       answer: "Yes. We support corporate, contractor, consultant, relocation, insurance, and project-team accommodation, including multi-house requests." },
+72:   { question: "Can I request a GST invoice?",            answer: "GST invoices are available for eligible business and corporate bookings. Include your business details in the enquiry or booking notes." },
+73:   { question: "Are weekly and monthly discounts available?", answer: "Yes. Weekly and monthly discounts are shown on each house listing when configured. Longer-stay rates can also be discussed for corporate or relocation bookings." },
+74:   { question: "How does self check-in work?",            answer: "After booking confirmation, you receive the arrival information and secure key-safe details needed to access the house." },
+75:   { question: "When will I receive the exact address?",  answer: "For guest privacy and security, the exact street address and access information are sent after your booking is confirmed." },
+76:   { question: "What is the cancellation policy?",        answer: "Cancellation terms depend on the booking and selected house. Please review the cancellation policy linked in the booking flow before confirming." },
+77: ];
+78: 
+79: const DEFAULT_LOCATION_FACTS: LocationFact[] = [
+80:   { label: "5-minute walk",    detail: "Pakenham Train Station and nearby buses" },
+81:   { label: "Nearby essentials", detail: "Shopping centres, restaurants, and local services" },
+82:   { label: "Work access",       detail: "Pakenham Industrial Park and surrounding business areas" },
+83:   { label: "Explore further",   detail: "Easy routes towards Melbourne, Gippsland, and Phillip Island" },
+84: ];
+85: 
+86: // ─── Page ────────────────────────────────────────────────────────────────────
+87: 
+88: export default async function Home() {
+89:   // ── Data Loading ────────────────────────────────────────────────────────
+90:   const [properties, homepageContent] = await Promise.all([
+91:     getPublicProperties(),
+92:     getHomepageContent(),
+93:   ]);
+94:   const content: Record<string, unknown> = homepageContent ?? {};
+95:   const today = todayIso();
+96: 
+97:   // ── Hero ─────────────────────────────────────────────────────────────────
+98:   const heroHeading  = textValue(content.hero_heading,   "Furnished whole-house stays in Pakenham");
+99:   const heroSubtitle = textValue(content.hero_subtitle,  "Comfortable private houses for families, corporate stays, contractors, relocations, and extended stays.");
+100:   const heroCtaLabel = textValue(content.hero_cta_label, "Search");
+101:   const heroCaption  = textValue(content.hero_image_caption, "");
+102: 
+103:   const heroImages = properties.length
+104:     ? properties.map((p) => ({
+105:         src: p.featuredImage || (p.images?.[0]?.src ?? "/file.svg"),
+106:         alt: `${displayName(p.name)} furnished accommodation in Pakenham`,
+107:         caption: displayName(p.name),
+108:       }))
+109:     : [{ src: "/file.svg", alt: "Furnished Serenity house in Pakenham", caption: "Serenity 7" }];
+110: 
+111:   // ── Featured Houses ───────────────────────────────────────────────────────
+112:   const featuredHeading     = textValue(content.featured_heading,     "Choose your Serenity house");
+113:   const featuredDescription = textValue(content.featured_description, "Three furnished houses beside each other in Pakenham, available separately or together when dates allow.");
+114:   const featuredProps       = properties.filter((p) => p.featured);
+115:   const homepageProperties  = featuredProps.length ? featuredProps : properties;
+116: 
+117:   // ── Benefits ──────────────────────────────────────────────────────────────
+118:   const benefitsHeading     = textValue(content.benefits_heading,     "Everything you need to feel at home");
+119:   const benefitsDescription = textValue(content.benefits_description, "Practical details, thoughtful spaces, and direct local support for comfortable stays of any length.");
+120:   const benefitSource       = Array.isArray(content.benefits) ? content.benefits : Array.isArray(content.sections) ? content.sections : [];
+121:   const cmsBenefits         = benefitSource.filter(isRecord).map((item) => ({
+122:     title:       String(item.title       ?? "").trim(),
+123:     description: String(item.description ?? item.text ?? "").trim(),
+124:   })).filter((item) => item.title && item.description);
+125: 
+126:   const iconPool: LucideIcon[] = DEFAULT_BENEFITS.map((b) => b.icon);
+127:   const benefits: BenefitItem[] = cmsBenefits.length
+128:     ? cmsBenefits.map((item, i) => ({ icon: iconPool[i % iconPool.length], title: item.title, description: item.description }))
+129:     : DEFAULT_BENEFITS;
+130: 
+131:   // ── Corporate ─────────────────────────────────────────────────────────────
+132:   const corporateHeading     = textValue(content.corporate_heading,     "Keep your team close, comfortable, and ready for the next day.");
+133:   const corporateDescription = textValue(content.corporate_description, "Book one house or request multiple adjacent houses for project teams, contractors, consultants, employee relocation, insurance stays, and longer business visits. GST invoices are available for eligible bookings.");
+134:   const corporateCtaLabel    = textValue(content.corporate_cta_label,   "Plan a corporate stay");
+135:   const corporateCtaHref     = textValue(content.corporate_cta_href,    "/corporate-stays");
+136: 
+137:   // ── Reviews ───────────────────────────────────────────────────────────────
+138:   const reviews: HomepageReview[] = properties.flatMap((p) =>
+139:     (p.reviews ?? []).map((r) => ({
+140:       ...r,
+141:       propertyName: displayName(p.name),
+142:       propertySlug: p.slug,
+143:     }))
+144:   );
+145: 
+146:   // ── Location ──────────────────────────────────────────────────────────────
+147:   const locationHeading     = textValue(content.location_heading,     "A convenient Pakenham base");
+148:   const locationDescription = textValue(content.location_description, "Stay close to transport, shops, restaurants, local services, and Pakenham Industrial Park, with straightforward access towards Melbourne and Gippsland.");
+149: 
+150:   // ── FAQ ───────────────────────────────────────────────────────────────────
+151:   const faqHeading     = textValue(content.faq_heading,     "Good to know before arrival.");
+152:   const faqDescription = textValue(content.faq_description, "Clear answers for families, business travellers, contractors, and longer-stay guests.");
+153:   const cmsFaqs        = Array.isArray(content.faqs)
+154:     ? content.faqs.filter(isRecord).map((item) => ({
+155:         question: String(item.question ?? item.q ?? "").trim(),
+156:         answer:   String(item.answer   ?? item.a ?? "").trim(),
+157:       })).filter((item) => item.question && item.answer)
+158:     : [];
+159:   const faqs: FaqItem[] = cmsFaqs.length ? cmsFaqs : DEFAULT_FAQS;
+160: 
+161:   // ── Final CTA ─────────────────────────────────────────────────────────────
+162:   const finalCtaHeading       = textValue(content.final_cta_heading,        "Find a comfortable house for your next stay.");
+163:   const finalCtaSubheading    = textValue(content.final_cta_description,    "Choose your dates, compare the three Serenity houses, and book direct in Australian Dollars.");
+164: 
+165:   // ── FAQ JSON-LD ───────────────────────────────────────────────────────────
+166:   const faqJsonLd = {
+167:     "@context": "https://schema.org",
+168:     "@type": "FAQPage",
+169:     mainEntity: faqs.map((faq) => ({
+170:       "@type": "Question",
+171:       name: faq.question,
+172:       acceptedAnswer: { "@type": "Answer", text: faq.answer },
+173:     })),
+174:   };
+175: 
+176:   // ── Render ────────────────────────────────────────────────────────────────
+177:   return (
+178:     <>
+179:       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd) }} />
+180:       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+181: 
+182:       <HomepageHeroSection
+183:         images={heroImages}
+184:         heading={heroHeading}
+185:         subtitle={heroSubtitle}
+186:         today={today}
+187:         submitLabel={heroCtaLabel}
+188:         caption={heroCaption}
+189:         primaryCtaLabel="Check availability"
+190:         secondaryCtaLabel="Explore our houses"
+191:       />
+192: 
+193:       <HomepageIntroSection />
+194: 
+195:       <HomepageFeaturedHousesSection
+196:         heading={featuredHeading}
+197:         description={featuredDescription}
+198:         properties={homepageProperties}
+199:         displayName={displayName}
+200:       />
+201: 
+202:       <HomepageServicesSection images={properties.map(p => p.featuredImage)} />
+203: 
+204:       <HomepageBenefitsSection
+205:         heading={benefitsHeading}
+206:         description={benefitsDescription}
+207:         benefits={benefits}
+208:         imageProperty={properties[1] ?? properties[0]}
+209:       />
+210: 
+211:       <HomepageCorporateSection
+212:         heading={corporateHeading}
+213:         description={corporateDescription}
+214:         ctaLabel={corporateCtaLabel}
+215:         ctaHref={corporateCtaHref}
+216:         properties={properties}
+217:         displayName={displayName}
+218:       />
+219: 
+220:       <HomepageReviewsSection reviews={reviews} />
+221: 
+222:       <HomepageLocationSection
+223:         heading={locationHeading}
+224:         description={locationDescription}
+225:         facts={DEFAULT_LOCATION_FACTS}
+226:       />
+227: 
+228:       <HomepageFaqSection
+229:         heading={faqHeading}
+230:         description={faqDescription}
+231:         faqs={faqs}
+232:       />
+233: 
+234:       <HomepageFinalCtaSection
+235:         heading={finalCtaHeading}
+236:         subheading={finalCtaSubheading}
+237:         properties={properties}
+238:       />
+239:     </>
+240:   );
+241: }
+242: 
+The above content shows the entire, complete file contents of the requested file.
+
+
+--- ViewFile output ---
+Created At: 2026-08-20T14:50:18+08:00
+Completed At: 2026-08-20T14:50:19+08:00
+File Path: `file:///d:/My%20Work/serenity/app/page.tsx`
+Total Lines: 242
+Total Bytes: 15895
+Showing lines 190 to 242
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+190:         secondaryCtaLabel="Explore our houses"
+191:       />
+192: 
+193:       <HomepageIntroSection />
+194: 
+195:       <HomepageFeaturedHousesSection
+196:         heading={featuredHeading}
+197:         description={featuredDescription}
+198:         properties={homepageProperties}
+199:         displayName={displayName}
+200:       />
+201: 
+202:       <HomepageServicesSection images={properties.map(p => p.featuredImage)} />
+203: 
+204:       <HomepageBenefitsSection
+205:         heading={benefitsHeading}
+206:         description={benefitsDescription}
+207:         benefits={benefits}
+208:         imageProperty={properties[1] ?? properties[0]}
+209:       />
+210: 
+211:       <HomepageCorporateSection
+212:         heading={corporateHeading}
+213:         description={corporateDescription}
+214:         ctaLabel={corporateCtaLabel}
+215:         ctaHref={corporateCtaHref}
+216:         properties={properties}
+217:         displayName={displayName}
+218:       />
+219: 
+220:       <HomepageReviewsSection reviews={reviews} />
+221: 
+222:       <HomepageLocationSection
+223:         heading={locationHeading}
+224:         description={locationDescription}
+225:         facts={DEFAULT_LOCATION_FACTS}
+226:       />
+227: 
+228:       <HomepageFaqSection
+229:         heading={faqHeading}
+230:         description={faqDescription}
+231:         faqs={faqs}
+232:       />
+233: 
+234:       <HomepageFinalCtaSection
+235:         heading={finalCtaHeading}
+236:         subheading={finalCtaSubheading}
+237:         properties={properties}
+238:       />
+239:     </>
+240:   );
+241: }
+242: 
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+
+--- ViewFile output ---
+Created At: 2026-08-20T14:50:26+08:00
+Completed At: 2026-08-20T14:50:26+08:00
+File Path: `file:///d:/My%20Work/serenity/app/page.tsx`
+Total Lines: 242
+Total Bytes: 15895
+Showing lines 150 to 190
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+150:   // ── FAQ ───────────────────────────────────────────────────────────────────
+151:   const faqHeading     = textValue(content.faq_heading,     "Good to know before arrival.");
+152:   const faqDescription = textValue(content.faq_description, "Clear answers for families, business travellers, contractors, and longer-stay guests.");
+153:   const cmsFaqs        = Array.isArray(content.faqs)
+154:     ? content.faqs.filter(isRecord).map((item) => ({
+155:         question: String(item.question ?? item.q ?? "").trim(),
+156:         answer:   String(item.answer   ?? item.a ?? "").trim(),
+157:       })).filter((item) => item.question && item.answer)
+158:     : [];
+159:   const faqs: FaqItem[] = cmsFaqs.length ? cmsFaqs : DEFAULT_FAQS;
+160: 
+161:   // ── Final CTA ─────────────────────────────────────────────────────────────
+162:   const finalCtaHeading       = textValue(content.final_cta_heading,        "Find a comfortable house for your next stay.");
+163:   const finalCtaSubheading    = textValue(content.final_cta_description,    "Choose your dates, compare the three Serenity houses, and book direct in Australian Dollars.");
+164: 
+165:   // ── FAQ JSON-LD ───────────────────────────────────────────────────────────
+166:   const faqJsonLd = {
+167:     "@context": "https://schema.org",
+168:     "@type": "FAQPage",
+169:     mainEntity: faqs.map((faq) => ({
+170:       "@type": "Question",
+171:       name: faq.question,
+172:       acceptedAnswer: { "@type": "Answer", text: faq.answer },
+173:     })),
+174:   };
+175: 
+176:   // ── Render ────────────────────────────────────────────────────────────────
+177:   return (
+178:     <>
+179:       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd) }} />
+180:       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+181: 
+182:       <HomepageHeroSection
+183:         images={heroImages}
+184:         heading={heroHeading}
+185:         subtitle={heroSubtitle}
+186:         today={today}
+187:         submitLabel={heroCtaLabel}
+188:         caption={heroCaption}
+189:         primaryCtaLabel="Check availability"
+190:         secondaryCtaLabel="Explore our houses"
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+
+--- ViewFile output ---
+Created At: 2026-08-20T14:50:31+08:00
+Completed At: 2026-08-20T14:50:31+08:00
+File Path: `file:///d:/My%20Work/serenity/app/page.tsx`
+Total Lines: 242
+Total Bytes: 15895
+Showing lines 100 to 150
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+100:   const heroCtaLabel = textValue(content.hero_cta_label, "Search");
+101:   const heroCaption  = textValue(content.hero_image_caption, "");
+102: 
+103:   const heroImages = properties.length
+104:     ? properties.map((p) => ({
+105:         src: p.featuredImage || (p.images?.[0]?.src ?? "/file.svg"),
+106:         alt: `${displayName(p.name)} furnished accommodation in Pakenham`,
+107:         caption: displayName(p.name),
+108:       }))
+109:     : [{ src: "/file.svg", alt: "Furnished Serenity house in Pakenham", caption: "Serenity 7" }];
+110: 
+111:   // ── Featured Houses ───────────────────────────────────────────────────────
+112:   const featuredHeading     = textValue(content.featured_heading,     "Choose your Serenity house");
+113:   const featuredDescription = textValue(content.featured_description, "Three furnished houses beside each other in Pakenham, available separately or together when dates allow.");
+114:   const featuredProps       = properties.filter((p) => p.featured);
+115:   const homepageProperties  = featuredProps.length ? featuredProps : properties;
+116: 
+117:   // ── Benefits ──────────────────────────────────────────────────────────────
+118:   const benefitsHeading     = textValue(content.benefits_heading,     "Everything you need to feel at home");
+119:   const benefitsDescription = textValue(content.benefits_description, "Practical details, thoughtful spaces, and direct local support for comfortable stays of any length.");
+120:   const benefitSource       = Array.isArray(content.benefits) ? content.benefits : Array.isArray(content.sections) ? content.sections : [];
+121:   const cmsBenefits         = benefitSource.filter(isRecord).map((item) => ({
+122:     title:       String(item.title       ?? "").trim(),
+123:     description: String(item.description ?? item.text ?? "").trim(),
+124:   })).filter((item) => item.title && item.description);
+125: 
+126:   const iconPool: LucideIcon[] = DEFAULT_BENEFITS.map((b) => b.icon);
+127:   const benefits: BenefitItem[] = cmsBenefits.length
+128:     ? cmsBenefits.map((item, i) => ({ icon: iconPool[i % iconPool.length], title: item.title, description: item.description }))
+129:     : DEFAULT_BENEFITS;
+130: 
+131:   // ── Corporate ─────────────────────────────────────────────────────────────
+132:   const corporateHeading     = textValue(content.corporate_heading,     "Keep your team close, comfortable, and ready for the next day.");
+133:   const corporateDescription = textValue(content.corporate_description, "Book one house or request multiple adjacent houses for project teams, contractors, consultants, employee relocation, insurance stays, and longer business visits. GST invoices are available for eligible bookings.");
+134:   const corporateCtaLabel    = textValue(content.corporate_cta_label,   "Plan a corporate stay");
+135:   const corporateCtaHref     = textValue(content.corporate_cta_href,    "/corporate-stays");
+136: 
+137:   // ── Reviews ───────────────────────────────────────────────────────────────
+138:   const reviews: HomepageReview[] = properties.flatMap((p) =>
+139:     (p.reviews ?? []).map((r) => ({
+140:       ...r,
+141:       propertyName: displayName(p.name),
+142:       propertySlug: p.slug,
+143:     }))
+144:   );
+145: 
+146:   // ── Location ──────────────────────────────────────────────────────────────
+147:   const locationHeading     = textValue(content.location_heading,     "A convenient Pakenham base");
+148:   const locationDescription = textValue(content.location_description, "Stay close to transport, shops, restaurants, local services, and Pakenham Industrial Park, with straightforward access towards Melbourne and Gippsland.");
+149: 
+150:   // ── FAQ ───────────────────────────────────────────────────────────────────
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+
+--- ViewFile output ---
+Created At: 2026-08-20T16:19:09+08:00
+Completed At: 2026-08-20T16:19:10+08:00
+File Path: `file:///d:/My%20Work/serenity/app/page.tsx`
+Total Lines: 268
+Total Bytes: 17502
+Showing lines 120 to 250
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+120:   const benefitSource       = Array.isArray(content.benefits) ? content.benefits : Array.isArray(content.sections) ? content.sections : [];
+121:   const cmsBenefits         = benefitSource.filter(isRecord).map((item) => ({
+122:     title:       String(item.title       ?? "").trim(),
+123:     description: String(item.description ?? item.text ?? "").trim(),
+124:   })).filter((item) => item.title && item.description);
+125: 
+126:   const iconPool: LucideIcon[] = DEFAULT_BENEFITS.map((b) => b.icon);
+127:   const benefits: BenefitItem[] = cmsBenefits.length
+128:     ? cmsBenefits.map((item, i) => ({ icon: iconPool[i % iconPool.length], title: item.title, description: item.description }))
+129:     : DEFAULT_BENEFITS;
+130: 
+131:   // ── Corporate ─────────────────────────────────────────────────────────────
+132:   const corporateHeading     = textValue(content.corporate_heading,     "Keep your team close, comfortable, and ready for the next day.");
+133:   const corporateDescription = textValue(content.corporate_description, "Book one house or request multiple adjacent houses for project teams, contractors, consultants, employee relocation, insurance stays, and longer business visits. GST invoices are available for eligible bookings.");
+134:   const corporateCtaLabel    = textValue(content.corporate_cta_label,   "Plan a corporate stay");
+135:   const corporateCtaHref     = textValue(content.corporate_cta_href,    "/corporate-stays");
+136: 
+137:   // ── Reviews ───────────────────────────────────────────────────────────────
+138:   const reviews: HomepageReview[] = properties.flatMap((p) =>
+139:     (p.reviews ?? []).map((r) => ({
+140:       ...r,
+141:       propertyName: displayName(p.name),
+142:       propertySlug: p.slug,
+143:     }))
+144:   );
+145: 
+146:   // ── Location ──────────────────────────────────────────────────────────────
+147:   const locationHeading     = textValue(content.location_heading,     "Our location");
+148:   const locationDescription = textValue(content.location_description, "Stay close to transport, shops, restaurants, and local services.");
+149:   const locationPhoneLabel  = textValue(content.location_phone_label, "CALL US");
+150:   const locationPhoneNumber = textValue(content.location_phone_number, "+61 400 000 000");
+151:   const locationEmailLabel  = textValue(content.location_email_label, "EMAIL US");
+152:   const locationEmailAddress= textValue(content.location_email_address, "stay@serenity.example.com");
+153:   const locationDirectionsLabel = textValue(content.location_directions_label, "GET DIRECTIONS");
+154:   const locationDirectionsLink = textValue(content.location_directions_link, "https://maps.google.com/?q=Pakenham+Victoria");
+155:   const locationPrivacyMessage = textValue(content.location_privacy_message, "The exact property address is provided after booking confirmation.");
+156:   const locationMapTitle    = textValue(content.location_map_title, "Pakenham Victoria Accommodation Area");
+157:   const locationPublicText  = textValue(content.location_public_text, "Pakenham, Victoria, Australia");
+158:   
+159:   const cmsLocationFacts = Array.isArray(content.location_facts)
+160:     ? content.location_facts.filter(isRecord).map((item) => ({
+161:         label: String(item.label ?? "").trim(),
+162:         detail: String(item.detail ?? "").trim(),
+163:       })).filter((item) => item.label && item.detail)
+164:     : [];
+165:   const locationFacts = cmsLocationFacts.length ? cmsLocationFacts : DEFAULT_LOCATION_FACTS;
+166: 
+167:   // ── FAQ ───────────────────────────────────────────────────────────────────
+168:   const faqHeading     = textValue(content.faq_heading,     "Good to know before arrival.");
+169:   const faqDescription = textValue(content.faq_description, "Clear answers for families, business travellers, contractors, and longer-stay guests.");
+170:   const cmsFaqs        = Array.isArray(content.faqs)
+171:     ? content.faqs.filter(isRecord).map((item) => ({
+172:         question: String(item.question ?? item.q ?? "").trim(),
+173:         answer:   String(item.answer   ?? item.a ?? "").trim(),
+174:       })).filter((item) => item.question && item.answer)
+175:     : [];
+176:   const faqs: FaqItem[] = cmsFaqs.length ? cmsFaqs : DEFAULT_FAQS;
+177: 
+178:   // ── Final CTA ─────────────────────────────────────────────────────────────
+179:   const finalCtaHeading       = textValue(content.final_cta_heading,        "Find a comfortable house for your next stay.");
+180:   const finalCtaSubheading    = textValue(content.final_cta_description,    "Choose your dates, compare the three Serenity houses, and book direct in Australian Dollars.");
+181: 
+182:   // ── FAQ JSON-LD ───────────────────────────────────────────────────────────
+183:   const faqJsonLd = {
+184:     "@context": "https://schema.org",
+185:     "@type": "FAQPage",
+186:     mainEntity: faqs.map((faq) => ({
+187:       "@type": "Question",
+188:       name: faq.question,
+189:       acceptedAnswer: { "@type": "Answer", text: faq.answer },
+190:     })),
+191:   };
+192: 
+193:   // ── Render ────────────────────────────────────────────────────────────────
+194:   return (
+195:     <>
+196:       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd) }} />
+197:       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+198: 
+199:       <HomepageHeroSection
+200:         images={heroImages}
+201:         heading={heroHeading}
+202:         subtitle={heroSubtitle}
+203:         today={today}
+204:         submitLabel={heroCtaLabel}
+205:         caption={heroCaption}
+206:         primaryCtaLabel="Check availability"
+207:         secondaryCtaLabel="Explore our houses"
+208:       />
+209: 
+210:       <HomepageIntroSection />
+211: 
+212:       <HomepageFeaturedHousesSection
+213:         heading={featuredHeading}
+214:         description={featuredDescription}
+215:         properties={homepageProperties}
+216:         displayName={displayName}
+217:       />
+218: 
+219:       <HomepageServicesSection images={properties.map(p => p.featuredImage)} />
+220: 
+221:       <HomepageBenefitsSection
+222:         heading={benefitsHeading}
+223:         description={benefitsDescription}
+224:         benefits={benefits}
+225:         imageProperty={properties[1] ?? properties[0]}
+226:       />
+227: 
+228:       <HomepageCorporateSection
+229:         heading={corporateHeading}
+230:         description={corporateDescription}
+231:         ctaLabel={corporateCtaLabel}
+232:         ctaHref={corporateCtaHref}
+233:         properties={properties}
+234:         displayName={displayName}
+235:       />
+236: 
+237:       <HomepageReviewsSection reviews={reviews} />
+238: 
+239:       <HomepageLocationSection
+240:         heading={locationHeading}
+241:         description={locationDescription}
+242:         phoneLabel={locationPhoneLabel}
+243:         phoneNumber={locationPhoneNumber}
+244:         emailLabel={locationEmailLabel}
+245:         emailAddress={locationEmailAddress}
+246:         directionsLabel={locationDirectionsLabel}
+247:         directionsLink={locationDirectionsLink}
+248:         privacyMessage={locationPrivacyMessage}
+249:         mapTitle={locationMapTitle}
+250:         publicText={locationPublicText}
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+
+--- ViewFile output ---
+Created At: 2026-08-20T16:32:48+08:00
+Completed At: 2026-08-20T16:32:48+08:00
+File Path: `file:///d:/My%20Work/serenity/app/page.tsx`
+Total Lines: 268
+Total Bytes: 17502
+Showing lines 225 to 240
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+225:         imageProperty={properties[1] ?? properties[0]}
+226:       />
+227: 
+228:       <HomepageCorporateSection
+229:         heading={corporateHeading}
+230:         description={corporateDescription}
+231:         ctaLabel={corporateCtaLabel}
+232:         ctaHref={corporateCtaHref}
+233:         properties={properties}
+234:         displayName={displayName}
+235:       />
+236: 
+237:       <HomepageReviewsSection reviews={reviews} />
+238: 
+239:       <HomepageLocationSection
+240:         heading={locationHeading}
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+
+--- ViewFile output ---
+Created At: 2026-08-20T16:58:10+08:00
+Completed At: 2026-08-20T16:58:13+08:00
+File Path: `file:///d:/My%20Work/serenity/app/page.tsx`
+Total Lines: 267
+Total Bytes: 17468
+Showing lines 1 to 267
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import {
+2:   BriefcaseBusiness,
+3:   Building2,
+4:   Car,
+5:   CheckCircle2,
+6:   Dog,
+7:   Home as HomeIcon,
+8:   KeyRound,
+9:   PawPrint,
+10:   ShieldCheck,
+11:   Users,
+12:   UtensilsCrossed,
+13:   Wifi,
+14: } from "lucide-react";
+15: import type { LucideIcon } from "lucide-react";
+16: import {
+17:   HomepageHeroSection,
+18:   HomepageIntroSection,
+19:   HomepageFeaturedHousesSection,
+20:   HomepageBenefitsSection,
+21:   HomepageCorporateSection,
+22:   HomepageReviewsSection,
+23:   HomepageLocationSection,
+24:   HomepageFaqSection,
+25:   HomepageFinalCtaSection,
+26:   HomepageServicesSection,
+27: } from "@/src/components/homepage";
+28: import type { BenefitItem, FaqItem, HomepageReview, LocationFact } from "@/src/components/homepage";
+29: import { getHomepageContent, getPublicProperties } from "@/src/lib/supabase/content";
+30: import { todayIso } from "@/src/lib/booking";
+31: import { lodgingBusinessJsonLd, pageMetadata } from "@/src/lib/seo";
+32: 
+33: export const metadata = pageMetadata("Furnished whole-house stays in Pakenham, Victoria");
+34: export const dynamic = "force-dynamic";
+35: 
+36: // ─── Helpers ────────────────────────────────────────────────────────────────
+37: 
+38: /** Strips the " - Whole" suffix that raw property names contain. */
+39: const displayName = (name: string) => name.replace(" - Whole", "");
+40: 
+41: const textValue = (value: unknown, fallback: string): string =>
+42:   typeof value === "string" && value.trim() ? value : fallback;
+43: 
+44: const isRecord = (value: unknown): value is Record<string, unknown> =>
+45:   Boolean(value) && typeof value === "object";
+46: 
+47: // ─── Default content (used when CMS returns nothing) ─────────────────────────
+48: 
+49: const DEFAULT_BENEFITS: BenefitItem[] = [
+50:   { icon: HomeIcon,          title: "Private whole-house accommodation",  description: "Enjoy the full home, living areas, bedrooms, and outdoor space exclusively for your stay." },
+51:   { icon: Building2,         title: "Three houses beside each other",     description: "Book one home or keep a larger family, team, or project group close together when available." },
+52:   { icon: KeyRound,          title: "Simple self check-in",               description: "Arrive with a secure key-safe code and settle in without waiting for a handover." },
+53:   { icon: Wifi,              title: "Wi-Fi for work and downtime",        description: "Stay connected for video calls, streaming, travel planning, and everyday communication." },
+54:   { icon: UtensilsCrossed,   title: "Kitchen and laundry facilities",     description: "Cook comfortably, wash clothes in-house, and enjoy the practicalities of a real home." },
+55:   { icon: Car,               title: "Parking for everyday travel",        description: "Use driveway or nearby street parking for cars, work vehicles, and longer stays." },
+56:   { icon: Dog,               title: "Pet-friendly options",               description: "Declared family pets are welcome at suitable houses with secure outdoor space." },
+57:   { icon: Users,             title: "Family-friendly space",              description: "Separate bedrooms and generous shared areas make longer family stays easier." },
+58:   { icon: BriefcaseBusiness, title: "Corporate and contractor stays",     description: "Practical furnished bases for project teams, consultants, and work crews." },
+59:   { icon: ShieldCheck,       title: "Weekly and monthly stays",           description: "Ask about longer-stay rates for relocation, insurance, and extended accommodation needs." },
+60:   { icon: PawPrint,          title: "Insurance accommodation",            description: "A calm, furnished home while repairs, relocations, or temporary arrangements are underway." },
+61:   { icon: CheckCircle2,      title: "Direct local support",               description: "Work with a responsive Serenity team before arrival and throughout your stay." },
+62: ];
+63: 
+64: const DEFAULT_FAQS: FaqItem[] = [
+65:   { question: "What is included in the stay?",           answer: "Each Serenity house is furnished for practical living with a kitchen, laundry facilities, Wi-Fi, living and dining areas, bedrooms, and parking. The full amenity list is shown on each house page." },
+66:   { question: "Are the houses private?",                 answer: "Yes. Every listing is a whole furnished house for the booking party, rather than a room in a shared home." },
+67:   { question: "Are pets allowed?",                       answer: "Pets are welcome at suitable pet-friendly houses when declared before arrival. Please include pets in your booking details so we can confirm the right home." },
+68:   { question: "What are the check-in and checkout times?", answer: "Standard check-in is after 3:00 pm and checkout is before 11:00 am. House-specific details are confirmed with your booking." },
+69:   { question: "What is the minimum stay?",               answer: "Minimum stays vary by house and dates. The live availability calendar will show whether your selected dates meet the house minimum." },
+70:   { question: "Can I book multiple houses?",             answer: "Yes. Serenity 7, Serenity 9, and Serenity 11 are beside each other and can be requested separately or together when the dates are available." },
+71:   { question: "Do you accept corporate bookings?",       answer: "Yes. We support corporate, contractor, consultant, relocation, insurance, and project-team accommodation, including multi-house requests." },
+72:   { question: "Can I request a GST invoice?",            answer: "GST invoices are available for eligible business and corporate bookings. Include your business details in the enquiry or booking notes." },
+73:   { question: "Are weekly and monthly discounts available?", answer: "Yes. Weekly and monthly discounts are shown on each house listing when configured. Longer-stay rates can also be discussed for corporate or relocation bookings." },
+74:   { question: "How does self check-in work?",            answer: "After booking confirmation, you receive the arrival information and secure key-safe details needed to access the house." },
+75:   { question: "When will I receive the exact address?",  answer: "For guest privacy and security, the exact street address and access information are sent after your booking is confirmed." },
+76:   { question: "What is the cancellation policy?",        answer: "Cancellation terms depend on the booking and selected house. Please review the cancellation policy linked in the booking flow before confirming." },
+77: ];
+78: 
+79: const DEFAULT_LOCATION_FACTS: LocationFact[] = [
+80:   { label: "5-minute walk",    detail: "Pakenham Train Station and nearby buses" },
+81:   { label: "Nearby essentials", detail: "Shopping centres, restaurants, and local services" },
+82:   { label: "Work access",       detail: "Pakenham Industrial Park and surrounding business areas" },
+83:   { label: "Explore further",   detail: "Easy routes towards Melbourne, Gippsland, and Phillip Island" },
+84: ];
+85: 
+86: // ─── Page ────────────────────────────────────────────────────────────────────
+87: 
+88: export default async function Home() {
+89:   // ── Data Loading ────────────────────────────────────────────────────────
+90:   const [properties, homepageContent] = await Promise.all([
+91:     getPublicProperties(),
+92:     getHomepageContent(),
+93:   ]);
+94:   const content: Record<string, unknown> = homepageContent ?? {};
+95:   const today = todayIso();
+96: 
+97:   // ── Hero ─────────────────────────────────────────────────────────────────
+98:   const heroHeading  = textValue(content.hero_heading,   "Furnished whole-house stays in Pakenham");
+99:   const heroSubtitle = textValue(content.hero_subtitle,  "Comfortable private houses for families, corporate stays, contractors, relocations, and extended stays.");
+100:   const heroCtaLabel = textValue(content.hero_cta_label, "Search");
+101:   const heroCaption  = textValue(content.hero_image_caption, "");
+102: 
+103:   const heroImages = properties.length
+104:     ? properties.map((p) => ({
+105:         src: p.featuredImage || (p.images?.[0]?.src ?? "/file.svg"),
+106:         alt: `${displayName(p.name)} furnished accommodation in Pakenham`,
+107:         caption: displayName(p.name),
+108:       }))
+109:     : [{ src: "/file.svg", alt: "Furnished Serenity house in Pakenham", caption: "Serenity 7" }];
+110: 
+111:   // ── Featured Houses ───────────────────────────────────────────────────────
+112:   const featuredHeading     = textValue(content.featured_heading,     "Choose your Serenity house");
+113:   const featuredDescription = textValue(content.featured_description, "Three furnished houses beside each other in Pakenham, available separately or together when dates allow.");
+114:   const featuredProps       = properties.filter((p) => p.featured);
+115:   const homepageProperties  = featuredProps.length ? featuredProps : properties;
+116: 
+117:   // ── Benefits ──────────────────────────────────────────────────────────────
+118:   const benefitsHeading     = textValue(content.benefits_heading,     "Everything you need to feel at home");
+119:   const benefitsDescription = textValue(content.benefits_description, "Practical details, thoughtful spaces, and direct local support for comfortable stays of any length.");
+120:   const benefitSource       = Array.isArray(content.benefits) ? content.benefits : Array.isArray(content.sections) ? content.sections : [];
+121:   const cmsBenefits         = benefitSource.filter(isRecord).map((item) => ({
+122:     title:       String(item.title       ?? "").trim(),
+123:     description: String(item.description ?? item.text ?? "").trim(),
+124:   })).filter((item) => item.title && item.description);
+125: 
+126:   const iconPool: LucideIcon[] = DEFAULT_BENEFITS.map((b) => b.icon);
+127:   const benefits: BenefitItem[] = cmsBenefits.length
+128:     ? cmsBenefits.map((item, i) => ({ icon: iconPool[i % iconPool.length], title: item.title, description: item.description }))
+129:     : DEFAULT_BENEFITS;
+130: 
+131:   // ── Corporate ─────────────────────────────────────────────────────────────
+132:   const corporateHeading     = textValue(content.corporate_heading,     "Keep your team close, comfortable, and ready for the next day.");
+133:   const corporateDescription = textValue(content.corporate_description, "Book one house or request multiple adjacent houses for project teams, contractors, consultants, employee relocation, insurance stays, and longer business visits. GST invoices are available for eligible bookings.");
+134:   const corporateCtaLabel    = textValue(content.corporate_cta_label,   "Plan a corporate stay");
+135:   const corporateCtaHref     = textValue(content.corporate_cta_href,    "/corporate-stays");
+136: 
+137:   // ── Reviews ───────────────────────────────────────────────────────────────
+138:   const reviews: HomepageReview[] = properties.flatMap((p) =>
+139:     (p.reviews ?? []).map((r) => ({
+140:       ...r,
+141:       propertyName: displayName(p.name),
+142:       propertySlug: p.slug,
+143:     }))
+144:   );
+145: 
+146:   // ── Location ──────────────────────────────────────────────────────────────
+147:   const locationHeading     = textValue(content.location_heading,     "Our location");
+148:   const locationDescription = textValue(content.location_description, "Stay close to transport, shops, restaurants, and local services.");
+149:   const locationPhoneLabel  = textValue(content.location_phone_label, "CALL US");
+150:   const locationPhoneNumber = textValue(content.location_phone_number, "+61 400 000 000");
+151:   const locationEmailLabel  = textValue(content.location_email_label, "EMAIL US");
+152:   const locationEmailAddress= textValue(content.location_email_address, "stay@serenity.example.com");
+153:   const locationDirectionsLabel = textValue(content.location_directions_label, "GET DIRECTIONS");
+154:   const locationDirectionsLink = textValue(content.location_directions_link, "https://maps.google.com/?q=Pakenham+Victoria");
+155:   const locationPrivacyMessage = textValue(content.location_privacy_message, "The exact property address is provided after booking confirmation.");
+156:   const locationMapTitle    = textValue(content.location_map_title, "Pakenham Victoria Accommodation Area");
+157:   const locationPublicText  = textValue(content.location_public_text, "Pakenham, Victoria, Australia");
+158:   
+159:   const cmsLocationFacts = Array.isArray(content.location_facts)
+160:     ? content.location_facts.filter(isRecord).map((item) => ({
+161:         label: String(item.label ?? "").trim(),
+162:         detail: String(item.detail ?? "").trim(),
+163:       })).filter((item) => item.label && item.detail)
+164:     : [];
+165:   const locationFacts = cmsLocationFacts.length ? cmsLocationFacts : DEFAULT_LOCATION_FACTS;
+166: 
+167:   // ── FAQ ───────────────────────────────────────────────────────────────────
+168:   const faqHeading     = textValue(content.faq_heading,     "Good to know before arrival.");
+169:   const faqDescription = textValue(content.faq_description, "Clear answers for families, business travellers, contractors, and longer-stay guests.");
+170:   const cmsFaqs        = Array.isArray(content.faqs)
+171:     ? content.faqs.filter(isRecord).map((item) => ({
+172:         question: String(item.question ?? item.q ?? "").trim(),
+173:         answer:   String(item.answer   ?? item.a ?? "").trim(),
+174:       })).filter((item) => item.question && item.answer)
+175:     : [];
+176:   const faqs: FaqItem[] = cmsFaqs.length ? cmsFaqs : DEFAULT_FAQS;
+177: 
+178:   // ── Final CTA ─────────────────────────────────────────────────────────────
+179:   const finalCtaHeading       = textValue(content.final_cta_heading,        "Find a comfortable house for your next stay.");
+180:   const finalCtaSubheading    = textValue(content.final_cta_description,    "Choose your dates, compare the three Serenity houses, and book direct in Australian Dollars.");
+181: 
+182:   // ── FAQ JSON-LD ───────────────────────────────────────────────────────────
+183:   const faqJsonLd = {
+184:     "@context": "https://schema.org",
+185:     "@type": "FAQPage",
+186:     mainEntity: faqs.map((faq) => ({
+187:       "@type": "Question",
+188:       name: faq.question,
+189:       acceptedAnswer: { "@type": "Answer", text: faq.answer },
+190:     })),
+191:   };
+192: 
+193:   // ── Render ────────────────────────────────────────────────────────────────
+194:   return (
+195:     <>
+196:       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd) }} />
+197:       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+198: 
+199:       <HomepageHeroSection
+200:         images={heroImages}
+201:         heading={heroHeading}
+202:         subtitle={heroSubtitle}
+203:         today={today}
+204:         submitLabel={heroCtaLabel}
+205:         caption={heroCaption}
+206:         primaryCtaLabel="Check availability"
+207:         secondaryCtaLabel="Explore our houses"
+208:       />
+209: 
+210:       <HomepageIntroSection />
+211: 
+212:       <HomepageFeaturedHousesSection
+213:         heading={featuredHeading}
+214:         description={featuredDescription}
+215:         properties={homepageProperties}
+216:         displayName={displayName}
+217:       />
+218: 
+219:       <HomepageServicesSection images={properties.map(p => p.featuredImage)} />
+220: 
+221:       <HomepageBenefitsSection
+222:         heading={benefitsHeading}
+223:         description={benefitsDescription}
+224:         benefits={benefits}
+225:         imageProperty={properties[1] ?? properties[0]}
+226:       />
+227: 
+228:       <HomepageCorporateSection
+229:         heading={corporateHeading}
+230:         description={corporateDescription}
+231:         ctaLabel={corporateCtaLabel}
+232:         ctaHref={corporateCtaHref}
+233:         properties={properties}
+234:       />
+235: 
+236:       <HomepageReviewsSection reviews={reviews} />
+237: 
+238:       <HomepageLocationSection
+239:         heading={locationHeading}
+240:         description={locationDescription}
+241:         phoneLabel={locationPhoneLabel}
+242:         phoneNumber={locationPhoneNumber}
+243:         emailLabel={locationEmailLabel}
+244:         emailAddress={locationEmailAddress}
+245:         directionsLabel={locationDirectionsLabel}
+246:         directionsLink={locationDirectionsLink}
+247:         privacyMessage={locationPrivacyMessage}
+248:         mapTitle={locationMapTitle}
+249:         publicText={locationPublicText}
+250:         facts={locationFacts}
+251:       />
+252: 
+253:       <HomepageFaqSection
+254:         heading={faqHeading}
+255:         description={faqDescription}
+256:         faqs={faqs}
+257:       />
+258: 
+259:       <HomepageFinalCtaSection
+260:         heading={finalCtaHeading}
+261:         subheading={finalCtaSubheading}
+262:         properties={properties}
+263:       />
+264:     </>
+265:   );
+266: }
+267: 
+The above content shows the entire, complete file contents of the requested file.
+
+
+--- ViewFile output ---
+Created At: 2026-08-20T17:10:12+08:00
+Completed At: 2026-08-20T17:10:12+08:00
+File Path: `file:///d:/My%20Work/serenity/app/page.tsx`
+Total Lines: 290
+Total Bytes: 19462
+Showing lines 220 to 250
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+220: 
+221:       <HomepageHeroSection
+222:         images={heroImages}
+223:         heading={heroHeading}
+224:         subtitle={heroSubtitle}
+225:         today={today}
+226:         submitLabel={heroCtaLabel}
+227:         caption={heroCaption}
+228:         primaryCtaLabel="Check availability"
+229:         secondaryCtaLabel="Explore our houses"
+230:       />
+231: 
+232:       <HomepageIntroSection />
+233: 
+234:       <HomepageFeaturedHousesSection
+235:         heading={featuredHeading}
+236:         description={featuredDescription}
+237:         properties={homepageProperties}
+238:         displayName={displayName}
+239:       />
+240: 
+241:       <HomepageServicesSection images={properties.map(p => p.featuredImage)} />
+242: 
+243:       <HomepageBenefitsSection
+244:         heading={benefitsHeading}
+245:         description={benefitsDescription}
+246:         benefits={benefits}
+247:         imageProperty={properties[1] ?? properties[0]}
+248:       />
+249: 
+250:       <HomepageCorporateSection
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+
+--- ViewFile output ---
+Created At: 2026-08-20T17:10:16+08:00
+Completed At: 2026-08-20T17:10:16+08:00
+File Path: `file:///d:/My%20Work/serenity/app/page.tsx`
+Total Lines: 290
+Total Bytes: 19462
+Showing lines 249 to 264
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+249: 
+250:       <HomepageCorporateSection
+251:         eyebrow={corporateEyebrow}
+252:         heading={corporateHeading}
+253:         description={corporateDescription}
+254:         ctaLabel={corporateCtaLabel}
+255:         ctaHref={corporateCtaHref}
+256:         items={corporateValues}
+257:       />
+258: 
+259:       <HomepageReviewsSection reviews={reviews} />
+260: 
+261:       <HomepageLocationSection
+262:         heading={locationHeading}
+263:         description={locationDescription}
+264:         phoneLabel={locationPhoneLabel}
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
+
+--- ViewFile output ---
+Created At: 2026-08-20T17:41:58+08:00
+Completed At: 2026-08-20T17:41:58+08:00
+File Path: `file:///d:/My%20Work/serenity/app/page.tsx`
+Total Lines: 290
+Total Bytes: 19467
+Showing lines 238 to 244
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+238:         displayName={displayName}
+239:       />
+240: 
+241:       <HomepageServicesSection images={properties.map(p => p.featuredImage)} />
+242: 
+243:       <HomepageBenefitsSection
+244:         heading={benefitsHeading}
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+
