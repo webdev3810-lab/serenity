@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { getStripeClient, markBookingCancelled, markBookingFailed, markBookingPaid, markBookingRefunded } from "@/src/lib/stripe";
+import { getStripeClient, markBookingCancelled, markBookingFailed, markBookingPaid, markBookingPaidFromPaymentIntent, markBookingRefunded } from "@/src/lib/stripe";
 
 export async function POST(request: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -17,6 +17,9 @@ export async function POST(request: Request) {
       const session = event.data.object as Stripe.Checkout.Session;
       if (session.payment_status === "paid") await markBookingPaid(session);
     }
+    if (event.type === "checkout.session.async_payment_succeeded") {
+      await markBookingPaid(event.data.object as Stripe.Checkout.Session);
+    }
     if (event.type === "checkout.session.expired") {
       const session = event.data.object as Stripe.Checkout.Session;
       const reference = session.metadata?.reference;
@@ -25,6 +28,14 @@ export async function POST(request: Request) {
     if (event.type === "checkout.session.async_payment_failed") {
       const session = event.data.object as Stripe.Checkout.Session;
       const reference = session.metadata?.reference;
+      if (reference) await markBookingFailed(reference);
+    }
+    if (event.type === "payment_intent.succeeded") {
+      await markBookingPaidFromPaymentIntent(event.data.object as Stripe.PaymentIntent);
+    }
+    if (event.type === "payment_intent.payment_failed") {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      const reference = paymentIntent.metadata?.reference;
       if (reference) await markBookingFailed(reference);
     }
     if (event.type === "charge.refunded") {

@@ -150,6 +150,7 @@ export type Database = {
           price_date: string;
           nightly_price: number;
           label: string;
+          is_active: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -187,6 +188,13 @@ export type Database = {
           promotion_code: string | null;
           promotion_discount: number;
           promotion_redemption_id: string | null;
+          booking_type: "standard" | "corporate" | "admin";
+          booking_source: "website" | "corporate_page" | "admin" | "enquiry" | "airbnb" | "vrbo" | "stayz";
+          enquiry_id: string | null;
+          group_reference: string | null;
+          idempotency_key: string | null;
+          internal_notes: string;
+          created_by_admin: string | null;
           notes: string;
           created_at: string;
           updated_at: string;
@@ -251,8 +259,11 @@ export type Database = {
           export_token_hash: string | null;
           is_enabled: boolean;
           last_synced_at: string | null;
+          last_attempt_at: string | null;
           last_success_at: string | null;
           last_error: string;
+          last_imported_event_count: number;
+          sync_frequency_minutes: number;
           sync_status: "not_configured" | "pending" | "success" | "error" | "conflict";
           created_at: string;
           updated_at: string;
@@ -272,6 +283,8 @@ export type Database = {
           end_date: string;
           status: "active" | "cancelled" | "stale";
           summary: string;
+          block_reason: "maintenance" | "owner_use" | "cleaning" | "preparation" | "renovation" | "private_booking" | "other" | null;
+          internal_note: string;
           is_blocking: boolean;
           last_seen_at: string | null;
           created_at: string;
@@ -281,7 +294,37 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["calendar_events"]["Row"]>;
         Relationships: [];
       };
-      enquiries: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown>; Relationships: [] };
+      enquiries: {
+        Row: {
+          id: string;
+          reference: string;
+          company_name: string;
+          contact_name: string;
+          email: string;
+          phone: string;
+          arrival: string | null;
+          departure: string | null;
+          guests: string;
+          houses_needed: string;
+          purpose: string;
+          notes: string;
+          status: "new" | "contacted" | "pending_approval" | "approved" | "declined" | "converted";
+          property_ids: string[];
+          abn: string;
+          purchase_order: string;
+          invoice_requested: boolean;
+          internal_notes: string;
+          source: "corporate_page" | "admin";
+          idempotency_key: string | null;
+          converted_at: string | null;
+          conversion_group_reference: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["enquiries"]["Row"]> & Pick<Database["public"]["Tables"]["enquiries"]["Row"], "company_name" | "contact_name" | "email">;
+        Update: Partial<Database["public"]["Tables"]["enquiries"]["Row"]>;
+        Relationships: [];
+      };
       homepage_content: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown>; Relationships: [] };
       homepage_hero_media: {
         Row: {
@@ -312,6 +355,10 @@ export type Database = {
       confirm_promotion_redemption: { Args: { p_redemption_id: string; p_booking_id: string; p_session_id: string }; Returns: undefined };
       release_promotion_redemption: { Args: { p_booking_id: string }; Returns: undefined };
       restore_promotion_redemption: { Args: { p_redemption_id: string }; Returns: undefined };
+      create_booking_group: {
+        Args: { p_rows: Json; p_group_reference?: string | null; p_enquiry_id?: string | null; p_idempotency_key?: string | null };
+        Returns: Database["public"]["Tables"]["bookings"]["Row"][];
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

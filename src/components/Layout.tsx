@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ArrowUpRight, Check, Copy, Mail, Phone, ShieldCheck } from "lucide-react";
+import { ArrowUpRight, Check, Copy } from "lucide-react";
 import { BookingProvider } from "@/src/context/BookingContext";
 import { ContactSettingsProvider, useContactSettings } from "@/src/context/ContactSettingsContext";
 import type { ContactSettings, PromoSettings } from "@/src/lib/siteSettings";
@@ -83,6 +83,7 @@ function Header({ pathname }: { pathname: string | null }) {
 function Footer() {
   const settings = useContactSettings();
   const contact = settings;
+  const currentYear = new Date().getFullYear();
   const phoneHref = contact?.phoneNumber ? `tel:${contact.phoneNumber.replace(/[^+\d]/g, "")}` : "#";
   const emailHref = contact?.contactEmail ? `mailto:${contact.contactEmail}` : "#";
   const whatsappDigits = contact?.whatsappNumber.replace(/\D/g, "") ?? "";
@@ -94,162 +95,114 @@ function Footer() {
   ].filter(([, href]) => href);
 
   return (
-    <footer className="site-footer border-t border-stone-200 bg-[#F7F4F1] text-stone-800 overflow-hidden">
-      {/* Top CTA & Link Grid */}
-      <div className="mx-auto w-full max-w-[96rem] px-4 pt-16 pb-12 sm:px-6 lg:px-8">
-        <div className="grid gap-12 lg:grid-cols-12 lg:gap-8">
-          {/* Left Top CTA Area */}
-          <div className="lg:col-span-4 space-y-6 flex flex-col justify-between">
-            <div className="space-y-4">
-              <span className="eyebrow text-[#B88A5A]">Get in Touch</span>
-              <h2 className="text-3xl font-extrabold text-stone-900 tracking-normal sm:text-4xl">
-                Let our team help you.
-              </h2>
-              <p className="text-xs sm:text-sm text-stone-600">{contact?.footerText}</p>
-              <div className="pt-2">
-                <Link
-                  href="/contact"
-                  className="btn-dark-primary inline-flex items-center gap-3 rounded-none px-6 py-3 text-sm font-semibold"
-                  aria-label="Contact Serenity team"
-                >
-                  <span>Contact us today</span>
-                  <span className="btn-arrow-circle h-7 w-7">
-                    <ArrowUpRight size={16} />
-                  </span>
-                </Link>
-              </div>
-            </div>
-
-            {/* Direct Contact Details */}
-            <div className="pt-6 border-t border-stone-300 space-y-2 text-xs text-stone-600">
-              {contact?.publicAddress && <p className="font-semibold text-stone-900">{contact.publicAddress}</p>}
-              {contact?.businessHours && <p>{contact.businessHours}</p>}
-              <p className="flex items-center gap-2">
-                <Phone size={14} className="text-[#B88A5A]" />
-                <a href={phoneHref} className="hover:text-[#5A463A] transition-colors">{contact?.phoneNumber}</a>
-              </p>
-              <p className="flex items-center gap-2">
-                <Mail size={14} className="text-[#B88A5A]" />
-                <a href={emailHref} className="break-words hover:text-[#5A463A] transition-colors">{contact?.contactEmail}</a>
-              </p>
-              {contact?.whatsappNumber && <p className="flex items-center gap-2"><a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="hover:text-[#5A463A] transition-colors">WhatsApp: {contact.whatsappNumber}</a></p>}
-              {contact?.directionsUrl && <p><a href={contact.directionsUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#5A463A] transition-colors">Get directions</a></p>}
-              {socialLinks.length > 0 && <div className="flex flex-wrap gap-3 pt-2">{socialLinks.map(([label, href]) => <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="font-semibold hover:text-[#5A463A]">{label}</a>)}</div>}
-            </div>
-          </div>
-
-          {/* Right Link Columns */}
-          <div className="lg:col-span-8 grid grid-cols-2 sm:grid-cols-4 gap-8">
-            {/* Column 1: Houses */}
-            <div className="space-y-4 text-sm">
-              <h3 className="text-base font-bold text-stone-900">Houses</h3>
-              <ul className="space-y-2.5 text-stone-600 text-xs sm:text-sm">
-                <li>
-                  <Link href="/houses" className="hover:text-[#5A463A] transition-colors">
-                    Browse Houses
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/properties/serenity-7" className="hover:text-[#5A463A] transition-colors">
-                    Serenity 7
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/properties/serenity-9" className="hover:text-[#5A463A] transition-colors">
-                    Serenity 9
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/properties/serenity-11" className="hover:text-[#5A463A] transition-colors">
-                    Serenity 11
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 2: About */}
-            <div className="space-y-4 text-sm">
-              <h3 className="text-base font-bold text-stone-900">About</h3>
-              <ul className="space-y-2.5 text-stone-600 text-xs sm:text-sm">
-                <li>
-                  <Link href="/about" className="hover:text-[#5A463A] transition-colors">
-                    About Serenity
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/#faqs" className="hover:text-[#5A463A] transition-colors">
-                    FAQs
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="hover:text-[#5A463A] transition-colors">
-                    Contact
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/admin/login" className="text-stone-500 hover:text-stone-900 transition-colors">
-                    Admin Portal
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 3: Corporate */}
-            <div className="space-y-4 text-sm">
-              <h3 className="text-base font-bold text-stone-900">Corporate</h3>
-              <ul className="space-y-2.5 text-stone-600 text-xs sm:text-sm">
-                <li>
-                  <Link href="/corporate-stays" className="hover:text-[#5A463A] transition-colors">
-                    Corporate Stays
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="hover:text-[#5A463A] transition-colors">
-                    Corporate Enquiry
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 4: Quick Links */}
-            <div className="space-y-4 text-sm">
-              <h3 className="text-base font-bold text-stone-900">Quick Links</h3>
-              <ul className="space-y-2.5 text-stone-600 text-xs sm:text-sm">
-                <li>
-                  <Link href="/terms" className="hover:text-[#5A463A] transition-colors">
-                    Terms & Conditions
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className="hover:text-[#5A463A] transition-colors">
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/cancellation-policy" className="hover:text-[#5A463A] transition-colors">
-                    Cancellation Policy
-                  </Link>
-                </li>
-              </ul>
+    <footer className="site-footer site-footer-editorial">
+      <div className="site-footer-shell site-footer-intro">
+        <p className="site-footer-kicker">Serenity Stays · Pakenham, Victoria</p>
+        <div className="site-footer-intro-grid">
+          <h2>
+            Stay close.<br />
+            <em>Settle in.</em>
+          </h2>
+          <div className="site-footer-intro-copy">
+            <p>{contact?.footerText}</p>
+            <div className="site-footer-actions">
+              <Link href="/houses" className="site-footer-action site-footer-action-primary">
+                View the houses <ArrowUpRight size={16} aria-hidden="true" />
+              </Link>
+              <Link href="/contact" className="site-footer-action site-footer-action-secondary">
+                Ask a question <ArrowUpRight size={16} aria-hidden="true" />
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Huge Oversized SERENITY Wordmark */}
-      <div className="w-full overflow-hidden select-none border-t border-stone-300 pt-6 pb-2 text-center leading-none">
-        <span className="display-font block w-full text-center text-[13vw] sm:text-[14.5vw] font-black leading-none tracking-normal text-[#D2C0B4] uppercase opacity-95">
-          SERENITY
-        </span>
+      <div className="site-footer-contact" aria-label="Contact details">
+        <div className="site-footer-shell site-footer-contact-grid">
+          {contact?.publicAddress && (
+            <div>
+              <span>Visit</span>
+              {contact.directionsUrl ? <a href={contact.directionsUrl} target="_blank" rel="noopener noreferrer">{contact.publicAddress}</a> : <p>{contact.publicAddress}</p>}
+            </div>
+          )}
+          {contact?.phoneNumber && (
+            <div>
+              <span>Call</span>
+              <a href={phoneHref}>{contact.phoneNumber}</a>
+            </div>
+          )}
+          {contact?.contactEmail && (
+            <div>
+              <span>Email</span>
+              <a href={emailHref}>{contact.contactEmail}</a>
+            </div>
+          )}
+          {contact?.businessHours && (
+            <div>
+              <span>Hours</span>
+              <p>{contact.businessHours}</p>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Bottom Footer */}
-      <div className="border-t border-stone-200 bg-white px-4 py-5 text-center text-xs text-stone-600">
-        <div className="mx-auto max-w-[96rem] flex flex-col sm:flex-row items-center justify-between gap-3 px-4">
-          <p>{contact?.businessName} Australia, 2026. All rights reserved. Prices shown in AUD.</p>
-          <p className="flex items-center gap-1.5 text-stone-600">
-            <ShieldCheck size={14} className="text-[#5A463A]" /> Direct booking with Stripe secure payment processing
-          </p>
+      <div className="site-footer-shell site-footer-directory">
+        <div className="site-footer-directory-lead">
+          <p className="site-footer-directory-mark">Three private homes.</p>
+          <p>Furnished stays for families, project teams and longer visits—side by side in Pakenham.</p>
+          <div className="site-footer-socials">
+            {socialLinks.map(([label, href]) => <a key={label} href={href} target="_blank" rel="noopener noreferrer">{label}</a>)}
+            {contact?.whatsappNumber && <a href={whatsappHref} target="_blank" rel="noopener noreferrer">WhatsApp</a>}
+          </div>
+        </div>
+
+        <nav className="site-footer-nav" aria-label="Footer navigation">
+          <div>
+            <h3>Houses</h3>
+            <ul>
+              <li><Link href="/houses">All houses</Link></li>
+              <li><Link href="/properties/serenity-7">Serenity 7</Link></li>
+              <li><Link href="/properties/serenity-9">Serenity 9</Link></li>
+              <li><Link href="/properties/serenity-11">Serenity 11</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Explore</h3>
+            <ul>
+              <li><Link href="/about">About</Link></li>
+              <li><Link href="/gallery">Gallery</Link></li>
+              <li><Link href="/location">Location</Link></li>
+              <li><Link href="/#faqs">FAQs</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Stays</h3>
+            <ul>
+              <li><Link href="/corporate-stays">Corporate stays</Link></li>
+              <li><Link href="/long-term-stays">Long-term stays</Link></li>
+              <li><Link href="/contact">Contact</Link></li>
+              <li><Link href="/admin/login">Admin portal</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Information</h3>
+            <ul>
+              <li><Link href="/terms">Terms &amp; conditions</Link></li>
+              <li><Link href="/privacy">Privacy policy</Link></li>
+              <li><Link href="/cancellation-policy">Cancellation policy</Link></li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+
+      <div className="site-footer-wordmark" aria-hidden="true">
+        <span>SERENITY</span>
+      </div>
+
+      <div className="site-footer-legal">
+        <div className="site-footer-shell">
+          <p>© {currentYear} {contact?.businessName}. All rights reserved.</p>
+          <p>Australian stays · AUD pricing · Secure direct booking</p>
         </div>
       </div>
     </footer>

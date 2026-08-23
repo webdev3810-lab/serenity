@@ -3,7 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { BedDouble, Building2, CalendarDays, Car, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Dog, MapPin, Minus, Plus, ShieldCheck, Users } from "lucide-react";
+import { createPortal } from "react-dom";
+import { BedDouble, CalendarDays, Car, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Dog, MapPin, Minus, Plus, ShieldCheck, Users } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Property } from "@/src/data/properties";
 import { properties } from "@/src/data/properties";
@@ -207,7 +208,7 @@ export function PropertyCard({ property }: { property: Property }) {
           /> : <div className="absolute inset-0 bg-[#E8DED6]" aria-label="Property photo not available" />}
           <div className="absolute top-3 left-3 flex flex-wrap gap-2">
             <span className="property-badge shadow-sm">
-              <Building2 size={13} /> Beside Serenity 7, 9 & 11
+              Beside Serenity 7, 9 & 11
             </span>
           </div>
           <div className="absolute top-3 right-3">
@@ -286,6 +287,10 @@ export function PriceBreakdownView({ property, checkIn, checkout, guests, corpor
 
   return (
     <div className="booking-price-breakdown space-y-3 text-base">
+      {price.nightlyRates.some((night) => night.isOverride) && <div className="border-b border-stone-200 pb-3">
+        <p className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-stone-500">Night-by-night AUD rates</p>
+        <div className="grid gap-1 text-sm">{price.nightlyRates.map((night) => <div key={night.date} className="flex justify-between gap-4 text-stone-600"><span>{formatDateAu(night.date)}{night.label ? ` · ${night.label}` : ""}</span><span className="font-semibold text-stone-900">{formatAud(night.nightlyPrice)}</span></div>)}</div>
+      </div>}
       {rows.map(([label, amount]) => (
         <div key={label as string} className="flex justify-between gap-4 text-stone-600">
           <span>{label}</span>
@@ -419,7 +424,8 @@ export function BookingCard({ property, today, blockedDates = [], availabilityLo
     if (!calendarOpen && !guestsOpen) return;
 
     const closeOnOutsideClick = (event: MouseEvent) => {
-      if (bookingCardRef.current && !bookingCardRef.current.contains(event.target as Node)) {
+      const calendarPopover = document.getElementById(`booking-calendar-${property.slug}`);
+      if (bookingCardRef.current && !bookingCardRef.current.contains(event.target as Node) && !calendarPopover?.contains(event.target as Node)) {
         setCalendarOpen(false);
         setGuestsOpen(false);
       }
@@ -437,7 +443,16 @@ export function BookingCard({ property, today, blockedDates = [], availabilityLo
       document.removeEventListener("mousedown", closeOnOutsideClick);
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [calendarOpen, guestsOpen]);
+  }, [calendarOpen, guestsOpen, property.slug]);
+
+  useEffect(() => {
+    if (!calendarOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [calendarOpen]);
 
   useEffect(() => {
     if (!calendarOpen) return;
@@ -448,11 +463,15 @@ export function BookingCard({ property, today, blockedDates = [], availabilityLo
 
       const rect = anchor.getBoundingClientRect();
       const width = Math.min(672, Math.max(280, window.innerWidth - 32));
-      const estimatedHeight = window.innerWidth <= 640 ? 680 : 600;
-      const openAbove = rect.bottom + 12 + estimatedHeight > window.innerHeight && rect.top - 12 - estimatedHeight >= 16;
-      const top = openAbove
-        ? Math.max(16, rect.top - estimatedHeight - 12)
-        : Math.min(rect.bottom + 12, Math.max(16, window.innerHeight - estimatedHeight - 16));
+      const estimatedHeight = window.innerWidth <= 640 ? Math.max(0, window.innerHeight - 32) : 640;
+      const preferredTop = rect.bottom + 12;
+      const maxTop = Math.max(16, window.innerHeight - estimatedHeight - 16);
+      const openAbove = preferredTop > maxTop && rect.top - estimatedHeight - 12 >= 16;
+      const top = window.innerWidth <= 640
+        ? 16
+        : openAbove
+          ? Math.max(16, rect.top - estimatedHeight - 12)
+          : Math.min(preferredTop, maxTop);
       const left = Math.min(Math.max(16, rect.right - width), Math.max(16, window.innerWidth - width - 16));
       setCalendarPosition({ top, left, width });
     };
@@ -509,10 +528,12 @@ export function BookingCard({ property, today, blockedDates = [], availabilityLo
           </button>
         </div>
 
-        {calendarOpen && (
-          <div id={`booking-calendar-${property.slug}`} className="booking-card-calendar" style={{ top: `${calendarPosition.top}px`, left: `${calendarPosition.left}px`, width: `${calendarPosition.width}px` }}>
+        {calendarOpen && typeof document !== "undefined" ? createPortal(
+          <>
+              <button type="button" className="booking-calendar-backdrop" aria-label="Close date picker" onClick={() => setCalendarOpen(false)} />
+              <div id={`booking-calendar-${property.slug}`} className="booking-card-calendar" style={{ top: `${calendarPosition.top}px`, left: `${calendarPosition.left}px`, width: `${calendarPosition.width}px` }}>
             <div className="booking-calendar-popover">
-              <div className="booking-calendar-popover-header">
+              <div className={`booking-calendar-popover-header ${calendarPosition.width <= 520 ? "is-compact" : ""}`}>
                 <div>
                   <h3 className="text-lg font-bold text-stone-900">Select dates</h3>
                   <p className="mt-1 text-sm text-stone-500">Add your travel dates for exact pricing</p>
@@ -554,8 +575,10 @@ export function BookingCard({ property, today, blockedDates = [], availabilityLo
                 <button type="button" className="btn-primary min-h-9 px-4 text-sm" onClick={() => setCalendarOpen(false)}>Close</button>
               </div>
             </div>
-          </div>
-        )}
+              </div>
+          </>,
+          document.body,
+        ) : null}
 
         <div className="booking-guest-picker mt-3">
           <button

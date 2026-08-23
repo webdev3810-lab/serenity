@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:calendar": "node --experimental-strip-types --test scripts/calendar-ical.test.mts",
-    "test:promotions": "node --experimental-strip-types --test scripts/promotions.test.mts"
+    "test:promotions": "node --experimental-strip-types --test scripts/promotions.test.mts",
+    "test:reservations": "node --experimental-strip-types --test scripts/reservations.test.mts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

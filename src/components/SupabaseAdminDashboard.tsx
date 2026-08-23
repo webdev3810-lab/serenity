@@ -345,7 +345,7 @@ export function SupabaseAdminDashboard({ email, role }: { email: string; role: "
   };
 
   const setEnquiryStatus = async (enquiry: Enquiry, status: string) => {
-    const result = await supabase.from("enquiries").update({ status }).eq("id", enquiry.id);
+    const result = await supabase.from("enquiries").update({ status: status as "new" | "contacted" | "pending_approval" | "approved" | "declined" | "converted" }).eq("id", enquiry.id);
     if (result.error) setError(result.error.message); else { notify("Enquiry status updated."); await load(); }
   };
 

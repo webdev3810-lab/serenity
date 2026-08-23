@@ -19,6 +19,7 @@ export type PropertyDatePrice = {
   date: string;
   nightlyPrice: number;
   label: string;
+  active?: boolean;
 };
 
 export type PropertyImage = {

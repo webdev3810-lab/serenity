@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import StrokeText from "@/src/components/StrokeText";
 
 type GalleryImmersiveIntroImage = {
   src: string;
@@ -57,9 +58,8 @@ export default function GalleryImmersiveIntro({ images }: GalleryImmersiveIntroP
     };
   }, []);
 
-  const safeImages = images.slice(0, 3);
-  const imagePosition = safeImages.length > 1 ? openingProgress * (safeImages.length - 1) : 0;
-  const openingScale = reducedMotion ? 1 : 1 - clamp(openingProgress / 0.82) * 0.14;
+  const safeImages = images.slice(0, 1);
+  const openingScale = reducedMotion ? 1 : 1 + clamp(openingProgress / 0.82) * 0.62;
   const wordmarkOpacity = reducedMotion ? 1 : clamp(1 - openingProgress * 2.1);
   const detailsOpacity = reducedMotion ? 1 : clamp((openingProgress - 0.42) * 3.2);
   const lineOneShift = reducedMotion ? 0 : (0.42 - manifestoProgress) * 34;
@@ -72,10 +72,8 @@ export default function GalleryImmersiveIntro({ images }: GalleryImmersiveIntroP
         <div className="gallery-cinematic-sticky">
           <div className="gallery-cinematic-image-shell" style={{ transform: `scale(${openingScale})` }}>
             {safeImages.map((image, index) => {
-              const distance = Math.abs(index - imagePosition);
-              const opacity = safeImages.length === 1 ? 1 : clamp(1 - distance * 1.65);
               return (
-                <div key={`${image.src}-${index}`} className="gallery-cinematic-image-layer" style={{ opacity }}>
+                <div key={`${image.src}-${index}`} className="gallery-cinematic-image-layer">
                   <Image src={image.src} alt={image.alt} fill priority={index === 0} loading={index === 0 ? "eager" : "lazy"} sizes="100vw" className="object-cover" />
                 </div>
               );
@@ -84,9 +82,23 @@ export default function GalleryImmersiveIntro({ images }: GalleryImmersiveIntroP
             <div className="gallery-cinematic-shade" />
           </div>
 
-          <div className="gallery-cinematic-wordmark" style={{ opacity: wordmarkOpacity, transform: `translate3d(0, ${openingProgress * -5}rem, 0)` }}>
-            <p id="gallery-cinematic-title">SERENITY</p>
-            <p>ON THE ROCKS</p>
+          <div className="gallery-cinematic-wordmark gallery-cinematic-wordmark-gallery" style={{ opacity: wordmarkOpacity, transform: `translate3d(0, ${openingProgress * -5}rem, 0)` }}>
+            <h1 id="gallery-cinematic-title">
+              <StrokeText
+                text="OUR GALLERY"
+                strokeColor="#ffffff"
+                fillColor="#ffffff"
+                strokeWidth={1.15}
+                drawDuration={0.9}
+                fillDelay={0.08}
+                stagger={0.025}
+                trigger="mount"
+                fillMode="wipe"
+                fontSize={180}
+                fontWeight={800}
+                letterSpacing={-13}
+              />
+            </h1>
           </div>
 
           <div className="gallery-cinematic-location" style={{ opacity: clamp(1 - openingProgress * 2.35) }}>
@@ -102,7 +114,6 @@ export default function GalleryImmersiveIntro({ images }: GalleryImmersiveIntroP
             <p>Three furnished houses beside each other in Pakenham, created for family time, focused work, and longer stays.</p>
           </div>
 
-          {safeImages.length ? <div className="gallery-cinematic-counter" style={{ opacity: detailsOpacity }}><span>{String(Math.min(safeImages.length, Math.round(imagePosition) + 1)).padStart(2, "0")}</span><i /><span>{String(safeImages.length).padStart(2, "0")}</span><small>{safeImages[Math.min(safeImages.length - 1, Math.round(imagePosition))]?.name}</small></div> : null}
         </div>
       </section>
 

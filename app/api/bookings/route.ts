@@ -141,6 +141,8 @@ export async function POST(request: Request) {
       promotion_discount: price.promotionDiscount ?? 0,
       payment_status: "pending",
       booking_status: corporate ? "corporate" : "pending_payment",
+      booking_type: corporate ? "corporate" : "standard",
+      booking_source: "website",
       notes: notes ?? guestDetails.requests ?? "",
     }).select("id, reference").single();
 
@@ -174,7 +176,34 @@ export async function POST(request: Request) {
     const origin = getRequestOrigin(request);
     const successUrl = `${origin}/booking/confirmation?session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${origin}/booking/payment?payment=cancelled&reference=${encodeURIComponent(reference)}`;
-    const metadata: Record<string, string> = { bookingId: String(booking.id), reference };
+    const nightlyRateMetadata = price.nightlyRates.map((night) => `${night.date}:${night.nightlyPrice}${night.isOverride ? "*" : ""}`).join(",").slice(0, 450);
+    const guestName = `${String(guestDetails?.firstName ?? "").trim()} ${String(guestDetails?.lastName ?? "").trim()}`.trim();
+    const companyName = String(corporateDetails?.companyName ?? "").trim();
+    const metadata: Record<string, string> = {
+      bookingId: String(booking.id),
+      reference,
+      propertyId: String(propertyRow.id),
+      propertySlug: property.slug,
+      propertyName: property.name.slice(0, 120),
+      checkIn,
+      checkout,
+      currency: "AUD",
+      guestEmail: email.slice(0, 150),
+      guestName: (guestName || "Guest").slice(0, 120),
+      corporate: corporate ? "true" : "false",
+      companyName: companyName.slice(0, 160),
+      nights: String(price.nights),
+      nightlyRates: nightlyRateMetadata,
+      nightlySubtotal: String(price.nightlySubtotal),
+      cleaningFee: String(price.cleaningFee),
+      petFee: String(price.petFee),
+      extraGuestFee: String(price.extraGuestFee),
+      totalDiscount: String(price.discount),
+      gst: String(price.tax),
+      totalAud: String(price.total),
+      availabilityChecked: "serenity,airbnb,vrbo,stayz,admin",
+      availabilityCheckedAt: new Date().toISOString(),
+    };
     if (promotion) {
       metadata.promotionId = promotion.id;
       metadata.promotionCode = promotion.code;
@@ -186,6 +215,9 @@ export async function POST(request: Request) {
     try {
       session = await stripe.checkout.sessions.create({
         mode: "payment",
+        // Keep every Serenity checkout in the property's AUD price instead of
+        // allowing Stripe Adaptive Pricing to offer a converted local currency.
+        adaptive_pricing: { enabled: false },
         customer_email: email,
         success_url: successUrl,
         cancel_url: cancelUrl,

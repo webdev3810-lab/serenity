@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildIcsCalendar, groupCalendarDates, parseIcsCalendar } from "../src/lib/calendar/ical.ts";
+import { buildIcsCalendar, groupCalendarDates, isIcsCalendarText, parseIcsCalendar } from "../src/lib/calendar/ical.ts";
+import { isBlockedCalendarHostname, normalizeCalendarPropertySlug, validateCalendarFeedUrl } from "../src/lib/calendar/validation.ts";
 
 test("parses all-day reservations with an exclusive checkout date", () => {
   const events = parseIcsCalendar([
@@ -49,4 +50,29 @@ test("groups adjacent blocked dates and emits valid CRLF iCal", () => {
   assert.match(output, /DTSTART;VALUE=DATE:20260910\r\n/);
   assert.match(output, /SUMMARY:Reserved\\, private\r\n/);
   assert.match(output, /END:VCALENDAR\r\n$/);
+});
+
+test("accepts webcal feeds, normalizes HTTPS, and rejects listing webpages", () => {
+  const valid = validateCalendarFeedUrl("webcal://www.airbnb.com/calendar/ical/12345.ics?s=private");
+  assert.equal(valid.ok, true);
+  assert.equal(valid.ok ? valid.normalizedUrl.startsWith("https://") : false, true);
+  const webpage = validateCalendarFeedUrl("https://www.airbnb.com/rooms/12345");
+  assert.equal(webpage.ok, false);
+});
+
+test("rejects local and reserved calendar hosts", () => {
+  assert.equal(isBlockedCalendarHostname("127.0.0.1"), true);
+  assert.equal(isBlockedCalendarHostname("169.254.169.254"), true);
+  assert.equal(isBlockedCalendarHostname("fd00::1"), true);
+  assert.equal(validateCalendarFeedUrl("https://localhost/private.ics").ok, false);
+});
+
+test("normalizes the .ics route suffix to a property slug", () => {
+  assert.equal(normalizeCalendarPropertySlug("serenity-7.ics"), "serenity-7");
+  assert.equal(normalizeCalendarPropertySlug("serenity-11"), "serenity-11");
+});
+
+test("distinguishes iCal content from an HTML listing page", () => {
+  assert.equal(isIcsCalendarText("BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n"), true);
+  assert.equal(isIcsCalendarText("<!doctype html><title>Airbnb listing</title>"), false);
 });

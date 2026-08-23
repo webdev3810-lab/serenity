@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Bath, BedDouble, BriefcaseBusiness, CalendarDays, ChevronLeft, ChevronRight, Dog, Home, Images, KeyRound, MapPin, ShieldCheck, Users, Building2, X } from "lucide-react";
+import { BedDouble, BriefcaseBusiness, CalendarDays, Car, ChevronLeft, ChevronRight, Dog, Images, KeyRound, ShieldCheck, X } from "lucide-react";
 import { ApproximateMap } from "@/src/components/ApproximateMap";
-import type { Property } from "@/src/data/properties";
+import type { Property, PropertyImage } from "@/src/data/properties";
 import { BookingCard, MiniCalendar, RelatedHouses } from "@/src/components/BookingWidgets";
 import { Drawer, Modal } from "@/src/components/UI";
 import { calculatePrice, defaultGuests, formatAud, validateDateRange } from "@/src/lib/booking";
@@ -13,10 +13,79 @@ import { useBooking } from "@/src/context/BookingContext";
 
 const isRemotePreviewImage = (src: string) => src.includes("a0.muscache.com");
 
+type PhotoTourPhoto = PropertyImage & {
+  categoryLabel: string;
+  categorySlug: string;
+  categoryOrder: number;
+  photoOrder: number;
+  photoIndex: number;
+};
+
+type PhotoTourCategory = {
+  slug: string;
+  label: string;
+  description: string;
+  order: number;
+  images: PhotoTourPhoto[];
+};
+
+const photoTourCategorySlug = (value: string) =>
+  value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "other";
+
+function groupPhotoTourImages(images: PropertyImage[]) {
+  const categories = new Map<string, PhotoTourCategory>();
+
+  images.forEach((image, index) => {
+    const label = image.categoryLabel?.trim() || image.category?.trim() || "Other";
+    const slug = photoTourCategorySlug(image.category?.trim() || label);
+    const photo: PhotoTourPhoto = {
+      ...image,
+      categoryLabel: label,
+      categorySlug: slug,
+      categoryOrder: Number(image.categoryOrder ?? index),
+      photoOrder: index,
+      photoIndex: 0,
+    };
+    const existing = categories.get(slug);
+
+    if (existing) {
+      existing.images.push(photo);
+      existing.order = Math.min(existing.order, photo.categoryOrder);
+      return;
+    }
+
+    categories.set(slug, {
+      slug,
+      label,
+      description: image.categoryDescription?.trim() || "",
+      order: photo.categoryOrder,
+      images: [photo],
+    });
+  });
+
+  const sortedCategories = [...categories.values()]
+    .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label))
+    .map((category) => ({
+      ...category,
+      images: [...category.images].sort((a, b) => a.photoOrder - b.photoOrder),
+    }));
+  let photoIndex = 0;
+  sortedCategories.forEach((category) => {
+    category.images.forEach((photo) => {
+      photo.photoIndex = photoIndex;
+      photoIndex += 1;
+    });
+  });
+
+  return { categories: sortedCategories, photos: sortedCategories.flatMap((category) => category.images) };
+}
+
 function PhotoTour({ property, open, onClose }: { property: Property; open: boolean; onClose: () => void }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const images = property.images.filter((image) => image.src && !image.src.includes("a0.muscache.com") && !image.src.includes("images.unsplash.com"));
+  const images = property.images.filter((image) => image.src && image.isVisible !== false);
+  const { categories: photoCategories, photos } = groupPhotoTourImages(images);
+  const displayName = property.listingTitle?.trim() || property.name.replace(/\s+-\s+Whole$/i, "");
 
   useEffect(() => {
     if (!open) return;
@@ -49,78 +118,103 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
 
   if (!images.length) return null;
 
-  const activeImage = images[activeIndex % images.length];
-  const showPrevious = () => setActiveIndex((current) => (current - 1 + images.length) % images.length);
-  const showNext = () => setActiveIndex((current) => (current + 1) % images.length);
+  const activeImage = photos[activeIndex % photos.length];
+  const showPrevious = () => setActiveIndex((current) => (current - 1 + photos.length) % photos.length);
+  const showNext = () => setActiveIndex((current) => (current + 1) % photos.length);
 
   return (
-    <div className="fixed inset-0 z-[100] overflow-y-auto bg-[#1E1916] text-[#F7F4F1]" role="dialog" aria-modal="true" aria-labelledby="photo-tour-title">
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-[#1E1916]/95 backdrop-blur-xl">
-        <div className="mx-auto flex min-h-20 w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-10">
-          <button type="button" onClick={onClose} className="inline-flex min-h-11 items-center gap-2 rounded-none border border-white/20 px-4 text-sm font-bold text-[#F7F4F1] transition hover:border-white/50 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D2C0B4]" aria-label="Close photo tour">
-            <X size={18} />
-            <span className="hidden sm:inline">Close</span>
+    <div className="property-photo-tour" role="dialog" aria-modal="true" aria-labelledby="photo-tour-title">
+      <header className="property-photo-tour-header">
+        <div className="property-photo-tour-header-inner">
+          <button type="button" onClick={onClose} className="property-photo-tour-close" aria-label="Close photo tour">
+            <X size={17} aria-hidden="true" />
+            <span>Close</span>
           </button>
-          <div className="min-w-0 text-center">
-            <p className="text-[0.68rem] font-bold uppercase tracking-[0.2em] text-[#D2C0B4]">Photo tour</p>
-            <h2 id="photo-tour-title" className="mt-1 truncate text-base font-bold sm:text-lg">{property.name}</h2>
+          <div className="property-photo-tour-identity">
+            <p>Photo tour</p>
+            <h2 id="photo-tour-title">{displayName}</h2>
           </div>
-          <div className="min-w-[78px] text-right text-xs font-semibold text-white/65 sm:min-w-[110px]">
-            {images.length} photos
-          </div>
+          <p className="property-photo-tour-count"><strong>{String(images.length).padStart(2, "0")}</strong> photographs</p>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-12">
-        <div className="mb-6 flex flex-col justify-between gap-3 sm:mb-8 sm:flex-row sm:items-end">
+      <main className="property-photo-tour-main">
+        <section className="property-photo-tour-intro" aria-labelledby="property-photo-tour-heading">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#D2C0B4]">Explore the house</p>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70 sm:text-base">Browse every room, outdoor area and detail in one calm, full-screen gallery.</p>
+            <p className="property-photo-tour-kicker">Private house · Pakenham</p>
+            <h3 id="property-photo-tour-heading">Inside {displayName}.</h3>
           </div>
-          <p className="text-xs font-semibold text-white/55">Select a photo to view it larger</p>
-        </div>
+          <div className="property-photo-tour-intro-copy">
+            <p>Move through every room, outdoor area and considered detail. Select any photograph for a closer view.</p>
+            <span>Curated from the published house gallery</span>
+            <nav className="property-photo-tour-category-nav" aria-label="Browse photo categories">
+              {photoCategories.map((category) => (
+                <a key={category.slug} href={`#photo-tour-category-${category.slug}`}>
+                  {category.label}<span>{category.images.length}</span>
+                </a>
+              ))}
+            </nav>
+          </div>
+        </section>
 
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
-          {images.map((image, index) => (
-            <button
-              key={image.src + index}
-              type="button"
-              onClick={() => { setActiveIndex(index); setLightboxOpen(true); }}
-              className={`group relative overflow-hidden rounded-none bg-[#2B2420] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D2C0B4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E1916] ${index === 0 ? "col-span-2 row-span-2 aspect-square lg:aspect-auto lg:min-h-[620px]" : "aspect-[4/3]"}`}
-              aria-label={`View photo ${index + 1} of ${images.length}: ${image.alt}`}
-            >
-              <Image
-                src={image.src}
-                alt={image.alt}
-                fill
-                unoptimized={isRemotePreviewImage(image.src)}
-                referrerPolicy={isRemotePreviewImage(image.src) ? "no-referrer" : undefined}
-                sizes={index === 0 ? "(max-width: 1024px) 100vw, 50vw" : "(max-width: 640px) 50vw, 25vw"}
-                className="object-cover transition duration-500 group-hover:scale-[1.03] group-hover:brightness-90"
-              />
-              <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#1E1916]/75 to-transparent px-3 pb-3 pt-10 text-left text-[0.68rem] font-semibold text-white/90 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                Photo {index + 1} of {images.length}
-              </span>
-              {index === 0 && <span className="absolute left-3 top-3 rounded-none bg-[#1E1916]/75 px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-[#F7F4F1] backdrop-blur-sm">Featured view</span>}
-            </button>
-          ))}
-        </div>
+        {photoCategories.map((category, categoryIndex) => (
+          <section key={category.slug} id={`photo-tour-category-${category.slug}`} className="property-photo-tour-category" aria-labelledby={`photo-tour-category-title-${category.slug}`}>
+            <header className="property-photo-tour-category-heading">
+              <div className="property-photo-tour-category-name">
+                <span className="property-photo-tour-category-index">{String(categoryIndex + 1).padStart(2, "0")}</span>
+                <h4 id={`photo-tour-category-title-${category.slug}`}>{category.label}</h4>
+              </div>
+              <div className="property-photo-tour-category-copy">
+                <span>{category.images.length} {category.images.length === 1 ? "photograph" : "photographs"}</span>
+                {category.description ? <p>{category.description}</p> : null}
+              </div>
+            </header>
+            <div className="property-photo-tour-grid">
+              {category.images.map((image) => (
+                <button
+                  key={image.src + image.photoIndex}
+                  type="button"
+                  onClick={() => { setActiveIndex(image.photoIndex); setLightboxOpen(true); }}
+                  className={`property-photo-tour-item ${image.photoIndex === 0 ? "is-featured" : ""}`}
+                  aria-label={`View photo ${image.photoIndex + 1} of ${photos.length}: ${image.alt}`}
+                >
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    unoptimized={isRemotePreviewImage(image.src)}
+                    referrerPolicy={isRemotePreviewImage(image.src) ? "no-referrer" : undefined}
+                    sizes={image.photoIndex === 0 ? "(max-width: 1024px) 100vw, 50vw" : "(max-width: 640px) 50vw, 25vw"}
+                  />
+                  <span className="property-photo-tour-number">{String(image.photoIndex + 1).padStart(2, "0")}</span>
+                  <span className="property-photo-tour-meta">
+                    <span>{image.photoIndex === 0 ? "Featured view" : image.categoryLabel}</span>
+                    <span>View larger</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        ))}
       </main>
 
       {lightboxOpen && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-[#1E1916]/[.98] p-3 sm:p-6" role="dialog" aria-modal="true" aria-label={`Photo ${activeIndex + 1} of ${images.length}`} onClick={() => setLightboxOpen(false)}>
-          <div className="flex h-full w-full max-w-7xl flex-col" onClick={(event) => event.stopPropagation()}>
-            <div className="flex items-center justify-between gap-4 pb-4 text-sm">
-              <p className="font-semibold text-white/75">Photo {activeIndex + 1} of {images.length}</p>
-              <button type="button" onClick={() => setLightboxOpen(false)} className="inline-flex min-h-11 items-center gap-2 rounded-none border border-white/20 px-4 font-bold text-[#F7F4F1] transition hover:border-white/50 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D2C0B4]" aria-label="Close enlarged photo">
-                <X size={18} /> <span className="hidden sm:inline">Close</span>
+        <div className="property-photo-lightbox" role="dialog" aria-modal="true" aria-label={`Photo ${activeIndex + 1} of ${photos.length}`} onClick={() => setLightboxOpen(false)}>
+          <div className="property-photo-lightbox-shell" onClick={(event) => event.stopPropagation()}>
+            <div className="property-photo-lightbox-header">
+              <div>
+                <p>{displayName}</p>
+                <span>{activeImage.categoryLabel} · Photo {String(activeIndex + 1).padStart(2, "0")} / {String(photos.length).padStart(2, "0")}</span>
+              </div>
+              <button type="button" onClick={() => setLightboxOpen(false)} className="property-photo-lightbox-close" aria-label="Close enlarged photo">
+                Close <X size={17} aria-hidden="true" />
               </button>
             </div>
-            <div className="relative flex min-h-0 flex-1 items-center justify-center gap-2 sm:gap-5">
-              <button type="button" onClick={showPrevious} className="z-10 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-none border border-white/25 bg-[#2B2420]/80 text-[#F7F4F1] transition hover:bg-[#5A463A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D2C0B4]" aria-label="Previous photo">
-                <ChevronLeft size={22} />
+            <div className="property-photo-lightbox-stage">
+              <button type="button" onClick={showPrevious} className="property-photo-lightbox-arrow is-previous" aria-label="Previous photo">
+                <ChevronLeft size={22} aria-hidden="true" />
               </button>
-              <div className="relative flex h-full min-h-[260px] min-w-0 flex-1 items-center justify-center">
+              <div className="property-photo-lightbox-image">
                 <Image
                   src={activeImage.src}
                   alt={activeImage.alt}
@@ -128,15 +222,17 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
                   height={1200}
                   unoptimized={isRemotePreviewImage(activeImage.src)}
                   referrerPolicy={isRemotePreviewImage(activeImage.src) ? "no-referrer" : undefined}
-                  sizes="(max-width: 768px) 88vw, 78vw"
-                  className="max-h-full w-auto max-w-full rounded-none object-contain shadow-2xl"
+                  sizes="(max-width: 768px) 96vw, 82vw"
                 />
               </div>
-              <button type="button" onClick={showNext} className="z-10 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-none border border-white/25 bg-[#2B2420]/80 text-[#F7F4F1] transition hover:bg-[#5A463A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D2C0B4]" aria-label="Next photo">
-                <ChevronRight size={22} />
+              <button type="button" onClick={showNext} className="property-photo-lightbox-arrow is-next" aria-label="Next photo">
+                <ChevronRight size={22} aria-hidden="true" />
               </button>
             </div>
-            <p className="pt-4 text-center text-xs text-white/60">Use the arrow buttons or keyboard arrows to browse</p>
+            <div className="property-photo-lightbox-caption">
+              <p>{activeImage.alt}</p>
+              <span>Use arrow keys or controls to browse</span>
+            </div>
           </div>
         </div>
       )}
@@ -152,9 +248,31 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
   const [availabilityLoading, setAvailabilityLoading] = useState(true);
   const [availabilityError, setAvailabilityError] = useState("");
   const { booking, setBooking } = useBooking();
-  const visibleImages = property.images.filter((image) => image.src && !image.src.includes("a0.muscache.com") && !image.src.includes("images.unsplash.com"));
+  const visibleImages = property.images.filter((image) => image.src && image.isVisible !== false);
   const price = calculatePrice(property, booking.checkIn, booking.checkout, booking.guests ?? defaultGuests);
   const mobileDisplayPrice = price.nights > 0 ? price.total : property.nightlyPrice;
+  const displayName = property.listingTitle?.trim() || property.name.replace(/\s+-\s+Whole$/i, "");
+  const adjacentSummary = property.nearbyLocations.find((location) => /beside|adjacent/i.test(location)) || "";
+  const longerStaySummary = [
+    property.weeklyDiscount > 0 ? `${property.weeklyDiscount}% weekly discount` : "",
+    property.monthlyDiscount > 0 ? `${property.monthlyDiscount}% monthly discount` : "",
+  ].filter(Boolean).join(" · ") || (property.longTermStaysAllowed ? "Long-term stays are available." : "");
+  const practicalDetails = [
+    ["Kitchen", property.kitchenFacilities],
+    ["Laundry", property.laundryFacilities],
+    ["Wi-Fi", property.wifiInformation],
+    ["Workspace", property.workspaceInformation],
+    ["Heating and cooling", property.heatingCooling],
+    ["Safety", property.safetyInformation],
+    ["Cancellation", property.cancellationPolicy],
+  ].filter(([, value]) => Boolean(value));
+  const stayHighlights = [
+    { Icon: KeyRound, title: "Arrival and departure", text: [property.checkIn, property.checkout, property.selfCheckInDetails].filter(Boolean).join(" · "), show: true },
+    { Icon: Car, title: "Parking", text: property.parkingType, show: Boolean(property.parkingType) },
+    { Icon: Dog, title: property.petsAllowed ? "Pets welcome" : "Pet policy", text: property.petPolicy, show: Boolean(property.petPolicy) },
+    { Icon: BriefcaseBusiness, title: "Corporate stays", text: property.corporateInformation || property.corporateInstructions, show: property.corporateBookingAllowed },
+    { Icon: CalendarDays, title: "Longer stays", text: longerStaySummary, show: property.longTermStaysAllowed && Boolean(longerStaySummary) },
+  ].filter((item) => item.show && item.text);
 
   useEffect(() => {
     let cancelled = false;
@@ -182,41 +300,43 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
   const vacationRentalJsonLd = {
     "@context": "https://schema.org",
     "@type": "VacationRental",
-    name: property.name,
+    name: displayName,
+    description: property.fullDescription,
     containsPlace: { "@type": "Accommodation", occupancy: { "@type": "QuantitativeValue", value: property.maxGuests } },
-    address: { "@type": "PostalAddress", addressLocality: "Pakenham", addressRegion: "VIC", addressCountry: "AU" },
+    address: { "@type": "PostalAddress", addressLocality: property.location, addressCountry: "AU" },
   };
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(vacationRentalJsonLd) }} />
       
-      <div className="section bg-[#FAF8F5] pt-8 pb-16">
-        <div className="container">
-          <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+      <div className="property-editorial-page">
+        <div className="property-editorial-shell">
+          <header className="property-editorial-heading">
             <div>
-              <span className="eyebrow flex items-center gap-1.5">
-                <Building2 size={14} /> Furnished Whole House · Pakenham VIC
-              </span>
-              <h1 className="page-heading mt-2 text-stone-900">
-                {property.name}
-              </h1>
-              <p className="mt-2 flex items-center gap-1.5 text-sm text-stone-600">
-                <MapPin size={16} className="text-[#7A4E2D]" /> {property.location}
-              </p>
+              <p className="property-editorial-kicker">{property.propertyType} · {property.location}</p>
+              <h1>{displayName}</h1>
             </div>
-            
-            <div className="rounded-none bg-[#FAF5EF] border border-[#EADCCF] px-4 py-2.5 text-xs font-bold text-[#7A4E2D] flex items-center gap-2">
-              <Building2 size={16} /> Located beside Serenity 7, 9 & 11 (Adjacent Houses)
+            <div className="property-editorial-heading-copy">
+              <p>{property.shortDescription}</p>
+              <a href="#availability">Check availability <span aria-hidden="true">↗</span></a>
             </div>
+          </header>
+
+          <div className="property-editorial-facts" aria-label={`${displayName} key facts`}>
+            <span><b>{formatAuNumber(property.maxGuests)}</b> guests</span>
+            <span><b>{formatAuNumber(property.bedrooms)}</b> bedrooms</span>
+            <span><b>{formatAuNumber(property.beds)}</b> beds</span>
+            <span><b>{formatAuNumber(property.bathrooms)}</b> bathrooms</span>
+            <span><b>{formatAud(property.nightlyPrice)}</b> AUD / night</span>
           </div>
 
           {/* Only approved uploaded photos are shown publicly. */}
           {visibleImages.length ? (
-            <div className="relative mt-6 overflow-hidden rounded-none border border-stone-200 shadow-sm">
-              <div className="grid gap-2 md:grid-cols-4 md:grid-rows-2">
+            <div className="property-editorial-gallery">
+              <div className="property-editorial-gallery-grid">
                 <button
-                  className="relative h-80 md:h-[460px] md:col-span-2 md:row-span-2 group overflow-hidden cursor-pointer"
+                  className="property-editorial-gallery-main group"
                   onClick={() => setGalleryOpen(true)}
                 >
                   <Image
@@ -231,7 +351,7 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
                 {visibleImages.slice(1, 5).map((image, idx) => (
                   <button
                     key={image.src + idx}
-                    className="group relative h-40 md:h-[226px] overflow-hidden cursor-pointer"
+                    className="property-editorial-gallery-tile group"
                     onClick={() => setGalleryOpen(true)}
                   >
                     <Image
@@ -246,183 +366,163 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
               </div>
 
               <button
-                className="btn-outline-dark absolute right-4 bottom-4 bg-white/95 backdrop-blur-md text-xs font-bold shadow-lg"
+                className="property-editorial-gallery-action"
                 onClick={() => setGalleryOpen(true)}
               >
                 <Images size={16} /> View all photos ({visibleImages.length})
               </button>
             </div>
           ) : (
-            <div className="mt-6 rounded-none border border-dashed border-stone-300 bg-white px-6 py-12 text-center text-sm text-stone-600">
+            <div className="property-editorial-gallery-empty">
               Photos for this house will be added soon.
             </div>
           )}
 
           {/* Content Layout */}
-          <div className="mt-10 grid gap-10 lg:grid-cols-12">
-            <div className="lg:col-span-7 xl:col-span-8 space-y-10">
-              
-              {/* Quick specs */}
-              <section className="card p-6 bg-white border border-stone-200">
-                <h2 className="section-heading text-stone-900">{property.propertyType} in Pakenham</h2>
-                <div className="mt-4 flex flex-wrap gap-6 text-sm text-stone-600">
-                  <span className="flex items-center gap-2 font-medium">
-                    <Users size={18} className="text-[#7A4E2D]" /> Up to {formatAuNumber(property.maxGuests)} guests
-                  </span>
-                  <span className="flex items-center gap-2 font-medium">
-                    <BedDouble size={18} className="text-[#7A4E2D]" /> {formatAuNumber(property.bedrooms)} bedrooms
-                  </span>
-                  <span className="flex items-center gap-2 font-medium">
-                    <BedDouble size={18} className="text-[#7A4E2D]" /> {formatAuNumber(property.beds)} beds
-                  </span>
-                  <span className="flex items-center gap-2 font-medium">
-                    <Bath size={18} className="text-[#7A4E2D]" /> {formatAuNumber(property.bathrooms)} bathrooms
-                  </span>
-                  <span className="flex items-center gap-2 font-medium">
-                    <Dog size={18} className="text-[#7A4E2D]" /> Pet-friendly
-                  </span>
+          <div className="property-editorial-body">
+            <div className="property-editorial-content">
+              <section className="property-editorial-section property-editorial-highlights" aria-labelledby="stay-details-title">
+                <div className="property-editorial-section-heading">
+                  <p>Stay details</p>
+                  <h2 id="stay-details-title">What this house includes.</h2>
+                </div>
+                <div className="property-editorial-highlight-grid">
+                  {stayHighlights.map(({ Icon, title, text }) => (
+                    <article key={title}>
+                      <Icon size={19} aria-hidden="true" />
+                      <h3>{title}</h3>
+                      <p>{text}</p>
+                    </article>
+                  ))}
                 </div>
               </section>
 
-              {/* Highlights */}
-              <section className="grid gap-4 sm:grid-cols-3">
-                {[
-                  [KeyRound, "Keyless Self Check-in", "Keypad access anytime after 3:00 PM"],
-                  [Home, "Entire Private House", "Exclusive private home & garden"],
-                  [BriefcaseBusiness, "Corporate Suitable", "Teams & contractors welcome"],
-                  [CalendarDays, "Long-term Rates", "Weekly & monthly discounts"],
-                  [Dog, "Pet-friendly", "Declared pets welcome"],
-                  [Building2, "Adjacent Houses", "Next door to Serenity 7 & 9"],
-                ].map(([Icon, title, text]) => (
-                  <article key={title as string} className="card p-4 bg-white">
-                    <Icon className="text-[#7A4E2D]" size={20} />
-                    <h3 className="mt-2 text-sm font-bold text-stone-900">{title as string}</h3>
-                    <p className="mt-0.5 text-xs text-stone-500">{text as string}</p>
-                  </article>
-                ))}
-              </section>
-
-              {[
-                ["Kitchen", property.kitchenFacilities],
-                ["Laundry", property.laundryFacilities],
-                ["Wi-Fi", property.wifiInformation],
-                ["Workspace", property.workspaceInformation],
-                ["Heating and cooling", property.heatingCooling],
-                ["Self check-in", property.selfCheckInDetails],
-                ["Safety", property.safetyInformation],
-                ["Cancellation", property.cancellationPolicy],
-                ["Corporate stays", property.corporateInformation],
-              ].some(([, value]) => Boolean(value)) ? <section className="card grid gap-4 bg-white p-6">
-                <div><p className="eyebrow">House details</p><h2 className="section-heading mt-1 text-stone-900">Practical information for your stay</h2></div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {[
-                    ["Kitchen", property.kitchenFacilities],
-                    ["Laundry", property.laundryFacilities],
-                    ["Wi-Fi", property.wifiInformation],
-                    ["Workspace", property.workspaceInformation],
-                    ["Heating and cooling", property.heatingCooling],
-                    ["Self check-in", property.selfCheckInDetails],
-                    ["Safety", property.safetyInformation],
-                    ["Cancellation", property.cancellationPolicy],
-                    ["Corporate stays", property.corporateInformation],
-                  ].filter(([, value]) => Boolean(value)).map(([label, value]) => <div key={label as string} className="rounded-none bg-[#FAF8F5] p-4"><h3 className="text-sm font-bold text-stone-900">{label as string}</h3><p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-stone-600">{value as string}</p></div>)}
+              {practicalDetails.length ? <section className="property-editorial-section" aria-labelledby="practical-details-title">
+                <div className="property-editorial-section-heading"><p>From your host</p><h2 id="practical-details-title">Practical information.</h2></div>
+                <div className="property-editorial-practical-grid">
+                  {practicalDetails.map(([label, value]) => <div key={label as string}><h3>{label as string}</h3><p>{value as string}</p></div>)}
                 </div>
               </section> : null}
 
               {/* Description */}
-              <section className="property-about-section">
-                <div className="property-about-heading">
-                  <span className="eyebrow">About your stay</span>
-                  <h2 className="section-heading mt-2 text-stone-900">About this house</h2>
+              <section className="property-editorial-section property-about-section" aria-labelledby="about-house-title">
+                <div className="property-editorial-section-heading property-about-heading">
+                  <p>About your stay</p>
+                  <h2 id="about-house-title">About this house.</h2>
                 </div>
 
                 <div className="property-about-copy">
                   <p>{property.fullDescription}</p>
                 </div>
 
-                <div className="property-adjacent-callout">
-                  <span className="property-adjacent-icon" aria-hidden="true">
-                    <Building2 size={18} />
-                  </span>
-                  <div>
-                    <p className="property-adjacent-title">Three houses beside each other</p>
-                    <p className="property-adjacent-text">Serenity 7, Serenity 9, and Serenity 11 are adjacent to one another. Contact us for multi-house bookings if you have larger groups, company project crews, or multi-family holidays.</p>
+                {property.adjacentHousesAllowed && (adjacentSummary || property.corporateInstructions) ? (
+                  <div className="property-adjacent-callout">
+                    <div>
+                      <p className="property-adjacent-title">Multi-house stays</p>
+                      <p className="property-adjacent-text">{adjacentSummary || property.corporateInstructions}</p>
+                    </div>
                   </div>
-                </div>
+                ) : null}
               </section>
 
               {/* Sleeping arrangements */}
-              <section>
-                <h2 className="section-heading text-stone-900 mb-4">Sleeping arrangements</h2>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {property.bedArrangements.map((room) => (
-                    <article key={room.room} className="card p-5 bg-white">
-                      <BedDouble className="text-[#7A4E2D]" size={22} />
-                      <h3 className="mt-3 font-bold text-stone-900 text-sm">{room.room}</h3>
-                      <p className="mt-1 text-xs text-stone-600">{room.beds}</p>
-                    </article>
-                  ))}
-                </div>
-              </section>
+              {property.bedArrangements.length ? (
+                <section className="property-editorial-section" aria-labelledby="sleeping-title">
+                  <div className="property-editorial-section-heading">
+                    <p>Room by room</p>
+                    <h2 id="sleeping-title">Sleeping arrangements.</h2>
+                  </div>
+                  <div className="property-editorial-sleep-grid">
+                    {property.bedArrangements.map((room, index) => (
+                      <article key={`${room.room}-${index}`}>
+                        <BedDouble size={21} aria-hidden="true" />
+                        <h3>{room.room}</h3>
+                        <p>{room.beds}</p>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
 
               {/* Amenities */}
-              <section>
-                <h2 className="section-heading text-stone-900 mb-4">Amenities</h2>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {property.amenities.slice(0, 10).map((amenity) => (
-                    <div key={amenity} className="flex items-center gap-3 rounded-none border border-stone-200 bg-white p-3.5 text-xs font-semibold text-stone-800">
-                      <ShieldCheck className="text-[#7A4E2D]" size={16} /> {amenity}
-                    </div>
-                  ))}
-                </div>
-                <button className="btn-outline-dark mt-4 text-xs font-bold" onClick={() => setAmenitiesOpen(true)}>
-                  Show all amenities ({property.amenities.length})
-                </button>
-              </section>
+              {property.amenities.length ? (
+                <section className="property-editorial-section" aria-labelledby="amenities-title">
+                  <div className="property-editorial-section-heading">
+                    <p>Included</p>
+                    <h2 id="amenities-title">Amenities.</h2>
+                  </div>
+                  <div className="property-editorial-amenities-grid">
+                    {property.amenities.slice(0, 10).map((amenity) => (
+                      <div key={amenity}>
+                        <ShieldCheck size={16} aria-hidden="true" />
+                        <span>{amenity}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {property.amenities.length > 10 ? (
+                    <button className="property-editorial-button" onClick={() => setAmenitiesOpen(true)}>
+                      Show all amenities ({property.amenities.length})
+                    </button>
+                  ) : null}
+                </section>
+              ) : null}
 
               {/* Availability */}
-              <section>
-                <h2 className="section-heading text-stone-900 mb-2">Availability Calendar</h2>
-                <p className="text-xs text-stone-500 mb-4">Select your stay dates to calculate total AUD rate and check availability.</p>
+              <section id="availability" className="property-editorial-section property-editorial-availability" aria-labelledby="availability-title">
+                <div className="property-editorial-section-heading">
+                  <p>Plan your stay</p>
+                  <h2 id="availability-title">Availability.</h2>
+                </div>
+                <p className="property-editorial-intro">Choose your dates to check current availability and calculate the total in Australian dollars.</p>
                 <MiniCalendar property={property} today={today} checkIn={booking.checkIn} checkout={booking.checkout} blockedDates={blockedDates} availabilityLoading={availabilityLoading} onCheckInSelect={(checkIn) => setBooking({ propertySlug: property.slug, checkIn, checkout: "" })} onSelect={(checkIn, checkout) => setBooking({ propertySlug: property.slug, checkIn, checkout })} />
-                {availabilityError && <p className="mt-2 text-xs font-semibold text-stone-600">{availabilityError}</p>}
-                {booking.checkIn && booking.checkout && <p className="mt-2 text-sm font-semibold text-[#8A3325]">{validateDateRange(property, booking.checkIn, booking.checkout, today, blockedDates)}</p>}
+                {availabilityError && <p className="property-editorial-notice">{availabilityError}</p>}
+                {booking.checkIn && booking.checkout && <p className="property-editorial-error">{validateDateRange(property, booking.checkIn, booking.checkout, today, blockedDates)}</p>}
               </section>
 
               {/* House Rules */}
-              <section>
-                <h2 className="section-heading text-stone-900 mb-4">House Rules & Policies</h2>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {property.houseRules.map((rule) => (
-                    <div key={rule} className="rounded-none border border-stone-200 bg-white p-3.5 text-xs text-stone-700">
-                      • {rule}
-                    </div>
-                  ))}
-                </div>
-              </section>
+              {property.houseRules.length ? (
+                <section className="property-editorial-section" aria-labelledby="rules-title">
+                  <div className="property-editorial-section-heading">
+                    <p>Before booking</p>
+                    <h2 id="rules-title">House rules.</h2>
+                  </div>
+                  <div className="property-editorial-rule-grid">
+                    {property.houseRules.map((rule) => <div key={rule}>{rule}</div>)}
+                  </div>
+                </section>
+              ) : null}
 
               {/* Location Map */}
-              <section>
-                <h2 className="section-heading text-stone-900 mb-4">Approximate Location</h2>
-                <ApproximateMap compact title="Pakenham Victoria Accommodation Area" />
-                <p className="mt-3 text-xs text-stone-500">
-                  Exact property address and key safe details are sent automatically upon booking confirmation.
-                </p>
+              <section className="property-editorial-section" aria-labelledby="location-title">
+                <div className="property-editorial-section-heading">
+                  <p>{property.location}</p>
+                  <h2 id="location-title">Where you&apos;ll be.</h2>
+                </div>
+                {property.nearbyLocations.length ? (
+                  <div className="property-editorial-nearby-grid">
+                    {property.nearbyLocations.map((location) => <p key={location}>{location}</p>)}
+                  </div>
+                ) : null}
+                <ApproximateMap compact title={`${property.location} accommodation area`} />
+                <p className="property-editorial-caption">Exact address and access instructions are sent after a confirmed booking.</p>
               </section>
 
               {/* Related Houses */}
-              <section className="pt-4 border-t border-stone-200">
-                <h2 className="section-heading text-stone-900 mb-6">Other Serenity Houses Beside This Property</h2>
+              <section className="property-editorial-section" aria-labelledby="related-title">
+                <div className="property-editorial-section-heading">
+                  <p>Continue browsing</p>
+                  <h2 id="related-title">Other Serenity houses.</h2>
+                </div>
                 <RelatedHouses currentSlug={property.slug} properties={relatedProperties} />
               </section>
             </div>
 
             {/* Desktop Sticky Booking Widget */}
-            <div className="hidden lg:block lg:col-span-5 xl:col-span-4">
+            <aside className="property-editorial-booking hidden lg:block">
               <div className="sticky top-28">
                 <BookingCard property={property} today={today} blockedDates={blockedDates} availabilityLoading={availabilityLoading} />
               </div>
-            </div>
+            </aside>
           </div>
         </div>
       </div>

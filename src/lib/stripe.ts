@@ -73,6 +73,20 @@ export async function markBookingPaid(session: Stripe.Checkout.Session) {
   return booking;
 }
 
+export async function markBookingPaidFromPaymentIntent(paymentIntent: Stripe.PaymentIntent) {
+  const bookingId = paymentIntent.metadata?.bookingId;
+  const reference = paymentIntent.metadata?.reference;
+  if (!bookingId || !reference) throw new Error("Stripe payment intent is missing booking metadata.");
+  const supabase = createSupabaseAdminClient();
+  const { data: existing, error: readError } = await supabase.from("bookings").select("id, payment_status, booking_status").eq("id", bookingId).eq("reference", reference).maybeSingle();
+  if (readError) throw readError;
+  if (!existing) throw new Error("Booking linked to Stripe payment intent was not found.");
+  if (existing.payment_status === "paid") return existing;
+  const { data, error } = await supabase.from("bookings").update({ payment_status: "paid", booking_status: "confirmed", stripe_payment_intent_id: paymentIntent.id }).eq("id", bookingId).eq("reference", reference).select("id, payment_status, booking_status").single();
+  if (error) throw error;
+  return data;
+}
+
 export async function markBookingCancelled(reference: string) {
   if (!reference) return;
   const supabase = createSupabaseAdminClient();

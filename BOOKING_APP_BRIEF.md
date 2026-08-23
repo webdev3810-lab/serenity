@@ -650,14 +650,15 @@ editorial introduction, followed by moving chapter typography and a reduced-
 motion-safe handoff into the collection. The intro does not own separate image
 records or hard-coded house facts; it derives them from the same public loader.
 
-`GalleryEditorialExperience` then reads the published `properties`,
-`property_images`, and category metadata used by the property pages. It is
-house-first: each published house has an editorial cover selector, an overview
-with booking links and facts, a dynamic category menu, scroll-pinned horizontal
-photo stages, drag/touch/keyboard controls, and a keyboard-accessible lightbox.
-A filtered, sortable collection grid remains below the editorial stages. It
-filters external preview/mock rows before rendering and shows a no-photo state
-when a house has no approved upload.
+`GalleryCinematicJourney` continues the same full-page motion language through
+the complete gallery. The previous house selector, summary panel, category bar,
+horizontal card stages, filters, and collection grid are not rendered. Instead,
+each published house receives a full-screen scroll chapter, followed by an
+interior chapter generated from that house's published Supabase categories and
+photo ordering. Category photos crossfade within sticky room scenes and open in
+a keyboard-accessible lightbox. The final booking chapter links back to the
+existing house and contact flows. External preview/mock rows remain filtered,
+and a no-photo state appears when no approved upload is available.
 
 ## Promotions and Voucher Booking
 
@@ -692,3 +693,27 @@ the redemption only after payment succeeds.
 Promotion dates are stored as UTC timestamps and entered/displayed in
 `Australia/Melbourne`; guest pricing remains in AUD. Apply migration 0014 with
 the normal Supabase migration workflow before publishing promotions.
+
+## Calendar synchronization and dated pricing hardening
+
+The admin Calendar Sync workspace supports Serenity 7, Serenity 9, and
+Serenity 11 independently. Each house has a hashed-token Serenity export and
+server-side Airbnb, Vrbo, and Stayz imports. Imports are keyed by external UID,
+updated in place, cancelled or stale records stop blocking, and provider-safe
+export links omit the provider's own imported events to reduce calendar loops.
+No guest personal or payment data is written to iCal.
+
+`vercel.json` schedules the protected sync endpoint every 15 minutes. External
+platform refresh timing remains outside Serenity's control, so booking creation
+always rechecks active bookings and calendar blocks on the server and relies on
+PostgreSQL conflict protection for the final insert.
+
+Migration `0015_calendar_sync_hardening.sql` is additive. It adds explicit sync
+attempt/frequency/count fields, admin-only manual-block reasons and notes, and
+active/inactive dated rates. Dated-rate saves use conflict-key upserts instead
+of deleting all rates. Each booking stores its night-by-night AUD rates in
+`price_breakdown`; Stripe Checkout uses the same server-calculated total and
+receives concise property, stay, availability-check, and price metadata.
+
+See `CALENDAR_SYNC_SETUP.md` for the admin setup, official marketplace paths,
+refresh limitations, privacy rules, test workflow, and troubleshooting.

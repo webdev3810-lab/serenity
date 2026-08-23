@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, CreditCard, Loader2, Printer, ShieldCheck, Lock, Building2 } from "lucide-react";
+import { CheckCircle2, CreditCard, Loader2, Printer, ShieldCheck, Lock } from "lucide-react";
 import type { Property } from "@/src/data/properties";
 import { useBooking } from "@/src/context/BookingContext";
 import { calculatePrice, formatAud, formatDateAu, nightsBetween, reservationCode, type PriceBreakdown } from "@/src/lib/booking";
@@ -35,16 +35,20 @@ async function requestPromotionPreview(property: Property, booking: { checkIn?: 
 
 function VoucherForm({ value, onChange, onApply, onClear, error, busy, applied }: { value: string; onChange: (value: string) => void; onApply: () => void; onClear: () => void; error: string; busy: boolean; applied: boolean }) {
   return (
-    <div className="border border-stone-200 bg-[#FAF8F5] p-4">
-      <div className="flex flex-wrap items-end gap-3">
-        <label className="min-w-[12rem] flex-1 text-xs font-bold uppercase tracking-[0.12em] text-stone-700">
-          Voucher code
-          <input className="field mt-1 w-full font-mono uppercase tracking-[0.08em]" value={value} onChange={(event) => onChange(event.target.value.toUpperCase())} placeholder="Enter code" maxLength={40} aria-describedby={error ? "voucher-error" : undefined} />
-        </label>
-        {applied ? <button type="button" className="btn-outline-dark min-h-10 px-4 text-sm" onClick={onClear}>Remove</button> : <button type="button" className="btn-secondary min-h-10 px-4 text-sm" onClick={onApply} disabled={busy || !value.trim()}>{busy ? "Checking…" : "Apply code"}</button>}
+    <div className="booking-promotion-code">
+      <div className="booking-promotion-code-copy">
+        <p className="booking-promotion-code-label">Promotion code <span>Optional</span></p>
+        <p id="promotion-code-help">If you have a code, enter it here before continuing.</p>
       </div>
-      {applied && !error && <p className="mt-3 text-sm font-semibold text-emerald-800" role="status">Voucher applied. Your final total has been updated.</p>}
-      {error && <p id="voucher-error" className="mt-3 text-sm font-semibold text-red-700" role="alert">{error}</p>}
+      <div className="booking-promotion-code-controls">
+        <label className="booking-promotion-code-field">
+          <span className="sr-only">Optional promotion code</span>
+          <input className="field font-mono uppercase tracking-[0.08em]" value={value} onChange={(event) => onChange(event.target.value.toUpperCase())} placeholder="Enter code (optional)" maxLength={40} aria-describedby={error ? "promotion-code-help voucher-error" : "promotion-code-help"} />
+        </label>
+        {applied ? <button type="button" className="btn-outline-dark" onClick={onClear}>Remove code</button> : <button type="button" className="btn-secondary" onClick={onApply} disabled={busy || !value.trim()}>{busy ? "Checking…" : "Apply code"}</button>}
+      </div>
+      {applied && !error && <p className="booking-promotion-code-status is-success" role="status">Code applied. Your final total has been updated.</p>}
+      {error && <p id="voucher-error" className="booking-promotion-code-status is-error" role="alert">{error}</p>}
     </div>
   );
 }
@@ -121,51 +125,58 @@ export function ReviewBookingPage() {
 
   return (
     <BookingFrame active={0}>
-      <div className="grid gap-8 lg:grid-cols-12">
-        <section className="lg:col-span-7 xl:col-span-8 card p-6 bg-white space-y-6">
-          <div>
-            <span className="eyebrow flex items-center gap-1">
-              <Building2 size={13} /> Direct Reservation Review
-            </span>
-            <h1 className="text-3xl font-extrabold text-stone-900 mt-1">Review Your Stay Details</h1>
-          </div>
+      <div className="booking-review-layout">
+        <section className="booking-review-panel">
+          <header className="booking-review-header">
+            <span className="booking-review-kicker">Direct reservation</span>
+            <h1>Review your stay.</h1>
+          </header>
 
-          <div className="flex flex-col sm:flex-row gap-5 p-4 rounded-none bg-[#FAF8F5] border border-stone-200">
-            {property.featuredImage ? <Image src={property.featuredImage} alt={`${property.name} thumbnail`} width={640} height={420} sizes="(max-width: 640px) 100vw, 176px" className="h-32 w-full sm:w-44 rounded-none object-cover" /> : <div className="h-32 w-full rounded-none bg-[#E8DED6] sm:w-44" aria-label="Property photo not available" />}
-            <div className="space-y-1.5">
-              <span className="text-[0.7rem] font-bold text-[#7A4E2D] uppercase tracking-wider">{property.propertyType}</span>
-              <h2 className="text-xl font-bold text-stone-900">{property.name}</h2>
-              <p className="text-xs text-stone-600">{property.location}</p>
-              <p className="text-xs font-semibold text-stone-800 pt-1">
-                📅 {formatDateAu(booking.checkIn)} to {formatDateAu(booking.checkout)} ({nights} night{nights > 1 ? "s" : ""})
-              </p>
-              <p className="text-xs text-stone-600">
-                👥 {booking.guests.adults + booking.guests.children} guests ({booking.guests.adults} adults, {booking.guests.children} children, {booking.guests.infants} infants), {booking.guests.pets} pets
-              </p>
+          <article className="booking-review-property">
+            <div className="booking-review-property-media">
+              {property.featuredImage ? <Image src={property.featuredImage} alt={`${property.name} exterior`} width={960} height={720} sizes="(max-width: 720px) 100vw, 300px" /> : <div className="booking-review-property-placeholder" aria-label="Property photo not available" />}
             </div>
-          </div>
+            <div className="booking-review-property-copy">
+              <span className="booking-review-property-type">{property.propertyType}</span>
+              <h2>{property.name}</h2>
+              <p className="booking-review-property-location">{property.location}</p>
+              <dl className="booking-review-stay-facts">
+                <div>
+                  <dt>Dates</dt>
+                  <dd>{formatDateAu(booking.checkIn)} — {formatDateAu(booking.checkout)}</dd>
+                </div>
+                <div>
+                  <dt>Length</dt>
+                  <dd>{nights} night{nights > 1 ? "s" : ""}</dd>
+                </div>
+                <div>
+                  <dt>Guests</dt>
+                  <dd>{booking.guests.adults + booking.guests.children} guests · {booking.guests.adults} adults · {booking.guests.children} children · {booking.guests.infants} infants · {booking.guests.pets} pets</dd>
+                </div>
+              </dl>
+            </div>
+          </article>
 
-          <div className="rounded-none bg-[#FAF5EF] border border-[#EADCCF] p-4 text-xs text-stone-700 space-y-1">
-            <p className="font-bold text-[#7A4E2D] flex items-center gap-1.5">
-              <ShieldCheck size={15} /> Direct Booking Advantage
-            </p>
-            <p>No customer account registration required. Your stay dates are held temporarily during checkout. Exact address instructions are sent upon confirmation.</p>
+          <div className="booking-review-advantage">
+            <p>Direct booking advantage</p>
+            <span>No customer account registration required. Your stay dates are held temporarily during checkout. Exact address instructions are sent upon confirmation.</span>
           </div>
 
           <VoucherForm value={voucherCode} onChange={setVoucherCode} onApply={() => void applyVoucher()} onClear={clearVoucher} error={voucherError} busy={voucherBusy} applied={Boolean(promotionPreview)} />
 
-          <div className="grid gap-4 sm:grid-cols-2 pt-2">
-            <Link className="btn-outline-dark justify-center text-xs" href={`/properties/${property.slug}`}>
+          <div className="booking-review-actions">
+            <Link className="btn-outline-dark" href={`/properties/${property.slug}`}>
               Edit Dates or Guests
             </Link>
-            <Link className="btn-primary justify-center text-xs" href="/booking/guest-details">
+            <Link className="btn-primary" href="/booking/guest-details">
               Continue to Guest Details →
             </Link>
           </div>
         </section>
 
-        <aside className="lg:col-span-5 xl:col-span-4 card p-6 bg-white h-fit space-y-4">
-          <h2 className="text-lg font-bold text-stone-900 border-b border-stone-100 pb-3">Price Summary (AUD)</h2>
+        <aside className="booking-review-price">
+          <span className="booking-review-kicker">Your total</span>
+          <h2>Price summary <small>AUD</small></h2>
           <PriceBreakdownView property={property} checkIn={booking.checkIn} checkout={booking.checkout} guests={booking.guests} corporate={booking.guestDetails?.corporate === true} price={promotionPreview?.price} />
         </aside>
       </div>

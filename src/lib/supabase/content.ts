@@ -120,8 +120,9 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
     nightlyPrice: Number(row.nightly_price),
     datePrices: datePrices
       .filter((price) => price.property_id === row.id)
+      .filter((price) => price.is_active !== false)
       .sort((a, b) => String(a.price_date).localeCompare(String(b.price_date)))
-      .map((price): PropertyDatePrice => ({ date: String(price.price_date), nightlyPrice: Number(price.nightly_price), label: String(price.label ?? "") })),
+      .map((price): PropertyDatePrice => ({ date: String(price.price_date), nightlyPrice: Number(price.nightly_price), label: String(price.label ?? ""), active: true })),
     cleaningFee: Number(row.cleaning_fee),
     petFee: Number(row.pet_fee),
     extraGuestFee: Number(row.extra_guest_fee),
@@ -151,7 +152,7 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
     corporateDepositRequired: row.corporate_deposit_required === true,
     corporateOnlinePayment: row.corporate_online_payment !== false,
     gstInvoiceAvailable: row.gst_invoice_available !== false,
-    corporateInstructions: String(row.corporate_instructions ?? "Corporate stays are welcome. Contact Serenity for multi-house availability, GST invoices, and project-team arrangements."),
+    corporateInstructions: String(row.corporate_instructions ?? ""),
     weeklyDiscount: Number(row.weekly_discount),
     monthlyDiscount: Number(row.monthly_discount),
     listingTitle: String(row.listing_title ?? ""),
@@ -237,7 +238,9 @@ export async function getPublicPropertyBySlug(slug: string): Promise<Property | 
     const supabase = await createSupabaseServerClient();
     const { data: row, error } = await supabase.from("properties").select("*").eq("slug", slug).eq("published", true).maybeSingle();
     if (error) throw error;
-    if (!row) return localPublicProperty;
+    // Supabase is the source of truth in public mode. If an editor unpublishes
+    // or removes a listing, do not silently render the bundled preview record.
+    if (!row) return undefined;
     const [{ data: images, error: imagesError }, { data: amenities, error: amenitiesError }, { data: reviews, error: reviewsError }, { data: categories, error: categoriesError }] = await Promise.all([
       supabase.from("property_images").select("*").eq("property_id", row.id).eq("is_visible", true).eq("is_placeholder", false).order("display_order"),
       supabase.from("amenities").select("*").eq("property_id", row.id).order("display_order"),
@@ -374,8 +377,10 @@ export async function getPublicContactSettings(): Promise<ContactSettings> {
       .maybeSingle();
     if (error) throw error;
     return normalizeContactSettings(data?.value);
-  } catch (error) {
-    logSupabaseLoadFailure("Unable to load public contact settings from Supabase", error);
+  } catch {
+    // Contact settings are optional CMS content. A missing row, an RLS/cache
+    // mismatch, or a temporary public read failure should use the safe public
+    // defaults without turning the shared root layout into a console error.
     return DEFAULT_CONTACT_SETTINGS;
   }
 }

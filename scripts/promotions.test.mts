@@ -16,7 +16,7 @@ const basePromotion = (overrides: Record<string, unknown> = {}) => normalizeProm
   applicable_property_ids: [], applies_to_corporate: false, stackable: true, restore_on_refund: false, ...overrides,
 });
 
-const price = { nights: 2, nightlySubtotal: 400, cleaningFee: 50, petFee: 0, extraGuestFee: 0, discount: 0, discountLabel: "", nightlyRateSummary: "AUD 200 × 2 nights", tax: 45, total: 495 };
+const price = { nights: 2, nightlyRates: [{ date: "2026-10-01", nightlyPrice: 200, label: "", isOverride: false }, { date: "2026-10-02", nightlyPrice: 200, label: "", isOverride: false }], nightlySubtotal: 400, cleaningFee: 50, petFee: 0, extraGuestFee: 0, discount: 0, discountLabel: "", nightlyRateSummary: "AUD 200 × 2 nights", tax: 45, total: 495 };
 
 test("normalizes codes and calculates percentage and fixed discounts", () => {
   assert.equal(normalizePromotionCode(" winter10 "), "WINTER10");

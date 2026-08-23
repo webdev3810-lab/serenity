@@ -23,6 +23,7 @@ export type BookingState = {
 
 export type PriceBreakdown = {
   nights: number;
+  nightlyRates: Array<{ date: string; nightlyPrice: number; label: string; isOverride: boolean }>;
   nightlySubtotal: number;
   cleaningFee: number;
   petFee: number;
@@ -49,7 +50,7 @@ export const dateToIso = (date: Date) => `${date.getUTCFullYear()}-${padDatePart
 
 export const getNightlyPrice = (property: Property, date?: string) => {
   if (!date) return property.nightlyPrice;
-  return property.datePrices?.find((override) => override.date === date)?.nightlyPrice ?? property.nightlyPrice;
+  return property.datePrices?.find((override) => override.date === date && override.active !== false)?.nightlyPrice ?? property.nightlyPrice;
 };
 
 export const todayIso = () => {
@@ -142,9 +143,12 @@ export const validateGuestCapacity = (property: Property, guests: GuestCounts) =
 
 export const calculatePrice = (property: Property, checkIn?: string, checkout?: string, guests: GuestCounts = defaultGuests, corporate = false): PriceBreakdown => {
   const nights = nightsBetween(checkIn, checkout);
-  const nightlyRates = checkIn && checkout ? datesInRange(checkIn, checkout).map((date) => getNightlyPrice(property, date)) : [];
-  const nightlySubtotal = nightlyRates.reduce((total, rate) => total + rate, 0);
-  const hasDatedRate = nightlyRates.some((rate) => rate !== property.nightlyPrice);
+  const nightlyRates = checkIn && checkout ? datesInRange(checkIn, checkout).map((date) => {
+    const override = property.datePrices?.find((price) => price.date === date && price.active !== false);
+    return { date, nightlyPrice: override?.nightlyPrice ?? property.nightlyPrice, label: override?.label ?? "", isOverride: Boolean(override) };
+  }) : [];
+  const nightlySubtotal = nightlyRates.reduce((total, rate) => total + rate.nightlyPrice, 0);
+  const hasDatedRate = nightlyRates.some((rate) => rate.isOverride);
   const petFee = guests.pets > 0 ? property.petFee : 0;
   const extraGuests = Math.max(0, totalStayingGuests(guests) - property.extraGuestThreshold);
   const extraGuestFee = extraGuests * property.extraGuestFee * nights;
@@ -155,6 +159,7 @@ export const calculatePrice = (property: Property, checkIn?: string, checkout?: 
   const tax = Math.round(taxable * 0.1);
   return {
     nights,
+    nightlyRates,
     nightlySubtotal,
     cleaningFee: property.cleaningFee,
     petFee,

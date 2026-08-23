@@ -2,6 +2,11 @@ import type { ParsedCalendarEvent } from "@/src/lib/calendar/types";
 
 const DATE_PATTERN = /^(\d{4})(\d{2})(\d{2})/;
 
+export function isIcsCalendarText(value: string) {
+  const normalized = value.replace(/^\uFEFF/, "").toUpperCase();
+  return normalized.includes("BEGIN:VCALENDAR") && normalized.includes("END:VCALENDAR");
+}
+
 function toDateValue(value: string) {
   const match = value.trim().match(DATE_PATTERN);
   return match ? `${match[1]}-${match[2]}-${match[3]}` : null;
