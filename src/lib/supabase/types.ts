@@ -325,6 +325,27 @@ export type Database = {
         Update: Partial<Database["public"]["Tables"]["enquiries"]["Row"]>;
         Relationships: [];
       };
+      contact_messages: {
+        Row: {
+          id: string;
+          reference: string;
+          first_name: string;
+          last_name: string;
+          email: string;
+          phone: string;
+          project_type: string;
+          preferred_house: string;
+          message: string;
+          status: "new" | "contacted" | "closed" | "spam";
+          internal_notes: string;
+          idempotency_key: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["contact_messages"]["Row"]> & Pick<Database["public"]["Tables"]["contact_messages"]["Row"], "first_name" | "last_name" | "email" | "message">;
+        Update: Partial<Database["public"]["Tables"]["contact_messages"]["Row"]>;
+        Relationships: [];
+      };
       homepage_content: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown>; Relationships: [] };
       homepage_hero_media: {
         Row: {

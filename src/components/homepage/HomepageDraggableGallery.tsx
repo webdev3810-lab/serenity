@@ -11,7 +11,7 @@ import {
 } from "react";
 import { isApprovedHomepageMediaSource } from "@/src/lib/homepageMedia";
 
-const AUTOPLAY_STEP = 1;
+const AUTOPLAY_STEP = 2.5;
 const AUTOPLAY_INTERVAL_MS = 16;
 
 export interface HomepageDraggableGalleryImage {
@@ -27,7 +27,6 @@ interface DraggableGalleryProps {
 export default function HomepageDraggableGallery({ images }: DraggableGalleryProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const autoplayIntervalRef = useRef<number | null>(null);
-  const hoverPausedRef = useRef(false);
   const dragRef = useRef({ active: false, startX: 0, startScrollLeft: 0 });
 
   const normalizedImages = useMemo(
@@ -84,12 +83,7 @@ export default function HomepageDraggableGallery({ images }: DraggableGalleryPro
     });
 
     const autoScroll = () => {
-      const isHovered = hoverPausedRef.current && track.matches(":hover");
-
-      if (
-        !dragRef.current.active &&
-        !isHovered
-      ) {
+      if (!dragRef.current.active) {
         track.scrollLeft += AUTOPLAY_STEP;
         recenterTrack();
       }
@@ -108,7 +102,6 @@ export default function HomepageDraggableGallery({ images }: DraggableGalleryPro
     const track = trackRef.current;
     if (!track) return;
 
-    if (event.pointerType === "touch") hoverPausedRef.current = false;
     dragRef.current = {
       active: true,
       startX: event.clientX,
@@ -158,12 +151,8 @@ export default function HomepageDraggableGallery({ images }: DraggableGalleryPro
     <section className="homepage-photo-rail" aria-labelledby="homepage-photo-rail-heading">
       <div className="homepage-photo-rail-intro">
         <div>
-          <p className="homepage-photo-rail-eyebrow">Inside Serenity</p>
           <h2 id="homepage-photo-rail-heading">A closer look at your next stay.</h2>
         </div>
-        <p className="homepage-photo-rail-instruction">
-          Drag to explore every room. The gallery keeps moving gently until you hover.
-        </p>
       </div>
 
       <div
@@ -172,12 +161,6 @@ export default function HomepageDraggableGallery({ images }: DraggableGalleryPro
         role="region"
         aria-label="Serenity house photo carousel"
         tabIndex={0}
-        onMouseEnter={() => {
-          hoverPausedRef.current = true;
-        }}
-        onMouseLeave={() => {
-          hoverPausedRef.current = false;
-        }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -212,9 +195,6 @@ export default function HomepageDraggableGallery({ images }: DraggableGalleryPro
         </div>
       </div>
 
-      <p className="homepage-photo-rail-note" aria-hidden="true">
-        Hover to pause <span>·</span> Drag left or right
-      </p>
     </section>
   );
 }

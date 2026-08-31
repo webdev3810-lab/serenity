@@ -247,54 +247,63 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
   ];
 
   return (
-    <main className="bg-[#F8F6F2] text-[#2D2622]">
-      <section className="border-b border-[#DED5CD]">
-        <div className="container max-w-[92rem] px-5 pb-14 pt-20 sm:px-8 sm:pb-20 sm:pt-28 lg:px-12">
-          <div className="grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-16">
-            <div className="lg:col-span-5">
-              <p className="eyebrow mb-5 flex items-center gap-2 text-[#85644E]"><MapPin size={14} /> Corporate accommodation · Pakenham</p>
-              <ScrollWipeText as="h1" className="text-[clamp(3.3rem,7vw,7.5rem)] font-semibold leading-[0.87] tracking-[-0.07em]" revealClassName="text-[#2D2622]">Room for the workday. Privacy after it.</ScrollWipeText>
-              <p className="mt-8 max-w-md text-base leading-7 text-[#685B53]">Fully furnished private houses for project teams, contractors, relocating employees, and companies that need a calm base.</p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="#corporate-question" className="inline-flex items-center gap-2 bg-[#2D2622] px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] text-white hover:bg-[#85644E]">Ask a question <ArrowUpRight size={15} /></Link>
-                <Link href="#corporate-booking" className="inline-flex items-center gap-2 border border-[#B9A697] px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] hover:border-[#2D2622]">Book as a customer <ArrowUpRight size={15} /></Link>
+    <main className="corporate-stays-page bg-[#F8F6F2] text-[#2D2622]">
+      <section className="bg-[#F7F4F1] py-20 lg:py-32">
+        <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
+          <div className="grid gap-16 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-6 flex flex-col items-start justify-center">
+              <span className="font-marcellus italic text-xl md:text-2xl text-stone-800 mb-6 tracking-wide flex items-center gap-2"><MapPin size={18} /> Corporate accommodation · Pakenham</span>
+              <ScrollWipeText as="h1" className="display-font mb-8 max-w-[12ch] text-[clamp(3.4rem,6vw,6rem)] font-bold leading-[0.9] tracking-[-0.045em] text-stone-900">Room for the workday. Privacy after it.</ScrollWipeText>
+              <p className="text-lg md:text-xl font-medium text-stone-800 mb-6 leading-relaxed max-w-xl">Thoughtfully prepared private homes for project teams, contractors, relocating employees, and companies that need the comfort of home.</p>
+              <div className="mt-4 flex flex-wrap gap-4">
+                <Link href="#corporate-question" className="inline-block bg-[#2D2622] text-white rounded-none px-8 py-4 text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase hover:bg-stone-800 transition-colors shadow-lg">Ask about a corporate stay</Link>
+                <Link href="#corporate-booking" className="inline-block border border-stone-300 bg-transparent text-stone-900 rounded-none px-8 py-4 text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase hover:border-stone-900 transition-colors">Book as an existing customer</Link>
               </div>
             </div>
 
-            <div className="lg:col-span-7">
-              <div className="relative aspect-[1.2] overflow-hidden bg-[#E6DDD5]">
-                {properties[1]?.featuredImage ? <Image src={properties[1].featuredImage} alt="Serenity furnished house for corporate stays" fill priority sizes="(max-width: 1023px) 100vw, 58vw" className="object-cover" /> : null}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#191512]/65 via-transparent to-transparent" aria-hidden="true" />
-                <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4 text-white sm:bottom-7 sm:left-7 sm:right-7">
-                  <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[#E5D6C8]">A practical base</p><p className="mt-1 text-2xl font-semibold tracking-[-0.04em]">Three homes, side by side.</p></div>
-                  <span className="text-xs font-bold uppercase tracking-[0.16em]">Pakenham VIC</span>
+            <div className="lg:col-span-6 relative pt-12 lg:pt-0">
+              <div className="relative aspect-[4/5] w-full max-w-lg mx-auto lg:mr-auto lg:ml-4 overflow-hidden rounded-none bg-[#DED2CB] shadow-xl">
+                <Image src="/corp-1.png" alt="Serenity houses side by side in Pakenham" fill priority sizes="(max-width: 1023px) 100vw, 50vw" className="object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/5" aria-hidden="true" />
+                <div className="absolute inset-6 sm:inset-8 border border-white/60 pointer-events-none" aria-hidden="true" />
+                <div className="absolute bottom-6 sm:bottom-8 left-6 sm:left-8 right-6 sm:right-8 border-t border-white/70 pt-5 pb-6 px-1 sm:px-3 text-white text-left pointer-events-none">
+                  <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.25em]">Serenity Stays</p>
+                  <p className="mt-2 font-marcellus text-[1.65rem] sm:text-4xl leading-tight">Space to settle in.</p>
                 </div>
               </div>
-              <div className="mt-5 grid grid-cols-3 border-y border-[#DED5CD] py-4 text-xs font-bold uppercase tracking-[0.13em] text-[#85644E]">
-                <span>3 homes</span><span>Up to 21 guests</span><span>Whole-house stays</span>
+              <div className="absolute -bottom-8 -right-2 sm:-right-4 lg:-bottom-12 lg:-right-6 z-10 w-[min(18rem,75%)] bg-white p-3 shadow-2xl">
+                <div className="relative aspect-square overflow-hidden bg-[#DED2CB]">
+                  <Image src="/corp-2.png" alt="Furnished kitchen and living area inside a Serenity house" fill sizes="(max-width: 639px) 75vw, 18rem" className="object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" aria-hidden="true" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5 text-white pointer-events-none">
+                    <p className="font-marcellus text-xl sm:text-[1.35rem] leading-[1.25]">Private homes, thoughtfully prepared.</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-b border-[#DED5CD] bg-[#EEE8E1]">
-        <div className="container max-w-[92rem] px-5 py-14 sm:px-8 sm:py-20 lg:px-12">
-          <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
-            <div className="lg:col-span-5">
-              <p className="eyebrow text-[#85644E]">Why Serenity</p>
-              <ScrollWipeText as="h2" className="mt-3 max-w-xl text-4xl font-semibold leading-[0.95] tracking-[-0.06em] sm:text-6xl" revealClassName="text-[#2D2622]">A simpler way to house a team.</ScrollWipeText>
+      <section className="bg-white py-16 sm:py-24 border-b border-stone-200">
+        <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
+          <div className="grid gap-12 lg:grid-cols-4">
+            <div className="lg:col-span-1 border-b border-stone-200 lg:border-none pb-6 lg:pb-0">
+              <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-stone-500 block mb-3">Why Serenity</span>
+              <ScrollWipeText as="h2" className="display-font text-3xl sm:text-4xl leading-tight font-bold text-stone-900">A simpler way to house a team.</ScrollWipeText>
             </div>
-            <div className="grid gap-8 sm:grid-cols-3 lg:col-span-7">
+            <div className="lg:col-span-3 grid gap-10 sm:grid-cols-3">
               {[
-                [Home, "Private homes", "Whole-house privacy, living areas, kitchens, and enclosed yards."],
+                [Home, "Private homes", "Whole-house privacy, living areas, furnished kitchens, and enclosed yards for space to decompress."],
                 [Users, "Keep teams close", "Book adjacent houses so everyone stays nearby without sharing one crowded space."],
-                [Receipt, "Company-ready", "Direct pricing, tax invoices, ABN billing, and purchase order support."],
+                [Receipt, "Company-ready", "Direct pricing, tax invoices, ABN billing, and purchase order support for easy administration."],
               ].map(([Icon, title, description]) => (
-                <article key={title as string} className="border-t border-[#B9A697] pt-4">
-                  <Icon size={21} className="text-[#85644E]" />
-                  <h3 className="mt-5 text-lg font-semibold tracking-[-0.03em]">{title as string}</h3>
-                  <p className="mt-2 text-sm leading-6 text-[#685B53]">{description as string}</p>
+                <article key={title as string} className="flex flex-col">
+                  <div className="mb-5 inline-flex h-12 w-12 items-center justify-center bg-[#F7F4F1] rounded-none border border-stone-200">
+                    <Icon size={20} className="text-[#85644E]" />
+                  </div>
+                  <h3 className="font-marcellus text-xl text-stone-900 mb-3">{title as string}</h3>
+                  <p className="text-sm leading-relaxed text-stone-600">{description as string}</p>
                 </article>
               ))}
             </div>
@@ -302,33 +311,22 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
         </div>
       </section>
 
-      <section id="corporate-enquiry" className="border-y border-[#DED5CD] bg-[#EEE8E1]">
-        <div className="container max-w-[92rem] px-5 py-14 sm:px-8 sm:py-20 lg:px-12">
-          <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
-            <div className="lg:col-span-4">
-              <p className="eyebrow text-[#85644E]">Corporate support</p>
-              <ScrollWipeText as="h2" className="mt-3 text-4xl font-semibold leading-[0.95] tracking-[-0.06em] sm:text-6xl" revealClassName="text-[#2D2622]">Ask first or book directly.</ScrollWipeText>
-              <p className="mt-6 max-w-sm text-sm leading-6 text-[#685B53]">Choose the short enquiry when you only have a question. Existing corporate customers can use the separate booking form with their customer ID.</p>
-              <div className="mt-8 space-y-3 text-sm text-[#685B53]">
-                <p className="flex items-center gap-2"><CalendarCheck size={16} className="text-[#85644E]" /> Weekly and monthly stays welcome</p>
-                <p className="flex items-center gap-2"><ShieldCheck size={16} className="text-[#85644E]" /> Exact details confirmed before arrival</p>
-                <p className="flex items-center gap-2"><Car size={16} className="text-[#85644E]" /> Parking for team vehicles</p>
-              </div>
-              <div className="mt-24 border-t border-[#CDBEB2] pt-6">
-                <p className="eyebrow text-[#85644E]">Already a customer?</p>
-                <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Book with your customer ID.</h3>
-                <p className="mt-3 max-w-sm text-sm leading-6 text-[#685B53]">Use the separate booking form beside this message when your company already has a Serenity corporate customer ID.</p>
-                <Link href="#corporate-booking" className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] underline decoration-[#B9A697] underline-offset-4">Go to booking form <ArrowUpRight size={15} /></Link>
-              </div>
+      <section id="corporate-question" className="bg-[#F7F4F1] py-20 sm:py-28">
+        <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
+          <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+            <div className="lg:col-span-5 flex flex-col justify-center">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#85644E] block mb-4">Enquiry</span>
+              <ScrollWipeText as="h2" className="display-font text-4xl sm:text-5xl font-bold text-stone-900 mb-6">Ask about a corporate stay.</ScrollWipeText>
+              <p className="text-base text-stone-600 leading-relaxed max-w-md mb-8">Use this short enquiry form for rates, invoices, longer stays, team arrangements, or anything you want to clarify before booking.</p>
+              <ul className="space-y-4 text-sm text-stone-600">
+                <li className="flex items-start gap-3"><CalendarCheck size={18} className="text-[#85644E] shrink-0 mt-0.5" /> Weekly and monthly stays welcome</li>
+                <li className="flex items-start gap-3"><ShieldCheck size={18} className="text-[#85644E] shrink-0 mt-0.5" /> Exact details confirmed before arrival</li>
+                <li className="flex items-start gap-3"><Car size={18} className="text-[#85644E] shrink-0 mt-0.5" /> Parking for team vehicles</li>
+              </ul>
             </div>
-
-            <div className="space-y-10 lg:col-span-8 lg:space-y-12">
-              <section id="corporate-question" className="border border-[#DED5CD] bg-[#FCFBF9] p-5 sm:p-8 lg:p-10">
-                <div className="border-b border-[#E5DDD6] pb-5">
-                  <p className="eyebrow text-[#85644E]">Have a question?</p>
-                  <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Ask about a corporate stay.</h3>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-[#685B53]">Use this short enquiry form for rates, invoices, longer stays, team arrangements, or anything you want to clarify before booking.</p>
-                </div>
+            
+            <div className="lg:col-span-7">
+              <div className="bg-white p-6 sm:p-10 border border-stone-200 shadow-sm">
                 {enquirySubmitted ? (
                   <div className="py-10 text-center">
                     <div className="mx-auto flex h-12 w-12 items-center justify-center bg-[#2D2622] text-white"><CheckCircle2 size={24} /></div>
@@ -347,17 +345,26 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                     </div>
                     <TextArea id="corp-enquiry-question" label="Your question *" required value={enquiryData.question} onChange={(event) => setEnquiryData({ ...enquiryData, question: event.target.value })} placeholder="What would you like to know about a corporate stay?" rows={4} />
                     {enquiryError && <p className="border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700" role="alert" aria-live="polite">{enquiryError}</p>}
-                    <button type="submit" className="inline-flex w-full items-center justify-center gap-2 border border-[#2D2622] bg-white px-5 py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-[#2D2622] hover:bg-[#EEE8E1] disabled:cursor-not-allowed disabled:opacity-60" disabled={enquirySubmitting}>{enquirySubmitting ? "Sending question…" : "Send corporate question"}<ArrowUpRight size={15} /></button>
+                    <button type="submit" className="inline-flex w-full items-center justify-center gap-2 bg-[#2D2622] text-white px-6 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] rounded-none hover:bg-stone-800 transition-colors disabled:cursor-not-allowed disabled:opacity-60" disabled={enquirySubmitting}>{enquirySubmitting ? "Sending question…" : "Send corporate question"}<ArrowUpRight size={15} /></button>
                   </form>
                 )}
-              </section>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-              <section id="corporate-booking" className="border border-[#DED5CD] bg-[#FCFBF9] p-5 sm:p-8 lg:p-10">
-                <div className="border-b border-[#E5DDD6] pb-5">
-                  <p className="eyebrow text-[#85644E]">Existing corporate customers</p>
-                  <h3 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">Book a corporate stay.</h3>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-[#685B53]">Use this booking form if Serenity has already issued your company a corporate customer ID.</p>
-                </div>
+      <section id="corporate-booking" className="bg-[#EEE8E1] py-20 sm:py-28 border-y border-[#DED5CD]">
+        <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
+          <div className="grid gap-12 lg:grid-cols-12 lg:gap-16 items-start">
+            <div className="lg:col-span-4 lg:sticky lg:top-32">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#85644E] block mb-4">Existing Customers</span>
+              <ScrollWipeText as="h2" className="display-font text-4xl sm:text-5xl font-bold text-stone-900 mb-6">Book with your customer ID.</ScrollWipeText>
+              <p className="text-base text-stone-600 leading-relaxed mb-6 max-w-md">Use this booking form to secure your stay dates instantly if Serenity has already issued your company a corporate customer ID.</p>
+            </div>
+            
+            <div className="lg:col-span-8">
+              <div className="bg-[#FCFBF9] p-6 sm:p-10 border border-[#DED5CD] shadow-sm">
               {formSubmitted ? (
                   <div className="flex min-h-[30rem] flex-col items-center justify-center text-center">
                     <div className="flex h-14 w-14 items-center justify-center rounded-none bg-[#2D2622] text-white"><CheckCircle2 size={27} /></div>
@@ -367,38 +374,44 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                   <button type="button" className="mt-7 border border-[#2D2622] px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] hover:bg-[#2D2622] hover:text-white" onClick={() => { setFormSubmitted(false); setSubmissionKey(""); setSubmittedReference(""); }}>Book another stay</button>
                 </div>
               ) : (
-                <form onSubmit={handleBookingSubmit} className="mt-6 space-y-7">
-                  <div className="border border-[#B9A697] bg-[#EEE8E1] p-4">
-                    <FormInput id="corp-customer-id" label="Corporate customer ID *" required maxLength={80} value={formData.customerId} onChange={(event) => setFormData({ ...formData, customerId: event.target.value.toUpperCase() })} placeholder="Enter the ID issued by Serenity" />
-                    <p className="mt-2 text-xs leading-5 text-[#685B53]">This ID is required for existing corporate customers and is stored with the reservation.</p>
+                <form onSubmit={handleBookingSubmit} className="mt-8 space-y-8">
+                  <div className="space-y-5">
+                    <h4 className="font-marcellus text-xl text-stone-900 border-b border-stone-200 pb-3">1. Company Details</h4>
+                    <div className="bg-[#F7F4F1] p-5 border border-stone-200">
+                      <FormInput id="corp-customer-id" label="Corporate customer ID *" required maxLength={80} value={formData.customerId} onChange={(event) => setFormData({ ...formData, customerId: event.target.value.toUpperCase() })} placeholder="Enter the ID issued by Serenity" />
+                      <p className="mt-2 text-xs leading-5 text-stone-600">This ID is required for existing corporate customers and is stored with the reservation.</p>
+                    </div>
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <FormInput id="corp-company-name" label="Company name *" required value={formData.companyName} onChange={(event) => setFormData({ ...formData, companyName: event.target.value })} placeholder="e.g. Cardinia Infrastructure Group" />
+                      <FormInput id="corp-contact-name" label="Contact name *" required value={formData.contactName} onChange={(event) => setFormData({ ...formData, contactName: event.target.value })} placeholder="Full name" />
+                      <FormInput id="corp-email" label="Business email *" type="email" required value={formData.email} onChange={(event) => setFormData({ ...formData, email: event.target.value })} placeholder="corporate@company.com.au" />
+                      <FormInput id="corp-phone" label="Phone number *" type="tel" required value={formData.phone} onChange={(event) => setFormData({ ...formData, phone: event.target.value })} placeholder="+61 400 000 000" />
+                    </div>
                   </div>
 
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <FormInput id="corp-company-name" label="Company name *" required value={formData.companyName} onChange={(event) => setFormData({ ...formData, companyName: event.target.value })} placeholder="e.g. Cardinia Infrastructure Group" />
-                    <FormInput id="corp-contact-name" label="Contact name *" required value={formData.contactName} onChange={(event) => setFormData({ ...formData, contactName: event.target.value })} placeholder="Full name" />
-                    <FormInput id="corp-email" label="Business email *" type="email" required value={formData.email} onChange={(event) => setFormData({ ...formData, email: event.target.value })} placeholder="corporate@company.com.au" />
-                    <FormInput id="corp-phone" label="Phone number *" type="tel" required value={formData.phone} onChange={(event) => setFormData({ ...formData, phone: event.target.value })} placeholder="+61 400 000 000" />
-                    <div ref={corporateDatePickerRef} className={`relative sm:col-span-2 ${calendarOpen ? "z-30" : "z-0"}`}>
+                  <div className="space-y-5 pt-4">
+                    <h4 className="font-marcellus text-xl text-stone-900 border-b border-stone-200 pb-3">2. Stay Dates & Team</h4>
+                    <div ref={corporateDatePickerRef} className={`relative ${calendarOpen ? "z-30" : "z-0"}`}>
                       <div className="grid gap-5 sm:grid-cols-2">
                         <button
                           type="button"
-                          className={`field min-h-[4.55rem] text-left ${calendarOpen ? "border-[#7A4E2D] bg-[#F8F6F2] shadow-[inset_0_0_0_2px_rgba(122,78,45,0.18)]" : "hover:border-[#7A4E2D]"}`}
+                          className={`field min-h-[4.55rem] text-left ${calendarOpen ? "border-stone-900 bg-white ring-1 ring-stone-900" : "bg-white hover:border-stone-400"}`}
                           onClick={() => setCalendarOpen(true)}
                           aria-expanded={calendarOpen}
                           aria-controls="corporate-date-calendar"
                         >
-                          <span className="flex items-center gap-1.5 text-[0.7rem] font-bold uppercase text-stone-500"><CalendarCheck size={14} /> Expected arrival *</span>
-                          <strong className="mt-1 block text-sm font-semibold text-stone-900">{formData.arrival ? formatDateAu(formData.arrival) : "Add date"}</strong>
+                          <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-stone-500"><CalendarCheck size={14} /> Expected arrival *</span>
+                          <strong className="mt-1.5 block text-sm font-semibold text-stone-900">{formData.arrival ? formatDateAu(formData.arrival) : "Add date"}</strong>
                         </button>
                         <button
                           type="button"
-                          className={`field min-h-[4.55rem] text-left ${calendarOpen ? "border-[#7A4E2D] bg-[#F8F6F2] shadow-[inset_0_0_0_2px_rgba(122,78,45,0.18)]" : "hover:border-[#7A4E2D]"}`}
+                          className={`field min-h-[4.55rem] text-left ${calendarOpen ? "border-stone-900 bg-white ring-1 ring-stone-900" : "bg-white hover:border-stone-400"}`}
                           onClick={() => setCalendarOpen(true)}
                           aria-expanded={calendarOpen}
                           aria-controls="corporate-date-calendar"
                         >
-                          <span className="flex items-center gap-1.5 text-[0.7rem] font-bold uppercase text-stone-500"><CalendarCheck size={14} /> Expected departure *</span>
-                          <strong className="mt-1 block text-sm font-semibold text-stone-900">{formData.departure ? formatDateAu(formData.departure) : "Add date"}</strong>
+                          <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-stone-500"><CalendarCheck size={14} /> Expected departure *</span>
+                          <strong className="mt-1.5 block text-sm font-semibold text-stone-900">{formData.departure ? formatDateAu(formData.departure) : "Add date"}</strong>
                         </button>
                       </div>
 
@@ -445,63 +458,139 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                         </div>
                       )}
                     </div>
-                    <div><label className="label mb-1.5 block text-xs font-bold text-stone-900" htmlFor="corp-guests">Guests / employees *</label><select id="corp-guests" className="field bg-white text-sm font-medium" value={formData.guests} onChange={(event) => setFormData({ ...formData, guests: event.target.value })}><option value="1-3">1 - 3 guests</option><option value="4-7">4 - 7 guests</option><option value="8-14">8 - 14 guests</option><option value="15-21">15 - 21 guests</option></select></div>
-                    <div><label className="label mb-1.5 block text-xs font-bold text-stone-900" htmlFor="corp-houses">Houses needed *</label><select id="corp-houses" className="field bg-white text-sm font-medium" value={formData.housesNeeded} onChange={(event) => updateHouseCount(event.target.value)}><option value="1">1 house</option><option value="2">2 houses beside each other</option><option value="3">All 3 houses beside each other</option></select></div>
-                    <div><label className="label mb-1.5 block text-xs font-bold text-stone-900" htmlFor="corp-purpose">Stay purpose</label><select id="corp-purpose" className="field bg-white text-sm font-medium" value={formData.purpose} onChange={(event) => setFormData({ ...formData, purpose: event.target.value })}><option>Contractor project crew</option><option>Employee relocation</option><option>Business travel</option><option>Training or event</option><option>Other</option></select></div>
-                    <FormInput id="corp-abn" label="ABN (optional)" value={formData.abn} onChange={(event) => setFormData({ ...formData, abn: event.target.value })} placeholder="12 345 678 901" />
-                    <FormInput id="corp-po" label="Purchase order (optional)" value={formData.purchaseOrder} onChange={(event) => setFormData({ ...formData, purchaseOrder: event.target.value })} placeholder="PO or cost centre" />
+                    
+                    <div className="grid gap-5 sm:grid-cols-3">
+                      <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-stone-700" htmlFor="corp-guests">Guests / employees *</label><select id="corp-guests" className="field bg-white text-sm font-medium" value={formData.guests} onChange={(event) => setFormData({ ...formData, guests: event.target.value })}><option value="1-3">1 - 3 guests</option><option value="4-7">4 - 7 guests</option><option value="8-14">8 - 14 guests</option><option value="15-21">15 - 21 guests</option></select></div>
+                      <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-stone-700" htmlFor="corp-houses">Houses needed *</label><select id="corp-houses" className="field bg-white text-sm font-medium" value={formData.housesNeeded} onChange={(event) => updateHouseCount(event.target.value)}><option value="1">1 house</option><option value="2">2 houses beside each other</option><option value="3">All 3 houses beside each other</option></select></div>
+                      <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-stone-700" htmlFor="corp-purpose">Stay purpose</label><select id="corp-purpose" className="field bg-white text-sm font-medium" value={formData.purpose} onChange={(event) => setFormData({ ...formData, purpose: event.target.value })}><option>Contractor project crew</option><option>Employee relocation</option><option>Business travel</option><option>Training or event</option><option>Other</option></select></div>
+                    </div>
                   </div>
 
-                  <div className="border-t border-[#E5DDD6] pt-6">
-                    <div className="flex items-end justify-between gap-4"><div><p className="text-sm font-bold">Select adjacent houses *</p><p className="mt-1 text-xs text-[#685B53]">The house count updates automatically.</p></div><span className="text-xs font-bold uppercase tracking-[0.14em] text-[#85644E]">{selectedProperties.length} selected</span></div>
-                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <div className="space-y-5 pt-4">
+                    <div className="flex items-end justify-between gap-4 border-b border-stone-200 pb-3">
+                      <h4 className="font-marcellus text-xl text-stone-900">3. Select Adjacent Houses</h4>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#85644E]">{selectedProperties.length} selected</span>
+                    </div>
+                    <p className="text-sm text-stone-600">The required house count updates automatically as you select properties.</p>
+                    <div className="grid gap-4 sm:grid-cols-3 mt-4">
                       {properties.map((property) => {
                         const checked = formData.propertySlugs.includes(property.slug);
                         const state = availability[property.slug];
                         const unavailable = selectedDates.length > 0 && state === "unavailable";
                         const disabled = !checked && unavailable;
-                        return <label key={property.slug} className={`flex items-center justify-between gap-3 border p-3 text-sm font-semibold transition-colors ${disabled ? "cursor-not-allowed border-[#DED5CD] bg-[#E8E2DD] text-stone-400" : checked ? "cursor-pointer border-[#2D2622] bg-[#EEE8E1]" : "cursor-pointer border-[#DED5CD] bg-white hover:border-[#8B6A54]"}`}><span className="flex items-center gap-2"><input type="checkbox" checked={checked} disabled={disabled} onChange={(event) => updateHouseSelection(property.slug, event.target.checked)} className="h-4 w-4 accent-[#2D2622]" /><span>{property.name.replace(" - Whole", "")}</span></span>{selectedDates.length > 0 && <span className={`text-[10px] uppercase tracking-[0.12em] ${state === "available" ? "text-emerald-700" : state === "unavailable" ? "text-red-700" : "text-stone-500"}`}>{state === "available" ? "Available" : state === "unavailable" ? "Unavailable" : state === "error" ? "Retry" : "Checking"}</span>}</label>;
+                        return (
+                          <label key={property.slug} className={`relative flex flex-col overflow-hidden border transition-all ${disabled ? "cursor-not-allowed border-stone-200 bg-stone-50 opacity-60" : checked ? "cursor-pointer border-stone-900 shadow-md ring-1 ring-stone-900" : "cursor-pointer border-stone-300 bg-white hover:border-stone-400"}`}>
+                            <div className="relative aspect-[4/3] w-full bg-stone-200">
+                              {property.featuredImage && <Image src={property.featuredImage} alt={property.name} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" />}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" aria-hidden="true" />
+                              <div className="absolute top-3 left-3 bg-white p-1 shadow-sm">
+                                <input type="checkbox" checked={checked} disabled={disabled} onChange={(event) => updateHouseSelection(property.slug, event.target.checked)} className="h-4 w-4 accent-stone-900 block" />
+                              </div>
+                            </div>
+                            <div className="p-4 bg-white flex flex-col flex-1">
+                              <span className="font-bold text-sm text-stone-900">{property.name.replace(" - Whole", "")}</span>
+                              <span className="text-xs text-stone-500 mt-1">Beside other houses</span>
+                              {selectedDates.length > 0 && (
+                                <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between">
+                                  <span className={`text-[10px] uppercase tracking-[0.15em] font-bold ${state === "available" ? "text-emerald-700" : state === "unavailable" ? "text-red-700" : "text-stone-500"}`}>{state === "available" ? "Available" : state === "unavailable" ? "Unavailable" : state === "error" ? "Retry" : "Checking..."}</span>
+                                </div>
+                              )}
+                            </div>
+                          </label>
+                        );
                       })}
                     </div>
-                    {selectedDates.length > 0 && <div className={`mt-4 border p-3 text-xs font-semibold ${allSelectedAvailable ? "border-emerald-300 bg-emerald-50 text-emerald-800" : availabilityReady ? "border-red-200 bg-red-50 text-red-700" : "border-[#D8CCC4] bg-white text-[#685B53]"}`} aria-live="polite">{allSelectedAvailable ? "All selected houses are available in the shared Serenity calendar." : availabilityReady ? "At least one selected house is unavailable. Choose another house or date range." : "Checking bookings, manual blocks, and connected calendars…"}</div>}
-                    {corporateNights > 0 && selectedProperties.length > 0 && <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border border-[#D7C9BC] bg-[#F4EEE8] p-4"><div><p className="text-sm font-bold">Indicative estimate</p><p className="mt-1 text-xs text-[#685B53]">{selectedProperties.length} house{selectedProperties.length === 1 ? "" : "s"} · {corporateNights} night{corporateNights === 1 ? "" : "s"}</p></div><p className="text-xl font-semibold text-[#85644E]">{formatAud(estimatedCorporateTotal)} AUD</p></div>}
+                    {selectedDates.length > 0 && <div className={`mt-4 p-4 text-sm font-medium ${allSelectedAvailable ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : availabilityReady ? "bg-red-50 text-red-800 border border-red-200" : "bg-stone-50 text-stone-600 border border-stone-200"}`} aria-live="polite">{allSelectedAvailable ? "All selected houses are available in the shared Serenity calendar." : availabilityReady ? "At least one selected house is unavailable. Choose another house or date range." : "Checking bookings, manual blocks, and connected calendars…"}</div>}
+                    
+                    {corporateNights > 0 && selectedProperties.length > 0 && (
+                      <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border border-stone-300 bg-[#F7F4F1] p-6 shadow-sm">
+                        <div>
+                          <p className="font-marcellus text-lg text-stone-900">Indicative estimate</p>
+                          <p className="mt-1 text-sm text-stone-600">{selectedProperties.length} house{selectedProperties.length === 1 ? "" : "s"} · {corporateNights} night{corporateNights === 1 ? "" : "s"}</p>
+                        </div>
+                        <p className="text-2xl sm:text-3xl font-bold text-stone-900">{formatAud(estimatedCorporateTotal)} AUD</p>
+                      </div>
+                    )}
                   </div>
 
-                  <label className="flex items-start gap-3 border border-[#DED5CD] bg-white p-4 text-sm font-semibold"><input type="checkbox" checked={formData.invoiceRequested} onChange={(event) => setFormData({ ...formData, invoiceRequested: event.target.checked })} className="mt-0.5 h-4 w-4 accent-[#2D2622]" /><span>Request a GST tax invoice with ABN and purchase order details.</span></label>
-                  <TextArea id="corp-notes" label="Notes or requirements" value={formData.notes} onChange={(event) => setFormData({ ...formData, notes: event.target.value })} placeholder="Tell us about roster flexibility, parking, billing, or anything else your team needs..." rows={4} />
-                  {formError && <p className="border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700" role="alert" aria-live="polite">{formError}</p>}
-                  <button type="submit" className="inline-flex w-full items-center justify-center gap-2 bg-[#2D2622] px-5 py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-white hover:bg-[#85644E] disabled:cursor-not-allowed disabled:opacity-60" disabled={formSubmitting || !allSelectedAvailable || !directBookingEnabled}>
-                    {formSubmitting ? "Reserving…" : directBookingEnabled ? "Book corporate stay" : "Enquiry required"}<ArrowUpRight size={15} />
-                  </button>
-                  {!directBookingEnabled && selectedProperties.length > 0 && <p className="text-xs leading-5 text-[#685B53]">The selected house rules require review before confirmation. Use the separate corporate enquiry form above and the Serenity team can help.</p>}
+                  <div className="space-y-5 pt-4">
+                    <h4 className="font-marcellus text-xl text-stone-900 border-b border-stone-200 pb-3">4. Billing & Requirements</h4>
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <FormInput id="corp-abn" label="ABN (optional)" value={formData.abn} onChange={(event) => setFormData({ ...formData, abn: event.target.value })} placeholder="12 345 678 901" />
+                      <FormInput id="corp-po" label="Purchase order (optional)" value={formData.purchaseOrder} onChange={(event) => setFormData({ ...formData, purchaseOrder: event.target.value })} placeholder="PO or cost centre" />
+                    </div>
+                    <label className="flex items-start gap-3 border border-stone-200 bg-white p-5 text-sm font-medium cursor-pointer hover:bg-stone-50 transition-colors">
+                      <input type="checkbox" checked={formData.invoiceRequested} onChange={(event) => setFormData({ ...formData, invoiceRequested: event.target.checked })} className="mt-0.5 h-4 w-4 accent-stone-900" />
+                      <span>Request a GST tax invoice with ABN and purchase order details.</span>
+                    </label>
+                    <TextArea id="corp-notes" label="Notes or requirements" value={formData.notes} onChange={(event) => setFormData({ ...formData, notes: event.target.value })} placeholder="Tell us about roster flexibility, parking, billing, or anything else your team needs..." rows={4} />
+                  </div>
+
+                  <div className="pt-4 border-t border-stone-200">
+                    {formError && <p className="mb-5 border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-800" role="alert" aria-live="polite">{formError}</p>}
+                    <button type="submit" className="inline-flex w-full items-center justify-center gap-2 bg-[#2D2622] text-white px-6 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] rounded-none hover:bg-stone-800 transition-colors disabled:cursor-not-allowed disabled:opacity-60" disabled={formSubmitting || !allSelectedAvailable || !directBookingEnabled}>
+                      {formSubmitting ? "Reserving…" : directBookingEnabled ? "Book corporate stay" : "Enquiry required"}<ArrowUpRight size={15} />
+                    </button>
+                    {!directBookingEnabled && selectedProperties.length > 0 && <p className="mt-4 text-xs leading-relaxed text-stone-600">The selected house rules require review before confirmation. Use the separate corporate enquiry form above and the Serenity team can help.</p>}
+                  </div>
                 </form>
               )}
-              </section>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="container max-w-[92rem] px-5 py-14 sm:px-8 sm:py-20 lg:px-12">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-4"><p className="eyebrow text-[#85644E]">Good to know</p><ScrollWipeText as="h2" className="mt-3 text-4xl font-semibold leading-[0.95] tracking-[-0.06em] sm:text-6xl" revealClassName="text-[#2D2622]">Clear answers before arrival.</ScrollWipeText></div>
-          <div className="lg:col-span-8">
-            {corporateFaqs.map(([question, answer]) => <details key={question} className="group border-t border-[#DED5CD] py-5 last:border-b"><summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-base font-semibold tracking-[-0.02em] marker:hidden"><span>{question}</span><ChevronDown size={18} className="shrink-0 text-[#85644E] transition-transform group-open:rotate-180" /></summary><p className="max-w-2xl pr-8 pt-3 text-sm leading-6 text-[#685B53]">{answer}</p></details>)}
+      <section className="bg-white py-20 sm:py-28">
+        <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
+          <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+            <div className="lg:col-span-4">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-500 block mb-4">Before your stay</span>
+              <ScrollWipeText as="h2" className="display-font text-4xl sm:text-5xl font-bold text-stone-900">Clear answers before arrival.</ScrollWipeText>
+            </div>
+            <div className="lg:col-span-8">
+              <div className="border-t border-[#DED2CB]">
+                {corporateFaqs.map(([question, answer]) => (
+                  <details key={question} className="group border-b border-[#DED2CB] py-6">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-lg font-marcellus text-stone-900 marker:hidden">
+                      <span>{question}</span>
+                      <ChevronDown size={20} className="shrink-0 text-stone-400 transition-transform duration-300 group-open:rotate-180" />
+                    </summary>
+                    <p className="max-w-2xl pr-8 pt-4 text-sm leading-relaxed text-stone-600">{answer}</p>
+                  </details>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="border-y border-[#DED5CD] bg-[#EEE8E1]">
-        <div className="container max-w-[92rem] px-5 py-14 sm:px-8 sm:py-20 lg:px-12">
-          <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="eyebrow text-[#85644E]">The neighbourhood</p><h2 className="mt-2 text-3xl font-semibold tracking-[-0.05em] sm:text-5xl">A calm base in Pakenham.</h2></div><Link href="/location" className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] underline decoration-[#B9A697] underline-offset-4">Explore the location <ArrowUpRight size={15} /></Link></div>
-          <div className="h-[26rem] sm:h-[34rem]"><ApproximateMap borderless fullHeight title="Serenity houses area" /></div>
+      <section className="bg-[#F7F4F1] py-20 sm:py-28 border-y border-stone-200">
+        <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
+          <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#85644E] block mb-4">The setting</span>
+              <h2 className="display-font text-4xl sm:text-5xl font-bold text-stone-900">The comfort of home in Pakenham.</h2>
+            </div>
+            <Link href="/location" className="inline-flex items-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-stone-500 hover:text-stone-900 transition-colors border-b border-stone-300 hover:border-stone-900 pb-1">Discover the setting</Link>
+          </div>
+          <div className="h-[26rem] sm:h-[34rem] shadow-sm border border-stone-200"><ApproximateMap borderless fullHeight title="Serenity houses area" /></div>
         </div>
       </section>
 
-      <section className="bg-[#2D2622] text-[#F8F6F2]">
-        <div className="container max-w-[92rem] px-5 py-14 sm:px-8 sm:py-20 lg:flex lg:items-end lg:justify-between lg:gap-16 lg:px-12">
-          <div><p className="eyebrow text-[#CDBBAA]">Direct support</p><ScrollWipeText as="h2" tone="light" className="mt-3 max-w-3xl text-4xl font-semibold tracking-[-0.05em] sm:text-6xl" revealClassName="text-[#F8F6F2]">A better base for the people doing the work.</ScrollWipeText></div>
-          <div className="mt-8 max-w-sm lg:mt-0"><p className="text-sm leading-6 text-[#D7CCC4]">We're here to make company stays simple, from the first enquiry to the final invoice.</p><div className="mt-6 space-y-2 text-sm text-[#D7CCC4]"><p className="flex items-center gap-2"><Phone size={15} /> <a href={`tel:${contact.phoneNumber.replace(/[^+\d]/g, "")}`} className="hover:text-white">{contact.phoneNumber}</a></p><p className="flex items-center gap-2"><Mail size={15} /> <a href={`mailto:${contact.corporateEnquiryEmail}`} className="break-words hover:text-white">{contact.corporateEnquiryEmail}</a></p></div></div>
+      <section className="bg-white text-[#2D2622]">
+        <div className="container max-w-[92rem] px-5 py-20 sm:px-8 sm:py-28 lg:flex lg:items-end lg:justify-between lg:gap-16 lg:px-12">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#CDBBAA] block mb-6">Personalised guest support</span>
+            <ScrollWipeText as="h2" className="display-font max-w-3xl text-4xl sm:text-5xl lg:text-6xl leading-tight font-bold text-[#2D2622]">A comfortable home for the people doing the work.</ScrollWipeText>
+          </div>
+          <div className="mt-10 max-w-sm lg:mt-0">
+            <p className="text-base leading-relaxed text-[#6F5A4D]">We&apos;re here to make company stays simple, from the first enquiry to the final invoice.</p>
+            <div className="mt-8 space-y-4 text-sm font-medium tracking-wide text-[#2D2622]">
+              <p className="flex items-center gap-4"><Phone size={18} className="text-[#85644E]" /> <a href={`tel:${contact.phoneNumber.replace(/[^+\d]/g, "")}`} className="hover:text-[#85644E] transition-colors">{contact.phoneNumber}</a></p>
+              <p className="flex items-center gap-4"><Mail size={18} className="text-[#85644E]" /> <a href={`mailto:${contact.corporateEnquiryEmail}`} className="break-words hover:text-[#85644E] transition-colors">{contact.corporateEnquiryEmail}</a></p>
+            </div>
+          </div>
         </div>
       </section>
     </main>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Copy, Eye, Pencil, Plus, Save, X } from "lucide-react";
+import { Check, Copy, Eye, LoaderCircle, Pencil, Plus, Save, X } from "lucide-react";
 import type { PromotionRecord, PromotionStatus } from "@/src/lib/promotions";
 
 type AdminPromotion = PromotionRecord & { status: PromotionStatus; remaining_redemptions: number | null };
@@ -32,7 +32,7 @@ const emptyForm = (): PromotionForm => ({
   name: "", badge_text: "BOOK DIRECT", message: "Save on your stay with code", mobile_message: "Save with code", code: "",
   discount_type: "percentage", discount_value: "5", starts_at: "", ends_at: "", max_redemptions: "",
   minimum_booking_amount: "0", minimum_nights: "0", applicable_property_ids: [], applies_to_corporate: false,
-  stackable: false, restore_on_refund: false, active: false, published: false, header_visible: true,
+  stackable: false, restore_on_refund: false, active: true, published: true, header_visible: true,
 });
 
 const toInputDate = (value: string | null) => {
@@ -61,6 +61,7 @@ export default function AdminPromotions({ properties }: { properties: PropertyOp
   const [editingId, setEditingId] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [busyId, setBusyId] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [preview, setPreview] = useState<AdminPromotion | null>(null);
@@ -122,7 +123,7 @@ export default function AdminPromotions({ properties }: { properties: PropertyOp
   };
 
   const toggle = async (promotion: AdminPromotion) => {
-    setError(""); setMessage("");
+    setError(""); setMessage(""); setBusyId(promotion.id);
     try {
       const response = await fetch("/api/admin/promotions/" + promotion.id, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active: !promotion.active }) });
       const data = await response.json();
@@ -130,18 +131,20 @@ export default function AdminPromotions({ properties }: { properties: PropertyOp
       setMessage(promotion.active ? "Promotion disabled." : "Promotion activated.");
       await load();
     } catch (toggleError) { setError(toggleError instanceof Error ? toggleError.message : "Could not update promotion status."); }
+    finally { setBusyId(""); }
   };
 
   const propertyNames = useMemo(() => new Map(properties.map((property) => [property.id, property.name])), [properties]);
 
   return (
     <div className="grid gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <header className="admin-page-header flex flex-wrap items-start justify-between gap-4">
         <div><p className="admin-section-kicker">Revenue and offers</p><h2 className="mt-1 text-2xl font-extrabold">Promotions</h2><p className="mt-1 max-w-3xl text-sm text-stone-600">Create voucher campaigns with clear dates, limits, house rules, and safe Stripe redemption tracking. Currency is AUD and dates use Australia/Melbourne.</p></div>
         <button type="button" className="btn-primary inline-flex items-center gap-2" onClick={reset}><Plus size={16} /> New promotion</button>
-      </div>
+      </header>
       {message && <div className="admin-notice is-success" role="status"><Check size={17} />{message}</div>}
       {error && <div className="admin-notice is-error" role="alert"><X size={17} />{error}</div>}
+      {busyId && <div className="admin-notice" role="status"><LoaderCircle size={17} className="animate-spin" aria-hidden="true" />Updating promotion status…</div>}
 
       <form onSubmit={save} className="card grid gap-5 bg-white p-5 sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#EAE1DD] pb-4"><div><p className="admin-section-kicker">{editingId ? "Edit promotion" : "New promotion"}</p><h3 className="mt-1 text-lg font-extrabold">{editingId ? "Update campaign details" : "Build a voucher campaign"}</h3></div>{editingId && <button type="button" className="btn-outline-dark text-sm" onClick={reset}>Clear form</button>}</div>
@@ -171,7 +174,7 @@ export default function AdminPromotions({ properties }: { properties: PropertyOp
         <div className="flex flex-wrap gap-3 border-t border-[#EAE1DD] pt-5"><button type="submit" className="btn-primary inline-flex items-center gap-2" disabled={saving}><Save size={16} />{saving ? "Saving…" : editingId ? "Save promotion" : "Create promotion"}</button><p className="self-center text-xs text-stone-500">Successful redemption count is controlled by paid Stripe bookings.</p></div>
       </form>
 
-      {loading ? <div className="card bg-white p-8 text-sm text-stone-600">Loading promotions…</div> : <div className="grid gap-3">{promotions.length === 0 && <div className="card bg-white p-8 text-sm text-stone-600">No promotions yet. Create the first campaign above.</div>}{promotions.map((promotion) => <article key={promotion.id} className="card bg-white p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex flex-wrap items-center gap-2"><span className={"admin-promotion-status is-" + promotion.status}>{statusLabel[promotion.status]}</span><span className="font-mono text-sm font-black tracking-[0.12em]">{promotion.code}</span></div><h3 className="mt-2 text-lg font-extrabold">{promotion.name}</h3><p className="mt-1 text-sm text-stone-600">{promotion.message}</p></div><div className="flex flex-wrap gap-2"><button type="button" className="btn-outline-dark inline-flex items-center gap-2 text-sm" onClick={() => setPreview(preview?.id === promotion.id ? null : promotion)}><Eye size={15} /> Preview</button><button type="button" className="btn-secondary inline-flex items-center gap-2 text-sm" onClick={() => edit(promotion)}><Pencil size={15} /> Edit</button><button type="button" className="btn-secondary text-sm" onClick={() => void toggle(promotion)}>{promotion.active ? "Disable" : "Activate"}</button></div></div><div className="mt-4 grid gap-3 border-t border-stone-200 pt-4 text-sm sm:grid-cols-2 lg:grid-cols-4"><Metric label="Discount" value={promotion.discount_type === "percentage" ? promotion.discount_value + "%" : "AUD " + promotion.discount_value} /><Metric label="Redemptions" value={String(promotion.successful_redemptions) + (promotion.max_redemptions === null ? "" : " / " + promotion.max_redemptions)} /><Metric label="Remaining" value={promotion.remaining_redemptions === null ? "Unlimited" : String(promotion.remaining_redemptions)} /><Metric label="Window" value={dateLabel(promotion.starts_at) + " → " + dateLabel(promotion.ends_at)} /></div>{promotion.applicable_property_ids.length > 0 && <p className="mt-3 text-xs text-stone-500">Houses: {promotion.applicable_property_ids.map((id) => propertyNames.get(id) ?? id).join(", ")}</p>}{preview?.id === promotion.id && <div className="mt-4 border border-[#5A463A] bg-[#1C1917] p-4 text-sm text-white"><p className="font-black uppercase tracking-[0.12em] text-[#D8CCC4]">{promotion.badge_text}</p><div className="mt-2 flex flex-wrap items-center gap-3"><span>{promotion.message}</span><button type="button" className="inline-flex items-center gap-2 border border-[#A99B8E] px-3 py-1.5 font-mono text-xs font-bold hover:bg-white hover:text-[#1C1917]" onClick={() => void navigator.clipboard?.writeText(promotion.code)}><Copy size={13} />{promotion.code}</button></div></div>}</article>)}</div>}
+      {loading ? <div className="card admin-loading-state" role="status"><LoaderCircle size={18} className="animate-spin" aria-hidden="true" /><span>Loading promotions…</span></div> : <div className="grid gap-3">{promotions.length === 0 && <div className="card bg-white p-8 text-sm text-stone-600">No promotions yet. Create the first campaign above.</div>}{promotions.map((promotion) => <article key={promotion.id} className="card bg-white p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex flex-wrap items-center gap-2"><span className={"admin-promotion-status is-" + promotion.status}>{statusLabel[promotion.status]}</span><span className="font-mono text-sm font-black tracking-[0.12em]">{promotion.code}</span></div><h3 className="mt-2 text-lg font-extrabold">{promotion.name}</h3><p className="mt-1 text-sm text-stone-600">{promotion.message}</p></div><div className="flex flex-wrap gap-2"><button type="button" className="btn-outline-dark inline-flex items-center gap-2 text-sm" onClick={() => setPreview(preview?.id === promotion.id ? null : promotion)}><Eye size={15} /> Preview</button><button type="button" className="btn-secondary inline-flex items-center gap-2 text-sm" onClick={() => edit(promotion)}><Pencil size={15} /> Edit</button><button type="button" className="btn-secondary text-sm" onClick={() => void toggle(promotion)}>{promotion.active ? "Disable" : "Activate"}</button></div></div><div className="mt-4 grid gap-3 border-t border-stone-200 pt-4 text-sm sm:grid-cols-2 lg:grid-cols-4"><Metric label="Discount" value={promotion.discount_type === "percentage" ? promotion.discount_value + "%" : "AUD " + promotion.discount_value} /><Metric label="Redemptions" value={String(promotion.successful_redemptions) + (promotion.max_redemptions === null ? "" : " / " + promotion.max_redemptions)} /><Metric label="Remaining" value={promotion.remaining_redemptions === null ? "Unlimited" : String(promotion.remaining_redemptions)} /><Metric label="Window" value={dateLabel(promotion.starts_at) + " → " + dateLabel(promotion.ends_at)} /></div>{promotion.applicable_property_ids.length > 0 && <p className="mt-3 text-xs text-stone-500">Houses: {promotion.applicable_property_ids.map((id) => propertyNames.get(id) ?? id).join(", ")}</p>}{preview?.id === promotion.id && <div className="mt-4 border border-[#5A463A] bg-[#1C1917] p-4 text-sm text-white"><p className="font-black uppercase tracking-[0.12em] text-[#D8CCC4]">{promotion.badge_text}</p><div className="mt-2 flex flex-wrap items-center gap-3"><span>{promotion.message}</span><button type="button" className="inline-flex items-center gap-2 border border-[#A99B8E] px-3 py-1.5 font-mono text-xs font-bold hover:bg-white hover:text-[#1C1917]" onClick={() => void navigator.clipboard?.writeText(promotion.code)}><Copy size={13} />{promotion.code}</button></div></div>}</article>)}</div>}
     </div>
   );
 }

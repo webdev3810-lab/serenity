@@ -6,7 +6,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { ChevronDown, ChevronUp, Images, LoaderCircle, Plus, Save, Trash2, Upload } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronUp, Images, LoaderCircle, Plus, Save, Trash2, Upload } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/src/lib/supabase/client";
 
 type Row = Record<string, any>;
@@ -22,6 +22,8 @@ type PropertyPhotoManagerProps = {
   onSelectProperty?: (property: Row) => void;
   embedded?: boolean;
   showHeader?: boolean;
+  showPropertySelector?: boolean;
+  onBackToHouses?: () => void;
 };
 
 type CategoryDraft = {
@@ -58,6 +60,7 @@ const DEFAULT_CATEGORIES: Array<Pick<CategoryDraft, "category" | "category_label
 
 const isStagingCategory = (category: string) => category === DEFAULT_UPLOAD_CATEGORY;
 const categoryCountLabel = (category: string, count: number) => isStagingCategory(category) ? `${count} staged` : `${count}/${MAX_IMAGES_PER_HOUSE_CATEGORY}`;
+const categoriesWithOtherLast = <T extends { category: string }>(items: T[]) => [...items].sort((a, b) => Number(a.category === "other") - Number(b.category === "other"));
 
 const defaultCategories = (): CategoryDraft[] => DEFAULT_CATEGORIES.map((item, index) => ({
   ...item,
@@ -97,7 +100,7 @@ async function compressImage(file: File) {
   return { blob, width: canvas.width, height: canvas.height };
 }
 
-export default function PropertyPhotoManager({ properties, selectedId, setSelectedId, images, reload, notify, onError, onSelectProperty, embedded = false, showHeader = true }: PropertyPhotoManagerProps) {
+export default function PropertyPhotoManager({ properties, selectedId, setSelectedId, images, reload, notify, onError, onSelectProperty, embedded = false, showHeader = true, showPropertySelector = true, onBackToHouses }: PropertyPhotoManagerProps) {
   const supabase = useMemo(() => createSupabaseBrowserClient() as any, []);
   const [localImages, setLocalImages] = useState<Row[]>([]);
   const [categories, setCategories] = useState<CategoryDraft[]>(defaultCategories);
@@ -202,7 +205,7 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
       if (!existingSlugs.has("other") && !imageCategories.some((category) => category.category === "other")) {
         imageCategories.push({ category: "other", category_label: "Other", category_description: "", display_order: baseCategories.length + imageCategories.length, is_visible: true, no_photo_available: false });
       }
-      setCategories([...baseCategories, ...imageCategories].sort((a, b) => a.display_order - b.display_order));
+      setCategories(categoriesWithOtherLast([...baseCategories, ...imageCategories].sort((a, b) => a.display_order - b.display_order)));
     })();
     return () => { cancelled = true; };
   }, [imageKey, images, onError, selectedId, supabase]);
@@ -212,7 +215,7 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
   const coverId = sortedImages.find((image) => !isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY)) && image.is_cover === true)?.id
     ?? sortedImages.find((image) => !isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY)))?.id;
   const categoryBySlug = new Map(categories.map((category) => [category.category, category]));
-  const categoryOptions = [...categories].sort((a, b) => a.category_label.localeCompare(b.category_label, undefined, { sensitivity: "base" }));
+  const categoryOptions = categoriesWithOtherLast([...categories].sort((a, b) => a.category_label.localeCompare(b.category_label, undefined, { sensitivity: "base" })));
   const activeUploadCategory = categoryBySlug.has(uploadCategory) ? uploadCategory : DEFAULT_UPLOAD_CATEGORY;
   const imageCountByCategory = new Map<string, number>();
   localImages.forEach((image) => {
@@ -227,14 +230,14 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
       if (!groups.has(category)) groups.set(category, { category, label: String(image.category_label ?? category), images: [] });
       groups.get(category)?.images.push(image);
     });
-    return Array.from(groups.values()).filter((group) => group.images.length);
+    return categoriesWithOtherLast(Array.from(groups.values()).filter((group) => group.images.length));
   })();
 
   const propertyIds = Array.from(new Set([
     selectedId,
     ...properties.map((property) => String(property.id ?? "")).filter(Boolean),
   ]));
-  const categoryRowsFor = (categoryList: CategoryDraft[]) => propertyIds.flatMap((propertyId) => categoryList.map((category, index) => ({
+  const categoryRowsFor = (categoryList: CategoryDraft[]) => propertyIds.flatMap((propertyId) => categoriesWithOtherLast(categoryList).map((category, index) => ({
     property_id: propertyId,
     category: category.category,
     category_label: category.category_label,
@@ -280,7 +283,7 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
         const imageResult = await supabase.from("property_images").update({ category, category_label: nextCategory.category_label }).eq("id", categoryImage.id);
         if (imageResult.error) throw imageResult.error;
       }
-      setCategories(nextCategories);
+      setCategories(categoriesWithOtherLast(nextCategories));
       setSavedCategorySlugs((current) => current.includes(category) ? current : [...current, category]);
       if (categoryImage) {
         setLocalImages((current) => current.map((image) => image.id === categoryImage.id ? { ...image, category, category_label: nextCategory.category_label } : image));
@@ -551,10 +554,10 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
   };
 
   return <>
-    <div className={`mb-5 flex flex-wrap items-center gap-2 ${embedded ? "border-b border-[#EAE1DD] pb-4" : ""}`}>
+    {showPropertySelector ? <div className={`mb-5 flex flex-wrap items-center gap-2 ${embedded ? "border-b border-[#EAE1DD] pb-4" : ""}`}>
       {embedded && <span className="mr-1 text-xs font-bold uppercase tracking-[0.14em] text-[#8B6B55]">Select house</span>}
       {properties.map((property) => <button key={property.id} type="button" onClick={() => onSelectProperty ? onSelectProperty(property) : setSelectedId(property.id)} className={`rounded-none border px-4 py-2 text-sm font-bold ${selectedId === property.id ? "border-[#5A463A] bg-[#5A463A] text-white" : "border-[#D8CCC4] bg-white hover:bg-[#F7F4F1]"}`}>{property.name}</button>)}
-    </div>
+    </div> : onBackToHouses ? <div className="mb-5 border-b border-[#EAE1DD] pb-4"><button type="button" className="btn-outline-dark inline-flex min-h-10 items-center gap-2" onClick={onBackToHouses}><ChevronLeft size={16} /> Back to houses</button></div> : null}
     {!selectedId ? <div className="card bg-white p-8 text-center text-sm text-stone-600"><Images className="mx-auto mb-3 text-[#8B6B55]" /><p>Select a house to manage its photos.</p></div> : <section className="card bg-white p-5 sm:p-7">
       {showHeader ? <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#EAE1DD] pb-5">
         <div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#8B6B55]">Property gallery</p><h2 className="mt-1 text-2xl font-extrabold">{propertyName}</h2><p className="mt-2 max-w-2xl text-sm text-stone-600">Upload real house photos, choose their room, set a cover, and publish only the photos you want guests to see.</p></div>

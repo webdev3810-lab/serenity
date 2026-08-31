@@ -168,7 +168,7 @@ function HouseSelector({ properties, selectedSlug, photoMap, onSelect }: HouseSe
                   onFocus={() => setHoveredSlug(property.slug)}
                   onClick={() => { setHoveredSlug(null); onSelect(property.slug); }}
                 >
-                  <span className="gallery-project-row-number">({index + 1})</span>
+
                   <span className="gallery-project-row-name">{displayName(property.name)}</span>
                   <span className="gallery-project-row-location">Pakenham</span>
                   <span className="gallery-project-row-dot" aria-hidden="true" />
@@ -351,7 +351,7 @@ function HorizontalEditorialGallery({ eyebrow, title, description, photos, onOpe
                     <span className="gallery-horizontal-card-shade" />
                     <span className="gallery-horizontal-card-caption">
                       <span>{photo.categoryLabel}</span>
-                      <small>{String(index + 1).padStart(2, "0")} / {String(photos.length).padStart(2, "0")}</small>
+                      
                     </span>
                     <span className="gallery-horizontal-card-open"><Maximize2 size={16} aria-hidden="true" /></span>
                   </span>
@@ -366,7 +366,7 @@ function HorizontalEditorialGallery({ eyebrow, title, description, photos, onOpe
           <p>{photos.length > 1 ? "Scroll, drag or use the arrows to explore" : "One approved photo in this collection"}</p>
           <div className="gallery-horizontal-controls">
             <button type="button" onClick={() => goTo(Math.max(0, Math.round(cardPosition) - 1))} disabled={photos.length < 2 || cardPosition <= 0.1} aria-label="Previous gallery photo"><ChevronLeft size={18} /></button>
-            <span>{String(Math.min(photos.length, Math.round(cardPosition) + 1)).padStart(2, "0")} / {String(photos.length).padStart(2, "0")}</span>
+            <span></span>
             <button type="button" onClick={() => goTo(Math.min(photos.length - 1, Math.round(cardPosition) + 1))} disabled={photos.length < 2 || cardPosition >= photos.length - 1.1} aria-label="Next gallery photo"><ChevronRight size={18} /></button>
           </div>
         </div>
@@ -451,7 +451,7 @@ function PhotoGrid({ photos, onOpenPhoto }: PhotoGridProps) {
             <button key={photo.id} type="button" className="gallery-editorial-grid-card" onClick={() => onOpenPhoto(visiblePhotos, index)} aria-label={`Open ${photo.alt || "gallery photo"} in full screen`}>
               <span className="gallery-editorial-grid-image">
                 <Image src={photo.src} alt={photo.alt} fill loading="lazy" sizes="(max-width: 760px) 92vw, (max-width: 1100px) 46vw, 30vw" className="object-cover" />
-                <span className="gallery-editorial-grid-index">{String(index + 1).padStart(2, "0")}</span>
+
                 <span className="gallery-editorial-grid-open"><Maximize2 size={15} aria-hidden="true" /></span>
               </span>
               <span className="gallery-editorial-grid-copy"><strong>{photo.propertyName}</strong><span>{photo.categoryLabel}</span></span>
@@ -498,7 +498,7 @@ function Lightbox({ photos, index, onClose, onChange }: LightboxProps) {
   return (
     <div className="gallery-editorial-lightbox" role="dialog" aria-modal="true" aria-label={`${photo.propertyName} photo viewer`} onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <div className="gallery-editorial-lightbox-inner">
-        <div className="gallery-editorial-lightbox-top"><p>{photo.propertyName} <span aria-hidden="true">·</span> {photo.categoryLabel} <span aria-hidden="true">·</span> {index + 1} / {photos.length}</p><button type="button" onClick={onClose} aria-label="Close photo viewer"><X size={20} /></button></div>
+        <div className="gallery-editorial-lightbox-top"><p>{photo.propertyName} <span aria-hidden="true">·</span> {photo.categoryLabel}</p><button type="button" onClick={onClose} aria-label="Close photo viewer"><X size={20} /></button></div>
         <div className="gallery-editorial-lightbox-image"><Image src={photo.src} alt={photo.alt} fill sizes="100vw" priority className="object-contain" /></div>
         <div className="gallery-editorial-lightbox-bottom"><button type="button" onClick={previous} disabled={photos.length < 2}><ArrowLeft size={17} /> Previous</button><p>{photo.alt}</p><button type="button" onClick={next} disabled={photos.length < 2}>Next <ArrowRight size={17} /></button></div>
       </div>

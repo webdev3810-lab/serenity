@@ -40,7 +40,7 @@ export default function HomepageFeaturedHousesSection({
           <ScrollWipeText
             as="h2"
             aria-label={eyebrow || "Our Houses"}
-            className="display-font text-[clamp(4.5rem,8vw,9.5rem)] font-bold uppercase leading-[0.78] tracking-[-0.075em] text-[#1D1D1B] lg:text-right"
+            className="homepage-featured-heading display-font w-full max-w-full text-[clamp(4.5rem,8vw,9.5rem)] font-bold uppercase leading-[0.78] tracking-[0.015em] text-[#1D1D1B] lg:text-right"
           >
             OUR
             <br />

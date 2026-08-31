@@ -36,7 +36,7 @@ export function AppShell({ children, contactSettings, promoSettings }: { childre
         <PromoBanner settings={promoSettings} />
         <Header pathname={pathname} />
         <main className="min-h-screen bg-background">{children}</main>
-        <Footer />
+        <Footer pathname={pathname} />
       </BookingProvider>
     </ContactSettingsProvider>
   );
@@ -80,10 +80,13 @@ function Header({ pathname }: { pathname: string | null }) {
   return <PillNav logo="/LOGO.png" logoAlt="Serenity Stays" items={nav} activeHref={pathname ?? undefined} />;
 }
 
-function Footer() {
+function Footer({ pathname }: { pathname: string | null }) {
   const settings = useContactSettings();
   const contact = settings;
+  const isHousesPage = pathname === "/houses";
   const currentYear = new Date().getFullYear();
+  const isGalleryPage = pathname === "/gallery";
+  const isLocationPage = pathname === "/location";
   const phoneHref = contact?.phoneNumber ? `tel:${contact.phoneNumber.replace(/[^+\d]/g, "")}` : "#";
   const emailHref = contact?.contactEmail ? `mailto:${contact.contactEmail}` : "#";
   const whatsappDigits = contact?.whatsappNumber.replace(/\D/g, "") ?? "";
@@ -97,7 +100,6 @@ function Footer() {
   return (
     <footer className="site-footer site-footer-editorial">
       <div className="site-footer-shell site-footer-intro">
-        <p className="site-footer-kicker">Serenity Stays · Pakenham, Victoria</p>
         <div className="site-footer-intro-grid">
           <h2>
             Stay close.<br />
@@ -106,8 +108,8 @@ function Footer() {
           <div className="site-footer-intro-copy">
             <p>{contact?.footerText}</p>
             <div className="site-footer-actions">
-              <Link href="/houses" className="site-footer-action site-footer-action-primary">
-                View the houses <ArrowUpRight size={16} aria-hidden="true" />
+              <Link href={isHousesPage ? "/corporate-stays" : isGalleryPage ? "/location" : isLocationPage ? "/corporate-stays" : "/houses"} className="site-footer-action site-footer-action-primary">
+                {isHousesPage ? "Corporate stays" : isGalleryPage ? "View location" : isLocationPage ? "Corporate stays" : "View the houses"} <ArrowUpRight size={16} aria-hidden="true" />
               </Link>
               <Link href="/contact" className="site-footer-action site-footer-action-secondary">
                 Ask a question <ArrowUpRight size={16} aria-hidden="true" />

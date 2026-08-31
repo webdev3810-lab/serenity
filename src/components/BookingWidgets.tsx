@@ -43,7 +43,7 @@ export function GuestSelector({ value, onChange, maxGuests = 12, embedded = fals
           </span>
         </div>
       ))}
-      {capacityReached && <p className="mt-2 text-xs font-semibold text-amber-800">Maximum guest capacity reached for this house.</p>}
+      {capacityReached && <p className="mt-2 text-xs font-semibold text-amber-800">Maximum guest capacity reached for this home.</p>}
     </div>
   );
 }
@@ -254,7 +254,7 @@ export function PropertyCard({ property }: { property: Property }) {
           </p>
         </div>
         <Link href={`/properties/${property.slug}`} className="btn-secondary text-xs px-4">
-          View House
+          View Home
         </Link>
       </div>
     </article>
@@ -613,7 +613,7 @@ export function BookingCard({ property, today, blockedDates = [], availabilityLo
       {reserveAttempted && (dateError || guestError) && <p className="mt-3 rounded-none border border-[#E7BDB4] bg-[#FFF6F3] p-3 text-sm font-semibold text-[#8A3325]" role="alert">{dateError || guestError}</p>}
 
       <button className="btn-primary mt-5 w-full justify-center text-base" disabled={Boolean(dateError || guestError || availabilityLoading)} onClick={reserve}>
-        Reserve House
+        Reserve Home
       </button>
 
       <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-stone-500">

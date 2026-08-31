@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { BedDouble, BriefcaseBusiness, CalendarDays, Car, ChevronLeft, ChevronRight, Dog, Images, KeyRound, ShieldCheck, X } from "lucide-react";
 import { ApproximateMap } from "@/src/components/ApproximateMap";
 import type { Property, PropertyImage } from "@/src/data/properties";
@@ -134,7 +135,7 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
             <p>Photo tour</p>
             <h2 id="photo-tour-title">{displayName}</h2>
           </div>
-          <p className="property-photo-tour-count"><strong>{String(images.length).padStart(2, "0")}</strong> photographs</p>
+          <p className="property-photo-tour-count"><strong>{images.length}</strong> photographs</p>
         </div>
       </header>
 
@@ -161,7 +162,7 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
           <section key={category.slug} id={`photo-tour-category-${category.slug}`} className="property-photo-tour-category" aria-labelledby={`photo-tour-category-title-${category.slug}`}>
             <header className="property-photo-tour-category-heading">
               <div className="property-photo-tour-category-name">
-                <span className="property-photo-tour-category-index">{String(categoryIndex + 1).padStart(2, "0")}</span>
+
                 <h4 id={`photo-tour-category-title-${category.slug}`}>{category.label}</h4>
               </div>
               <div className="property-photo-tour-category-copy">
@@ -186,7 +187,7 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
                     referrerPolicy={isRemotePreviewImage(image.src) ? "no-referrer" : undefined}
                     sizes={image.photoIndex === 0 ? "(max-width: 1024px) 100vw, 50vw" : "(max-width: 640px) 50vw, 25vw"}
                   />
-                  <span className="property-photo-tour-number">{String(image.photoIndex + 1).padStart(2, "0")}</span>
+
                   <span className="property-photo-tour-meta">
                     <span>{image.photoIndex === 0 ? "Featured view" : image.categoryLabel}</span>
                     <span>View larger</span>
@@ -204,7 +205,7 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
             <div className="property-photo-lightbox-header">
               <div>
                 <p>{displayName}</p>
-                <span>{activeImage.categoryLabel} · Photo {String(activeIndex + 1).padStart(2, "0")} / {String(photos.length).padStart(2, "0")}</span>
+                <span>{activeImage.categoryLabel}</span>
               </div>
               <button type="button" onClick={() => setLightboxOpen(false)} className="property-photo-lightbox-close" aria-label="Close enlarged photo">
                 Close <X size={17} aria-hidden="true" />
@@ -312,6 +313,11 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
       
       <div className="property-editorial-page">
         <div className="property-editorial-shell">
+          <Link href="/houses" className="property-editorial-back-link">
+            <ChevronLeft size={15} aria-hidden="true" />
+            <span>Back to houses</span>
+          </Link>
+
           <header className="property-editorial-heading">
             <div>
               <p className="property-editorial-kicker">{property.propertyType} · {property.location}</p>
@@ -374,7 +380,7 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
             </div>
           ) : (
             <div className="property-editorial-gallery-empty">
-              Photos for this house will be added soon.
+              Photos for this home will be added soon.
             </div>
           )}
 
@@ -384,7 +390,7 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
               <section className="property-editorial-section property-editorial-highlights" aria-labelledby="stay-details-title">
                 <div className="property-editorial-section-heading">
                   <p>Stay details</p>
-                  <h2 id="stay-details-title">What this house includes.</h2>
+                  <h2 id="stay-details-title">What this home includes.</h2>
                 </div>
                 <div className="property-editorial-highlight-grid">
                   {stayHighlights.map(({ Icon, title, text }) => (
@@ -408,7 +414,7 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
               <section className="property-editorial-section property-about-section" aria-labelledby="about-house-title">
                 <div className="property-editorial-section-heading property-about-heading">
                   <p>About your stay</p>
-                  <h2 id="about-house-title">About this house.</h2>
+                  <h2 id="about-house-title">About this home.</h2>
                 </div>
 
                 <div className="property-about-copy">
@@ -511,7 +517,7 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
               <section className="property-editorial-section" aria-labelledby="related-title">
                 <div className="property-editorial-section-heading">
                   <p>Continue browsing</p>
-                  <h2 id="related-title">Other Serenity houses.</h2>
+                  <h2 id="related-title">Other Serenity homes.</h2>
                 </div>
                 <RelatedHouses currentSlug={property.slug} properties={relatedProperties} />
               </section>

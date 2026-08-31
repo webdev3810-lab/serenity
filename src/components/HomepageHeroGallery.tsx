@@ -15,9 +15,6 @@ type HomepageHeroGalleryProps = {
   images: HomepageHeroImage[];
   heading?: string;
   tagline?: string;
-  supportingText?: string;
-  ctaLabel?: string;
-  ctaHref?: string;
 };
 
 const isPreviewImage = (src: string) => src.includes("a0.muscache.com");
@@ -27,9 +24,6 @@ export default function HomepageHeroGallery({
   images,
   heading = "SERENITY",
   tagline = "ON THE ROCKS",
-  supportingText = "",
-  ctaLabel = "BOOK NOW",
-  ctaHref = "/houses",
 }: HomepageHeroGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -68,7 +62,7 @@ export default function HomepageHeroGallery({
       <div className="serenity-hero-media" aria-hidden="true">
         {images.map((image, index) => {
           const previewImage = isPreviewImage(image.src);
-          const directImage = previewImage || isSupabaseImage(image.src);
+          const directImage = previewImage;
           const isActive = index === activeIndex;
           const isVideo = image.type === "video";
           return (
@@ -91,7 +85,16 @@ export default function HomepageHeroGallery({
                     aria-hidden="true"
                   />
                 ) : image.poster ? (
-                  <Image src={image.poster} alt="" fill sizes="100vw" unoptimized={isPreviewImage(image.poster) || isSupabaseImage(image.poster)} className="serenity-hero-image-asset" />
+                  <Image
+                    src={image.poster}
+                    alt=""
+                    fill
+                    priority={index === 0}
+                    loading="eager"
+                    sizes="100vw"
+                    unoptimized={isPreviewImage(image.poster)}
+                    className="serenity-hero-image-asset"
+                  />
                 ) : null
               ) : (
                 <Image
@@ -99,7 +102,7 @@ export default function HomepageHeroGallery({
                   alt=""
                   fill
                   priority={index === 0}
-                  loading={index === 0 ? "eager" : "lazy"}
+                  loading="eager"
                   unoptimized={directImage}
                   referrerPolicy={previewImage ? "no-referrer" : undefined}
                   sizes="100vw"
@@ -120,11 +123,6 @@ export default function HomepageHeroGallery({
             <span className="serenity-hero-title-main">{heading}</span>
             <span className="serenity-hero-title-sub">{tagline}</span>
           </h1>
-          <div className="serenity-hero-actions">
-            {supportingText && <p className="serenity-hero-support">{supportingText}</p>}
-            <a className="serenity-hero-cta" href={ctaHref}>{ctaLabel}</a>
-          </div>
-
         </div>
 
         <div className="serenity-hero-bottom-lines" aria-label="Serenity stays locations">

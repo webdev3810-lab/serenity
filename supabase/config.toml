@@ -1,5 +1,4 @@
-# Replace this placeholder before running `supabase link`.
-project_id = "YOUR_PROJECT_REF"
+project_id = "goobbsmkluehjzfzzyvi"
 
 [storage]
 enabled = true

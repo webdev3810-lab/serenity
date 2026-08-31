@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { properties as fallbackProperties, type Property, type PropertyDatePrice, type PropertyReview } from "@/src/data/properties";
 import { isSupabaseConfigured } from "@/src/lib/supabase/config";
-import { createSupabaseServerClient } from "@/src/lib/supabase/server";
+import { createSupabasePublicClient } from "@/src/lib/supabase/server";
 import { DEFAULT_CONTACT_SETTINGS, DEFAULT_PROMO_SETTINGS, normalizeContactSettings, type ContactSettings, type PromoSettings } from "@/src/lib/siteSettings";
 import type { Database } from "@/src/lib/supabase/types";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
@@ -33,7 +33,7 @@ function describeSupabaseError(error: unknown) {
   };
 
   return {
-    message: value.message ?? "Unknown Supabase error",
+    message: value.message ?? (Object.keys(value).length === 0 ? "Empty error object (network or fetch failure)" : "Unknown Supabase error"),
     code: value.code ?? "",
     details: value.details ?? "",
     hint: value.hint ?? "",
@@ -46,7 +46,11 @@ function isSupabaseUnavailableError(error: unknown) {
     ? description
     : `${description.message} ${description.details}`;
 
-  return /fetch failed|econnrefused|enotfound|eacces|networkerror/i.test(text);
+  if (typeof error === "object" && error !== null && Object.keys(error).length === 0) {
+    return true;
+  }
+
+  return /fetch failed|econnrefused|enotfound|eacces|networkerror|empty error/i.test(text);
 }
 
 function logSupabaseLoadFailure(message: string, error: unknown) {
@@ -194,7 +198,7 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
 }
 
 async function queryPublicProperties() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicClient();
   const { data: rows, error } = await supabase.from("properties").select("*").eq("published", true).order("display_order");
   if (error) throw error;
   const ids = (rows ?? []).map((row) => row.id);
@@ -235,7 +239,7 @@ export async function getPublicPropertyBySlug(slug: string): Promise<Property | 
   const localPublicProperty = publicLocalProperties.find((property) => property.slug === slug);
   if (isLocalContentPreview || !isSupabaseConfigured) return localPublicProperty;
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data: row, error } = await supabase.from("properties").select("*").eq("slug", slug).eq("published", true).maybeSingle();
     if (error) throw error;
     // Supabase is the source of truth in public mode. If an editor unpublishes
@@ -264,7 +268,7 @@ export async function getPublicPropertyBySlug(slug: string): Promise<Property | 
 export async function getHomepageContent() {
   if (isLocalContentPreview || !isSupabaseConfigured) return null;
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data } = await supabase.from("homepage_content").select("content").eq("page_key", "home").eq("published", true).maybeSingle();
     return (data as { content?: Record<string, unknown> } | null)?.content ?? null;
   } catch {
@@ -277,7 +281,7 @@ export type HomepageHeroMedia = Database["public"]["Tables"]["homepage_hero_medi
 export async function getHomepageHeroMedia(): Promise<HomepageHeroMedia[]> {
   if (isLocalContentPreview || !isSupabaseConfigured) return [];
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data, error } = await supabase
       .from("homepage_hero_media")
       .select("id, storage_path, public_url, media_type, mime_type, file_size, alt_text, caption, display_order, active, created_at, updated_at")
@@ -300,67 +304,42 @@ export async function getHomepageHeroMedia(): Promise<HomepageHeroMedia[]> {
 }
 
 export async function getPublicPromoSettings(): Promise<PromoSettings> {
-  if (!isSupabaseConfigured) return DEFAULT_PROMO_SETTINGS;
+  const noActivePromotion = { ...DEFAULT_PROMO_SETTINGS, code: "", status: "disabled", headerVisible: false } satisfies PromoSettings;
+  if (!isSupabaseConfigured) return noActivePromotion;
 
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data: promotions, error: promotionError } = await supabase
       .from("promotions")
       .select("*")
       .eq("active", true)
       .eq("published", true)
       .order("created_at", { ascending: false });
-    if (!promotionError && promotions) {
-      const records = promotions.map((row) => normalizePromotionRow(row as Record<string, unknown>));
-      const promotion = records.find((row) => getPromotionStatus(row) === "active" && row.header_visible);
-      if (promotion) {
-        const remaining = promotion.max_redemptions === null ? null : Math.max(0, promotion.max_redemptions - promotion.successful_redemptions - promotion.reserved_redemptions);
-        return {
-          id: promotion.id,
-          name: promotion.name,
-          status: "active",
-          badge: promotion.badge_text,
-          message: promotion.message,
-          mobileMessage: promotion.mobile_message,
-          code: promotion.code,
-          endsAt: promotion.ends_at ?? "",
-          discountType: promotion.discount_type,
-          discountValue: promotion.discount_value,
-          startsAt: promotion.starts_at ?? "",
-          maxRedemptions: promotion.max_redemptions,
-          successfulRedemptions: promotion.successful_redemptions,
-          reservedRedemptions: promotion.reserved_redemptions,
-          remainingRedemptions: remaining,
-          headerVisible: true,
-        };
-      }
-      // A promotions table with no active header offer intentionally suppresses
-      // the legacy site-settings bar rather than showing stale copy.
-      return { ...DEFAULT_PROMO_SETTINGS, code: "", status: "disabled", headerVisible: false };
-    }
-
-    const { data, error } = await supabase
-      .from("site_settings")
-      .select("value")
-      .eq("key", "site")
-      .eq("is_public", true)
-      .maybeSingle();
-    if (error) throw error;
-
-    const value = (data?.value ?? {}) as Record<string, unknown>;
-    const legacyEndsAt = String(value.promo_ends_at || DEFAULT_PROMO_SETTINGS.endsAt);
-    const legacyExpired = Boolean(legacyEndsAt) && !Number.isNaN(new Date(legacyEndsAt).getTime()) && new Date(legacyEndsAt).getTime() <= Date.now();
+    if (promotionError || !promotions) return noActivePromotion;
+    const records = promotions.map((row) => normalizePromotionRow(row as Record<string, unknown>));
+    const promotion = records.find((row) => getPromotionStatus(row) === "active" && row.header_visible);
+    if (!promotion) return noActivePromotion;
+    const remaining = promotion.max_redemptions === null ? null : Math.max(0, promotion.max_redemptions - promotion.successful_redemptions - promotion.reserved_redemptions);
     return {
-      badge: String(value.promo_badge || DEFAULT_PROMO_SETTINGS.badge),
-      message: String(value.promo_message || DEFAULT_PROMO_SETTINGS.message),
-      mobileMessage: String(value.promo_mobile_message || DEFAULT_PROMO_SETTINGS.mobileMessage),
-      code: legacyExpired ? "" : String(value.promo_code || DEFAULT_PROMO_SETTINGS.code),
-      endsAt: legacyEndsAt,
-      status: legacyExpired ? "expired" : "active",
-      headerVisible: !legacyExpired,
+      id: promotion.id,
+      name: promotion.name,
+      status: "active",
+      badge: promotion.badge_text,
+      message: promotion.message,
+      mobileMessage: promotion.mobile_message,
+      code: promotion.code,
+      endsAt: promotion.ends_at ?? "",
+      discountType: promotion.discount_type,
+      discountValue: promotion.discount_value,
+      startsAt: promotion.starts_at ?? "",
+      maxRedemptions: promotion.max_redemptions,
+      successfulRedemptions: promotion.successful_redemptions,
+      reservedRedemptions: promotion.reserved_redemptions,
+      remainingRedemptions: remaining,
+      headerVisible: true,
     };
   } catch {
-    return DEFAULT_PROMO_SETTINGS;
+    return noActivePromotion;
   }
 }
 
@@ -368,7 +347,7 @@ export async function getPublicContactSettings(): Promise<ContactSettings> {
   if (!isSupabaseConfigured) return DEFAULT_CONTACT_SETTINGS;
 
   try {
-    const supabase = await createSupabaseServerClient();
+    const supabase = createSupabasePublicClient();
     const { data, error } = await supabase
       .from("site_settings")
       .select("value")

@@ -25,7 +25,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const promoSettings = await getPublicPromoSettings();
 
   return (
-    <html lang="en-AU" className="h-full antialiased">
+    <html lang="en-AU" className="h-full antialiased" data-scroll-behavior="smooth">
       <body className="min-h-full font-sans">
         <AppShell contactSettings={contactSettings} promoSettings={promoSettings}>{children}</AppShell>
       </body>

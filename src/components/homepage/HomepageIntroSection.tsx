@@ -42,9 +42,9 @@ export default function HomepageIntroSection({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-center">
           
           {/* Left Column: abstract editorial artwork (no external demo imagery) */}
-          <ScrollFloat className="lg:col-span-6 relative" intensity={30}>
+          <div className="lg:col-span-6 relative">
             <div className="relative aspect-[4/5] w-full max-w-lg mx-auto lg:mr-auto overflow-hidden rounded-none bg-[#DED2CB] shadow-xl">
-              {artImage ? <Image src={artImage} alt="" fill sizes="(max-width: 1023px) 100vw, 50vw" unoptimized className="object-cover" /> : <div className="absolute inset-0 bg-[linear-gradient(145deg,#f1e8e1_0%,#d4bcae_42%,#8d7364_100%)]" aria-hidden="true" />}
+              {artImage ? <Image src={artImage} alt="" fill loading="eager" sizes="(max-width: 1023px) 100vw, 50vw" unoptimized className="object-cover" /> : <div className="absolute inset-0 bg-[linear-gradient(145deg,#f1e8e1_0%,#d4bcae_42%,#8d7364_100%)]" aria-hidden="true" />}
               <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/5" aria-hidden="true" />
               <div className="absolute inset-8 border border-white/60" aria-hidden="true" />
               <div className="absolute bottom-10 left-10 right-10 border-t border-white/70 pt-4 text-white" aria-hidden="true">
@@ -54,14 +54,14 @@ export default function HomepageIntroSection({
             </div>
             
             {/* Overlapping editorial detail panel */}
-            <div className="absolute -bottom-8 -right-4 sm:-right-8 lg:-bottom-12 lg:-right-12 w-1/2 aspect-square bg-white p-2 shadow-2xl z-10">
+            <ScrollFloat intensity={35} className="absolute -bottom-8 -right-4 sm:-right-8 lg:-bottom-12 lg:-right-12 w-1/2 aspect-square bg-white p-2 shadow-2xl z-10">
               <div className="relative flex h-full items-end overflow-hidden bg-[#F7F4F1] p-5 sm:p-7">
                 {artCardImage && <Image src={artCardImage} alt="" fill sizes="(max-width: 1023px) 50vw, 25vw" unoptimized className="object-cover" />}
                 {artCardImage && <div className="absolute inset-0 bg-black/25" aria-hidden="true" />}
                 <p className={`relative z-10 font-marcellus text-2xl leading-tight sm:text-3xl ${artCardImage ? "text-white" : "text-stone-800"}`}>{artCard}</p>
               </div>
-            </div>
-          </ScrollFloat>
+            </ScrollFloat>
+          </div>
 
           {/* Right Column: Text Content */}
           <div className="lg:col-span-6 flex flex-col items-start justify-center pt-12 lg:pt-0">

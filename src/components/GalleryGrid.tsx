@@ -205,7 +205,7 @@ export default function GalleryGrid({ properties }: GalleryGridProps) {
             <section key={property.slug} className="gallery-property-section" data-gallery-reveal aria-labelledby={`gallery-property-${property.slug}`}>
               <div className="gallery-property-heading">
                 <div className="gallery-property-copy">
-                  <p className="gallery-property-kicker"><span>{String(index + 1).padStart(2, "0")}</span> Serenity house</p>
+                  <p className="gallery-property-kicker">Serenity house</p>
                   <h3 id={`gallery-property-${property.slug}`}>{displayName(property.name)}</h3>
                   <p>{property.shortDescription}</p>
                 </div>
@@ -271,7 +271,7 @@ export default function GalleryGrid({ properties }: GalleryGridProps) {
             <div className="gallery-lightbox-header">
               <div>
                 <p className="gallery-lightbox-kicker">{displayName(selectedPhoto.propertyName)}</p>
-                <p className="gallery-lightbox-count">{selectedPhoto.category} · {selectedIndex + 1} of {visiblePhotos.length}</p>
+                <p className="gallery-lightbox-count">{selectedPhoto.category}</p>
               </div>
               <button ref={closeButtonRef} type="button" className="gallery-lightbox-close" onClick={() => setSelectedIndex(null)} aria-label="Close photo viewer">
                 <X size={22} aria-hidden="true" />

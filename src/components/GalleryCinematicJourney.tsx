@@ -130,7 +130,7 @@ function JourneyLightbox({
     >
       <div className="gallery-journey-lightbox-inner">
         <header>
-          <p>{photo.propertyName} <span>·</span> {photo.categoryLabel} <span>·</span> {index + 1} / {photos.length}</p>
+          <p>{photo.propertyName} <span>·</span> {photo.categoryLabel}</p>
           <button type="button" onClick={onClose} aria-label="Close photo viewer"><X size={20} /></button>
         </header>
         <div className="gallery-journey-lightbox-image">
@@ -305,7 +305,7 @@ export default function GalleryCinematicJourney({ properties }: GalleryCinematic
                 {cover ? <Image src={cover.src} alt={cover.alt} fill sizes="100vw" className="object-cover" /> : null}
                 <span className="gallery-journey-house-shade" />
               </div>
-              <p className="gallery-journey-house-chapter">({String(index + 1).padStart(2, "0")}) <span>{property.location}</span></p>
+              <p className="gallery-journey-house-chapter"><span>{property.location}</span></p>
               <h2 id={`gallery-journey-${property.slug}`} className="font-marcellus gallery-journey-house-title">{name}</h2>
               <div className="gallery-journey-house-copy">
                 <p>{property.shortDescription}</p>
@@ -338,7 +338,7 @@ export default function GalleryCinematicJourney({ properties }: GalleryCinematic
             aria-labelledby={`gallery-property-${property.slug}`}
           >
             <header className="gallery-journey-property-intro">
-              <p><span>{String(propertyIndex + 1).padStart(2, "0")}</span><span>{property.location}</span></p>
+              <p><span></span><span>{property.location}</span></p>
               <h2 id={`gallery-property-${property.slug}`} className="font-marcellus">Inside<br /><em>{propertyName}</em></h2>
               <div><p>{property.fullDescription}</p><Link href={`/properties/${property.slug}#availability`}>Check availability <ArrowUpRight size={16} aria-hidden="true" /></Link></div>
             </header>
@@ -355,7 +355,7 @@ export default function GalleryCinematicJourney({ properties }: GalleryCinematic
                   aria-labelledby={`gallery-room-${property.slug}-${category.slug}`}
                 >
                   <div className="gallery-journey-room-sticky">
-                    <p className="gallery-journey-room-meta"><span>{propertyName}</span><span>{String(categoryIndex + 1).padStart(2, "0")} / {String(categories.length).padStart(2, "0")}</span></p>
+                    <p className="gallery-journey-room-meta"><span>{propertyName}</span></p>
                     <h3 id={`gallery-room-${property.slug}-${category.slug}`} className="font-marcellus gallery-journey-room-title">{category.label}</h3>
                     <div className={`gallery-journey-room-images gallery-journey-room-images-${layoutCount}`}>
                       {category.images.map((photo, photoIndex) => (
@@ -378,7 +378,7 @@ export default function GalleryCinematicJourney({ properties }: GalleryCinematic
                     </div>
                     <div className="gallery-journey-room-copy">
                       {category.description ? <p>{category.description}</p> : null}
-                      <span><b>{String(category.images.length).padStart(2, "0")}</b> {category.images.length === 1 ? "photo" : "photos"}</span>
+                      <span><b>{category.images.length}</b> {category.images.length === 1 ? "photo" : "photos"}</span>
                     </div>
                   </div>
                 </section>

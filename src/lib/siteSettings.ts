@@ -137,13 +137,13 @@ export function normalizeContactSettings(value: unknown): ContactSettings {
 }
 
 export const DEFAULT_PROMO_SETTINGS: PromoSettings = {
-  badge: "BOOK DIRECT",
-  message: "Save 5% on your stay with code",
-  mobileMessage: "Save 5% with code",
-  code: "SERENITY5",
+  badge: "",
+  message: "",
+  mobileMessage: "",
+  code: "",
   endsAt: "",
-  status: "active",
+  status: "disabled",
   discountType: "percentage",
   discountValue: 5,
-  headerVisible: true,
+  headerVisible: false,
 };

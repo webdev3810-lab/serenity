@@ -19,7 +19,7 @@ export interface HomepageFinalCtaSectionProps {
  */
 export default function HomepageFinalCtaSection({
   heading = "Ready to stay with Serenity?",
-  subheading = "Choose your ideal house below.",
+  subheading = "Choose your ideal home below.",
   eyebrow = "Your next stay",
   properties,
   className = "",
@@ -60,10 +60,10 @@ export default function HomepageFinalCtaSection({
                 href="/houses"
                 className="group inline-flex items-center gap-3 border-b border-[#2D2622] pb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#2D2622] transition-colors hover:border-[#B88A5A] hover:text-[#B88A5A]"
               >
-                Explore the houses
+                Explore the homes
                 <ArrowUpRight size={15} className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" aria-hidden="true" />
               </Link>
-              <span className="text-sm text-stone-500">Three furnished homes, one calm base.</span>
+              <span className="text-sm text-stone-500">Three furnished homes, one comfortable setting.</span>
             </div>
           </GsapFadeIn>
 
@@ -115,7 +115,7 @@ export default function HomepageFinalCtaSection({
                 </div>
               ) : (
                 <Link href="/houses" className="flex items-center justify-between px-7 py-6 text-sm font-bold sm:px-10">
-                  Browse available houses <ArrowUpRight size={16} aria-hidden="true" />
+                  Browse available homes <ArrowUpRight size={16} aria-hidden="true" />
                 </Link>
               )}
             </div>

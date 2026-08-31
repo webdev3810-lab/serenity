@@ -63,7 +63,6 @@ const worldToLatLng = ({ x, y }: Point, zoom: number): LatLng => {
 export function ApproximateMap({ compact = false, borderless = false, areaOnly = false, title = "Where you'll be", properties, selectedSlug, onSelectProperty, fullHeight = false, hideHeader = false }: ApproximateMapProps) {
   const [center, setCenter] = useState<LatLng>(approximateAreaLocation);
   const [zoom, setZoom] = useState(13);
-  const [mapType, setMapType] = useState<"map" | "satellite">("map");
   const [viewport, setViewport] = useState({ width: 900, height: compact ? 288 : 480 });
   const [drag, setDrag] = useState<{ pointerId: number; start: Point; center: Point } | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -131,11 +130,9 @@ export function ApproximateMap({ compact = false, borderless = false, areaOnly =
       for (let y = startY - 1; y <= endY + 1; y += 1) {
         if (y < 0 || y >= maxTile) continue;
         const wrappedX = ((x % maxTile) + maxTile) % maxTile;
-        const tileUrl = mapType === "satellite"
-          ? `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y}/${wrappedX}`
-          : `https://tile.openstreetmap.org/${zoom}/${wrappedX}/${y}.png`;
+        const tileUrl = `https://tile.openstreetmap.org/${zoom}/${wrappedX}/${y}.png`;
         result.push({
-          key: `${mapType}-${zoom}-${x}-${y}`,
+          key: `map-${zoom}-${x}-${y}`,
           src: tileUrl,
           left: x * tileSize - centerWorld.x + viewport.width / 2,
           top: y * tileSize - centerWorld.y + viewport.height / 2,
@@ -144,7 +141,7 @@ export function ApproximateMap({ compact = false, borderless = false, areaOnly =
     }
 
     return result;
-  }, [centerWorld.x, centerWorld.y, mapType, viewport.height, viewport.width, zoom]);
+  }, [centerWorld.x, centerWorld.y, viewport.height, viewport.width, zoom]);
 
   const beginDrag = (event: PointerEvent<HTMLDivElement>) => {
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -219,24 +216,6 @@ export function ApproximateMap({ compact = false, borderless = false, areaOnly =
           <span className="text-xs font-bold text-stone-800 truncate">Pakenham, VIC 3810, Australia</span>
         </div>
 
-        {/* Map / Satellite Toggle */}
-        <div className="absolute bottom-3 left-3 z-20 flex overflow-hidden rounded-none border border-stone-300 bg-white/95 text-xs font-semibold shadow-md backdrop-blur-md">
-          <button
-            type="button"
-            className={`px-3 py-1.5 transition-colors ${mapType === "map" ? "bg-[#7A4E2D] text-white" : "text-stone-700 hover:bg-stone-100"}`}
-            onClick={() => setMapType("map")}
-          >
-            Map
-          </button>
-          <button
-            type="button"
-            className={`px-3 py-1.5 transition-colors ${mapType === "satellite" ? "bg-[#7A4E2D] text-white" : "text-stone-700 hover:bg-stone-100"}`}
-            onClick={() => setMapType("satellite")}
-          >
-            Satellite
-          </button>
-        </div>
-
         {/* Zoom & Recenter Controls */}
         <div className="absolute right-3 bottom-3 z-20 flex flex-col gap-1.5">
           <button
@@ -287,11 +266,12 @@ export function ApproximateMap({ compact = false, borderless = false, areaOnly =
               }}
               aria-label={`View ${property.name} on the property list`}
             >
-              <span className={`mb-1 rounded-none border px-2.5 py-1 text-[11px] font-extrabold shadow-lg transition-colors ${selected ? "border-[#5A463A] bg-[#2D2622] text-white" : "border-white bg-white text-[#2D2622]"}`}>
+              <span className={`mb-2 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-extrabold shadow-lg transition-colors ${selected ? "border-[#5A463A] bg-[#2D2622] text-white" : "border-white bg-white text-[#2D2622]"}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${selected ? "bg-[#D8CCC4]" : "bg-[#7A4E2D]"}`} aria-hidden="true" />
                 {formatAud(property.nightlyPrice)}
               </span>
-              <span className={`flex h-9 w-9 items-center justify-center rounded-none text-white shadow-2xl ring-4 ring-white transition-transform ${selected ? "scale-125 bg-[#2D2622]" : "bg-[#7A4E2D]"}`}>
-                <MapPin size={20} fill="currentColor" />
+              <span className={`flex h-11 w-11 items-center justify-center rounded-full border-2 border-white text-white shadow-[0_4px_14px_rgba(45,38,34,0.35)] transition-transform ${selected ? "scale-125 bg-[#2D2622]" : "bg-[#7A4E2D]"}`}>
+                <MapPin size={21} strokeWidth={2.4} fill="currentColor" />
               </span>
             </a>
           );
@@ -310,18 +290,19 @@ export function ApproximateMap({ compact = false, borderless = false, areaOnly =
             }}
             aria-label={areaPinAction ? "View availability near the Serenity Houses Area" : undefined}
           >
-            <div className="mb-1 flex items-center gap-1 rounded-none border border-white bg-[#7A4E2D] px-2.5 py-1 text-[11px] font-bold text-white shadow-lg">
+            <div className="mb-2 flex items-center gap-1.5 rounded-full border border-white bg-white px-3 py-1.5 text-[11px] font-bold text-[#2D2622] shadow-lg">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#7A4E2D]" aria-hidden="true" />
               <span>Serenity Houses Area</span>
             </div>
-            <div className="flex h-10 w-10 place-items-center justify-center rounded-none bg-[#7A4E2D] text-white shadow-2xl ring-4 ring-white">
-              <MapPin size={22} fill="currentColor" />
+            <div className="flex h-12 w-12 place-items-center justify-center rounded-full border-2 border-white bg-[#2D2622] text-white shadow-[0_4px_14px_rgba(45,38,34,0.4)]">
+              <MapPin size={22} strokeWidth={2.4} fill="currentColor" />
             </div>
           </div>
         )}
 
         {/* Footer Attribution */}
         <div className="absolute bottom-1 right-1 z-10 rounded-none bg-white/80 px-1.5 py-0.5 text-[9px] text-stone-600">
-          Google Maps-style approximate area · Pakenham VIC
+          © OpenStreetMap contributors · Approximate area · Pakenham VIC
         </div>
       </div>
 

@@ -17,7 +17,6 @@ export function LocationPage({ contact }: { contact: ContactSettings }) {
     <main className="location-editorial-page">
       <section className="location-editorial-hero">
         <GsapFadeIn className="location-editorial-shell">
-          <p className="location-editorial-eyebrow">Pakenham · Victoria · Australia</p>
           <ScrollWipeText
             as="h1"
             aria-label="Close to what brings you here."
@@ -45,17 +44,13 @@ export function LocationPage({ contact }: { contact: ContactSettings }) {
 
       <section className="location-editorial-map-section" aria-labelledby="location-map-heading">
         <GsapFadeIn className="location-editorial-map-heading location-editorial-shell">
-          <p className="location-editorial-index">01</p>
-          <div>
-            <p className="location-editorial-eyebrow">The neighbourhood</p>
-            <ScrollWipeText
-              as="h2"
-              aria-label="Where you'll be."
-              className="location-editorial-section-title font-marcellus"
-            >
-              Where you&apos;ll be.
-            </ScrollWipeText>
-          </div>
+          <ScrollWipeText
+            as="h2"
+            aria-label="Where you'll be."
+            className="location-editorial-section-title font-marcellus"
+          >
+            Where you&apos;ll be.
+          </ScrollWipeText>
           <p className="location-editorial-section-copy" id="location-map-heading">
             One shared approximate pin shows the neighbourhood because Serenity 7,
             Serenity 9, and Serenity 11 sit beside each other.
@@ -84,10 +79,6 @@ export function LocationPage({ contact }: { contact: ContactSettings }) {
       <section className="location-editorial-neighbourhood">
         <GsapFadeIn className="location-editorial-shell">
           <div className="location-editorial-neighbourhood-heading">
-            <div>
-              <p className="location-editorial-index">02</p>
-              <p className="location-editorial-eyebrow">Close, calm, connected</p>
-            </div>
             <ScrollWipeText
               as="h2"
               aria-label="Everything you need is nearby."
@@ -97,7 +88,7 @@ export function LocationPage({ contact }: { contact: ContactSettings }) {
             </ScrollWipeText>
             <p className="location-editorial-section-copy">
               Stay close to the station and town centre without giving up the privacy
-              of a whole house. Pakenham is a practical base for South East Melbourne,
+              of a whole house. Pakenham is a practical location for South East Melbourne,
               Cardinia, and Gippsland.
             </p>
           </div>
@@ -113,37 +104,15 @@ export function LocationPage({ contact }: { contact: ContactSettings }) {
           </div>
 
           <div className="location-editorial-actions">
-            <p>Choose the house that suits your dates, or ask us which setup fits your stay.</p>
+            <p>Explore the houses and rooms, or ask us which setup fits your stay.</p>
             <div>
-              <Link href="/houses" className="location-editorial-button location-editorial-button-primary">
-                View the houses <ArrowUpRight size={15} aria-hidden="true" />
+              <Link href="/gallery" className="location-editorial-button location-editorial-button-primary">
+                Explore the gallery <ArrowUpRight size={15} aria-hidden="true" />
               </Link>
               <Link href="/contact" className="location-editorial-button">
                 Ask a question <ArrowUpRight size={15} aria-hidden="true" />
               </Link>
             </div>
-          </div>
-        </GsapFadeIn>
-      </section>
-
-      <section className="location-editorial-cta">
-        <GsapFadeIn className="location-editorial-shell">
-          <p className="location-editorial-eyebrow">Plan your stay</p>
-          <ScrollWipeText
-            as="h2"
-            aria-label="Make Pakenham your base."
-            className="location-editorial-cta-title display-font"
-          >
-            Make Pakenham your base.
-          </ScrollWipeText>
-          <div className="location-editorial-cta-footer">
-            <p>
-              Private furnished houses with the space, comfort, and local connection
-              to make a short visit or longer stay feel straightforward.
-            </p>
-            <Link href="/houses" className="location-editorial-button location-editorial-button-primary">
-              Browse houses <ArrowUpRight size={15} aria-hidden="true" />
-            </Link>
           </div>
         </GsapFadeIn>
       </section>

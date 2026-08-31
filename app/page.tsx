@@ -81,9 +81,6 @@ export default async function Home() {
       <HomepageHeroSection
         images={heroImages}
         heading={textValue(content.hero_heading, "SERENITY")}
-        supportingText={textValue(content.hero_subtitle, "")}
-        ctaLabel={textValue(content.hero_cta_label, "BOOK NOW")}
-        ctaHref={textValue(content.hero_cta_href, "/houses")}
       />
       <HomepageIntroSection
         eyebrow={textValue(content.intro_eyebrow, "Serenity On The Rocks")}
@@ -106,6 +103,7 @@ export default async function Home() {
       />
       <HomepageServicesSection />
       <HomepageCorporateSection
+        className="homepage-corporate-closing"
         heading={corporateHeading}
         description={corporateDescription}
         ctaLabel={corporateCtaLabel}
@@ -115,7 +113,7 @@ export default async function Home() {
       />
       <HomepageDraggableGallery images={houseGalleryImages} />
       <HomepageFaqSection
-        heading={textValue(content.faq_heading, "Good to know before arrival.")}
+        heading={textValue(content.faq_heading, "Before you arrive.")}
         description={textValue(content.faq_description, "Clear answers for families, business travellers, contractors, and longer-stay guests.")}
         faqs={homepageFaqs.length ? homepageFaqs : defaultHomepageFaqs}
       />

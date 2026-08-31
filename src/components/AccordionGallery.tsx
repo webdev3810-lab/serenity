@@ -6,6 +6,8 @@ import { gsap } from 'gsap';
 export interface AccordionGalleryItem {
   image: string;
   label?: string;
+  description?: string;
+  details?: string;
   link?: string;
   alt?: string;
 }
@@ -69,6 +71,7 @@ const AccordionGallery = ({
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const firstRunRef = useRef(true);
   const mediaSizeRef = useRef(320);
+  const mountedRef = useRef(false);
 
   const vertical = orientation === 'vertical';
   const count = items.length;
@@ -80,6 +83,13 @@ const AccordionGallery = ({
       : false;
 
   const overlayBg = `linear-gradient(180deg, transparent 45%, color-mix(in srgb, ${overlayColor} 78%, transparent) 100%), color-mix(in srgb, ${overlayColor} calc(var(--ag-dim, 0.35) * 100%), transparent)`;
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const applyLayout = useCallback(
     (animate: boolean) => {
@@ -182,10 +192,11 @@ const AccordionGallery = ({
   );
 
   const handleEnter = (i: number) => {
-    if (trigger === 'hover') setActive(i);
+    if (mountedRef.current && trigger === 'hover') setActive(i);
   };
 
   const handleClick = (i: number, e: MouseEvent) => {
+    if (!mountedRef.current) return;
     if (i !== active) {
       e.preventDefault();
       setActive(i);
@@ -193,6 +204,7 @@ const AccordionGallery = ({
   };
 
   const handleKeyDown = (i: number, e: KeyboardEvent) => {
+    if (!mountedRef.current) return;
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
       e.preventDefault();
       setActive((i + 1) % count);
@@ -205,7 +217,7 @@ const AccordionGallery = ({
   return (
     <div
       ref={rootRef}
-      className={`flex ${vertical ? 'flex-col' : 'flex-row'} w-full max-w-full [perspective:1400px] max-[520px]:!flex-col max-[520px]:[perspective:none] ${className}`}
+      className={`flex ${vertical ? 'flex-col' : 'flex-row'} w-full max-w-full [perspective:1400px] max-[520px]:[perspective:none] ${className}`}
       style={{ gap: `${gap}px`, height: vertical ? typeof height === 'number' ? `${Math.round(height * 1.6)}px` : height : typeof height === 'number' ? `${height}px` : height }}
       role="list"
       aria-label="Image accordion gallery"
@@ -230,19 +242,25 @@ const AccordionGallery = ({
             href={item.link || undefined}
             onClick={e => handleClick(i, e)}
             onMouseEnter={() => handleEnter(i)}
-            onFocus={() => setActive(i)}
+            onFocus={() => {
+              if (mountedRef.current) setActive(i);
+            }}
             onKeyDown={e => handleKeyDown(i, e)}
             role="listitem"
             tabIndex={0}
             aria-current={isActive ? 'true' : undefined}
-            aria-label={item.label}
+            aria-label={
+              [item.label ?? 'Gallery item', item.description, item.details]
+                .filter(Boolean)
+                .join(' — ')
+            }
           >
             <span className="absolute inset-0 overflow-hidden [border-radius:inherit]">
               <span
                 ref={(el: HTMLElement | null) => {
                   mediaRefs.current[i] = el;
                 }}
-                className="absolute top-1/2 left-1/2 [filter:grayscale(var(--ag-gray,1))]"
+                className="accordion-gallery-media absolute top-1/2 left-1/2 [filter:grayscale(var(--ag-gray,1))]"
                 style={{
                   width: vertical ? '100%' : 'var(--ag-media-size, 320px)',
                   height: vertical ? 'var(--ag-media-size, 320px)' : '100%',
@@ -272,27 +290,42 @@ const AccordionGallery = ({
             </span>
             {showLabels && (
               <span
-                className="pointer-events-none absolute bottom-5 left-5 right-5 z-[2] flex items-center gap-3"
+                className="pointer-events-none absolute bottom-5 left-5 right-5 z-[2] flex items-end gap-3"
                 aria-hidden="true"
               >
                 <span
                   ref={(el: HTMLElement | null) => {
                     barRefs.current[i] = el;
                   }}
-                  className="h-[42px] w-[4px] flex-none rounded-none opacity-100"
-                  style={{
-                    background: accentColor,
-                    boxShadow: `0 0 12px color-mix(in srgb, ${accentColor} 60%, transparent)`
-                  }}
+                  className="accordion-gallery-marker h-[42px] w-[4px] flex-none rounded-none opacity-100"
+                  style={{ background: accentColor }}
                 />
-                <span
-                  ref={(el: HTMLElement | null) => {
-                    textRefs.current[i] = el;
-                  }}
-                  className="display-font overflow-hidden text-ellipsis whitespace-nowrap text-[clamp(1.5rem,3.2vw,2.75rem)] font-bold tracking-[0.01em] [text-shadow:0_2px_14px_rgba(0,0,0,0.55)]"
-                  style={{ color: textColor }}
-                >
-                  {item.label}
+                <span className="accordion-gallery-copy min-w-0">
+                  <span
+                    ref={(el: HTMLElement | null) => {
+                      textRefs.current[i] = el;
+                    }}
+                    className="display-font block overflow-visible text-ellipsis whitespace-nowrap text-[clamp(1.5rem,3.2vw,2.75rem)] font-bold leading-[1.2] tracking-[0.01em] [text-shadow:0_2px_14px_rgba(0,0,0,0.55)]"
+                    style={{ color: textColor }}
+                  >
+                    {item.label}
+                  </span>
+                  {item.description ? (
+                    <span
+                      className={`accordion-gallery-description mt-2 block max-w-[32rem] overflow-hidden text-sm font-medium leading-[1.55] text-white/90 transition-[max-height,opacity] duration-300 whitespace-normal ${isActive ? 'max-h-32 opacity-100' : 'max-h-0 opacity-0'}`}
+                      style={{ color: textColor }}
+                    >
+                      {item.description}
+                    </span>
+                  ) : null}
+                  {item.details ? (
+                    <span
+                      className={`accordion-gallery-details mt-2 block max-w-[38rem] overflow-hidden text-xs font-semibold leading-[1.45] tracking-[0.02em] text-white/90 transition-[max-height,opacity] duration-300 whitespace-normal ${isActive ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'}`}
+                      style={{ color: textColor }}
+                    >
+                      {item.details}
+                    </span>
+                  ) : null}
                 </span>
               </span>
             )}

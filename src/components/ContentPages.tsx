@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import Image from "next/image";
 import { ArrowUpRight, Building2, CheckCircle2, Clock3, ExternalLink, Home, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { FormInput, TextArea } from "@/src/components/UI";
@@ -117,6 +117,8 @@ export function AboutPage() {
 
 export function ContactPage() {
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const contact = useContactSettings() ?? DEFAULT_CONTACT_SETTINGS;
   const phoneHref = `tel:${contact.phoneNumber.replace(/[^+\d]/g, "")}`;
   const emailHref = `mailto:${contact.contactEmail}`;
@@ -128,11 +130,46 @@ export function ContactPage() {
     ["LinkedIn", contact.linkedinUrl],
   ].filter(([, href]) => href);
 
+  const submitContact = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setSent(false);
+    setSubmitError("");
+    const form = event.currentTarget;
+    const values = new FormData(form);
+    try {
+      const response = await fetch("/api/contact-messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": `contact:${crypto.randomUUID()}`,
+        },
+        body: JSON.stringify({
+          firstName: values.get("firstName"),
+          lastName: values.get("lastName"),
+          email: values.get("email"),
+          phone: values.get("phone"),
+          projectType: values.get("projectType"),
+          preferredHouse: values.get("house"),
+          message: values.get("message"),
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "We could not send your message.");
+      form.reset();
+      setSent(true);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "We could not send your message.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <section className="min-h-screen bg-[#FAF8F5] text-[#2D2622]">
-      <div className="mx-auto w-full max-w-[96rem] px-5 pb-24 pt-12 sm:px-8 lg:px-12 lg:pt-20">
+    <section className="contact-editorial-page min-h-screen bg-[#FAF8F5] text-[#2D2622]">
+      <div className="mx-auto w-full max-w-[120rem] px-4 pb-20 pt-10 sm:px-6 sm:pb-24 sm:pt-14 lg:px-8 lg:pt-16">
         <div className="border-t border-[#D8CCC4] pt-10 lg:pt-16">
-          <div className="mx-auto max-w-5xl text-center">
+          <div className="mx-auto max-w-6xl text-center">
             <span className="eyebrow text-[#8B6B55]">Get in touch · {contact.businessName}</span>
             <h1 className="display-font mt-6 text-[clamp(3.25rem,7.5vw,8.5rem)] uppercase leading-[0.86] tracking-[-0.065em] text-[#2D2622]">
               {contact.contactPageHeading}
@@ -168,8 +205,8 @@ export function ContactPage() {
             <div className="px-1 py-7 md:px-6"><span className="flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#8B6B55]"><ArrowUpRight size={14} /> Social</span><div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-base font-semibold text-[#2D2622]">{socialLinks.length ? socialLinks.map(([label, href]) => <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="hover:text-[#8B6B55]">{label}</a>) : <span className="text-[#6F5A4D]">Follow updates soon</span>}</div></div>
           </div>
 
-          <div className="mt-20 grid gap-14 lg:grid-cols-[0.72fr_1.28fr] lg:gap-24">
-            <div className="max-w-sm">
+          <div className="mt-16 grid gap-12 lg:grid-cols-[minmax(18rem,0.75fr)_minmax(0,1.25fr)] lg:gap-16">
+            <div className="max-w-lg">
               <span className="eyebrow text-[#8B6B55]">Contact form</span>
               <h2 className="display-font mt-5 text-4xl leading-[0.95] tracking-[-0.04em] sm:text-5xl">Let&apos;s start a conversation.</h2>
               <p className="mt-6 text-sm leading-relaxed text-[#6F5A4D] sm:text-base">
@@ -181,7 +218,7 @@ export function ContactPage() {
               </div>
             </div>
 
-            <form className="grid gap-7" onSubmit={(event) => { event.preventDefault(); setSent(true); }}>
+            <form className="grid gap-7" onSubmit={submitContact}>
               <div className="grid gap-7 sm:grid-cols-2">
                 <label className="contact-editorial-field">First name <span>*</span><input name="firstName" type="text" required placeholder="Your first name" /></label>
                 <label className="contact-editorial-field">Last name <span>*</span><input name="lastName" type="text" required placeholder="Your last name" /></label>
@@ -195,9 +232,10 @@ export function ContactPage() {
                 <label className="contact-editorial-field">Preferred house<select name="house" defaultValue=""><option value="" disabled>Select an option</option><option>Serenity 7</option><option>Serenity 9</option><option>Serenity 11</option><option>Not sure yet</option></select></label>
               </div>
               <label className="contact-editorial-field">Message <span>*</span><textarea name="message" required rows={5} placeholder="Tell us a little about your stay" /></label>
-              {sent && <p className="border border-[#CBB9A9] bg-[#F3ECE5] p-4 text-sm font-semibold text-[#5A463A]" role="status">Thanks — your enquiry is ready for our team. We&apos;ll be in touch shortly.</p>}
+              {sent && <p className="border border-[#CBB9A9] bg-[#F3ECE5] p-4 text-sm font-semibold text-[#5A463A]" role="status">Thanks — your message has been sent to our team. We&apos;ll be in touch shortly.</p>}
+              {submitError && <p className="border border-[#E7BDB4] bg-[#FBF0EE] p-4 text-sm font-semibold text-[#8A3325]" role="alert">{submitError}</p>}
               <div className="flex justify-end pt-1">
-                <button type="submit" className="inline-flex items-center gap-3 bg-[#2D2622] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#5A463A]">Send message <ArrowUpRight size={16} /></button>
+                <button type="submit" disabled={submitting} className="inline-flex items-center gap-3 bg-[#2D2622] px-7 py-3.5 text-xs font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#5A463A] disabled:cursor-wait disabled:opacity-60">{submitting ? "Sending…" : "Send message"} <ArrowUpRight size={16} /></button>
               </div>
             </form>
           </div>

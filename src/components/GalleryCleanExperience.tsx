@@ -35,6 +35,8 @@ const categorySlug = (value: string) =>
 const isUsableImage = (image: PropertyImage) =>
   Boolean(image.src && image.isVisible !== false && isApprovedHomepageMediaSource(image.src));
 
+const isOtherCategory = (category: Pick<CleanGalleryCategory, "slug">) => category.slug === "other";
+
 function photosFor(property: Property): CleanGalleryPhoto[] {
   return property.images.filter(isUsableImage).map((image, index) => {
     const label = image.categoryLabel?.trim() || image.category?.trim() || "Other";
@@ -71,7 +73,7 @@ function categoriesFor(photos: CleanGalleryPhoto[]): CleanGalleryCategory[] {
   });
 
   return [...categories.values()]
-    .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label))
+    .sort((a, b) => Number(isOtherCategory(a)) - Number(isOtherCategory(b)) || a.order - b.order || a.label.localeCompare(b.label))
     .map((category) => ({ ...category, images: [...category.images].sort((a, b) => a.photoOrder - b.photoOrder) }));
 }
 
@@ -116,7 +118,7 @@ function CleanGalleryLightbox({
         <header className="gallery-clean-lightbox-header">
           <div>
             <p>{houseName}</p>
-            <span>{photo.categoryLabel} · {String(index + 1).padStart(2, "0")} / {String(photos.length).padStart(2, "0")}</span>
+            <span>{photo.categoryLabel}</span>
           </div>
           <button type="button" onClick={onClose} aria-label="Close photo viewer">Close <X size={17} aria-hidden="true" /></button>
         </header>
@@ -170,7 +172,6 @@ export default function GalleryCleanExperience({ properties }: GalleryCleanExper
   return (
     <div className="gallery-clean-experience">
       <section className="gallery-clean-hero" aria-labelledby="gallery-clean-title">
-        <p>Serenity On The Rocks · Pakenham</p>
         <h1 id="gallery-clean-title">Our Gallery</h1>
         <div className="gallery-clean-hero-copy">
           <p>Explore each house room by room. Every image and category below follows the collection published from the Serenity admin.</p>
@@ -185,7 +186,7 @@ export default function GalleryCleanExperience({ properties }: GalleryCleanExper
             const isSelected = property.slug === selectedProperty?.slug;
             return (
               <button key={property.slug} type="button" className={isSelected ? "is-active" : ""} aria-pressed={isSelected} onClick={() => chooseHouse(property.slug)}>
-                <small>{String(index + 1).padStart(2, "0")}</small>
+                
                 <strong>{displayName(property.name)}</strong>
                 <span>{photoMap.get(property.slug)?.length ?? 0} photos</span>
               </button>
@@ -199,7 +200,7 @@ export default function GalleryCleanExperience({ properties }: GalleryCleanExper
           <section id="gallery-clean-house" className="gallery-clean-house" aria-labelledby="gallery-clean-house-title">
             <div className="gallery-clean-house-image">
               {cover ? <Image src={cover.src} alt={cover.alt} fill priority sizes="(max-width: 900px) 100vw, 54vw" className="object-cover" /> : null}
-              <span>{String(selectedPhotos.length).padStart(2, "0")} photographs</span>
+              <span>{selectedPhotos.length} photographs</span>
             </div>
             <div className="gallery-clean-house-copy">
               <p>{selectedProperty.location}</p>
@@ -232,14 +233,14 @@ export default function GalleryCleanExperience({ properties }: GalleryCleanExper
               return (
                 <section key={category.slug} id={`gallery-clean-${selectedProperty.slug}-${category.slug}`} className="gallery-clean-category" aria-labelledby={`gallery-clean-title-${selectedProperty.slug}-${category.slug}`}>
                   <header className="gallery-clean-category-header">
-                    <div><span>{String(categoryIndex + 1).padStart(2, "0")}</span><h3 id={`gallery-clean-title-${selectedProperty.slug}-${category.slug}`}>{category.label}</h3></div>
+                    <div><h3 id={`gallery-clean-title-${selectedProperty.slug}-${category.slug}`}>{category.label}</h3></div>
                     <div><strong>{category.images.length} {category.images.length === 1 ? "photograph" : "photographs"}</strong>{category.description ? <p>{category.description}</p> : null}</div>
                   </header>
                   <div className={`gallery-clean-grid ${layoutClass} count-${Math.min(category.images.length, 6)}`}>
                     {category.images.map((photo, photoIndex) => (
                       <button key={photo.id} type="button" className={photoIndex === 0 && category.images.length >= 3 ? "is-featured" : ""} onClick={() => openLightbox(category.images, photoIndex)} aria-label={`Open ${photo.alt || `${category.label} photo ${photoIndex + 1}`} in full screen`}>
                         <Image src={photo.src} alt={photo.alt} fill loading="lazy" sizes="(max-width: 700px) 94vw, (max-width: 1100px) 48vw, 32vw" className="object-cover" />
-                        <span className="gallery-clean-grid-number">{String(photoIndex + 1).padStart(2, "0")}</span>
+
                         <span className="gallery-clean-grid-caption"><strong>{category.label}</strong><small>View larger</small></span>
                       </button>
                     ))}
@@ -249,11 +250,6 @@ export default function GalleryCleanExperience({ properties }: GalleryCleanExper
             })}
           </div>
 
-          <section className="gallery-clean-cta" aria-labelledby="gallery-clean-cta-title">
-            <p>Ready to choose?</p>
-            <h2 id="gallery-clean-cta-title">Find your Serenity house.</h2>
-            <div><Link href="/houses">View all houses <ArrowUpRight size={16} aria-hidden="true" /></Link><Link href="/contact">Ask a question <ArrowUpRight size={16} aria-hidden="true" /></Link></div>
-          </section>
         </>
       ) : null}
 

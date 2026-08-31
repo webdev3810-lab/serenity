@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, CalendarPlus, Check, Copy, ExternalLink, Link2, Pause, Pencil, Play, RefreshCw, Save, ShieldCheck, TestTube2, Trash2, Unplug, X } from "lucide-react";
+import { AlertTriangle, CalendarPlus, Check, Copy, ExternalLink, Link2, LoaderCircle, Pause, Pencil, Play, RefreshCw, Save, ShieldCheck, TestTube2, Trash2, Unplug, X } from "lucide-react";
 import { CALENDAR_PLATFORM_LABELS, CALENDAR_PLATFORMS, type CalendarPlatform } from "@/src/lib/calendar/types";
 import { todayIso } from "@/src/lib/booking";
 
@@ -85,7 +85,7 @@ function MonthlyBlockCalendar({ items }: { items: CalendarItem[] }) {
   const cells = [...Array.from({ length: leading }, () => null), ...Array.from({ length: daysInMonth }, (_, index) => index + 1)];
   const sourceTone: Record<string, string> = { direct: "bg-[#2D2521]", airbnb: "bg-[#C2654D]", vrbo: "bg-[#56706A]", stayz: "bg-[#88715F]" };
 
-  return <div className="border border-[#D8CCC4] bg-white">
+  return <div className="admin-calendar-grid">
     <div className="flex items-center justify-between border-b border-[#D8CCC4] px-3 py-3">
       <button type="button" className="btn-secondary min-h-9 px-3 text-xs" onClick={() => setOffset((current) => current - 1)}>Previous</button>
       <p className="font-extrabold text-[#2D2521]">{label}</p>
@@ -284,13 +284,13 @@ export default function CalendarSyncManager() {
   const activeProperties = useMemo(() => properties.filter((property) => property.slug), [properties]);
   const wizardProperty = activeProperties.find((property) => property.id === wizardPropertyId) ?? activeProperties[0];
 
-  if (loading) return <div className="card bg-white p-8 text-sm text-stone-600">Loading calendar connections…</div>;
+  if (loading) return <div className="card admin-loading-state" role="status"><LoaderCircle size={18} className="animate-spin" aria-hidden="true" /><span>Loading calendar connections…</span></div>;
 
   return <div className="grid gap-6">
-    <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+    <header className="admin-page-header flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
       <div><p className="admin-eyebrow">Availability protection</p><h2 className="admin-page-title">Calendar sync</h2><p className="admin-page-description">Connect each private iCal feed server-side, export clean Serenity date blocks, and keep a final database conflict check before checkout.</p></div>
       <button type="button" className="btn-primary inline-flex min-h-11 items-center justify-center gap-2" onClick={() => void sync()} disabled={Boolean(busy)}><RefreshCw size={16} className={busy.startsWith("sync:") ? "animate-spin" : ""} /> Sync all calendars</button>
-    </div>
+    </header>
     {message && <div className="admin-notice is-success" role="status"><Check size={18} />{message}</div>}
     {error && <div className="admin-notice is-error" role="alert"><AlertTriangle size={18} />{error}</div>}
 

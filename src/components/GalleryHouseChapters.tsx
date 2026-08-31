@@ -81,7 +81,7 @@ export default function GalleryHouseChapters({ properties }: GalleryHouseChapter
               className="gallery-house-scroll-expand"
             >
               <div className="gallery-house-overlay-copy">
-                <p className="gallery-house-kicker"><span>{String(index + 1).padStart(2, "0")}</span> House chapter</p>
+                <p className="gallery-house-kicker">House chapter</p>
                 <h2 id={`gallery-house-title-${property.slug}`}>{name}</h2>
                 <p>{property.shortDescription}</p>
                 <div className="gallery-house-details">
@@ -107,7 +107,7 @@ export default function GalleryHouseChapters({ properties }: GalleryHouseChapter
               <div className="container">
                 <div className="gallery-masonry-heading">
                   <div>
-                    <p className="gallery-masonry-kicker">{String(index + 1).padStart(2, "0")} · {name}</p>
+                    <p className="gallery-masonry-kicker">{name}</p>
                     <h3 id={`gallery-masonry-title-${property.slug}`}>A closer look at {name}.</h3>
                     <p>Browse every available photo in the same order as the house listing.</p>
                   </div>

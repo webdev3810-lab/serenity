@@ -1,27 +1,28 @@
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
-import { GsapFadeIn, GsapStagger } from "./AnimatedSection";
+import { GsapFadeIn } from "./AnimatedSection";
+import { GsapServiceWipe } from "./GsapServiceWipe";
 import ScrollWipeText from "./ScrollWipeText";
 
 const SERVICES = [
   {
     title: "Pet-friendly homes",
-    description: "Comfortable private houses where guests can stay with their pets.",
+    description: "Private homes where guests can comfortably settle in with their pets.",
     href: "/houses",
   },
   {
-    title: "Easy parking",
-    description: "Convenient off-street parking makes every arrival and daily trip easier.",
+    title: "Convenient parking",
+    description: "Off-street parking makes every arrival and daily trip seamless.",
     href: "/houses",
   },
   {
-    title: "Fully furnished",
-    description: "Ready-to-live-in homes with kitchens, bedrooms, laundry, and everyday essentials.",
+    title: "Move-in-ready comfort",
+    description: "Thoughtfully prepared homes with full kitchens, laundries, and everyday essentials.",
     href: "/houses",
   },
   {
-    title: "Clean and ready",
-    description: "Fresh, well-prepared homes with a calm and comfortable standard for every stay.",
+    title: "Prepared for your arrival",
+    description: "Fresh, meticulously prepared environments ensuring a calm standard for every stay.",
     href: "/houses",
   },
 ];
@@ -39,7 +40,7 @@ const COLORS = [
 
 // Abstract Line Graphic 1 (Radial Sunburst)
 const GraphicOne = () => (
-  <svg className="absolute -bottom-16 -left-16 w-80 h-80 opacity-20 pointer-events-none" viewBox="0 0 100 100">
+  <svg className="service-graphic absolute -bottom-16 -left-16 w-80 h-80 opacity-20 pointer-events-none" viewBox="0 0 100 100" data-graphic-type="radial">
     <g transform="translate(50, 50)">
       {Array.from({ length: 72 }).map((_, i) => (
         <line 
@@ -57,7 +58,7 @@ const GraphicOne = () => (
 
 // Abstract Line Graphic 2 (Vertical Ascending/Descending)
 const GraphicTwo = () => (
-  <svg className="absolute bottom-0 right-0 w-full h-48 opacity-20 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+  <svg className="service-graphic absolute bottom-0 right-0 w-full h-48 opacity-20 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none" data-graphic-type="vertical">
     {Array.from({ length: 60 }).map((_, i) => {
       // Create a pattern of increasing heights with a sharp drop
       let height = 0;
@@ -83,7 +84,7 @@ const GraphicTwo = () => (
 
 // Abstract Line Graphic 3 (Horizontal Chevron)
 const GraphicThree = () => (
-  <svg className="absolute bottom-10 -right-10 w-72 h-48 opacity-20 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+  <svg className="service-graphic absolute bottom-10 -right-10 w-72 h-48 opacity-20 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none" data-graphic-type="horizontal">
     {Array.from({ length: 25 }).map((_, i) => {
       const y = 10 + i * 3.5;
       // create a gap that forms a chevron <
@@ -105,11 +106,11 @@ export default function HomepageServicesSection() {
     <section className="bg-[#F9F8F6] py-32 px-4 sm:px-6 overflow-hidden">
       <GsapFadeIn className="w-full max-w-5xl mx-auto text-center mb-20">
         <ScrollWipeText className="editorial-heading text-stone-900 max-w-4xl mx-auto leading-tight">
-          Accommodation for every kind of stay — a clear perspective that guides every decision we make.
+          Comfort for every kind of stay — a clear perspective that guides every decision we make.
         </ScrollWipeText>
       </GsapFadeIn>
 
-      <GsapStagger className="w-full max-w-[96rem] mx-auto grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2" selector=".service-card">
+      <GsapServiceWipe className="w-full max-w-[96rem] mx-auto grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2">
         {SERVICES.map((service, idx) => {
           const colorClass = COLORS[idx % COLORS.length];
           const number = String(idx + 1).padStart(2, "0");
@@ -122,7 +123,7 @@ export default function HomepageServicesSection() {
               className={`service-card block group relative h-[31rem] p-8 sm:h-[34rem] sm:p-10 xl:h-[36rem] flex flex-col justify-between transition-transform duration-500 hover:scale-[1.01] overflow-hidden ${colorClass}`}
             >
               <div className="relative z-10">
-                <h3 className="text-xl md:text-2xl font-bold mb-3 flex items-center justify-between font-sans">
+                <h3 className="font-marcellus text-xl md:text-2xl font-bold mb-3 flex items-center justify-between">
                   {service.title}
                   <ArrowUpRight size={24} className="opacity-0 -translate-x-4 translate-y-4 transition-all duration-300 ease-out group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0" />
                 </h3>
@@ -140,7 +141,7 @@ export default function HomepageServicesSection() {
             </Link>
           );
         })}
-      </GsapStagger>
+      </GsapServiceWipe>
     </section>
   );
 }

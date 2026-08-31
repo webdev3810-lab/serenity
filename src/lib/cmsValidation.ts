@@ -46,11 +46,6 @@ export const CMS_LIMITS = {
   social_url: 300,
   booking_enquiry_email: 120,
   corporate_enquiry_email: 120,
-  promo_badge: 32,
-  promo_message: 120,
-  promo_mobile_message: 90,
-  promo_code: 40,
-  promo_ends_at: 40,
   footer_text: 220,
   review_text: 1000,
   admin_notes: 1000,
@@ -243,11 +238,6 @@ export function validateSiteSettings(payload: CmsPayload) {
   addTextError(errors, "Booking enquiry email", payload.booking_enquiry_email, CMS_LIMITS.booking_enquiry_email);
   addTextError(errors, "Corporate enquiry email", payload.corporate_enquiry_email, CMS_LIMITS.corporate_enquiry_email);
   addTextError(errors, "Address", payload.address, CMS_LIMITS.nearby_location);
-  addTextError(errors, "Promo badge", payload.promo_badge, CMS_LIMITS.promo_badge);
-  addTextError(errors, "Promo message", payload.promo_message, CMS_LIMITS.promo_message);
-  addTextError(errors, "Mobile promo message", payload.promo_mobile_message, CMS_LIMITS.promo_mobile_message);
-  addTextError(errors, "Promo code", payload.promo_code, CMS_LIMITS.promo_code);
-  addTextError(errors, "Promo end time", payload.promo_ends_at, CMS_LIMITS.promo_ends_at);
   addTextError(errors, "Footer text", payload.footer_text, CMS_LIMITS.footer_text);
   addEmailError(errors, "Contact email", payload.contact_email, true);
   addEmailError(errors, "Booking enquiry email", payload.booking_enquiry_email, true);
