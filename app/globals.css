@@ -9826,10 +9826,10 @@ h4,
   position: relative;
   display: flex;
   height: calc(100svh - 8rem);
-  min-height: 0;
+  min-height: 36rem;
   overflow: hidden;
   isolation: isolate;
-  background: #60615e;
+  background: var(--deep-brown);
   color: var(--background);
 }
 
@@ -9844,7 +9844,7 @@ h4,
 .serenity-hero-media {
   z-index: -3;
   overflow: hidden;
-  background: #60615e;
+  background: var(--deep-brown);
 }
 
 .serenity-hero-image {
@@ -9862,7 +9862,7 @@ h4,
   height: 100%;
   object-fit: cover;
   object-position: center;
-  filter: saturate(0.76) sepia(0.24) hue-rotate(-9deg) contrast(0.92) brightness(0.78);
+  filter: saturate(0.74) sepia(0.18) hue-rotate(-9deg) contrast(0.92) brightness(0.74);
   transform: scale(1.04);
 }
 
@@ -9949,9 +9949,9 @@ h4,
   z-index: -2;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(38, 31, 26, 0.48) 0%, rgba(38, 31, 26, 0.08) 26%, rgba(38, 31, 26, 0.18) 63%, rgba(38, 31, 26, 0.64) 100%),
-    linear-gradient(110deg, rgba(183, 132, 62, 0.15), rgba(118, 78, 33, 0.07) 52%, rgba(210, 160, 77, 0.13)),
-    radial-gradient(ellipse at center, rgba(29, 24, 21, 0.04) 16%, rgba(29, 24, 21, 0.36) 100%);
+    linear-gradient(90deg, rgba(45, 38, 34, 0.84) 0%, rgba(45, 38, 34, 0.62) 28%, rgba(45, 38, 34, 0.24) 64%, rgba(45, 38, 34, 0.08) 100%),
+    linear-gradient(180deg, rgba(45, 38, 34, 0.26) 0%, rgba(45, 38, 34, 0.04) 43%, rgba(45, 38, 34, 0.68) 100%),
+    radial-gradient(ellipse at 72% 42%, rgba(45, 38, 34, 0) 12%, rgba(45, 38, 34, 0.28) 100%);
 }
 
 .serenity-hero-grain {
@@ -9967,60 +9967,41 @@ h4,
   position: relative;
   z-index: 1;
   display: grid;
-  width: min(100% - clamp(2rem, 8vw, 10rem), 100rem);
+  width: min(100% - clamp(2rem, 8vw, 10rem), 108rem);
   height: 100%;
   min-height: 0;
   margin-inline: auto;
   padding-block: clamp(1.5rem, 4vw, 3.5rem);
-  grid-template-rows: auto 1fr auto;
-}
-
-.serenity-hero-bottom-lines {
-  position: absolute;
-  top: calc(50% + clamp(6rem, 9vw, 11rem));
-  right: 0;
-  left: 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: clamp(2rem, 8vw, 10rem);
-  width: 100%;
-}
-
-.serenity-hero-side-line {
-  max-width: 19ch;
-  margin: 0;
-  color: #faf8f5;
-  font-family: var(--font-display);
-  font-size: clamp(1.2rem, 2.6vw, 2.8rem);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.05;
-  text-shadow: 0 0.2rem 1.5rem rgba(29, 24, 21, 0.4);
-  text-wrap: balance;
-  animation: serenity-hero-rise 700ms 430ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.serenity-hero-side-line-right {
-  text-align: right;
-  animation-delay: 520ms;
+  grid-template-rows: 1fr auto;
 }
 
 .serenity-hero-copy {
   position: absolute;
   top: 50%;
-  left: 50%;
-  width: min(100% - 1rem, 90rem);
-  transform: translate(-50%, -50%);
-  max-width: 90rem;
+  left: 0;
+  width: min(100%, 54rem);
+  transform: translateY(-50%);
   padding-block: 2rem;
-  text-align: center;
+  text-align: left;
+}
+
+.serenity-hero-eyebrow {
+  margin: 0 0 clamp(1.1rem, 2vw, 1.8rem);
+  color: rgba(250, 248, 245, 0.86);
+  font-family: var(--font-sans);
+  font-size: clamp(0.62rem, 0.8vw, 0.78rem);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  text-shadow: 0 0.2rem 1rem rgba(29, 24, 21, 0.45);
+  animation: serenity-hero-rise 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .serenity-hero-title {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   margin: 0;
   color: var(--background);
   font-family: var(--font-display);
@@ -10031,72 +10012,143 @@ h4,
 
 .serenity-hero-title-main {
   max-width: 100%;
-  overflow-wrap: anywhere;
   color: #faf8f5;
-  font-size: clamp(4.5rem, 16.5vw, 15rem);
+  font-size: clamp(4.1rem, 8.5vw, 8.75rem);
   font-weight: 400;
-  letter-spacing: clamp(0.01em, 0.45vw, 0.035em);
-  line-height: 0.82;
+  letter-spacing: -0.045em;
+  line-height: 0.83;
   text-shadow: 0 0.2rem 2rem rgba(29, 24, 21, 0.3);
-  white-space: nowrap;
+  text-wrap: balance;
   animation: serenity-hero-rise 850ms 100ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .serenity-hero-title-sub {
-  margin-top: clamp(1.1rem, 2.5vw, 2.2rem);
+  margin-top: clamp(0.55rem, 1.1vw, 1rem);
   color: #faf8f5;
-  font-size: clamp(1.35rem, 3vw, 2.8rem);
+  font-size: clamp(2.6rem, 5.1vw, 5.4rem);
   font-family: inherit;
-  font-style: normal;
+  font-style: italic;
   font-weight: 400;
-  letter-spacing: 0.01em;
-  line-height: 1;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
   animation: serenity-hero-rise 850ms 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .serenity-hero-actions {
-  display: grid;
-  justify-items: center;
-  gap: 1rem;
-  margin-top: clamp(1.4rem, 3vw, 2.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: clamp(1rem, 2vw, 1.8rem);
+  margin-top: clamp(1.65rem, 3vw, 2.4rem);
   animation: serenity-hero-rise 850ms 340ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .serenity-hero-support {
-  max-width: 42rem;
-  margin: 0;
+  max-width: 40rem;
+  margin: clamp(1.5rem, 2.4vw, 2rem) 0 0;
   color: rgba(250, 248, 245, 0.92);
   font-family: var(--font-sans);
-  font-size: clamp(0.82rem, 1.25vw, 1.05rem);
-  line-height: 1.5;
+  font-size: clamp(0.95rem, 1.25vw, 1.12rem);
+  line-height: 1.65;
   text-wrap: balance;
   text-shadow: 0 0.2rem 1.5rem rgba(29, 24, 21, 0.55);
 }
 
 .serenity-hero-cta {
   display: inline-flex;
-  min-height: 2.8rem;
+  min-height: 3.2rem;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(250, 248, 245, 0.75);
-  border-radius: 999px;
-  padding: 0.75rem 1.35rem;
+  gap: 0.7rem;
+  border: 1px solid #faf8f5;
+  border-radius: 0;
+  padding: 0.85rem 1.25rem;
   color: #2d2622;
   background: #faf8f5;
   font-family: var(--font-sans);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.13em;
   text-decoration: none;
   text-transform: uppercase;
-  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
 }
 
 .serenity-hero-cta:hover,
 .serenity-hero-cta:focus-visible {
   color: #faf8f5;
   background: #2d2622;
+  border-color: #2d2622;
   transform: translateY(-1px);
+}
+
+.serenity-hero-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3.2rem;
+  color: #faf8f5;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-decoration: none;
+  text-transform: uppercase;
+  text-shadow: 0 0.2rem 1rem rgba(29, 24, 21, 0.5);
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.serenity-hero-text-link:hover,
+.serenity-hero-text-link:focus-visible {
+  color: #eae1dd;
+  transform: translateY(-1px);
+}
+
+.serenity-hero-stats {
+  display: grid;
+  grid-row: 2;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(100%, 74rem);
+  margin-top: clamp(2rem, 5vw, 4rem);
+  border: 1px solid rgba(250, 248, 245, 0.26);
+  background: rgba(45, 38, 34, 0.84);
+  box-shadow: 0 1.25rem 3rem rgba(29, 24, 21, 0.18);
+  backdrop-filter: blur(0.6rem);
+  animation: serenity-hero-rise 800ms 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.serenity-hero-stat {
+  display: flex;
+  min-height: clamp(5rem, 8vw, 6.5rem);
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.85rem clamp(0.8rem, 1.8vw, 1.7rem);
+  border-right: 1px solid rgba(250, 248, 245, 0.2);
+}
+
+.serenity-hero-stat:last-child {
+  border-right: 0;
+}
+
+.serenity-hero-stat strong {
+  color: #faf8f5;
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 2.6vw, 2.55rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+}
+
+.serenity-hero-stat span {
+  color: rgba(250, 248, 245, 0.7);
+  font-family: var(--font-sans);
+  font-size: clamp(0.52rem, 0.64vw, 0.68rem);
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  line-height: 1.3;
+  text-transform: uppercase;
 }
 
 @keyframes serenity-hero-drift {
@@ -10112,7 +10164,7 @@ h4,
 @media (max-width: 767px) {
   .serenity-hero,
   .serenity-hero-shell {
-    height: calc(100svh - 5.75rem);
+    height: max(42rem, calc(100svh - 5.75rem));
     min-height: 0;
   }
 
@@ -10121,36 +10173,63 @@ h4,
     padding-block: 1.35rem 1.75rem;
   }
 
+  .serenity-hero-copy {
+    top: 43%;
+    width: 100%;
+  }
+
+  .serenity-hero-eyebrow {
+    max-width: 28rem;
+    margin-bottom: 1.1rem;
+    font-size: 0.58rem;
+    letter-spacing: 0.16em;
+  }
+
   .serenity-hero-title-main {
     max-width: 100%;
-    font-size: clamp(3.15rem, 16vw, 5.6rem);
+    font-size: clamp(3.5rem, 16vw, 5.8rem);
     white-space: normal;
   }
 
   .serenity-hero-title-sub {
-    font-size: clamp(1.2rem, 5.8vw, 1.7rem);
+    font-size: clamp(2.45rem, 13vw, 4.3rem);
   }
 
   .serenity-hero-actions {
-    margin-top: 1.2rem;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 1.35rem;
   }
 
-  .serenity-hero-bottom-lines {
-    top: auto;
-    bottom: 1rem;
-    align-items: flex-end;
-    flex-direction: row;
-    justify-content: space-between;
-    gap: 1rem;
+  .serenity-hero-support {
+    margin-top: 1.35rem;
+    font-size: 0.9rem;
   }
 
-  .serenity-hero-side-line {
-    max-width: 45%;
-    font-size: clamp(0.95rem, 4.8vw, 1.35rem);
+  .serenity-hero-cta,
+  .serenity-hero-text-link {
+    min-height: 3rem;
   }
 
-  .serenity-hero-side-line-right {
-    align-self: flex-end;
+  .serenity-hero-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    margin-top: 1.35rem;
+  }
+
+  .serenity-hero-stat {
+    min-height: 4.9rem;
+    padding: 0.8rem 0.7rem;
+    border-bottom: 1px solid rgba(250, 248, 245, 0.2);
+  }
+
+  .serenity-hero-stat:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .serenity-hero-stat:nth-last-child(-n + 2) {
+    border-bottom: 0;
   }
 }
 
@@ -10168,10 +10247,11 @@ h4,
   }
 
   .serenity-hero-image.is-active .serenity-hero-image-asset,
+  .serenity-hero-eyebrow,
   .serenity-hero-title-main,
   .serenity-hero-title-sub,
   .serenity-hero-actions,
-  .serenity-hero-side-line {
+  .serenity-hero-stats {
     animation: none;
   }
 }

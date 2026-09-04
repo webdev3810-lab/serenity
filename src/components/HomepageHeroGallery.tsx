@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { ArrowDown, ArrowRight } from "lucide-react";
 
 export type HomepageHeroImage = {
   type?: "image" | "video";
@@ -56,6 +58,13 @@ export default function HomepageHeroGallery({
       void video.play().catch(() => undefined);
     });
   }, [activeIndex, images, reducedMotion]);
+
+  const heroStats = [
+    ["3", "ADJACENT HOMES"],
+    ["5 min", "WALK TO PAKENHAM STATION"],
+    ["8+ yrs", "HOSTING EXPERIENCE"],
+    ["1 contact", "ENQUIRY TO CHECKOUT"],
+  ] as const;
 
   return (
     <section className="serenity-hero" aria-labelledby="homepage-hero-title">
@@ -119,15 +128,31 @@ export default function HomepageHeroGallery({
 
       <div className="serenity-hero-shell">
         <div className="serenity-hero-copy">
+          <p className="serenity-hero-eyebrow">FURNISHED HOMES · PAKENHAM, VICTORIA</p>
           <h1 id="homepage-hero-title" className="serenity-hero-title">
             <span className="serenity-hero-title-main">{heading}</span>
             <span className="serenity-hero-title-sub">{tagline}</span>
           </h1>
+          <p className="serenity-hero-support">
+            Private whole-home stays for families, project teams, and longer visits—thoughtfully prepared and close to everything that matters.
+          </p>
+          <div className="serenity-hero-actions">
+            <Link href="/houses" className="serenity-hero-cta">
+              Explore the homes <ArrowRight size={16} aria-hidden="true" />
+            </Link>
+            <Link href="/corporate-stays" className="serenity-hero-text-link">
+              Corporate stays <ArrowDown size={15} aria-hidden="true" />
+            </Link>
+          </div>
         </div>
 
-        <div className="serenity-hero-bottom-lines" aria-label="Serenity stays locations">
-          <p className="serenity-hero-side-line serenity-hero-side-line-left">Private homes · Pakenham</p>
-          <p className="serenity-hero-side-line serenity-hero-side-line-right">Furnished stays · Victoria</p>
+        <div className="serenity-hero-stats" aria-label="Serenity stay highlights">
+          {heroStats.map(([value, label]) => (
+            <div className="serenity-hero-stat" key={label}>
+              <strong>{value}</strong>
+              <span>{label}</span>
+            </div>
+          ))}
         </div>
       </div>
     </section>
