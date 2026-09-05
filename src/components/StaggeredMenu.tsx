@@ -101,7 +101,7 @@ export default function StaggeredMenu({
     };
   }, [mobileOpen]);
 
-  const headerClasses = "sticky top-0 border-b border-[#D8CCC4] bg-[#F7F4F1]/[.98] text-stone-900 shadow-[0_0.75rem_2rem_rgba(45,38,34,0.06)]";
+  const headerClasses = "sticky top-0 border-b border-[#D8CCC4] bg-white/[.98] text-stone-900 shadow-[0_0.75rem_2rem_rgba(45,38,34,0.06)]";
   const buttonClasses = "border-[#2D2622] bg-[#2D2622] text-white hover:bg-[#5A463A]";
   const menuButtonClasses = "text-stone-900 hover:bg-stone-100";
 
@@ -174,7 +174,7 @@ export default function StaggeredMenu({
           }}
           {...(!mobileOpen ? { inert: true } : {})}
         >
-          <div className={`absolute inset-y-0 left-0 flex w-[min(88vw,20rem)] min-w-[18rem] flex-col overflow-y-auto bg-[#F7F4F1] text-stone-900 shadow-[1.5rem_0_3rem_rgba(45,38,34,0.18)] transition-transform duration-300 ease-out ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+          <div className={`absolute inset-y-0 left-0 flex w-[min(88vw,20rem)] min-w-[18rem] flex-col overflow-y-auto bg-white text-stone-900 shadow-[1.5rem_0_3rem_rgba(45,38,34,0.18)] transition-transform duration-300 ease-out ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
             <nav className="flex-1 px-6 pb-8 pt-5 sm:px-8 sm:pt-6" aria-label="Site navigation">
               <ul className="space-y-0" role="list">
                 {items.map((item, itemIndex) => {

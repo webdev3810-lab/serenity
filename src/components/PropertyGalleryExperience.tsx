@@ -92,7 +92,7 @@ export default function PropertyGalleryExperience({ properties }: PropertyGaller
   }, [activePhoto, lightboxOpen, showNext, showPrevious]);
 
   if (!availableProperties.length) {
-    return <div className="mx-auto max-w-4xl rounded-none border border-dashed border-[#B99D88] bg-[#F7F4F1] px-6 py-16 text-center text-stone-600"><Images className="mx-auto mb-4 text-[#8B6B55]" size={28} /><h2 className="text-2xl font-semibold text-[#2D2622]">Photos will appear here soon.</h2><p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed">The Serenity gallery is ready for real house photos. No preview or placeholder images are shown publicly.</p></div>;
+    return <div className="mx-auto max-w-4xl rounded-none border border-dashed border-[#B99D88] bg-white px-6 py-16 text-center text-stone-600"><Images className="mx-auto mb-4 text-[#8B6B55]" size={28} /><h2 className="text-2xl font-semibold text-[#2D2622]">Photos will appear here soon.</h2><p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed">The Serenity gallery is ready for real house photos. No preview or placeholder images are shown publicly.</p></div>;
   }
 
   const selectHouse = (slug: string) => {
@@ -111,7 +111,7 @@ export default function PropertyGalleryExperience({ properties }: PropertyGaller
   return (
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10">
       <div className="overflow-hidden rounded-none border border-[#D8CCC4] bg-white shadow-[0_18px_60px_rgba(90,70,58,0.09)]">
-        <div className="border-b border-[#EAE1DD] bg-[#F7F4F1] px-4 py-4 sm:px-6 lg:px-8">
+        <div className="border-b border-[#EAE1DD] bg-white px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 overflow-x-auto pb-1" aria-label="Choose a house">
             {availableProperties.map((property) => {
               const active = property.slug === selectedProperty?.slug;

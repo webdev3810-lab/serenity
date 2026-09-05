@@ -3,16 +3,40 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { BedDouble, BriefcaseBusiness, CalendarDays, Car, ChevronLeft, ChevronRight, Dog, Images, KeyRound, ShieldCheck, X } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { AirVent, BedDouble, BriefcaseBusiness, CalendarDays, Car, Check, ChefHat, ChevronLeft, ChevronRight, Dog, DoorOpen, Images, KeyRound, Sparkles, Star, Tv, Utensils, WashingMachine, Wifi, X } from "lucide-react";
 import { ApproximateMap } from "@/src/components/ApproximateMap";
 import type { Property, PropertyImage } from "@/src/data/properties";
 import { BookingCard, MiniCalendar, RelatedHouses } from "@/src/components/BookingWidgets";
 import { Drawer, Modal } from "@/src/components/UI";
+import ScrollWipeText from "@/src/components/homepage/ScrollWipeText";
+import HomepageReviewsCarousel from "@/src/components/homepage/HomepageReviewsCarousel";
 import { calculatePrice, defaultGuests, formatAud, validateDateRange } from "@/src/lib/booking";
 import { formatAuNumber } from "@/src/lib/localization";
 import { useBooking } from "@/src/context/BookingContext";
 
 const isRemotePreviewImage = (src: string) => src.includes("a0.muscache.com");
+
+function amenityIcon(amenity: string): LucideIcon {
+  const label = amenity.toLowerCase();
+
+  if (label.includes("check-in") || label.includes("key safe")) return KeyRound;
+  if (label.includes("wi-fi") || label.includes("wifi")) return Wifi;
+  if (label.includes("kitchen")) return ChefHat;
+  if (label.includes("laundry") || label.includes("washing")) return WashingMachine;
+  if (label.includes("parking")) return Car;
+  if (label.includes("tv") || label.includes("television") || label.includes("netflix")) return Tv;
+  if (label.includes("heating")) return Sparkles;
+  if (label.includes("air conditioning")) return AirVent;
+  if (label.includes("dining")) return Utensils;
+  if (label.includes("entrance")) return DoorOpen;
+  if (label.includes("long-term")) return CalendarDays;
+  if (label.includes("pet")) return Dog;
+  if (label.includes("corporate")) return BriefcaseBusiness;
+  if (label.includes("family")) return BedDouble;
+
+  return Check;
+}
 
 type PhotoTourPhoto = PropertyImage & {
   categoryLabel: string;
@@ -140,35 +164,35 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
       </header>
 
       <main className="property-photo-tour-main">
-        <section className="property-photo-tour-intro" aria-labelledby="property-photo-tour-heading">
-          <div>
-            <p className="property-photo-tour-kicker">Private house · Pakenham</p>
-            <h3 id="property-photo-tour-heading">Inside {displayName}.</h3>
+        <section className="property-photo-tour-browser" aria-labelledby="property-photo-tour-heading">
+          <div className="property-photo-tour-browser-heading">
+            <h3 id="property-photo-tour-heading">Photo tour</h3>
           </div>
-          <div className="property-photo-tour-intro-copy">
-            <p>Move through every room, outdoor area and considered detail. Select any photograph for a closer view.</p>
-            <span>Curated from the published house gallery</span>
-            <nav className="property-photo-tour-category-nav" aria-label="Browse photo categories">
-              {photoCategories.map((category) => (
-                <a key={category.slug} href={`#photo-tour-category-${category.slug}`}>
-                  {category.label}<span>{category.images.length}</span>
-                </a>
-              ))}
-            </nav>
-          </div>
+          <nav className="property-photo-tour-category-nav" aria-label="Browse rooms and areas">
+            {photoCategories.map((category) => (
+              <button
+                key={category.slug}
+                type="button"
+                aria-label={`Scroll to ${category.label}`}
+                onClick={() => document.getElementById(`photo-tour-category-${category.slug}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              >
+                <span className="property-photo-tour-category-nav-thumb" aria-hidden="true">
+                  <Image src={category.images[0].src} alt="" fill sizes="(max-width: 640px) 94px, 124px" />
+                </span>
+                <span className="property-photo-tour-category-nav-label">{category.label}</span>
+              </button>
+            ))}
+          </nav>
         </section>
 
-        {photoCategories.map((category, categoryIndex) => (
-          <section key={category.slug} id={`photo-tour-category-${category.slug}`} className="property-photo-tour-category" aria-labelledby={`photo-tour-category-title-${category.slug}`}>
+        {photoCategories.map((category) => (
+          <section key={category.slug} id={`photo-tour-category-${category.slug}`} className="property-photo-tour-category property-photo-tour-room-section" aria-labelledby={`photo-tour-category-title-${category.slug}`}>
             <header className="property-photo-tour-category-heading">
               <div className="property-photo-tour-category-name">
-
                 <h4 id={`photo-tour-category-title-${category.slug}`}>{category.label}</h4>
+                <span>{category.images.length} {category.images.length === 1 ? "photo" : "photos"}</span>
               </div>
-              <div className="property-photo-tour-category-copy">
-                <span>{category.images.length} {category.images.length === 1 ? "photograph" : "photographs"}</span>
-                {category.description ? <p>{category.description}</p> : null}
-              </div>
+              {category.description ? <p>{category.description}</p> : null}
             </header>
             <div className="property-photo-tour-grid">
               {category.images.map((image) => (
@@ -176,7 +200,7 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
                   key={image.src + image.photoIndex}
                   type="button"
                   onClick={() => { setActiveIndex(image.photoIndex); setLightboxOpen(true); }}
-                  className={`property-photo-tour-item ${image.photoIndex === 0 ? "is-featured" : ""}`}
+                  className="property-photo-tour-item"
                   aria-label={`View photo ${image.photoIndex + 1} of ${photos.length}: ${image.alt}`}
                 >
                   <Image
@@ -185,13 +209,8 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
                     fill
                     unoptimized={isRemotePreviewImage(image.src)}
                     referrerPolicy={isRemotePreviewImage(image.src) ? "no-referrer" : undefined}
-                    sizes={image.photoIndex === 0 ? "(max-width: 1024px) 100vw, 50vw" : "(max-width: 640px) 50vw, 25vw"}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 60vw, 720px"
                   />
-
-                  <span className="property-photo-tour-meta">
-                    <span>{image.photoIndex === 0 ? "Featured view" : image.categoryLabel}</span>
-                    <span>View larger</span>
-                  </span>
                 </button>
               ))}
             </div>
@@ -253,7 +272,6 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
   const price = calculatePrice(property, booking.checkIn, booking.checkout, booking.guests ?? defaultGuests);
   const mobileDisplayPrice = price.nights > 0 ? price.total : property.nightlyPrice;
   const displayName = property.listingTitle?.trim() || property.name.replace(/\s+-\s+Whole$/i, "");
-  const adjacentSummary = property.nearbyLocations.find((location) => /beside|adjacent/i.test(location)) || "";
   const longerStaySummary = [
     property.weeklyDiscount > 0 ? `${property.weeklyDiscount}% weekly discount` : "",
     property.monthlyDiscount > 0 ? `${property.monthlyDiscount}% monthly discount` : "",
@@ -274,6 +292,18 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
     { Icon: BriefcaseBusiness, title: "Corporate stays", text: property.corporateInformation || property.corporateInstructions, show: property.corporateBookingAllowed },
     { Icon: CalendarDays, title: "Longer stays", text: longerStaySummary, show: property.longTermStaysAllowed && Boolean(longerStaySummary) },
   ].filter((item) => item.show && item.text);
+  const publishedReviews = (property.reviews ?? [])
+    .filter((review) => review.published)
+    .sort((a, b) => a.displayOrder - b.displayOrder);
+  const propertyReviewCards = publishedReviews.slice(0, 6).map((review) => ({
+    id: review.id,
+    reviewerName: review.reviewerName,
+    reviewText: review.reviewText,
+    propertyName: displayName,
+    propertySlug: property.slug,
+    reviewDate: review.reviewDate,
+    reviewDateLabel: review.reviewDateLabel,
+  }));
 
   useEffect(() => {
     let cancelled = false;
@@ -321,7 +351,7 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
           <header className="property-editorial-heading">
             <div>
               <p className="property-editorial-kicker">{property.propertyType} · {property.location}</p>
-              <h1>{displayName}</h1>
+              <ScrollWipeText as="h1">{displayName}</ScrollWipeText>
             </div>
             <div className="property-editorial-heading-copy">
               <p>{property.shortDescription}</p>
@@ -390,7 +420,7 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
               <section className="property-editorial-section property-editorial-highlights" aria-labelledby="stay-details-title">
                 <div className="property-editorial-section-heading">
                   <p>Stay details</p>
-                  <h2 id="stay-details-title">What this home includes.</h2>
+                  <ScrollWipeText as="h2" id="stay-details-title">What this home includes.</ScrollWipeText>
                 </div>
                 <div className="property-editorial-highlight-grid">
                   {stayHighlights.map(({ Icon, title, text }) => (
@@ -404,7 +434,7 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
               </section>
 
               {practicalDetails.length ? <section className="property-editorial-section" aria-labelledby="practical-details-title">
-                <div className="property-editorial-section-heading"><p>From your host</p><h2 id="practical-details-title">Practical information.</h2></div>
+                <div className="property-editorial-section-heading"><p>From your host</p><ScrollWipeText as="h2" id="practical-details-title">Practical information.</ScrollWipeText></div>
                 <div className="property-editorial-practical-grid">
                   {practicalDetails.map(([label, value]) => <div key={label as string}><h3>{label as string}</h3><p>{value as string}</p></div>)}
                 </div>
@@ -414,29 +444,38 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
               <section className="property-editorial-section property-about-section" aria-labelledby="about-house-title">
                 <div className="property-editorial-section-heading property-about-heading">
                   <p>About your stay</p>
-                  <h2 id="about-house-title">About this home.</h2>
+                  <ScrollWipeText as="h2" id="about-house-title">About this home.</ScrollWipeText>
                 </div>
 
                 <div className="property-about-copy">
                   <p>{property.fullDescription}</p>
                 </div>
 
-                {property.adjacentHousesAllowed && (adjacentSummary || property.corporateInstructions) ? (
-                  <div className="property-adjacent-callout">
-                    <div>
-                      <p className="property-adjacent-title">Multi-house stays</p>
-                      <p className="property-adjacent-text">{adjacentSummary || property.corporateInstructions}</p>
-                    </div>
-                  </div>
-                ) : null}
               </section>
+
+              {publishedReviews.length ? (
+                <section className="property-editorial-section property-editorial-reviews" aria-labelledby="reviews-title">
+                  <div className="property-editorial-section-heading">
+                    <p>Guest reviews</p>
+                    <ScrollWipeText as="h2" id="reviews-title">What guests say.</ScrollWipeText>
+                  </div>
+                  <div className="property-editorial-review-summary">
+                    <span>5.0</span>
+                    <div aria-label="Five-star guest rating" className="property-editorial-review-stars">
+                      {Array.from({ length: 5 }, (_, index) => <Star key={index} size={15} fill="currentColor" strokeWidth={0} aria-hidden="true" />)}
+                    </div>
+                    <p>Verified notes from guests who stayed at {displayName}.</p>
+                  </div>
+                  <HomepageReviewsCarousel reviews={propertyReviewCards} />
+                </section>
+              ) : null}
 
               {/* Sleeping arrangements */}
               {property.bedArrangements.length ? (
                 <section className="property-editorial-section" aria-labelledby="sleeping-title">
                   <div className="property-editorial-section-heading">
                     <p>Room by room</p>
-                    <h2 id="sleeping-title">Sleeping arrangements.</h2>
+                    <ScrollWipeText as="h2" id="sleeping-title">Sleeping arrangements.</ScrollWipeText>
                   </div>
                   <div className="property-editorial-sleep-grid">
                     {property.bedArrangements.map((room, index) => (
@@ -455,15 +494,18 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
                 <section className="property-editorial-section" aria-labelledby="amenities-title">
                   <div className="property-editorial-section-heading">
                     <p>Included</p>
-                    <h2 id="amenities-title">Amenities.</h2>
+                    <ScrollWipeText as="h2" id="amenities-title">Amenities.</ScrollWipeText>
                   </div>
                   <div className="property-editorial-amenities-grid">
-                    {property.amenities.slice(0, 10).map((amenity) => (
-                      <div key={amenity}>
-                        <ShieldCheck size={16} aria-hidden="true" />
-                        <span>{amenity}</span>
-                      </div>
-                    ))}
+                    {property.amenities.slice(0, 10).map((amenity) => {
+                      const AmenityIcon = amenityIcon(amenity);
+                      return (
+                        <div key={amenity}>
+                          <AmenityIcon size={16} strokeWidth={1.6} aria-hidden="true" />
+                          <span>{amenity}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                   {property.amenities.length > 10 ? (
                     <button className="property-editorial-button" onClick={() => setAmenitiesOpen(true)}>
@@ -477,7 +519,7 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
               <section id="availability" className="property-editorial-section property-editorial-availability" aria-labelledby="availability-title">
                 <div className="property-editorial-section-heading">
                   <p>Plan your stay</p>
-                  <h2 id="availability-title">Availability.</h2>
+                  <ScrollWipeText as="h2" id="availability-title">Availability.</ScrollWipeText>
                 </div>
                 <p className="property-editorial-intro">Choose your dates to check current availability and calculate the total in Australian dollars.</p>
                 <MiniCalendar property={property} today={today} checkIn={booking.checkIn} checkout={booking.checkout} blockedDates={blockedDates} availabilityLoading={availabilityLoading} onCheckInSelect={(checkIn) => setBooking({ propertySlug: property.slug, checkIn, checkout: "" })} onSelect={(checkIn, checkout) => setBooking({ propertySlug: property.slug, checkIn, checkout })} />
@@ -490,7 +532,7 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
                 <section className="property-editorial-section" aria-labelledby="rules-title">
                   <div className="property-editorial-section-heading">
                     <p>Before booking</p>
-                    <h2 id="rules-title">House rules.</h2>
+                    <ScrollWipeText as="h2" id="rules-title">House rules.</ScrollWipeText>
                   </div>
                   <div className="property-editorial-rule-grid">
                     {property.houseRules.map((rule) => <div key={rule}>{rule}</div>)}
@@ -502,7 +544,7 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
               <section className="property-editorial-section" aria-labelledby="location-title">
                 <div className="property-editorial-section-heading">
                   <p>{property.location}</p>
-                  <h2 id="location-title">Where you&apos;ll be.</h2>
+                  <ScrollWipeText as="h2" id="location-title">Where you&apos;ll be.</ScrollWipeText>
                 </div>
                 {property.nearbyLocations.length ? (
                   <div className="property-editorial-nearby-grid">
@@ -517,7 +559,7 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
               <section className="property-editorial-section" aria-labelledby="related-title">
                 <div className="property-editorial-section-heading">
                   <p>Continue browsing</p>
-                  <h2 id="related-title">Other Serenity homes.</h2>
+                  <ScrollWipeText as="h2" id="related-title">Other Serenity homes.</ScrollWipeText>
                 </div>
                 <RelatedHouses currentSlug={property.slug} properties={relatedProperties} />
               </section>
@@ -540,8 +582,8 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
             <p className="text-lg font-bold text-stone-900">{formatAud(mobileDisplayPrice)}</p>
             <p className="text-xs text-stone-500">{price.nights ? `${price.nights} night${price.nights > 1 ? "s" : ""} stay` : "Select dates"}</p>
           </div>
-          <button className="btn-primary text-sm px-6" onClick={() => setDrawerOpen(true)}>
-            Reserve
+          <button className="property-mobile-book-button btn-primary text-sm px-6" onClick={() => setDrawerOpen(true)}>
+            Book
           </button>
         </div>
       </div>
@@ -554,11 +596,15 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
 
       <Modal title="All House Amenities" open={amenitiesOpen} onClose={() => setAmenitiesOpen(false)}>
         <div className="grid gap-3 sm:grid-cols-2">
-          {property.amenities.map((amenity) => (
-            <div key={amenity} className="rounded-none border border-stone-200 p-3.5 text-xs font-semibold text-stone-800">
-              ✓ {amenity}
-            </div>
-          ))}
+          {property.amenities.map((amenity) => {
+            const AmenityIcon = amenityIcon(amenity);
+            return (
+              <div key={amenity} className="flex items-center gap-2.5 rounded-none border border-stone-200 p-3.5 text-xs font-semibold text-stone-800">
+                <AmenityIcon size={16} strokeWidth={1.6} aria-hidden="true" />
+                <span>{amenity}</span>
+              </div>
+            );
+          })}
         </div>
       </Modal>
     </>

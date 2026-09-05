@@ -247,8 +247,8 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
   ];
 
   return (
-    <main className="corporate-stays-page bg-[#F8F6F2] text-[#2D2622]">
-      <section className="bg-[#F7F4F1] py-20 lg:py-32">
+    <main className="corporate-stays-page bg-white text-[#2D2622]">
+      <section className="bg-white py-20 lg:py-32">
         <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
           <div className="grid gap-16 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-6 flex flex-col items-start justify-center">
@@ -299,7 +299,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                 [Receipt, "Company-ready", "Direct pricing, tax invoices, ABN billing, and purchase order support for easy administration."],
               ].map(([Icon, title, description]) => (
                 <article key={title as string} className="flex flex-col">
-                  <div className="mb-5 inline-flex h-12 w-12 items-center justify-center bg-[#F7F4F1] rounded-none border border-stone-200">
+                  <div className="mb-5 inline-flex h-12 w-12 items-center justify-center bg-white rounded-none border border-stone-200">
                     <Icon size={20} className="text-[#85644E]" />
                   </div>
                   <h3 className="font-marcellus text-xl text-stone-900 mb-3">{title as string}</h3>
@@ -311,7 +311,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
         </div>
       </section>
 
-      <section id="corporate-question" className="bg-[#F7F4F1] py-20 sm:py-28">
+      <section id="corporate-question" className="bg-white py-20 sm:py-28">
         <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-5 flex flex-col justify-center">
@@ -354,7 +354,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
         </div>
       </section>
 
-      <section id="corporate-booking" className="bg-[#EEE8E1] py-20 sm:py-28 border-y border-[#DED5CD]">
+      <section id="corporate-booking" className="bg-white py-20 sm:py-28 border-y border-[#DED5CD]">
         <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-16 items-start">
             <div className="lg:col-span-4 lg:sticky lg:top-32">
@@ -364,7 +364,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
             </div>
             
             <div className="lg:col-span-8">
-              <div className="bg-[#FCFBF9] p-6 sm:p-10 border border-[#DED5CD] shadow-sm">
+              <div className="bg-white p-6 sm:p-10 border border-[#DED5CD] shadow-sm">
               {formSubmitted ? (
                   <div className="flex min-h-[30rem] flex-col items-center justify-center text-center">
                     <div className="flex h-14 w-14 items-center justify-center rounded-none bg-[#2D2622] text-white"><CheckCircle2 size={27} /></div>
@@ -377,7 +377,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                 <form onSubmit={handleBookingSubmit} className="mt-8 space-y-8">
                   <div className="space-y-5">
                     <h4 className="font-marcellus text-xl text-stone-900 border-b border-stone-200 pb-3">1. Company Details</h4>
-                    <div className="bg-[#F7F4F1] p-5 border border-stone-200">
+                    <div className="bg-white p-5 border border-stone-200">
                       <FormInput id="corp-customer-id" label="Corporate customer ID *" required maxLength={80} value={formData.customerId} onChange={(event) => setFormData({ ...formData, customerId: event.target.value.toUpperCase() })} placeholder="Enter the ID issued by Serenity" />
                       <p className="mt-2 text-xs leading-5 text-stone-600">This ID is required for existing corporate customers and is stored with the reservation.</p>
                     </div>
@@ -503,7 +503,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                     {selectedDates.length > 0 && <div className={`mt-4 p-4 text-sm font-medium ${allSelectedAvailable ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : availabilityReady ? "bg-red-50 text-red-800 border border-red-200" : "bg-stone-50 text-stone-600 border border-stone-200"}`} aria-live="polite">{allSelectedAvailable ? "All selected houses are available in the shared Serenity calendar." : availabilityReady ? "At least one selected house is unavailable. Choose another house or date range." : "Checking bookings, manual blocks, and connected calendars…"}</div>}
                     
                     {corporateNights > 0 && selectedProperties.length > 0 && (
-                      <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border border-stone-300 bg-[#F7F4F1] p-6 shadow-sm">
+                      <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border border-stone-300 bg-white p-6 shadow-sm">
                         <div>
                           <p className="font-marcellus text-lg text-stone-900">Indicative estimate</p>
                           <p className="mt-1 text-sm text-stone-600">{selectedProperties.length} house{selectedProperties.length === 1 ? "" : "s"} · {corporateNights} night{corporateNights === 1 ? "" : "s"}</p>
@@ -565,14 +565,14 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
         </div>
       </section>
 
-      <section className="bg-[#F7F4F1] py-20 sm:py-28 border-y border-stone-200">
+      <section className="bg-white py-20 sm:py-28 border-y border-stone-200">
         <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
           <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#85644E] block mb-4">The setting</span>
-              <h2 className="display-font text-4xl sm:text-5xl font-bold text-stone-900">The comfort of home in Pakenham.</h2>
+              <ScrollWipeText as="h2" className="display-font text-4xl sm:text-5xl font-bold text-stone-900">The comfort of home in Pakenham.</ScrollWipeText>
             </div>
-            <Link href="/location" className="inline-flex items-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-stone-500 hover:text-stone-900 transition-colors border-b border-stone-300 hover:border-stone-900 pb-1">Discover the setting</Link>
+            <Link href="/contact" className="inline-flex items-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-stone-500 hover:text-stone-900 transition-colors border-b border-stone-300 hover:border-stone-900 pb-1">Discover the setting</Link>
           </div>
           <div className="h-[26rem] sm:h-[34rem] shadow-sm border border-stone-200"><ApproximateMap borderless fullHeight title="Serenity houses area" /></div>
         </div>

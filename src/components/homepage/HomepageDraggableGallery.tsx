@@ -10,6 +10,7 @@ import {
   type PointerEvent,
 } from "react";
 import { isApprovedHomepageMediaSource } from "@/src/lib/homepageMedia";
+import ScrollWipeText from "./ScrollWipeText";
 
 const AUTOPLAY_STEP = 2.5;
 const AUTOPLAY_INTERVAL_MS = 16;
@@ -151,7 +152,7 @@ export default function HomepageDraggableGallery({ images }: DraggableGalleryPro
     <section className="homepage-photo-rail" aria-labelledby="homepage-photo-rail-heading">
       <div className="homepage-photo-rail-intro">
         <div>
-          <h2 id="homepage-photo-rail-heading">A closer look at your next stay.</h2>
+          <ScrollWipeText as="h2" id="homepage-photo-rail-heading">A closer look at your next stay.</ScrollWipeText>
         </div>
       </div>
 

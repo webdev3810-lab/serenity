@@ -1,14 +1,13 @@
 import Link from "next/link";
 import {
   ArrowUpRight,
-  BriefcaseBusiness,
   CheckCircle2,
-  Home,
-  Users,
 } from "lucide-react";
 
 import { GsapFadeIn, GsapStagger } from "@/src/components/GsapAnimations";
 import ScrollWipeText from "@/src/components/homepage/ScrollWipeText";
+import HomepageReviewsSection from "@/src/components/homepage/HomepageReviewsSection";
+import type { Property } from "@/src/data/properties";
 
 const ABOUT_CONTENT = {
   hero: {
@@ -54,19 +53,16 @@ const ABOUT_CONTENT = {
       "From easy reservations to invoices and regular updates, we’re responsive, flexible, and easy to work with.",
     items: [
       {
-        icon: Home,
         number: "01",
         title: "Modern comfort",
         text: "A beautifully furnished, peaceful home gives you room to cook, work, rest, and feel at home.",
       },
       {
-        icon: Users,
         number: "02",
         title: "A convenient base",
         text: "Stay close to transport, shopping centres, restaurants, Pakenham Industrial Park, and the places worth exploring across Gippsland.",
       },
       {
-        icon: BriefcaseBusiness,
         number: "03",
         title: "Bookings made easy",
         text: "We have extensive experience with corporate bookings, insurance stays, and travel-agent bookings, keeping the process smooth and hassle-free.",
@@ -75,7 +71,19 @@ const ABOUT_CONTENT = {
   },
 };
 
-export function AboutPage() {
+export function AboutPage({ properties }: { properties: Property[] }) {
+  const reviews = properties.flatMap((property) =>
+    (property.reviews ?? []).map((review) => ({
+      id: review.id,
+      reviewerName: review.reviewerName,
+      reviewText: review.reviewText,
+      propertyName: property.name.replace(" - Whole", ""),
+      propertySlug: property.slug,
+      reviewDate: review.reviewDate,
+      reviewDateLabel: review.reviewDateLabel,
+    })),
+  );
+
   return (
     <main className="about-editorial-page">
       <section className="about-editorial-hero" aria-label="About Serenity">
@@ -105,8 +113,8 @@ export function AboutPage() {
                 <Link className="about-editorial-button about-editorial-button-primary" href="/houses">
                   Explore the houses <ArrowUpRight size={16} aria-hidden="true" />
                 </Link>
-                <Link className="about-editorial-button about-editorial-button-secondary" href="/location">
-                  See the location <ArrowUpRight size={16} aria-hidden="true" />
+                <Link className="about-editorial-button about-editorial-button-secondary" href="/contact">
+                  Find us &amp; get in touch <ArrowUpRight size={16} aria-hidden="true" />
                 </Link>
               </div>
             </div>
@@ -177,13 +185,12 @@ export function AboutPage() {
           </GsapFadeIn>
 
           <GsapStagger className="about-editorial-principle-list" selector=".about-editorial-principle">
-            {ABOUT_CONTENT.principles.items.map(({ icon: Icon, number, title, text }) => (
+            {ABOUT_CONTENT.principles.items.map(({ number, title, text }) => (
               <article className="about-editorial-principle" key={title}>
                 <span className="about-editorial-principle-number" aria-hidden="true">
                   {number}
                 </span>
                 <div className="about-editorial-principle-title">
-                  <Icon size={19} strokeWidth={1.5} aria-hidden="true" />
                   <h3>{title}</h3>
                 </div>
                 <p>{text}</p>
@@ -198,6 +205,19 @@ export function AboutPage() {
           </GsapStagger>
         </div>
       </section>
+
+      {reviews.length > 0 && (
+        <HomepageReviewsSection
+          id="guest-reviews"
+          eyebrow="Guestbook"
+          heading="A stay remembered in kind words."
+          description="Read the full collection of five-star notes from guests who stayed in the Serenity houses."
+          reviews={reviews}
+          maxReviews={reviews.length}
+          allReviewsHref="/houses"
+          allReviewsLabel="EXPLORE THE HOUSES"
+        />
+      )}
 
     </main>
   );

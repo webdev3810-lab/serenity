@@ -117,7 +117,6 @@ export function ApproximateMap({ compact = false, borderless = false, areaOnly =
       top: viewport.height / 2 + areaWorld.y - centerWorld.y + offset.y + controlClearance,
     };
   });
-
   const tiles = useMemo(() => {
     const startX = Math.floor((centerWorld.x - viewport.width / 2) / tileSize);
     const endX = Math.floor((centerWorld.x + viewport.width / 2) / tileSize);

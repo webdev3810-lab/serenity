@@ -10,6 +10,7 @@ import { useBooking } from "@/src/context/BookingContext";
 import { calculatePrice, formatAud, formatDateAu, nightsBetween, reservationCode, type PriceBreakdown } from "@/src/lib/booking";
 import { FormInput, TextArea } from "@/src/components/UI";
 import { PriceBreakdownView } from "@/src/components/BookingWidgets";
+import ScrollWipeText from "@/src/components/homepage/ScrollWipeText";
 
 const steps = ["Review stay", "Guest details", "Stripe payment", "Confirmation"];
 
@@ -129,7 +130,7 @@ export function ReviewBookingPage() {
         <section className="booking-review-panel">
           <header className="booking-review-header">
             <span className="booking-review-kicker">Direct reservation</span>
-            <h1>Review your stay.</h1>
+            <ScrollWipeText as="h1">Review your stay.</ScrollWipeText>
           </header>
 
           <article className="booking-review-property">
@@ -217,7 +218,7 @@ export function GuestDetailsPage() {
       <form onSubmit={submit} className="card p-6 bg-white max-w-4xl mx-auto space-y-6">
         <div>
           <span className="eyebrow">Guest Information</span>
-          <h1 className="text-3xl font-extrabold text-stone-900 mt-1">Enter Guest Contact Details</h1>
+          <ScrollWipeText as="h1" className="text-3xl font-extrabold text-stone-900 mt-1">Enter Guest Contact Details</ScrollWipeText>
           <p className="text-xs text-stone-500 mt-1">You are booking as a guest. No password or customer account creation needed.</p>
         </div>
 
@@ -238,7 +239,7 @@ export function GuestDetailsPage() {
           <TextArea id="requests" label="Special Requests or Notes" value={form.requests} onChange={(e) => update("requests", e.target.value)} />
         </div>
 
-        <div className="rounded-none border border-stone-200 bg-[#FAF8F5] p-5 space-y-4">
+        <div className="rounded-none border border-stone-200 bg-white p-5 space-y-4">
           <label className="flex items-center gap-3 font-bold text-sm text-stone-900 cursor-pointer">
             <input type="checkbox" checked={corporate} onChange={(e) => setCorporate(e.target.checked)} className="accent-[#7A4E2D] w-4 h-4" />
             Is a company paying for this stay? (Corporate / Tax Invoice)
@@ -360,11 +361,11 @@ export function PaymentPage() {
 
           <div>
             <span className="eyebrow">Secure PCI Payment</span>
-            <h1 className="text-3xl font-extrabold text-stone-900 mt-1">Stripe Checkout</h1>
+            <ScrollWipeText as="h1" className="text-3xl font-extrabold text-stone-900 mt-1">Stripe Checkout</ScrollWipeText>
             <p className="text-sm text-stone-500 mt-1">Complete your payment securely in Australian Dollars (AUD), then return here for your booking confirmation.</p>
           </div>
 
-          <div className="rounded-none border border-stone-200 bg-[#FAF8F5] p-5 space-y-3">
+          <div className="rounded-none border border-stone-200 bg-white p-5 space-y-3">
             <p className="font-bold text-stone-900">What happens next?</p>
             <ol className="list-decimal space-y-2 pl-5 text-sm leading-relaxed text-stone-600">
               <li>Review the secure Stripe payment page.</li>
@@ -442,7 +443,7 @@ export function ConfirmationPage() {
       <BookingFrame active={3}>
         <section className="card mx-auto max-w-2xl p-10 bg-white text-center space-y-4">
           <Loader2 className="mx-auto animate-spin text-[#7A4E2D]" size={34} aria-hidden="true" />
-          <h1 className="text-2xl font-extrabold text-stone-900">Confirming your Stripe payment…</h1>
+          <ScrollWipeText as="h1" className="text-2xl font-extrabold text-stone-900">Confirming your Stripe payment…</ScrollWipeText>
           <p className="text-sm text-stone-600">Please wait while we securely confirm your reservation.</p>
         </section>
       </BookingFrame>
@@ -453,7 +454,7 @@ export function ConfirmationPage() {
     return (
       <BookingFrame active={2}>
         <section className="card mx-auto max-w-2xl p-8 bg-white text-center space-y-4">
-          <h1 className="text-2xl font-extrabold text-stone-900">We could not confirm the payment</h1>
+          <ScrollWipeText as="h1" className="text-2xl font-extrabold text-stone-900">We could not confirm the payment</ScrollWipeText>
           <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-none p-4" role="alert">{verificationError}</p>
           <Link className="btn-primary inline-flex" href="/booking/payment">Return to payment</Link>
         </section>
@@ -470,11 +471,11 @@ export function ConfirmationPage() {
 
         <div>
           <span className="eyebrow">Reservation Confirmed</span>
-        <h1 className="text-4xl font-extrabold text-stone-900 mt-1">Booking Confirmation #{reference}</h1>
+        <ScrollWipeText as="h1" className="text-4xl font-extrabold text-stone-900 mt-1">Booking Confirmation #{reference}</ScrollWipeText>
           <p className="text-xs text-stone-500 mt-1">A confirmation receipt has been generated for your record.</p>
         </div>
 
-        <div className="grid gap-4 text-left sm:grid-cols-2 bg-[#FAF8F5] p-5 rounded-none border border-stone-200">
+        <div className="grid gap-4 text-left sm:grid-cols-2 bg-white p-5 rounded-none border border-stone-200">
           <Info label="Property" value={property.name} />
           <Info label="Dates" value={`${formatDateAu(booking.checkIn)} to ${formatDateAu(booking.checkout)}`} />
           <Info label="Guests" value={`${booking.guests.adults + booking.guests.children} guests, ${booking.guests.pets} pets`} />
@@ -505,7 +506,7 @@ export function ConfirmationPage() {
 
 function BookingFrame({ active, children }: { active: number; children: React.ReactNode }) {
   return (
-    <div className="section bg-[#FAF8F5] pt-8 pb-16">
+    <div className="section bg-white pt-8 pb-16">
       <div className="container">
         <BookingProgress active={active} />
         {children}
@@ -518,7 +519,7 @@ function MissingBooking() {
   return (
     <BookingFrame active={0}>
       <div className="card mx-auto max-w-xl p-8 bg-white text-center space-y-4">
-        <h1 className="text-3xl font-bold text-stone-900">Please select a house and stay dates first.</h1>
+        <ScrollWipeText as="h1" className="text-3xl font-bold text-stone-900">Please select a house and stay dates first.</ScrollWipeText>
         <p className="text-xs text-stone-600">Your reservation session requires a house selection, check-in, and checkout date.</p>
         <Link className="btn-primary inline-flex text-xs" href="/houses">
           Browse Serenity Houses

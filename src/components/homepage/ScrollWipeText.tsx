@@ -8,6 +8,7 @@ export interface ScrollWipeTextProps {
   className?: string;
   revealClassName?: string;
   tone?: "dark" | "light";
+  id?: string;
   "aria-label"?: string;
   style?: CSSProperties;
 }
@@ -23,6 +24,7 @@ export default function ScrollWipeText({
   className = "",
   revealClassName = "",
   tone = "dark",
+  id,
   "aria-label": ariaLabel,
   style,
 }: ScrollWipeTextProps) {
@@ -58,6 +60,7 @@ export default function ScrollWipeText({
         rootRef.current = node;
       }}
       className={`scroll-wipe-text scroll-wipe-text-${tone} ${className}`.trim()}
+      id={id}
       aria-label={ariaLabel}
       style={style}
     >

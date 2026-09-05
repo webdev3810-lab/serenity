@@ -185,7 +185,7 @@ export default function PillNav({
   };
 
   return (
-    <header className={`pill-nav-header sticky top-0 z-[80] transform-gpu border-b border-[#D8CCC4] bg-[#F7F4F1] text-[#2D2622] shadow-[0_0.75rem_2rem_rgba(45,38,34,0.06)] ${reducedMotion ? "transition-none" : "transition-transform duration-300 ease-out"} ${navHidden ? "-translate-y-full" : "translate-y-0"} ${className}`}>
+    <header className={`pill-nav-header sticky top-0 z-[80] transform-gpu border-b border-[#D8CCC4] bg-white text-[#2D2622] shadow-[0_0.75rem_2rem_rgba(45,38,34,0.06)] ${reducedMotion ? "transition-none" : "transition-transform duration-300 ease-out"} ${navHidden ? "-translate-y-full" : "translate-y-0"} ${className}`}>
       <div className="mx-auto flex h-[5.75rem] w-full max-w-[100rem] items-center gap-4 px-4 sm:px-8 lg:h-32 lg:px-12">
         <button
           ref={hamburgerRef}
@@ -201,7 +201,7 @@ export default function PillNav({
         </button>
 
         <Link href="/" aria-label="Serenity Stays home" className="pill-nav-brand relative z-10 flex shrink-0 items-center" onClick={closeMobileMenu}>
-          <Image src={logo} alt={logoAlt} width={148} height={112} priority className="h-20 w-auto object-contain lg:h-28" />
+          <Image src={logo} alt={logoAlt} width={148} height={112} priority className="h-14 w-auto object-contain lg:h-20" />
         </Link>
 
         <nav className="hidden min-w-0 flex-1 items-center justify-center md:flex" aria-label="Primary navigation">
@@ -229,7 +229,7 @@ export default function PillNav({
         </Link>
       </div>
 
-      <div ref={mobileMenuRef} id="pill-nav-mobile-menu" role="dialog" aria-modal="true" aria-label="Site navigation" aria-hidden={!mobileOpen} className="invisible absolute inset-x-4 top-[calc(100%+0.75rem)] z-[90] origin-top rounded-none border border-[#D8CCC4] bg-[#F7F4F1] p-4 opacity-0 shadow-[0_1rem_3rem_rgba(45,38,34,0.16)] md:hidden">
+      <div ref={mobileMenuRef} id="pill-nav-mobile-menu" role="dialog" aria-modal="true" aria-label="Site navigation" aria-hidden={!mobileOpen} className="invisible absolute inset-x-4 top-[calc(100%+0.75rem)] z-[90] origin-top rounded-none border border-[#D8CCC4] bg-white p-4 opacity-0 shadow-[0_1rem_3rem_rgba(45,38,34,0.16)] md:hidden">
         <nav aria-label="Mobile navigation">
           <ul className="m-0 flex list-none flex-col gap-1 p-0">
             {items.map((item) => (

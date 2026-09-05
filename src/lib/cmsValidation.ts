@@ -6,17 +6,6 @@ export const CMS_LIMITS = {
   section_description: 300,
   button_label: 28,
   hero_cta_href: 120,
-  intro_eyebrow: 60,
-  intro_heading: 80,
-  intro_lead: 300,
-  intro_body: 500,
-  intro_cta_label: 28,
-  intro_cta_href: 120,
-  intro_art_label: 32,
-  intro_art_heading: 80,
-  intro_art_card: 120,
-  intro_image_url: 500,
-  intro_image_path: 300,
   navigation_label: 24,
   property_name: 80,
   property_short_description: 220,
@@ -180,20 +169,6 @@ export function validateHomepageContent(payload: CmsPayload) {
   addTextError(errors, "Button label", payload.hero_cta_label, CMS_LIMITS.button_label);
   addTextError(errors, "Hero button link", payload.hero_cta_href, CMS_LIMITS.hero_cta_href);
   addHrefError(errors, "Hero button link", payload.hero_cta_href);
-  addTextError(errors, "Intro eyebrow", payload.intro_eyebrow, CMS_LIMITS.intro_eyebrow);
-  addTextError(errors, "Intro heading", payload.intro_heading, CMS_LIMITS.intro_heading);
-  addTextError(errors, "Intro lead", payload.intro_lead, CMS_LIMITS.intro_lead);
-  addTextError(errors, "Intro body", payload.intro_body, CMS_LIMITS.intro_body);
-  addTextError(errors, "Intro button label", payload.intro_cta_label, CMS_LIMITS.intro_cta_label);
-  addTextError(errors, "Intro button link", payload.intro_cta_href, CMS_LIMITS.intro_cta_href);
-  addHrefError(errors, "Intro button link", payload.intro_cta_href);
-  addTextError(errors, "Intro artwork label", payload.intro_art_label, CMS_LIMITS.intro_art_label);
-  addTextError(errors, "Intro artwork heading", payload.intro_art_heading, CMS_LIMITS.intro_art_heading);
-  addTextError(errors, "Intro artwork card", payload.intro_art_card, CMS_LIMITS.intro_art_card);
-  addTextError(errors, "Intro image 1 URL", payload.intro_image_1, CMS_LIMITS.intro_image_url);
-  addTextError(errors, "Intro image 1 path", payload.intro_image_1_path, CMS_LIMITS.intro_image_path);
-  addTextError(errors, "Intro image 2 URL", payload.intro_image_2, CMS_LIMITS.intro_image_url);
-  addTextError(errors, "Intro image 2 path", payload.intro_image_2_path, CMS_LIMITS.intro_image_path);
   addTextError(errors, "Featured heading", payload.featured_heading, CMS_LIMITS.section_heading);
   addTextError(errors, "Featured description", payload.featured_description, CMS_LIMITS.section_description);
   addTextError(errors, "Section heading", payload.section_heading, CMS_LIMITS.section_heading);

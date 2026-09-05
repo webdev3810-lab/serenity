@@ -34,7 +34,7 @@ export default function HomepageBenefitsSection({
   const propertyImages = imageProperty?.images?.map((img) => img.src) || [];
 
   return (
-    <section className={`bg-[#F9F8F6] pt-12 pb-24 overflow-hidden relative ${className}`}>
+    <section className={`bg-white pt-12 pb-24 overflow-hidden relative ${className}`}>
       {/* Top Meta Text */}
       <div className="flex justify-between text-[10px] sm:text-[11px] font-sans font-bold tracking-widest uppercase px-4 sm:px-8 mb-4 text-stone-500">
         <span>Pakenham, VIC 3810</span>
@@ -61,7 +61,7 @@ export default function HomepageBenefitsSection({
         <GsapStagger className="grid gap-3 sm:grid-cols-2" selector=".benefit-card">
           {benefits.map(({ icon: Icon, title, description: benefitDescription }) => (
             <article key={title} className="benefit-card rounded-none border border-stone-200 bg-white p-5 shadow-sm">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-none bg-[#F4F0EA] text-[#71836B]">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-none bg-[#F1F1F1] text-[#71836B]">
                 <Icon size={19} aria-hidden="true" />
               </span>
               <h3 className="mt-4 text-lg font-bold leading-tight text-stone-900">{title}</h3>

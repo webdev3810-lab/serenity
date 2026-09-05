@@ -1,101 +1,171 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, type PointerEvent } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Quote } from "lucide-react";
+import { ArrowRight, Quote, Star } from "lucide-react";
 import type { HomepageReview } from "./HomepageReviewsSection";
 
 export default function HomepageReviewsCarousel({ reviews }: { reviews: HomepageReview[] }) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0);
+  const dragRef = useRef({
+    pointerId: null as number | null,
+    startX: 0,
+    startScrollLeft: 0,
+    lastX: 0,
+    lastTime: 0,
+    velocity: 0,
+    dragged: false,
+  });
+  const momentumFrameRef = useRef<number | null>(null);
+  const suppressClickRef = useRef(false);
 
-  const handleScroll = () => {
-    if (!trackRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = trackRef.current;
-    const maxScroll = scrollWidth - clientWidth;
-    setProgress(maxScroll > 0 ? scrollLeft / maxScroll : 0);
+  const stopMomentum = () => {
+    if (momentumFrameRef.current !== null) {
+      window.cancelAnimationFrame(momentumFrameRef.current);
+      momentumFrameRef.current = null;
+    }
   };
 
-  const scrollBy = (direction: 1 | -1) => {
-    if (!trackRef.current) return;
-    const scrollAmount = trackRef.current.clientWidth * 0.8;
-    trackRef.current.scrollBy({ left: scrollAmount * direction, behavior: "smooth" });
+  const continueMomentum = (initialVelocity: number) => {
+    const track = trackRef.current;
+    if (!track || Math.abs(initialVelocity) < 0.08) return;
+
+    let velocity = initialVelocity;
+    const step = () => {
+      const maxScrollLeft = track.scrollWidth - track.clientWidth;
+      const nextScrollLeft = Math.min(maxScrollLeft, Math.max(0, track.scrollLeft + velocity * 16));
+      track.scrollLeft = nextScrollLeft;
+      velocity *= 0.93;
+
+      if (Math.abs(velocity) < 0.08 || nextScrollLeft === 0 || nextScrollLeft === maxScrollLeft) {
+        momentumFrameRef.current = null;
+        return;
+      }
+      momentumFrameRef.current = window.requestAnimationFrame(step);
+    };
+
+    momentumFrameRef.current = window.requestAnimationFrame(step);
   };
 
-  // Hydration sync
-  useEffect(() => {
-    handleScroll();
-  }, []);
+  const beginDrag = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (!trackRef.current) return;
+    stopMomentum();
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startScrollLeft: trackRef.current.scrollLeft,
+      lastX: event.clientX,
+      lastTime: event.timeStamp,
+      velocity: 0,
+      dragged: false,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const drag = (event: PointerEvent<HTMLDivElement>) => {
+    if (!trackRef.current) return;
+    const state = dragRef.current;
+    if (state.pointerId !== event.pointerId) return;
+
+    const distance = event.clientX - state.startX;
+    if (Math.abs(distance) > 4) state.dragged = true;
+    trackRef.current.scrollLeft = state.startScrollLeft - distance;
+    const elapsed = Math.max(event.timeStamp - state.lastTime, 1);
+    const currentVelocity = -(event.clientX - state.lastX) / elapsed;
+    state.velocity = state.velocity * 0.7 + currentVelocity * 0.3;
+    state.lastX = event.clientX;
+    state.lastTime = event.timeStamp;
+    event.preventDefault();
+  };
+
+  const endDrag = (event: PointerEvent<HTMLDivElement>) => {
+    const state = dragRef.current;
+    if (state.pointerId !== event.pointerId) return;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    if (state.dragged) {
+      suppressClickRef.current = true;
+      window.setTimeout(() => {
+        suppressClickRef.current = false;
+      }, 0);
+      continueMomentum(state.velocity);
+    }
+    dragRef.current.pointerId = null;
+  };
 
   return (
-    <div className="w-full relative mt-16 mb-20">
-      {/* Track */}
+    <div className="relative mt-14 mb-10 w-[calc(100%+3rem)] -mx-6 sm:mt-16 sm:mb-12 sm:w-[calc(100%+5rem)] sm:-mx-10 lg:w-[calc(100%+8rem)] lg:-mx-16">
       <div 
         ref={trackRef}
-        onScroll={handleScroll}
-        className="flex w-full overflow-x-auto snap-x snap-mandatory no-scrollbar pb-12 pt-4"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        onPointerDown={beginDrag}
+        onPointerMove={drag}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onClickCapture={(event) => {
+          if (!suppressClickRef.current) return;
+          event.preventDefault();
+          event.stopPropagation();
+          suppressClickRef.current = false;
+        }}
+        className="flex w-full cursor-grab gap-5 select-none overflow-x-auto overscroll-x-contain px-6 pb-3 pt-4 active:cursor-grabbing sm:px-10 lg:px-16"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none", touchAction: "pan-y", WebkitOverflowScrolling: "touch" }}
       >
-        <div className="w-[5vw] md:w-[15vw] flex-shrink-0" /> {/* Left padding spacer */}
-        
         {reviews.map((review, index) => {
           const featured = index % 3 === 0;
+          const quoteLength = review.reviewText.replace(/\s+/g, " ").trim().length;
+          const quoteSize = quoteLength > 300
+            ? "text-[0.68rem] leading-[1.3] tracking-[-0.01em]"
+            : quoteLength > 200
+              ? "text-[0.78rem] leading-[1.28] tracking-[-0.012em]"
+              : quoteLength > 140
+                ? "text-[0.9rem] leading-[1.26] tracking-[-0.015em]"
+                : quoteLength > 100
+                  ? "text-[1rem] leading-[1.24] tracking-[-0.017em]"
+                  : quoteLength > 65
+                    ? "text-[1.12rem] leading-[1.22] tracking-[-0.018em]"
+                    : "text-[clamp(1.2rem,1.6vw,1.45rem)] leading-[1.2] tracking-[-0.02em]";
           return (
-            <div key={review.id} className="snap-center flex-shrink-0 w-[86vw] sm:w-[64vw] md:w-[48vw] lg:w-[38vw] xl:w-[31vw] mr-5 sm:mr-7 flex">
-              <div className={`group relative flex min-h-[24rem] w-full overflow-hidden rounded-none border shadow-[0_20px_55px_-38px_rgba(45,37,33,0.65)] transition-transform duration-500 hover:-translate-y-2 ${featured ? "border-[#5A463A] bg-[#2D2521] text-[#F7F4F1]" : "border-[#DDD1C8] bg-[#FBF9F7] text-stone-900"}`}>
-                <div className="flex w-full flex-col p-7 sm:min-h-[26rem] sm:p-9">
+            <div key={review.id} className="flex w-[78vw] max-w-[22rem] flex-shrink-0 sm:w-[22rem]">
+              <article className={`group relative flex aspect-square w-full overflow-hidden border shadow-[0_24px_60px_-42px_rgba(45,37,33,0.7)] transition-[transform,box-shadow] duration-500 hover:-translate-y-2 hover:shadow-[0_28px_65px_-38px_rgba(45,37,33,0.42)] ${featured ? "border-[#5A463A] bg-[#2D2521] text-[#F7F4F1]" : "border-[#DDD1C8] bg-[#FFFEFC] text-stone-900"}`}>
+                <div className="flex w-full flex-col p-6 sm:p-7">
                   <div className="flex items-center justify-between gap-4 border-b border-current/15 pb-5 text-[10px] font-bold uppercase tracking-[0.18em]">
-                    <span className={featured ? "text-[#D2C0B4]" : "text-[#8B6B55]"}>{String(index + 1).padStart(2, "0")} / guest note</span>
-                    <span className={featured ? "text-[#F7F4F1]/60" : "text-stone-400"}>{review.reviewDateLabel ?? review.reviewDate ?? ""}</span>
+                    <span className={featured ? "text-[#DCC9BA]" : "text-[#8B6B55]"}>{String(index + 1).padStart(2, "0")} <span className="mx-1 text-current/45">/</span> guest note</span>
+                    <time className={featured ? "text-[#F7F4F1]/60" : "text-stone-400"}>{review.reviewDateLabel ?? review.reviewDate ?? ""}</time>
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between gap-4">
-                    <span className={`rounded-none px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] ${featured ? "bg-[#F7F4F1]/10 text-[#F7F4F1]" : "bg-[#F0E8E1] text-[#5A463A]"}`}>
-                      {review.propertyName}
-                    </span>
-                    <Quote size={28} strokeWidth={1.2} className={featured ? "text-[#B99D88]" : "text-[#C8B5A8]"} aria-hidden="true" />
+                  <div className="mt-6 flex items-start justify-between gap-4">
+                    <div>
+                      <div className={`mb-3 flex gap-0.5 ${featured ? "text-[#DCC9BA]" : "text-[#B88A5A]"}`} aria-label="Five-star guest review">
+                        {Array.from({ length: 5 }, (_, star) => <Star key={star} size={12} fill="currentColor" strokeWidth={0} aria-hidden="true" />)}
+                      </div>
+                      <span className={`inline-flex px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] ${featured ? "bg-[#F7F4F1]/10 text-[#F7F4F1]" : "bg-[#F0E8E1] text-[#5A463A]"}`}>
+                        {review.propertyName}
+                      </span>
+                    </div>
+                    <Quote size={31} strokeWidth={1.1} className={featured ? "text-[#B99D88]" : "text-[#C8B5A8]"} aria-hidden="true" />
                   </div>
 
-                  <h3 className={`homepage-review-quote display-font mt-8 line-clamp-5 text-[clamp(1.65rem,2.5vw,2.5rem)] leading-[1.08] ${featured ? "text-[#F7F4F1]" : "text-stone-900"}`}>
+                  <h3 className={`homepage-review-quote display-font mt-7 break-words ${quoteSize} ${featured ? "text-[#F7F4F1]" : "text-stone-900"}`}>
                     &ldquo;{review.reviewText}&rdquo;
                   </h3>
 
                   <div className="mt-auto flex items-end justify-between gap-4 border-t border-current/15 pt-7">
-                    <div className="flex items-center gap-3">
-                      <span className={`h-px w-8 ${featured ? "bg-[#B99D88]" : "bg-[#B88A5A]"}`} aria-hidden="true" />
+                    <div>
                       <p className="text-[11px] font-bold uppercase tracking-[0.18em]">{review.reviewerName}</p>
+                      <p className={`mt-1 text-[9px] font-bold uppercase tracking-[0.15em] ${featured ? "text-[#F7F4F1]/55" : "text-stone-400"}`}>Verified guest</p>
                     </div>
                     <Link href={`/properties/${review.propertySlug}`} className={`group/link inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] transition-colors ${featured ? "text-[#F7F4F1]/65 hover:text-[#F7F4F1]" : "text-stone-400 hover:text-[#B88A5A]"}`}>
-                      View house
+                      View stay
                       <ArrowRight size={13} className="transition-transform group-hover/link:translate-x-1" aria-hidden="true" />
                     </Link>
                   </div>
                 </div>
-              </div>
+              </article>
             </div>
           );
         })}
-        
-        <div className="w-[5vw] md:w-[15vw] flex-shrink-0" /> {/* Right padding spacer */}
-      </div>
-
-      {/* Navigation Controls */}
-      <div className="flex items-center justify-between w-full max-w-5xl mx-auto px-6 sm:px-12">
-        <button onClick={() => scrollBy(-1)} className="p-3 rounded-none border border-stone-200 bg-white hover:bg-[#F4F0EA] hover:border-[#D2C0B4] transition-all duration-300 shadow-sm hover:shadow-md" aria-label="Previous">
-          <ArrowLeft size={18} strokeWidth={1.5} className="text-stone-800" />
-        </button>
-        
-        {/* Progress Bar */}
-        <div className="flex-1 mx-6 sm:mx-16 h-0.5 bg-stone-200 relative rounded-none overflow-hidden">
-          <div 
-            className="absolute top-0 left-0 h-full bg-[#B88A5A] transition-all duration-300 ease-out"
-            style={{ width: '15%', left: `${progress * 85}%` }}
-          />
-        </div>
-        
-        <button onClick={() => scrollBy(1)} className="p-3 rounded-none border border-stone-200 bg-white hover:bg-[#F4F0EA] hover:border-[#D2C0B4] transition-all duration-300 shadow-sm hover:shadow-md" aria-label="Next">
-          <ArrowRight size={18} strokeWidth={1.5} className="text-stone-800" />
-        </button>
       </div>
     </div>
   );

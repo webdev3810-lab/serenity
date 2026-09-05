@@ -19,9 +19,6 @@ export type { HomepageHeroImage } from "./HomepageHeroSection";
 export { default as HomepageHouseCard } from "./HomepageHouseCard";
 
 // Sections
-export { default as HomepageIntroSection } from "./HomepageIntroSection";
-export type { HomepageIntroSectionProps } from "./HomepageIntroSection";
-
 export { default as HomepageServicesSection } from "./HomepageServicesSection";
 
 export { default as HomepageFeaturedHousesSection } from "./HomepageFeaturedHousesSection";

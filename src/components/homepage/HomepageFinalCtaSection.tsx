@@ -29,7 +29,7 @@ export default function HomepageFinalCtaSection({
   const coverImage = coverProperty?.featuredImage || "";
 
   return (
-    <section className={`relative overflow-hidden bg-[#F7F4F1] px-6 py-24 sm:px-10 lg:px-16 lg:py-32 ${className}`}>
+    <section className={`relative overflow-hidden bg-white px-6 py-24 sm:px-10 lg:px-16 lg:py-32 ${className}`}>
       <div className="pointer-events-none absolute inset-x-0 top-0 border-t border-[#D8CCC4]" aria-hidden="true" />
 
       <div className="mx-auto max-w-[92rem]">

@@ -22,6 +22,7 @@ export interface HomepageReviewsSectionProps {
   allReviewsHref?: string;
   allReviewsLabel?: string;
   className?: string;
+  id?: string;
 }
 
 /**
@@ -36,11 +37,12 @@ export default function HomepageReviewsSection({
   allReviewsHref = "/about#guest-reviews",
   allReviewsLabel = "READ ALL REVIEWS",
   className = "",
+  id,
 }: HomepageReviewsSectionProps) {
   if (!reviews.length) return null;
 
   return (
-    <section className={`relative overflow-hidden bg-[#F4F0EA] px-6 py-24 sm:px-10 sm:py-32 lg:px-16 ${className}`}>
+    <section id={id} className={`relative overflow-hidden bg-white px-6 py-24 sm:px-10 sm:py-32 lg:px-16 ${className}`}>
       <div className="pointer-events-none absolute inset-x-0 top-0 border-t border-[#D8CCC4]" aria-hidden="true" />
 
       <GsapFadeIn className="w-full flex flex-col items-center relative z-10">

@@ -17,6 +17,8 @@ type HomepageHeroGalleryProps = {
   images: HomepageHeroImage[];
   heading?: string;
   tagline?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
 };
 
 const isPreviewImage = (src: string) => src.includes("a0.muscache.com");
@@ -24,8 +26,10 @@ const isSupabaseImage = (src: string) => src.includes(".supabase.co/");
 
 export default function HomepageHeroGallery({
   images,
-  heading = "SERENITY",
-  tagline = "ON THE ROCKS",
+  heading = "Whole-home stays.",
+  tagline = "Business-ready.",
+  ctaLabel = "Request corporate rates",
+  ctaHref = "/corporate-stays",
 }: HomepageHeroGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -60,10 +64,10 @@ export default function HomepageHeroGallery({
   }, [activeIndex, images, reducedMotion]);
 
   const heroStats = [
-    ["3", "ADJACENT HOMES"],
-    ["5 min", "WALK TO PAKENHAM STATION"],
-    ["8+ yrs", "HOSTING EXPERIENCE"],
-    ["1 contact", "ENQUIRY TO CHECKOUT"],
+    { value: "3", label: "ADJACENT HOMES", href: "/houses" },
+    { value: "9 min", label: "WALK TO PAKENHAM STATION", href: "/contact#location-map" },
+    { value: "8+ yrs", label: "HOSTING EXPERIENCE", href: "/about#guest-reviews" },
+    { value: "1 contact", label: "ENQUIRY TO CHECKOUT", href: "/contact" },
   ] as const;
 
   return (
@@ -123,35 +127,35 @@ export default function HomepageHeroGallery({
         })}
       </div>
 
-      <div className="serenity-hero-veil" aria-hidden="true" />
-      <div className="serenity-hero-grain" aria-hidden="true" />
+      <div className="serenity-hero-smoke" aria-hidden="true" />
 
       <div className="serenity-hero-shell">
         <div className="serenity-hero-copy">
-          <p className="serenity-hero-eyebrow">FURNISHED HOMES · PAKENHAM, VICTORIA</p>
+          <p className="serenity-hero-eyebrow">CORPORATE ACCOMMODATION · SOUTH-EAST MELBOURNE</p>
           <h1 id="homepage-hero-title" className="serenity-hero-title">
             <span className="serenity-hero-title-main">{heading}</span>
             <span className="serenity-hero-title-sub">{tagline}</span>
           </h1>
           <p className="serenity-hero-support">
-            Private whole-home stays for families, project teams, and longer visits—thoughtfully prepared and close to everything that matters.
+            Furnished private homes for project teams, relocations and insurance stays—managed locally, with flexible terms and one responsive point of contact.
           </p>
           <div className="serenity-hero-actions">
-            <Link href="/houses" className="serenity-hero-cta">
-              Explore the homes <ArrowRight size={16} aria-hidden="true" />
+            <Link href={ctaHref} className="serenity-hero-cta">
+              {ctaLabel} <ArrowRight size={16} aria-hidden="true" />
             </Link>
-            <Link href="/corporate-stays" className="serenity-hero-text-link">
-              Corporate stays <ArrowDown size={15} aria-hidden="true" />
+            <Link href="#featured-houses" className="serenity-hero-text-link">
+              Explore the homes <ArrowDown size={15} aria-hidden="true" />
             </Link>
           </div>
+
         </div>
 
         <div className="serenity-hero-stats" aria-label="Serenity stay highlights">
-          {heroStats.map(([value, label]) => (
-            <div className="serenity-hero-stat" key={label}>
+          {heroStats.map(({ value, label, href }) => (
+            <Link className="serenity-hero-stat" href={href} key={label}>
               <strong>{value}</strong>
               <span>{label}</span>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

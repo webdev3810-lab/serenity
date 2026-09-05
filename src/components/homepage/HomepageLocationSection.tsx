@@ -56,7 +56,7 @@ export default function HomepageLocationSection({
   const emailHref = resolvedEmailAddress ? `mailto:${resolvedEmailAddress}` : "#";
 
   return (
-    <section className={`py-24 lg:py-32 bg-[#F7F4F1] text-stone-900 overflow-hidden ${className}`}>
+    <section className={`py-24 lg:py-32 bg-white text-stone-900 overflow-hidden ${className}`}>
       <GsapFadeIn className="w-full max-w-[85rem] mx-auto px-6 lg:px-12">
         {/* Heading Area */}
         <div className="text-center max-w-3xl mx-auto mb-12">

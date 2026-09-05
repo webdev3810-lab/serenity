@@ -244,7 +244,7 @@ export function PropertyCard({ property }: { property: Property }) {
         </div>
       </div>
 
-      <div className="border-t border-stone-100 p-4 bg-[#FAF8F5] flex items-center justify-between">
+      <div className="border-t border-stone-100 p-4 bg-white flex items-center justify-between">
         <div>
           <span className="text-[0.7rem] font-bold uppercase tracking-wider text-stone-600 block">
             Direct rate AUD
@@ -493,7 +493,7 @@ export function BookingCard({ property, today, blockedDates = [], availabilityLo
   };
 
   return (
-    <aside ref={bookingCardRef} className="card p-6 shadow-xl border border-stone-200">
+    <aside ref={bookingCardRef} className="property-booking-card card p-6 shadow-xl border border-stone-200">
       <div className="mb-5 flex items-end justify-between border-b border-stone-100 pb-4">
         <div>
         <span className="booking-nightly-price text-3xl font-bold text-stone-900">{formatAud(property.nightlyPrice)}</span>{" "}
@@ -612,8 +612,8 @@ export function BookingCard({ property, today, blockedDates = [], availabilityLo
       {availabilityLoading && <p className="mt-3 text-sm font-semibold text-stone-600" role="status">Checking live availability…</p>}
       {reserveAttempted && (dateError || guestError) && <p className="mt-3 rounded-none border border-[#E7BDB4] bg-[#FFF6F3] p-3 text-sm font-semibold text-[#8A3325]" role="alert">{dateError || guestError}</p>}
 
-      <button className="btn-primary mt-5 w-full justify-center text-base" disabled={Boolean(dateError || guestError || availabilityLoading)} onClick={reserve}>
-        Reserve Home
+      <button className="property-book-button btn-primary mt-5 w-full justify-center text-base" disabled={Boolean(dateError || guestError || availabilityLoading)} onClick={reserve}>
+        Book
       </button>
 
       <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-stone-500">

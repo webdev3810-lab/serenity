@@ -12,9 +12,7 @@ import PillNav, { type PillNavItem } from "@/src/components/PillNav";
 const nav: PillNavItem[] = [
   { label: "Houses", href: "/houses" },
   { label: "About", href: "/about" },
-  { label: "Gallery", href: "/gallery" },
   { label: "Contact", href: "/contact" },
-  { label: "Location", href: "/location" },
   { label: "Corporate Stays", href: "/corporate-stays" },
 ];
 
@@ -77,7 +75,7 @@ function PromoBanner({ settings }: { settings: PromoSettings }) {
 }
 
 function Header({ pathname }: { pathname: string | null }) {
-  return <PillNav logo="/LOGO.png" logoAlt="Serenity Stays" items={nav} activeHref={pathname ?? undefined} />;
+  return <PillNav logo="/LOGO.png" logoAlt="Serenity Stays" items={nav} activeHref={pathname ?? undefined} className={pathname === "/" ? "pill-nav-header-home" : ""} />;
 }
 
 function Footer({ pathname }: { pathname: string | null }) {
@@ -85,8 +83,6 @@ function Footer({ pathname }: { pathname: string | null }) {
   const contact = settings;
   const isHousesPage = pathname === "/houses";
   const currentYear = new Date().getFullYear();
-  const isGalleryPage = pathname === "/gallery";
-  const isLocationPage = pathname === "/location";
   const phoneHref = contact?.phoneNumber ? `tel:${contact.phoneNumber.replace(/[^+\d]/g, "")}` : "#";
   const emailHref = contact?.contactEmail ? `mailto:${contact.contactEmail}` : "#";
   const whatsappDigits = contact?.whatsappNumber.replace(/\D/g, "") ?? "";
@@ -101,15 +97,18 @@ function Footer({ pathname }: { pathname: string | null }) {
     <footer className="site-footer site-footer-editorial">
       <div className="site-footer-shell site-footer-intro">
         <div className="site-footer-intro-grid">
-          <h2>
-            Stay close.<br />
-            <em>Settle in.</em>
-          </h2>
+          <div>
+            <p className="site-footer-kicker">Serenity Stays · Pakenham, Victoria</p>
+            <h2>
+              Stay close.<br />
+              <em>Settle in.</em>
+            </h2>
+          </div>
           <div className="site-footer-intro-copy">
             <p>{contact?.footerText}</p>
             <div className="site-footer-actions">
-              <Link href={isHousesPage ? "/corporate-stays" : isGalleryPage ? "/location" : isLocationPage ? "/corporate-stays" : "/houses"} className="site-footer-action site-footer-action-primary">
-                {isHousesPage ? "Corporate stays" : isGalleryPage ? "View location" : isLocationPage ? "Corporate stays" : "View the houses"} <ArrowUpRight size={16} aria-hidden="true" />
+              <Link href={isHousesPage ? "/corporate-stays" : "/houses"} className="site-footer-action site-footer-action-primary">
+                {isHousesPage ? "Corporate stays" : "View the houses"} <ArrowUpRight size={16} aria-hidden="true" />
               </Link>
               <Link href="/contact" className="site-footer-action site-footer-action-secondary">
                 Ask a question <ArrowUpRight size={16} aria-hidden="true" />
@@ -172,8 +171,6 @@ function Footer({ pathname }: { pathname: string | null }) {
             <h3>Explore</h3>
             <ul>
               <li><Link href="/about">About</Link></li>
-              <li><Link href="/gallery">Gallery</Link></li>
-              <li><Link href="/location">Location</Link></li>
               <li><Link href="/#faqs">FAQs</Link></li>
             </ul>
           </div>

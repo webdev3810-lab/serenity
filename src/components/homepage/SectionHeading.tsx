@@ -26,7 +26,7 @@ export default function SectionHeading({
   return (
     <div className={`${centred ? "text-center max-w-2xl mx-auto" : ""} ${className}`}>
       {eyebrow && <EyebrowLabel>{eyebrow}</EyebrowLabel>}
-      <Heading className="font-serif text-3xl sm:text-4xl font-bold text-[#2D2622] leading-[1.15] text-balance">
+      <Heading className="font-serif text-3xl sm:text-4xl font-normal text-[#2D2622] leading-[1.15] text-balance">
         {heading}
       </Heading>
       {description && (
