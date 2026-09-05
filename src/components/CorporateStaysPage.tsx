@@ -17,7 +17,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
-import { ApproximateMap } from "@/src/components/ApproximateMap";
+import { SerenityLocationMap } from "@/src/components/SerenityLocationMap";
 import { MiniCalendar } from "@/src/components/BookingWidgets";
 import ScrollWipeText from "@/src/components/homepage/ScrollWipeText";
 import { FormInput, TextArea } from "@/src/components/UI";
@@ -574,7 +574,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
             </div>
             <Link href="/contact" className="inline-flex items-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-stone-500 hover:text-stone-900 transition-colors border-b border-stone-300 hover:border-stone-900 pb-1">Discover the setting</Link>
           </div>
-          <div className="h-[26rem] sm:h-[34rem] shadow-sm border border-stone-200"><ApproximateMap borderless fullHeight title="Serenity houses area" /></div>
+          <div className="corporate-location-map-frame h-[26rem] sm:h-[34rem]"><SerenityLocationMap /></div>
         </div>
       </section>
 

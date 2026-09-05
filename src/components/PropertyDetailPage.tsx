@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import { AirVent, BedDouble, BriefcaseBusiness, CalendarDays, Car, Check, ChefHat, ChevronLeft, ChevronRight, Dog, DoorOpen, Images, KeyRound, Sparkles, Star, Tv, Utensils, WashingMachine, Wifi, X } from "lucide-react";
-import { ApproximateMap } from "@/src/components/ApproximateMap";
+import { SerenityLocationMap } from "@/src/components/SerenityLocationMap";
 import type { Property, PropertyImage } from "@/src/data/properties";
 import { BookingCard, MiniCalendar, RelatedHouses } from "@/src/components/BookingWidgets";
 import { Drawer, Modal } from "@/src/components/UI";
@@ -551,7 +551,9 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
                     {property.nearbyLocations.map((location) => <p key={location}>{location}</p>)}
                   </div>
                 ) : null}
-                <ApproximateMap compact title={`${property.location} accommodation area`} />
+                <div className="property-editorial-location-map">
+                  <SerenityLocationMap />
+                </div>
                 <p className="property-editorial-caption">Exact address and access instructions are sent after a confirmed booking.</p>
               </section>
 

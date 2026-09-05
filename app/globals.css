@@ -5213,6 +5213,36 @@ h4,
   box-shadow: 0 1rem 2.75rem rgba(45, 38, 34, 0.08);
 }
 
+.corporate-location-map-frame,
+.property-editorial-location-map {
+  overflow: hidden;
+  border: 1px solid #d8ccc4;
+  background: #ffffff;
+  box-shadow: 0 1rem 2.5rem rgba(45, 38, 34, 0.07);
+}
+
+.corporate-location-map-frame .location-editorial-map,
+.property-editorial-location-map .location-editorial-map {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+}
+
+.corporate-location-map-frame .location-openseadragon-map,
+.property-editorial-location-map .location-openseadragon-map {
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+.property-editorial-location-map {
+  margin-top: clamp(1.5rem, 2.5vw, 2.5rem);
+}
+
+.property-editorial-location-map .location-editorial-map {
+  height: clamp(24rem, 36vw, 36rem);
+}
+
 .property-editorial-page .property-about-copy {
   max-width: 64ch;
   font-size: clamp(1rem, 1.15vw, 1.12rem);
