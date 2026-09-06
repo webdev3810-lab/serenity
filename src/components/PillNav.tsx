@@ -200,7 +200,7 @@ export default function PillNav({
           <span className="hamburger-line h-0.5 w-4 rounded-none bg-current" />
         </button>
 
-        <Link href="/" aria-label="Serenity Stays home" className="pill-nav-brand relative z-10 flex shrink-0 items-center" onClick={closeMobileMenu}>
+        <Link href="/" aria-label="Serenity Stays home" className="pill-nav-brand relative z-10 ml-auto flex shrink-0 items-center md:ml-0" onClick={closeMobileMenu}>
           <Image src={logo} alt={logoAlt} width={148} height={112} priority className="h-14 w-auto object-contain lg:h-20" />
         </Link>
 
