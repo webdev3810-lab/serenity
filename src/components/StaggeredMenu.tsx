@@ -2,81 +2,177 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Menu, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { gsap } from "gsap";
+import { ArrowUpRight, Menu, X } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 
-export interface StaggeredMenuLink {
+export interface StaggeredMenuItem {
+  label: string;
+  ariaLabel?: string;
+  link: string;
+  isActive?: boolean;
+}
+
+export interface StaggeredMenuSocialItem {
   label: string;
   link: string;
-  ariaLabel?: string;
-}
-
-export interface StaggeredMenuColumn {
-  title: string;
-  links: StaggeredMenuLink[];
-}
-
-export interface StaggeredMenuItem extends StaggeredMenuLink {
-  columns?: StaggeredMenuColumn[];
 }
 
 export interface StaggeredMenuProps {
-  items: StaggeredMenuItem[];
+  position?: "left" | "right";
+  colors?: string[];
+  items?: StaggeredMenuItem[];
+  socialItems?: StaggeredMenuSocialItem[];
+  displaySocials?: boolean;
+  displayItemNumbering?: boolean;
   className?: string;
+  logoUrl?: string;
+  logoAlt?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  menuButtonColor?: string;
+  openMenuButtonColor?: string;
+  accentColor?: string;
+  isFixed?: boolean;
+  changeMenuColorOnOpen?: boolean;
+  closeOnClickAway?: boolean;
   onMenuOpen?: () => void;
   onMenuClose?: () => void;
 }
 
-const transitionMs = 280;
-
 export default function StaggeredMenu({
-  items,
+  position = "right",
+  colors = ["#5A463A", "#B99D88", "#D8CCC4"],
+  items = [],
+  socialItems = [],
+  displaySocials = true,
+  displayItemNumbering = true,
   className = "",
+  logoUrl = "/LOGO.png",
+  logoAlt = "Serenity Stays",
+  ctaLabel = "BOOK NOW",
+  ctaHref = "/houses",
+  menuButtonColor = "#2D2622",
+  openMenuButtonColor = "#2D2622",
+  accentColor = "#B7664E",
+  isFixed = false,
+  changeMenuColorOnOpen = true,
+  closeOnClickAway = true,
   onMenuOpen,
   onMenuClose,
 }: StaggeredMenuProps) {
-  const mobilePanelRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const openRef = useRef(false);
+
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const preLayersRef = useRef<HTMLDivElement | null>(null);
+  const preLayerElsRef = useRef<HTMLElement[]>([]);
+  const toggleBtnRef = useRef<HTMLButtonElement | null>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileMounted, setMobileMounted] = useState(false);
-  const [mobileSection, setMobileSection] = useState<string | null>(null);
-
-  const closeMobileMenu = useCallback(() => {
-    setMobileOpen(false);
-    setMobileSection(null);
-    onMenuClose?.();
-    window.setTimeout(() => setMobileMounted(false), transitionMs);
-    previousFocusRef.current?.focus();
-  }, [onMenuClose]);
-
-  const openMobileMenu = () => {
-    previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    setMobileMounted(true);
-    setMobileOpen(false);
-    onMenuOpen?.();
-    window.requestAnimationFrame(() => {
-      setMobileOpen(true);
-      window.requestAnimationFrame(() => {
-        mobilePanelRef.current?.querySelector<HTMLElement>("a, button")?.focus();
-      });
-    });
-  };
+  const colorTweenRef = useRef<gsap.core.Tween | null>(null);
 
   useEffect(() => {
-    if (!mobileOpen) return;
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateMotionPreference = () => setReducedMotion(mediaQuery.matches);
+    updateMotionPreference();
+    mediaQuery.addEventListener("change", updateMotionPreference);
+    return () => mediaQuery.removeEventListener("change", updateMotionPreference);
+  }, []);
 
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      const panel = panelRef.current;
+      const preContainer = preLayersRef.current;
+      if (!panel) return;
+
+      preLayerElsRef.current = preContainer
+        ? Array.from(preContainer.querySelectorAll<HTMLElement>(".sm-prelayer"))
+        : [];
+
+      const offscreen = position === "left" ? -100 : 100;
+      gsap.set([panel, ...preLayerElsRef.current], { xPercent: offscreen, opacity: 1 });
+      if (toggleBtnRef.current) gsap.set(toggleBtnRef.current, { color: menuButtonColor });
+    });
+
+    return () => ctx.revert();
+  }, [menuButtonColor, position]);
+
+  const setPanelState = useCallback((isOpen: boolean) => {
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const layers = preLayerElsRef.current;
+    const itemEls = Array.from(panel.querySelectorAll<HTMLElement>(".sm-panel-item-label"));
+    const numberEls = Array.from(panel.querySelectorAll<HTMLElement>(".sm-panel-list[data-numbering] .sm-panel-item"));
+    const socialTitle = panel.querySelector<HTMLElement>(".sm-socials-title");
+    const socialLinks = Array.from(panel.querySelectorAll<HTMLElement>(".sm-socials-link"));
+    const offscreen = position === "left" ? -100 : 100;
+    gsap.set([...layers, panel], { xPercent: isOpen ? 0 : offscreen, opacity: 1 });
+    gsap.set(itemEls, { yPercent: 0, rotate: 0 });
+    if (numberEls.length) gsap.set(numberEls, { ["--sm-num-opacity" as string]: isOpen ? 1 : 0 });
+    if (socialTitle) gsap.set(socialTitle, { opacity: isOpen ? 1 : 0 });
+    if (socialLinks.length) gsap.set(socialLinks, { y: 0, opacity: isOpen ? 1 : 0 });
+  }, [position]);
+
+  const playOpen = useCallback(() => {
+    setPanelState(true);
+  }, [setPanelState]);
+
+  const playClose = useCallback(() => {
+    setPanelState(false);
+  }, [setPanelState]);
+
+  const animateColor = useCallback((opening: boolean) => {
+    const button = toggleBtnRef.current;
+    if (!button) return;
+    colorTweenRef.current?.kill();
+    const targetColor = opening ? openMenuButtonColor : menuButtonColor;
+    if (changeMenuColorOnOpen && !reducedMotion) {
+      colorTweenRef.current = gsap.to(button, { color: targetColor, delay: 0.18, duration: 0.3, ease: "power2.out" });
+    } else {
+      gsap.set(button, { color: targetColor });
+    }
+  }, [changeMenuColorOnOpen, menuButtonColor, openMenuButtonColor, reducedMotion]);
+
+  const closeMenu = useCallback(() => {
+    if (!openRef.current) return;
+    openRef.current = false;
+    setOpen(false);
+    onMenuClose?.();
+    playClose();
+    animateColor(false);
+    previousFocusRef.current?.focus();
+  }, [animateColor, onMenuClose, playClose]);
+
+  const toggleMenu = useCallback(() => {
+    const nextOpen = !openRef.current;
+    openRef.current = nextOpen;
+    setOpen(nextOpen);
+
+    if (nextOpen) {
+      previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      onMenuOpen?.();
+      playOpen();
+    } else {
+      onMenuClose?.();
+      playClose();
+    }
+
+    animateColor(nextOpen);
+  }, [animateColor, onMenuClose, onMenuOpen, playClose, playOpen]);
+
+  useEffect(() => {
+    if (!open) return;
+    const focusFirstItem = window.requestAnimationFrame(() => panelRef.current?.querySelector<HTMLElement>("a, button")?.focus());
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        closeMobileMenu();
+        closeMenu();
         return;
       }
-
-      if (!mobileOpen || event.key !== "Tab" || !mobilePanelRef.current) return;
-      const focusable = Array.from(
-        mobilePanelRef.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled])")
-      ).filter((element) => !element.hasAttribute("aria-hidden"));
+      if (event.key !== "Tab" || !panelRef.current) return;
+      const focusable = Array.from(panelRef.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled])"));
       if (!focusable.length) return;
-
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
       if (event.shiftKey && document.activeElement === first) {
@@ -89,157 +185,93 @@ export default function StaggeredMenu({
     };
 
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [closeMobileMenu, mobileOpen]);
-
-  useEffect(() => {
-    if (!mobileOpen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
+      window.cancelAnimationFrame(focusFirstItem);
+      document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
     };
-  }, [mobileOpen]);
+  }, [closeMenu, open]);
 
-  const headerClasses = "sticky top-0 border-b border-[#D8CCC4] bg-white/[.98] text-stone-900 shadow-[0_0.75rem_2rem_rgba(45,38,34,0.06)]";
-  const buttonClasses = "border-[#2D2622] bg-[#2D2622] text-white hover:bg-[#5A463A]";
-  const menuButtonClasses = "text-stone-900 hover:bg-stone-100";
+  useEffect(() => {
+    if (!closeOnClickAway || !open) return;
+    const handleClickAway = (event: MouseEvent) => {
+      if (!panelRef.current?.contains(event.target as Node) && !toggleBtnRef.current?.contains(event.target as Node)) closeMenu();
+    };
+    document.addEventListener("mousedown", handleClickAway);
+    return () => document.removeEventListener("mousedown", handleClickAway);
+  }, [closeMenu, closeOnClickAway, open]);
+
+  useEffect(() => () => {
+    colorTweenRef.current?.kill();
+  }, []);
+
+  const layerColors = colors.slice(0, 4).filter(Boolean);
+  const cssVars = { "--sm-accent": accentColor } as CSSProperties;
 
   return (
-    <div className={`relative z-50 ${className}`}>
-      <header className={`site-nav relative z-[80] transition-[background-color,border-color,color] duration-300 ease-out ${headerClasses}`}>
-        <div className="site-nav-inner mx-auto flex h-[5.75rem] w-full max-w-[100rem] items-center gap-6 pr-5 pl-0 sm:pr-8 sm:pl-0 lg:h-32 lg:pr-12 lg:pl-0">
-          <div className="relative z-10 flex shrink-0 items-center">
-            <button
-              type="button"
-              className={`inline-flex h-14 w-14 items-center justify-center rounded-none transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#B99D88] md:hidden ${menuButtonClasses}`}
-              aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
-              aria-expanded={mobileOpen}
-              aria-controls="site-navigation"
-              onClick={mobileOpen ? closeMobileMenu : openMobileMenu}
-            >
-              {mobileOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
-            </button>
-          </div>
+    <div className={`sm-scope z-[80] ${open ? "pointer-events-auto" : "pointer-events-none"} ${isFixed ? "fixed inset-0 h-screen w-screen overflow-hidden" : "relative h-full w-full"} ${className}`}>
+      <div className="staggered-menu-wrapper pointer-events-none relative z-40 h-full w-full" style={cssVars} data-position={position} data-open={open || undefined}>
+        <div ref={preLayersRef} className="sm-prelayers pointer-events-none absolute bottom-0 right-0 top-0 z-[5]" aria-hidden="true">
+          {(layerColors.length ? layerColors : ["#5A463A", "#B99D88"]).map((color, index) => (
+            <div key={`${color}-${index}`} className="sm-prelayer absolute bottom-0 right-0 top-0 h-full w-full" style={{ background: color }} />
+          ))}
+        </div>
 
-          <Link href="/" aria-label="Serenity Stays home" className="site-nav-brand absolute left-1/2 flex -translate-x-1/2 items-center md:static md:mr-8 md:translate-x-0 lg:mr-12" onClick={closeMobileMenu}>
-            <Image
-              src="/LOGO.png"
-              alt="Serenity Stays"
-              width={148}
-              height={112}
-              priority
-              className="h-20 w-auto object-contain lg:h-28"
-            />
+        <header className="staggered-menu-header pointer-events-none absolute left-0 top-0 z-20 flex h-[5.75rem] w-full items-center justify-between border-b border-[#D8CCC4] bg-white/[.98] px-4 shadow-[0_0.75rem_2rem_rgba(45,38,34,0.06)] sm:px-8" aria-label="Main navigation header">
+          <Link href="/" className="sm-logo pointer-events-auto flex items-center" aria-label="Serenity Stays home" onClick={closeMenu}>
+            <Image src={logoUrl} alt={logoAlt} width={148} height={112} priority className="block h-14 w-auto object-contain" />
           </Link>
 
-          <nav className="site-nav-links hidden flex-1 items-center justify-center gap-1 rounded-none border border-[#D8CCC4] bg-white/60 p-1.5 shadow-[0_0.5rem_1.25rem_rgba(45,38,34,0.045)] md:flex" aria-label="Main navigation">
-            {items.map((item) => (
-              <Link
-                key={item.label}
-                href={item.link}
-                aria-label={item.ariaLabel ?? item.label}
-                onClick={closeMobileMenu}
-                className="inline-flex min-h-12 items-center whitespace-nowrap rounded-none px-4 text-[13px] font-bold uppercase tracking-[0.12em] transition-[background-color,color,transform] hover:bg-[#EAE1DD] hover:text-[#5A463A] hover:-translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#B99D88] lg:px-5 lg:text-sm"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          <button ref={toggleBtnRef} className="sm-toggle pointer-events-auto inline-flex h-12 w-12 items-center justify-center border border-[#D8CCC4] bg-white p-0 text-[#2D2622] transition-colors hover:bg-[#EAE1DD] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#B99D88]" aria-label={open ? "Close navigation menu" : "Open navigation menu"} aria-expanded={open} aria-controls="staggered-menu-panel" onClick={toggleMenu} type="button">
+            {open ? <X size={21} strokeWidth={1.8} aria-hidden="true" /> : <Menu size={21} strokeWidth={1.8} aria-hidden="true" />}
+          </button>
+        </header>
 
-          <div className="ml-auto flex shrink-0 items-center gap-3">
-            <Link
-              href="/houses"
-              onClick={closeMobileMenu}
-              className={`hidden min-h-12 items-center justify-center rounded-none border px-6 text-[11px] font-bold uppercase tracking-[0.2em] transition-[background-color,transform] hover:-translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#B99D88] md:inline-flex lg:px-7 ${buttonClasses}`}
-            >
-              BOOK NOW
+        <aside id="staggered-menu-panel" ref={panelRef} className={`staggered-menu-panel absolute bottom-0 right-0 top-0 z-10 flex flex-col overflow-y-auto bg-[#FCFBF9] px-5 pb-8 pt-[7.25rem] text-[#2D2622] sm:px-8 sm:pt-[8rem] ${open ? "pointer-events-auto" : "pointer-events-none"}`} aria-hidden={!open}>
+          <div className="sm-panel-inner flex flex-1 flex-col gap-6">
+            <ul className="sm-panel-list m-0 flex list-none flex-col border-t border-[#EAE1DD] p-0" role="list" data-numbering={displayItemNumbering || undefined}>
+              {items.length ? items.map((item, index) => (
+                <li className="sm-panel-item-wrap group relative overflow-hidden border-b border-[#EAE1DD] leading-none" key={`${item.label}-${index}`}>
+                  <Link href={item.link} aria-label={item.ariaLabel ?? item.label} aria-current={item.isActive ? "page" : undefined} className="sm-panel-item relative flex min-h-[4.35rem] w-full items-center justify-between gap-4 py-3 font-marcellus text-[clamp(2.25rem,10.5vw,3.8rem)] font-normal leading-[0.86] tracking-[-0.045em] text-[#2D2622] no-underline transition-colors duration-150 hover:text-[var(--sm-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--sm-accent)]" onClick={closeMenu}>
+                    <span className="sm-panel-item-label inline-block">{item.label}</span>
+                    <ArrowUpRight size={20} strokeWidth={1.5} aria-hidden="true" className={`shrink-0 transition-[color,opacity,transform] duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${item.isActive ? "text-[var(--sm-accent)] opacity-100" : "text-[#B99D88] opacity-50 group-hover:opacity-100"}`} />
+                  </Link>
+                </li>
+              )) : (
+                <li className="text-lg text-[#6F6258]">No navigation items</li>
+              )}
+            </ul>
+
+            <Link href={ctaHref} onClick={closeMenu} className="sm-panel-cta inline-flex min-h-14 w-full items-center justify-between gap-5 bg-[#2D2622] px-5 text-xs font-bold uppercase tracking-[0.18em] text-white no-underline transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-[#5A463A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--sm-accent)] sm:px-6">
+              <span>{ctaLabel}</span>
+              <ArrowUpRight size={19} strokeWidth={1.7} aria-hidden="true" />
             </Link>
-          </div>
-        </div>
-      </header>
 
-      {mobileMounted && (
-        <div
-          id="site-navigation"
-          ref={mobilePanelRef}
-          className={`absolute inset-x-0 top-full z-[70] h-[calc(100dvh-5.75rem)] overflow-hidden bg-stone-950/25 transition-opacity duration-300 md:hidden ${mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
-          data-open={mobileOpen}
-          aria-hidden={!mobileOpen}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Site navigation"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) closeMobileMenu();
-          }}
-          {...(!mobileOpen ? { inert: true } : {})}
-        >
-          <div className={`absolute inset-y-0 left-0 flex w-[min(88vw,20rem)] min-w-[18rem] flex-col overflow-y-auto bg-white text-stone-900 shadow-[1.5rem_0_3rem_rgba(45,38,34,0.18)] transition-transform duration-300 ease-out ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
-            <nav className="flex-1 px-6 pb-8 pt-5 sm:px-8 sm:pt-6" aria-label="Site navigation">
-              <ul className="space-y-0" role="list">
-                {items.map((item, itemIndex) => {
-                  const hasMenu = Boolean(item.columns?.length);
-                  const isSectionOpen = mobileSection === item.label;
-                  const sectionId = `mobile-section-${item.label.toLowerCase().replaceAll(" ", "-")}`;
-                  return (
-                    <li key={item.label} className="border-b border-stone-900/15">
-                      {hasMenu ? (
-                        <>
-                          <button
-                            type="button"
-                            className="flex w-full items-center justify-between py-2.5 text-left font-serif text-[1.1rem] tracking-tight text-stone-900 transition-colors hover:text-stone-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5A463A] sm:text-[1.2rem]"
-                            aria-expanded={isSectionOpen}
-                            aria-controls={sectionId}
-                            onClick={() => setMobileSection(isSectionOpen ? null : item.label)}
-                          >
-                            <span>{item.label}</span>
-                            <ChevronRight size={19} className={`transition-transform duration-200 ${isSectionOpen ? "rotate-90" : ""}`} aria-hidden="true" />
-                          </button>
-                          <div id={sectionId} className={`grid transition-[grid-template-rows,opacity] duration-300 ${isSectionOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-                            <div className="min-h-0 overflow-hidden pl-3 pb-3">
-                              {item.columns?.map((column) => (
-                                <div key={column.title} className="mb-4 last:mb-0">
-                                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-stone-800">{column.title}</p>
-                                  <ul className="space-y-1" role="list">
-                                    {column.links.map((link) => (
-                                      <li key={`${column.title}-${link.label}`}>
-                                        <Link
-                                          href={link.link}
-                                          className="block py-2 text-base text-stone-700 transition-colors hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5A463A]"
-                                          onClick={closeMobileMenu}
-                                        >
-                                          {link.label}
-                                        </Link>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <Link
-                          href={item.link}
-                          className="staggered-mobile-link block py-2.5 font-serif text-[1.1rem] tracking-tight text-stone-900 transition-colors hover:text-stone-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#5A463A] sm:text-[1.2rem]"
-                          style={{ "--mobile-stagger-delay": `${itemIndex * 45}ms` } as CSSProperties}
-                          onClick={closeMobileMenu}
-                        >
-                          {item.label}
-                        </Link>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-
-            <p className="mx-6 mb-6 border-t border-white/10 pt-5 text-xs leading-relaxed text-stone-400 sm:mx-8">
-              Private furnished houses in Pakenham, Victoria.
-            </p>
+            {displaySocials && socialItems.length > 0 && (
+              <div className="sm-socials mt-auto flex flex-col gap-3 border-t border-[#D8CCC4] pt-6" aria-label="Social links">
+                <h2 className="sm-socials-title m-0 text-xs font-bold uppercase tracking-[0.18em] text-[var(--sm-accent)]">Connect</h2>
+                <ul className="sm-socials-list m-0 flex list-none flex-wrap gap-x-5 gap-y-2 p-0" role="list">
+                  {socialItems.map((social, index) => <li key={`${social.label}-${index}`}><a href={social.link} target="_blank" rel="noopener noreferrer" className="sm-socials-link text-base text-[#2D2622] no-underline hover:text-[var(--sm-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sm-accent)]">{social.label}</a></li>)}
+                </ul>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        </aside>
+      </div>
+
+      <style>{`
+        .sm-scope .staggered-menu-header > * { pointer-events: auto; }
+        .sm-scope .staggered-menu-panel { width: min(88vw, 28rem); }
+        .sm-scope .sm-panel-list[data-numbering] { counter-reset: sm-item; }
+        .sm-scope .sm-panel-list[data-numbering] .sm-panel-item::after { counter-increment: sm-item; content: counter(sm-item, decimal-leading-zero); position: absolute; right: 0; top: 0.15em; color: var(--sm-accent); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; opacity: var(--sm-num-opacity, 0); }
+        .sm-scope [data-position='left'] .staggered-menu-panel { right: auto; left: 0; }
+        .sm-scope [data-position='left'] .sm-prelayers { right: auto; left: 0; }
+        @media (max-width: 640px) {
+          .sm-scope .staggered-menu-panel { width: 100%; }
+        }
+      `}</style>
     </div>
   );
 }

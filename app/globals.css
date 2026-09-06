@@ -11267,9 +11267,10 @@ h4,
 
   .serenity-hero-title-main {
     max-width: 100%;
-    font-size: clamp(2rem, 11vw, 3.6rem);
+    font-size: clamp(2rem, 10.5vw, 3.35rem);
     line-height: 0.9;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: break-word;
   }
 
   .serenity-hero-title-sub {
@@ -12769,7 +12770,8 @@ textarea:focus-visible {
 }
 
 /* The homepage hero owns the first viewport. Keep the navbar over it so its
-   hidden state cannot leave an empty header-height strip above the image. */
+   fixed position cannot leave an empty header-height strip around the image.
+   The mobile menu wrapper sits between the header and main in the DOM. */
 .pill-nav-header-home {
   position: fixed !important;
   top: 0;
@@ -12778,13 +12780,13 @@ textarea:focus-visible {
   width: 100%;
 }
 
-.pill-nav-header-home + main .serenity-hero {
+.pill-nav-header-home + div + main .serenity-hero {
   height: 100svh;
   min-height: 36rem;
 }
 
 @media (max-width: 767px) {
-  .pill-nav-header-home + main .serenity-hero {
+  .pill-nav-header-home + div + main .serenity-hero {
     height: max(40rem, 100svh);
     min-height: 0;
   }

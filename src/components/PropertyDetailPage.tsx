@@ -466,7 +466,7 @@ export function PropertyDetailPage({ property, relatedProperties, today }: { pro
                     </div>
                     <p>Verified notes from guests who stayed at {displayName}.</p>
                   </div>
-                  <HomepageReviewsCarousel reviews={propertyReviewCards} />
+                  <HomepageReviewsCarousel reviews={propertyReviewCards} fullBleed={false} />
                 </section>
               ) : null}
 
