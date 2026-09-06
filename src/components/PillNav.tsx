@@ -194,13 +194,13 @@ export default function PillNav({
           aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
           aria-expanded={mobileOpen}
           aria-controls="pill-nav-mobile-menu"
-          className="relative z-10 inline-flex h-12 w-12 shrink-0 flex-col items-center justify-center gap-1 rounded-none border border-[#D8CCC4] bg-white text-[#2D2622] transition-colors hover:bg-[#EAE1DD] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#B99D88] md:hidden"
+          className="relative z-10 order-2 ml-auto inline-flex h-12 w-12 shrink-0 flex-col items-center justify-center gap-1 rounded-none border border-[#D8CCC4] bg-white text-[#2D2622] transition-colors hover:bg-[#EAE1DD] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#B99D88] md:order-none md:ml-0 md:hidden"
         >
           <span className="hamburger-line h-0.5 w-4 rounded-none bg-current" />
           <span className="hamburger-line h-0.5 w-4 rounded-none bg-current" />
         </button>
 
-        <Link href="/" aria-label="Serenity Stays home" className="pill-nav-brand relative z-10 ml-auto flex shrink-0 items-center md:ml-0" onClick={closeMobileMenu}>
+        <Link href="/" aria-label="Serenity Stays home" className="pill-nav-brand relative z-10 order-1 flex shrink-0 items-center md:order-none" onClick={closeMobileMenu}>
           <Image src={logo} alt={logoAlt} width={148} height={112} priority className="h-14 w-auto object-contain lg:h-20" />
         </Link>
 
