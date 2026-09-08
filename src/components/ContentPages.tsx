@@ -176,7 +176,7 @@ export function ContactPage() {
   };
 
   return (
-    <section className="contact-editorial-page min-h-screen bg-white text-[#2D2622]">
+    <section className="contact-editorial-page homepage-theme public-page-theme min-h-screen bg-white text-[#2D2622]">
       <div className="mx-auto w-full max-w-[120rem] px-4 pb-20 pt-10 sm:px-6 sm:pb-24 sm:pt-14 lg:px-8 lg:pt-16">
         <div className="border-t border-[#D8CCC4] pt-10 lg:pt-16">
           <div className="mx-auto max-w-6xl text-center">

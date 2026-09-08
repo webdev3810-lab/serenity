@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from "next";
 import { AppShell } from "@/src/components/Layout";
 import { getPublicContactSettings, getPublicPromoSettings } from "@/src/lib/supabase/content";
 import "./globals.css";
+import "./public-page-theme.css";
 import "./property-stay.css";
 
 export const dynamic = "force-dynamic";

@@ -86,7 +86,7 @@ export function AboutPage({ properties }: { properties: Property[] }) {
   );
 
   return (
-    <main className="about-editorial-page">
+    <main className="about-editorial-page homepage-theme public-page-theme">
       <section className="about-editorial-hero" aria-label="About Serenity">
         <div className="about-editorial-shell">
           <div className="about-editorial-topline">

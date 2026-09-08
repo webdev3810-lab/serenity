@@ -247,7 +247,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
   ];
 
   return (
-    <main className="corporate-stays-page bg-white text-[#2D2622]">
+    <main className="corporate-stays-page homepage-theme public-page-theme bg-white text-[#2D2622]">
       <section className="bg-white py-20 lg:py-32">
         <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
           <div className="grid gap-16 lg:grid-cols-12 lg:items-center">
