@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Check, Copy, Eye, LoaderCircle, Pencil, Plus, Save, X } from "lucide-react";
-import type { PromotionRecord, PromotionStatus } from "@/src/lib/promotions";
+import type { PromotionRecord,PromotionStatus } from "@/src/lib/promotions";
+import { Check,Copy,Eye,LoaderCircle,Pencil,Plus,Save,X } from "lucide-react";
+import { useEffect,useMemo,useState } from "react";
 
+import { AdminBadge,useAdminPagination,useAdminWorkspace,useDirtyGuard } from "@/src/components/admin/AdminUI";
 type AdminPromotion = PromotionRecord & { status: PromotionStatus; remaining_redemptions: number | null };
 type PropertyOption = { id: string; name: string };
 type PromotionForm = {
@@ -53,9 +54,12 @@ const toMelbourneIso = (value: string) => {
 };
 
 const dateLabel = (value: string | null) => value ? new Intl.DateTimeFormat("en-AU", { dateStyle: "medium", timeStyle: "short", timeZone: "Australia/Melbourne" }).format(new Date(value)) : "No limit";
-const statusLabel: Record<PromotionStatus, string> = { draft: "DRAFT", scheduled: "SCHEDULED", active: "ACTIVE", expired: "EXPIRED", sold_out: "SOLD OUT", disabled: "DISABLED" };
 
 export default function AdminPromotions({ properties }: { properties: PropertyOption[] }) {
+  const { confirm } = useAdminWorkspace();
+  const [baseline, setBaseline] = useState<PromotionForm>(emptyForm());
+  const [query, setQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [promotions, setPromotions] = useState<AdminPromotion[]>([]);
   const [form, setForm] = useState<PromotionForm>(emptyForm());
   const [editingId, setEditingId] = useState("");
@@ -66,8 +70,13 @@ export default function AdminPromotions({ properties }: { properties: PropertyOp
   const [message, setMessage] = useState("");
   const [preview, setPreview] = useState<AdminPromotion | null>(null);
 
+  const dirty = JSON.stringify(form) !== JSON.stringify(baseline);
+  useDirtyGuard(dirty);
+  const filtered = promotions.filter(p => `${p.name} ${p.code}`.toLowerCase().includes(query.toLowerCase()) && (filterStatus === "all" || p.status === filterStatus));
+  const { visible, pagination } = useAdminPagination(filtered);
   const load = async () => {
     setLoading(true);
+    setError("");
     try {
       const response = await fetch("/api/admin/promotions", { cache: "no-store" });
       const data = await response.json();
@@ -83,18 +92,19 @@ export default function AdminPromotions({ properties }: { properties: PropertyOp
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const update = <K extends keyof PromotionForm>(key: K, value: PromotionForm[K]) => setForm((current) => ({ ...current, [key]: value }));
-  const edit = (promotion: AdminPromotion) => {
+  const edit = async (promotion: AdminPromotion) => {
+    if (dirty && !await confirm({ title: "Discard promotion edits?", description: "Your unsaved campaign changes will be lost.", confirmLabel: "Discard changes", destructive: true })) return;
     setEditingId(promotion.id);
-    setForm({
+    const next: PromotionForm = {
       name: promotion.name, badge_text: promotion.badge_text, message: promotion.message, mobile_message: promotion.mobile_message, code: promotion.code,
       discount_type: promotion.discount_type, discount_value: String(promotion.discount_value), starts_at: toInputDate(promotion.starts_at), ends_at: toInputDate(promotion.ends_at),
       max_redemptions: promotion.max_redemptions === null ? "" : String(promotion.max_redemptions), minimum_booking_amount: String(promotion.minimum_booking_amount),
       minimum_nights: String(promotion.minimum_nights), applicable_property_ids: promotion.applicable_property_ids, applies_to_corporate: promotion.applies_to_corporate,
       stackable: promotion.stackable, restore_on_refund: promotion.restore_on_refund, active: promotion.active, published: promotion.published, header_visible: promotion.header_visible,
-    });
+    }; setForm(next); setBaseline(next);
     setError(""); setMessage(""); window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  const reset = () => { setEditingId(""); setForm(emptyForm()); setError(""); setPreview(null); };
+  const reset = () => { setEditingId(""); setForm(emptyForm()); setBaseline(emptyForm()); setError(""); setPreview(null); };
 
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -139,22 +149,22 @@ export default function AdminPromotions({ properties }: { properties: PropertyOp
   return (
     <div className="grid gap-6">
       <header className="admin-page-header flex flex-wrap items-start justify-between gap-4">
-        <div><p className="admin-section-kicker">Revenue and offers</p><h2 className="mt-1 text-2xl font-extrabold">Promotions</h2><p className="mt-1 max-w-3xl text-sm text-stone-600">Create voucher campaigns with clear dates, limits, house rules, and safe Stripe redemption tracking. Currency is AUD and dates use Australia/Melbourne.</p></div>
-        <button type="button" className="btn-primary inline-flex items-center gap-2" onClick={reset}><Plus size={16} /> New promotion</button>
+        <div><p className="admin-section-kicker">Revenue and offers</p><h2 className="mt-1 text-2xl font-semibold">Promotions</h2><p className="mt-1 max-w-3xl text-sm text-[var(--admin-muted)]">Create voucher campaigns with clear dates, limits, house rules, and safe Stripe redemption tracking. Currency is AUD and dates use Australia/Melbourne.</p></div>
+        <button type="button" className="admin-button admin-button-primary inline-flex items-center gap-2" onClick={async () => { if (!dirty || await confirm({ title: "Start a new promotion?", description: "Unsaved campaign edits will be discarded.", confirmLabel: "Discard and start new", destructive: true })) reset(); }}><Plus size={16} /> New promotion</button>
       </header>
       {message && <div className="admin-notice is-success" role="status"><Check size={17} />{message}</div>}
-      {error && <div className="admin-notice is-error" role="alert"><X size={17} />{error}</div>}
+      {error && <div className="admin-notice is-error" role="alert"><X size={17} />{error}<button type="button" className="admin-button" onClick={() => void load()}>Retry loading</button></div>}
       {busyId && <div className="admin-notice" role="status"><LoaderCircle size={17} className="animate-spin" aria-hidden="true" />Updating promotion status…</div>}
 
-      <form onSubmit={save} className="card grid gap-5 bg-white p-5 sm:p-7">
-        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#EAE1DD] pb-4"><div><p className="admin-section-kicker">{editingId ? "Edit promotion" : "New promotion"}</p><h3 className="mt-1 text-lg font-extrabold">{editingId ? "Update campaign details" : "Build a voucher campaign"}</h3></div>{editingId && <button type="button" className="btn-outline-dark text-sm" onClick={reset}>Clear form</button>}</div>
+      <form onSubmit={save} className="admin-card grid gap-5 bg-[var(--admin-surface)] p-5 sm:p-7">
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--admin-border)] pb-4"><div><p className="admin-section-kicker">{editingId ? "Edit promotion" : "New promotion"}</p><h3 className="mt-1 text-lg font-semibold">{editingId ? "Update campaign details" : "Build a voucher campaign"}</h3></div>{editingId && <button type="button" className="admin-button text-sm" onClick={reset}>Clear form</button>}</div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Promotion name" value={form.name} onChange={(value) => update("name", value)} maxLength={80} />
           <Field label="Badge text" value={form.badge_text} onChange={(value) => update("badge_text", value)} maxLength={40} />
           <Field label="Desktop message" value={form.message} onChange={(value) => update("message", value)} maxLength={140} />
           <Field label="Mobile message" value={form.mobile_message} onChange={(value) => update("mobile_message", value)} maxLength={90} />
           <Field label="Voucher code" value={form.code} onChange={(value) => update("code", value.toUpperCase())} maxLength={40} mono />
-          <label className="text-xs font-bold text-stone-800">Discount type<select className="field mt-1 w-full" value={form.discount_type} onChange={(event) => update("discount_type", event.target.value as PromotionForm["discount_type"])}><option value="percentage">Percentage</option><option value="fixed_aud">Fixed AUD</option></select></label>
+          <label className="text-sm font-medium text-[var(--admin-text)]">Discount type<select className="admin-field mt-1 w-full" value={form.discount_type} onChange={(event) => update("discount_type", event.target.value as PromotionForm["discount_type"])}><option value="percentage">Percentage</option><option value="fixed_aud">Fixed AUD</option></select></label>
           <Field label={form.discount_type === "percentage" ? "Discount percentage" : "Discount value (AUD)"} value={form.discount_value} onChange={(value) => update("discount_value", value)} type="number" min="0" step="0.01" />
           <Field label="Maximum successful redemptions" value={form.max_redemptions} onChange={(value) => update("max_redemptions", value)} type="number" min="1" step="1" placeholder="No limit" />
           <Field label="Minimum booking amount (AUD)" value={form.minimum_booking_amount} onChange={(value) => update("minimum_booking_amount", value)} type="number" min="0" step="0.01" />
@@ -162,7 +172,7 @@ export default function AdminPromotions({ properties }: { properties: PropertyOp
           <Field label="Starts (Melbourne time)" value={form.starts_at} onChange={(value) => update("starts_at", value)} type="datetime-local" />
           <Field label="Ends (Melbourne time)" value={form.ends_at} onChange={(value) => update("ends_at", value)} type="datetime-local" />
         </div>
-        <div className="grid gap-3 border-t border-[#EAE1DD] pt-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 border-t border-[var(--admin-border)] pt-5 sm:grid-cols-2 lg:grid-cols-4">
           <Toggle label="Active" checked={form.active} onChange={(value) => update("active", value)} />
           <Toggle label="Published in CMS" checked={form.published} onChange={(value) => update("published", value)} />
           <Toggle label="Show in header" checked={form.header_visible} onChange={(value) => update("header_visible", value)} />
@@ -170,23 +180,25 @@ export default function AdminPromotions({ properties }: { properties: PropertyOp
           <Toggle label="Stack with house discount" checked={form.stackable} onChange={(value) => update("stackable", value)} />
           <Toggle label="Restore capacity after refund" checked={form.restore_on_refund} onChange={(value) => update("restore_on_refund", value)} />
         </div>
-        <fieldset className="border-t border-[#EAE1DD] pt-5"><legend className="text-xs font-black uppercase tracking-[0.14em] text-stone-700">Applicable houses</legend><p className="mt-1 text-sm text-stone-500">Leave all unchecked to apply to every published house.</p><div className="mt-3 grid gap-2 sm:grid-cols-3">{properties.map((property) => <label key={property.id} className="flex items-center gap-2 border border-stone-200 p-3 text-sm font-semibold"><input type="checkbox" checked={form.applicable_property_ids.includes(property.id)} onChange={(event) => update("applicable_property_ids", event.target.checked ? [...form.applicable_property_ids, property.id] : form.applicable_property_ids.filter((id) => id !== property.id))} />{property.name}</label>)}</div></fieldset>
-        <div className="flex flex-wrap gap-3 border-t border-[#EAE1DD] pt-5"><button type="submit" className="btn-primary inline-flex items-center gap-2" disabled={saving}><Save size={16} />{saving ? "Saving…" : editingId ? "Save promotion" : "Create promotion"}</button><p className="self-center text-xs text-stone-500">Successful redemption count is controlled by paid Stripe bookings.</p></div>
+        <fieldset className="border-t border-[var(--admin-border)] pt-5"><legend className="text-sm font-semibold text-[var(--admin-text)]">Applicable houses</legend><p className="mt-1 text-sm text-[var(--admin-muted)]">Leave all unchecked to apply to every published house.</p><div className="mt-3 grid gap-2 sm:grid-cols-3">{properties.map((property) => <label key={property.id} className="flex items-center gap-2 border border-[var(--admin-border)] p-3 text-sm font-semibold"><input type="checkbox" checked={form.applicable_property_ids.includes(property.id)} onChange={(event) => update("applicable_property_ids", event.target.checked ? [...form.applicable_property_ids, property.id] : form.applicable_property_ids.filter((id) => id !== property.id))} />{property.name}</label>)}</div></fieldset>
+        <div className="flex flex-wrap gap-3 border-t border-[var(--admin-border)] pt-5"><button type="submit" className="admin-button admin-button-primary inline-flex items-center gap-2" disabled={saving}><Save size={16} />{saving ? "Saving…" : editingId ? "Save promotion" : "Create promotion"}</button><p className="self-center text-sm text-[var(--admin-muted)]">Successful redemption count is controlled by paid Stripe bookings.</p></div>
       </form>
 
-      {loading ? <div className="card admin-loading-state" role="status"><LoaderCircle size={18} className="animate-spin" aria-hidden="true" /><span>Loading promotions…</span></div> : <div className="grid gap-3">{promotions.length === 0 && <div className="card bg-white p-8 text-sm text-stone-600">No promotions yet. Create the first campaign above.</div>}{promotions.map((promotion) => <article key={promotion.id} className="card bg-white p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex flex-wrap items-center gap-2"><span className={"admin-promotion-status is-" + promotion.status}>{statusLabel[promotion.status]}</span><span className="font-mono text-sm font-black tracking-[0.12em]">{promotion.code}</span></div><h3 className="mt-2 text-lg font-extrabold">{promotion.name}</h3><p className="mt-1 text-sm text-stone-600">{promotion.message}</p></div><div className="flex flex-wrap gap-2"><button type="button" className="btn-outline-dark inline-flex items-center gap-2 text-sm" onClick={() => setPreview(preview?.id === promotion.id ? null : promotion)}><Eye size={15} /> Preview</button><button type="button" className="btn-secondary inline-flex items-center gap-2 text-sm" onClick={() => edit(promotion)}><Pencil size={15} /> Edit</button><button type="button" className="btn-secondary text-sm" onClick={() => void toggle(promotion)}>{promotion.active ? "Disable" : "Activate"}</button></div></div><div className="mt-4 grid gap-3 border-t border-stone-200 pt-4 text-sm sm:grid-cols-2 lg:grid-cols-4"><Metric label="Discount" value={promotion.discount_type === "percentage" ? promotion.discount_value + "%" : "AUD " + promotion.discount_value} /><Metric label="Redemptions" value={String(promotion.successful_redemptions) + (promotion.max_redemptions === null ? "" : " / " + promotion.max_redemptions)} /><Metric label="Remaining" value={promotion.remaining_redemptions === null ? "Unlimited" : String(promotion.remaining_redemptions)} /><Metric label="Window" value={dateLabel(promotion.starts_at) + " → " + dateLabel(promotion.ends_at)} /></div>{promotion.applicable_property_ids.length > 0 && <p className="mt-3 text-xs text-stone-500">Houses: {promotion.applicable_property_ids.map((id) => propertyNames.get(id) ?? id).join(", ")}</p>}{preview?.id === promotion.id && <div className="mt-4 border border-[#5A463A] bg-[#1C1917] p-4 text-sm text-white"><p className="font-black uppercase tracking-[0.12em] text-[#D8CCC4]">{promotion.badge_text}</p><div className="mt-2 flex flex-wrap items-center gap-3"><span>{promotion.message}</span><button type="button" className="inline-flex items-center gap-2 border border-[#A99B8E] px-3 py-1.5 font-mono text-xs font-bold hover:bg-white hover:text-[#1C1917]" onClick={() => void navigator.clipboard?.writeText(promotion.code)}><Copy size={13} />{promotion.code}</button></div></div>}</article>)}</div>}
+      <div className="admin-filter-panel flex flex-wrap gap-3 p-4"><input className="admin-field flex-1" aria-label="Search promotions" placeholder="Search campaign or code" value={query} onChange={e => setQuery(e.target.value)} /><select className="admin-field flex-1" aria-label="Promotion status" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}><option value="all">All statuses</option>{["active","scheduled","draft","expired","sold_out","disabled"].map(value => <option key={value} value={value}>{value.replaceAll("_"," ")}</option>)}</select><button type="button" className="admin-button" onClick={() => { setQuery(""); setFilterStatus("all"); }}>Reset filters</button></div>
+      {loading ? <div className="admin-card admin-loading-state" role="status"><LoaderCircle size={18} className="animate-spin" aria-hidden="true" /><span>Loading promotions…</span></div> : <div className="grid gap-3">{!error && filtered.length === 0 && <div className="admin-card bg-[var(--admin-surface)] p-8 text-sm text-[var(--admin-muted)]">{promotions.length ? "No promotions match these filters." : "No promotions yet. Create the first campaign above."}</div>}{visible.map((promotion) => <article key={promotion.id} className="admin-card bg-[var(--admin-surface)] p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex flex-wrap items-center gap-2"><AdminBadge domain="promotion" value={promotion.status} /><span className="font-mono text-sm font-semibold">{promotion.code}</span></div><h3 className="mt-2 text-lg font-semibold">{promotion.name}</h3><p className="mt-1 text-sm text-[var(--admin-muted)]">{promotion.message}</p></div><div className="flex flex-wrap gap-2"><button type="button" className="admin-button inline-flex items-center gap-2 text-sm" onClick={() => setPreview(preview?.id === promotion.id ? null : promotion)}><Eye size={15} /> Preview</button><button type="button" className="admin-button inline-flex items-center gap-2 text-sm" onClick={() => edit(promotion)}><Pencil size={15} /> Edit</button><button type="button" className="admin-button text-sm" disabled={Boolean(busyId)} onClick={() => void toggle(promotion)}>{promotion.active ? "Disable" : "Activate"}</button></div></div><div className="mt-4 grid gap-3 border-t border-[var(--admin-border)] pt-4 text-sm sm:grid-cols-2 lg:grid-cols-4"><Metric label="Discount" value={promotion.discount_type === "percentage" ? promotion.discount_value + "%" : "AUD " + promotion.discount_value} /><Metric label="Redemptions" value={String(promotion.successful_redemptions) + (promotion.max_redemptions === null ? "" : " / " + promotion.max_redemptions)} /><Metric label="Remaining" value={promotion.remaining_redemptions === null ? "Unlimited" : String(promotion.remaining_redemptions)} /><Metric label="Window" value={dateLabel(promotion.starts_at) + " → " + dateLabel(promotion.ends_at)} /></div>{promotion.applicable_property_ids.length > 0 && <p className="mt-3 text-sm text-[var(--admin-muted)]">Houses: {promotion.applicable_property_ids.map((id) => propertyNames.get(id) ?? id).join(", ")}</p>}{preview?.id === promotion.id && <div className="admin-guest-preview mt-4 border border-[#5A463A] bg-[#1C1917] p-4 text-sm text-white"><p className="font-black uppercase tracking-[0.12em] text-[#D8CCC4]">{promotion.badge_text}</p><div className="mt-2 flex flex-wrap items-center gap-3"><span>{promotion.message}</span><button type="button" className="inline-flex items-center gap-2 border border-[#A99B8E] px-3 py-1.5 font-mono text-xs font-bold hover:bg-white hover:text-[#1C1917]" onClick={() => void navigator.clipboard?.writeText(promotion.code)}><Copy size={13} />{promotion.code}</button></div></div>}</article>)}</div>}
+      {!loading && pagination}
     </div>
   );
 }
 
 function Field({ label, value, onChange, maxLength, mono, ...props }: { label: string; value: string; onChange: (value: string) => void; maxLength?: number; mono?: boolean } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange" | "maxLength">) {
-  return <label className="text-xs font-bold text-stone-800">{label}<input {...props} className={"field mt-1 w-full " + (mono ? "font-mono uppercase tracking-[0.08em]" : "")} value={value} maxLength={maxLength} onChange={(event) => onChange(event.target.value)} /></label>;
+  return <label className="text-sm font-medium text-[var(--admin-text)]">{label}<input {...props} className={"admin-field mt-1 w-full " + (mono ? "font-mono" : "")} value={value} maxLength={maxLength} onChange={(event) => onChange(event.target.value)} /></label>;
 }
 
 function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (value: boolean) => void }) {
-  return <label className="flex items-center gap-2 border border-stone-200 p-3 text-sm font-semibold"><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} />{label}</label>;
+  return <label className="flex items-center gap-2 border border-[var(--admin-border)] p-3 text-sm font-semibold"><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} />{label}</label>;
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
-  return <div><p className="text-[10px] font-black uppercase tracking-[0.12em] text-stone-500">{label}</p><p className="mt-1 font-bold text-stone-900">{value}</p></div>;
+  return <div><p className="text-sm font-semibold text-[var(--admin-muted)]">{label}</p><p className="mt-1 font-medium text-[var(--admin-text)]">{value}</p></div>;
 }

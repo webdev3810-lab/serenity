@@ -130,6 +130,7 @@ export type Database = {
           reviewer_name: string;
           review_text: string;
           rating: number;
+          category_ratings: Json;
           review_date: string | null;
           review_date_label: string | null;
           source: string;
@@ -159,7 +160,7 @@ export type Database = {
         Relationships: [];
       };
       amenities: {
-        Row: { id: string; property_id: string; name: string; display_order: number; created_at: string };
+        Row: { id: string; property_id: string; name: string; catalog_id: string | null; icon_id: string | null; amenity_group: string | null; display_order: number; created_at: string };
         Insert: Partial<Database["public"]["Tables"]["amenities"]["Row"]> & Pick<Database["public"]["Tables"]["amenities"]["Row"], "property_id" | "name">;
         Update: Partial<Database["public"]["Tables"]["amenities"]["Row"]>;
         Relationships: [];

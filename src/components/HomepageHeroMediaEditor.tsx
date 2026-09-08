@@ -1,16 +1,17 @@
 "use client";
+import { useAdminWorkspace,useDirtyGuard } from "@/src/components/admin/AdminUI";
 
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, ChevronDown, ChevronUp, Film, Globe2, ImagePlus, LoaderCircle, Trash2, Upload, X } from "lucide-react";
 import {
-  HERO_IMAGE_MAX_BYTES,
-  HERO_IMAGE_TYPES,
-  HERO_MEDIA_MAX_ITEMS,
-  HERO_VIDEO_MAX_BYTES,
-  HERO_VIDEO_TYPES,
-  validateHeroMediaFile,
+HERO_IMAGE_MAX_BYTES,
+HERO_IMAGE_TYPES,
+HERO_MEDIA_MAX_ITEMS,
+HERO_VIDEO_MAX_BYTES,
+HERO_VIDEO_TYPES,
+validateHeroMediaFile,
 } from "@/src/lib/heroMedia";
+import { CheckCircle2,ChevronDown,ChevronUp,Film,Globe2,ImagePlus,LoaderCircle,Trash2,Upload,X } from "lucide-react";
+import Image from "next/image";
+import { useEffect,useRef,useState } from "react";
 
 type HeroMediaItem = {
   id: string;
@@ -47,6 +48,7 @@ function uploadWithProgress(signedUrl: string, file: File, onProgress: (progress
 }
 
 export default function HomepageHeroMediaEditor({ onChange }: { onChange?: () => void }) {
+  const { confirm } = useAdminWorkspace();
   const inputRef = useRef<HTMLInputElement>(null);
   const [media, setMedia] = useState<HeroMediaItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,9 +58,10 @@ export default function HomepageHeroMediaEditor({ onChange }: { onChange?: () =>
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState("");
   const [publishing, setPublishing] = useState(false);
+  useDirtyGuard(Boolean(upload) || Boolean(busyId) || publishing);
 
   const load = async () => {
-    setLoading(true);
+    setLoading(true); setError("");
     try {
       const response = await fetch("/api/admin/hero-media", { cache: "no-store" });
       const data = await response.json();
@@ -226,7 +229,7 @@ export default function HomepageHeroMediaEditor({ onChange }: { onChange?: () =>
   };
 
   const deleteMedia = async (item: HeroMediaItem) => {
-    if (!window.confirm(`Delete ${item.media_type} “${item.caption || item.alt_text || "this hero item"}”? This removes the file from Supabase Storage.`)) return;
+    if (!await confirm(`Delete ${item.media_type} “${item.caption || item.alt_text || "this hero item"}”? This removes the file from Supabase Storage.`)) return;
     setBusyId(item.id);
     setError("");
     try {
@@ -243,27 +246,27 @@ export default function HomepageHeroMediaEditor({ onChange }: { onChange?: () =>
     }
   };
 
-  return <section className="rounded-none border border-[#D8CCC4] bg-[#F7F4F1] p-4 sm:p-5" aria-labelledby="hero-media-editor-title">
+  return <section className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-alt)] p-4 sm:p-5" aria-labelledby="hero-media-editor-title">
     <div className="flex flex-wrap items-start justify-between gap-3">
-      <div><h3 id="hero-media-editor-title" className="text-lg font-extrabold">Hero media</h3><p className="mt-1 max-w-2xl text-sm leading-relaxed text-stone-600">Upload images or videos, preview them immediately, then publish the set when it is ready.</p></div>
-      <div className="flex flex-wrap items-center gap-2"><span className="rounded-none bg-[#EAE1DD] px-3 py-1 text-xs font-bold text-[#5A463A]">{media.length}/{HERO_MEDIA_MAX_ITEMS} items</span>{media.length > 0 && <button type="button" className="btn-primary inline-flex min-h-9 items-center gap-2 px-3 py-1.5 text-xs" onClick={() => void publishMedia()} disabled={publishing || Boolean(upload)}><Globe2 size={14} /> {publishing ? "Publishing…" : "Publish media"}</button>}</div>
+      <div><h3 id="hero-media-editor-title" className="text-lg font-semibold">Hero media</h3><p className="mt-1 max-w-2xl text-sm leading-relaxed text-[var(--admin-muted)]">Upload images or videos, preview them immediately, then publish the set when it is ready.</p></div>
+      <div className="flex flex-wrap items-center gap-2"><span className="rounded-xl bg-[var(--admin-surface-alt)] px-3 py-1 text-sm font-medium text-[var(--admin-text)]">{media.length}/{HERO_MEDIA_MAX_ITEMS} items</span>{media.length > 0 && <button type="button" className="admin-button admin-button-primary inline-flex min-h-9 items-center gap-2 px-3 py-1.5 text-sm" onClick={() => void publishMedia()} disabled={publishing || Boolean(upload)}><Globe2 size={14} /> {publishing ? "Publishing…" : "Publish media"}</button>}</div>
     </div>
 
-    <div className="mt-4 grid gap-2 text-xs text-stone-600 sm:grid-cols-2"><p>Images: JPG, JPEG, PNG, WebP, AVIF · max {formatBytes(HERO_IMAGE_MAX_BYTES)}</p><p>Videos: MP4, WebM · max {formatBytes(HERO_VIDEO_MAX_BYTES)}</p></div>
-    <button type="button" className={`mt-4 flex min-h-28 w-full flex-col items-center justify-center rounded-none border border-dashed p-5 text-center transition-colors ${dragging ? "border-[#5A463A] bg-white" : "border-[#B99D88] bg-white/70 hover:bg-white"}`} onClick={() => inputRef.current?.click()} onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); void handleFiles(Array.from(event.dataTransfer.files)); }} disabled={Boolean(upload) || media.length >= HERO_MEDIA_MAX_ITEMS}>
-      <Upload size={21} className="text-[#8B6B55]" /><span className="mt-2 text-sm font-bold">Drop files here or choose from your device</span><span className="mt-1 text-xs text-stone-500">Only the active hero media is loaded on the public homepage.</span>
+    <div className="mt-4 grid gap-2 text-sm text-[var(--admin-muted)] sm:grid-cols-2"><p>Images: JPG, JPEG, PNG, WebP, AVIF · max {formatBytes(HERO_IMAGE_MAX_BYTES)}</p><p>Videos: MP4, WebM · max {formatBytes(HERO_VIDEO_MAX_BYTES)}</p></div>
+    <button type="button" className={`mt-4 flex min-h-28 w-full flex-col items-center justify-center rounded-xl border border-dashed p-5 text-center transition-colors ${dragging ? "border-[var(--admin-border)] bg-[var(--admin-surface)]" : "border-[var(--admin-border)] bg-[var(--admin-surface)] hover:bg-[var(--admin-surface)]"}`} onClick={() => inputRef.current?.click()} onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); void handleFiles(Array.from(event.dataTransfer.files)); }} disabled={Boolean(upload) || media.length >= HERO_MEDIA_MAX_ITEMS}>
+      <Upload size={21} className="text-[var(--admin-text)]" /><span className="mt-2 text-sm font-medium">Drop files here or choose from your device</span><span className="mt-1 text-sm text-[var(--admin-muted)]">Only the active hero media is loaded on the public homepage.</span>
     </button>
     <input ref={inputRef} type="file" className="sr-only" accept={[...HERO_IMAGE_TYPES, ...HERO_VIDEO_TYPES].join(",")} multiple onChange={(event) => { void handleFiles(Array.from(event.target.files ?? [])); event.target.value = ""; }} />
 
-    {upload && <div className="mt-3 rounded-none border border-[#D8CCC4] bg-white p-3" role="status"><div className="flex items-center justify-between gap-3 text-xs font-bold"><span className="truncate">Uploading {upload.name}</span><span>{upload.progress}%</span></div><div className="mt-2 h-2 overflow-hidden rounded-none bg-[#EAE1DD]"><div className="h-full rounded-none bg-[#5A463A] transition-[width]" style={{ width: `${upload.progress}%` }} /></div></div>}
-    {message && <p className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#356047]" role="status"><CheckCircle2 size={16} /> {message}</p>}
-    {error && <p className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#8A3325]" role="alert"><X size={16} /> {error}</p>}
+    {upload && <div className="mt-3 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3" role="status"><div className="flex items-center justify-between gap-3 text-sm font-medium"><span className="truncate">Uploading {upload.name}</span><span>{upload.progress}%</span></div><div className="mt-2 h-2 overflow-hidden rounded-xl bg-[var(--admin-surface-alt)]"><div className="h-full rounded-xl bg-[var(--admin-accent)] transition-[width]" style={{ width: `${upload.progress}%` }} /></div></div>}
+    {message && <p className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[var(--admin-success-text)]" role="status"><CheckCircle2 size={16} /> {message}</p>}
+    {error && <p className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[var(--admin-danger-text)]" role="alert"><X size={16} /> {error}<button type="button" className="admin-button" onClick={() => void load()}>Retry loading</button></p>}
 
-    {loading ? <p className="mt-5 text-sm text-stone-600">Loading hero media…</p> : media.length ? <div className="mt-5 grid gap-2">{media.map((item, index) => <article key={item.id} className={`flex flex-wrap items-center gap-3 rounded-none border p-3 ${item.active ? "border-[#D8CCC4] bg-white" : "border-[#D8CCC4] bg-[#EAE1DD]/60"}`}>
-      <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-none bg-stone-800">{item.media_type === "video" ? <><video src={item.preview_url || item.public_url} className="h-full w-full object-cover" muted playsInline autoPlay loop preload="auto" /> <span className="absolute bottom-1 left-1 inline-flex items-center gap-1 rounded-none bg-black/65 px-1.5 py-1 text-[0.62rem] font-bold text-white"><Film size={11} /> Video</span></> : <Image src={item.preview_url || item.public_url} alt="" fill sizes="112px" unoptimized className="object-cover" />} </div>
-      <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><span className="rounded-none bg-[#5A463A] px-2 py-1 text-[0.62rem] font-bold uppercase tracking-wider text-white">{index === 0 ? "First" : `Position ${index + 1}`}</span><span className="text-xs text-stone-500">{item.mime_type} · {formatBytes(item.file_size)}</span></div><p className="mt-1 text-sm font-semibold text-stone-800">{item.active ? "Published on homepage" : "Ready to publish"}</p></div>
-      <div className="flex items-center gap-1"><button type="button" className="icon-button" aria-label={`Move ${item.caption || "media"} up`} disabled={index === 0 || Boolean(busyId)} onClick={() => void moveMedia(index, -1)}><ChevronUp size={16} /></button><button type="button" className="icon-button" aria-label={`Move ${item.caption || "media"} down`} disabled={index === media.length - 1 || Boolean(busyId)} onClick={() => void moveMedia(index, 1)}><ChevronDown size={16} /></button><button type="button" className="icon-button text-[#8A3325]" aria-label={`Delete ${item.caption || "media"}`} disabled={busyId === item.id} onClick={() => void deleteMedia(item)}><Trash2 size={16} /></button></div>
-    </article>)}</div> : <div className="mt-5 rounded-none border border-dashed border-[#B99D88] bg-white p-5 text-sm text-stone-600"><ImagePlus size={18} className="mb-2 text-[#8B6B55]" /> No dedicated hero media yet. The homepage will continue using the existing property image fallback.</div>}
-    {busyId && <p className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-stone-500"><LoaderCircle size={14} className="animate-spin" /> Saving media…</p>}
+    {loading ? <p className="mt-5 text-sm text-[var(--admin-muted)]">Loading hero media…</p> : media.length ? <div className="mt-5 grid gap-2">{media.map((item, index) => <article key={item.id} className={`flex flex-wrap items-center gap-3 rounded-xl border p-3 ${item.active ? "border-[var(--admin-border)] bg-[var(--admin-surface)]" : "border-[var(--admin-border)] bg-[var(--admin-surface-alt)]"}`}>
+      <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-[var(--admin-surface-alt)]">{item.media_type === "video" ? <><video src={item.preview_url || item.public_url} className="h-full w-full object-cover" muted playsInline autoPlay loop preload="auto" /> <span className="absolute bottom-1 left-1 inline-flex items-center gap-1 rounded-xl bg-black/65 px-1.5 py-1 text-xs font-medium text-white"><Film size={11} /> Video</span></> : <Image src={item.preview_url || item.public_url} alt="" fill sizes="112px" unoptimized className="object-cover" />} </div>
+      <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><span className="rounded-xl bg-[var(--admin-accent)] px-2 py-1 text-xs font-medium text-[var(--admin-on-accent)]">{index === 0 ? "First" : `Position ${index + 1}`}</span><span className="text-sm text-[var(--admin-muted)]">{item.mime_type} · {formatBytes(item.file_size)}</span></div><p className="mt-1 text-sm font-semibold text-[var(--admin-text)]">{item.active ? "Published on homepage" : "Ready to publish"}</p></div>
+      <div className="flex items-center gap-1"><button type="button" className="admin-icon-button" aria-label={`Move ${item.caption || "media"} up`} disabled={index === 0 || Boolean(busyId)} onClick={() => void moveMedia(index, -1)}><ChevronUp size={16} /></button><button type="button" className="admin-icon-button" aria-label={`Move ${item.caption || "media"} down`} disabled={index === media.length - 1 || Boolean(busyId)} onClick={() => void moveMedia(index, 1)}><ChevronDown size={16} /></button><button type="button" className="admin-icon-button text-[var(--admin-danger-text)]" aria-label={`Delete ${item.caption || "media"}`} disabled={busyId === item.id} onClick={() => void deleteMedia(item)}><Trash2 size={16} /></button></div>
+    </article>)}</div> : !error && <div className="mt-5 rounded-xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 text-sm text-[var(--admin-muted)]"><ImagePlus size={18} className="mb-2 text-[var(--admin-text)]" /> No dedicated hero media yet. The homepage will continue using the existing property image fallback.</div>}
+    {busyId && <p className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-[var(--admin-muted)]"><LoaderCircle size={14} className="animate-spin" /> Saving media…</p>}
   </section>;
 }

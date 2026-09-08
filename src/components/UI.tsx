@@ -1,37 +1,14 @@
 "use client";
-
 import { X } from "lucide-react";
-
-export function Modal({ title, open, onClose, children }: { title: string; open: boolean; onClose: () => void; children: React.ReactNode }) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-[70] bg-[#5A463A]/40 backdrop-blur-xs p-4 flex items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="modal-title" onClick={onClose}>
-      <div className="mx-auto max-h-[90vh] w-full max-w-4xl overflow-auto rounded-none bg-white p-6 shadow-2xl border border-stone-200" onClick={(event) => event.stopPropagation()}>
-        <div className="mb-5 flex items-center justify-between gap-4 border-b border-stone-100 pb-4">
-          <h2 id="modal-title" className="text-xl font-bold text-stone-900">{title}</h2>
-          <button className="icon-button" aria-label="Close modal" onClick={onClose}>
-            <X size={18} />
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
+import { useEffect, useRef } from "react";
+let count=0, originalOverflow="";
+export function PublicDialog({ label,onClose,children,className="" }: {label:string;onClose:()=>void;children:React.ReactNode;className?:string}) {
+ const ref=useRef<HTMLDialogElement>(null);
+ useEffect(()=>{const dialog=ref.current,previous=document.activeElement as HTMLElement|null;if(count++===0)originalOverflow=document.body.style.overflow;dialog?.showModal();document.body.style.overflow="hidden";return()=>{dialog?.close();if(--count===0)document.body.style.overflow=originalOverflow;if(previous?.isConnected)previous.focus();};},[]);
+ return <dialog ref={ref} className={"serenity-modal "+className} aria-label={label} onCancel={e=>{e.preventDefault();e.stopPropagation();onClose();}} onClick={e=>{if(e.target!==e.currentTarget)return;const r=e.currentTarget.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)onClose();}}>{children}</dialog>;
 }
-
-export function Drawer({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-[70] bg-[#5A463A]/30 md:hidden" role="dialog" aria-modal="true" onClick={onClose}>
-      <div className="absolute inset-x-0 bottom-0 max-h-[88vh] overflow-auto rounded-none bg-white p-6 shadow-2xl border-t border-stone-200" onClick={(event) => event.stopPropagation()}>
-        <div className="mb-4 flex justify-center">
-          <span className="h-1.5 w-12 rounded-none bg-stone-300" />
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
+export function Modal({title,open,onClose,children}:{title:string;open:boolean;onClose:()=>void;children:React.ReactNode}) {return open?<PublicDialog label={title} onClose={onClose}><header className="serenity-modal-heading"><h2>{title}</h2><button type="button" className="serenity-modal-close" aria-label={"Close "+title} onClick={onClose}><X size={20}/></button></header>{children}</PublicDialog>:null;}
+export function Drawer({open,onClose,children}:{open:boolean;onClose:()=>void;children:React.ReactNode}) {return open?<PublicDialog label="Your stay" onClose={onClose} className="serenity-booking-drawer"><header className="serenity-modal-heading"><h2>Your stay</h2><button type="button" className="serenity-modal-close" aria-label="Close booking" onClick={onClose}><X size={20}/></button></header>{children}</PublicDialog>:null;}
 
 export function FormInput({
   label,

@@ -1,13 +1,15 @@
 "use client";
+import { useAdminWorkspace,useDirtyGuard } from "@/src/components/admin/AdminUI";
+import { fetchAllAdminRows } from "@/src/lib/admin-pagination";
 
 /* The photo manager keeps edits in the browser until the single Save changes
    action. Upload bytes still go directly to Supabase Storage via a signed URL. */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
-import { ChevronDown, ChevronLeft, ChevronUp, Images, LoaderCircle, Plus, Save, Trash2, Upload } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/src/lib/supabase/client";
+import { ChevronDown,ChevronLeft,ChevronUp,Images,LoaderCircle,Plus,Save,Trash2,Upload } from "lucide-react";
+import Image from "next/image";
+import { useEffect,useMemo,useRef,useState } from "react";
 
 type Row = Record<string, any>;
 
@@ -101,6 +103,7 @@ async function compressImage(file: File) {
 }
 
 export default function PropertyPhotoManager({ properties, selectedId, setSelectedId, images, reload, notify, onError, onSelectProperty, embedded = false, showHeader = true, showPropertySelector = true, onBackToHouses }: PropertyPhotoManagerProps) {
+  const { confirm } = useAdminWorkspace();
   const supabase = useMemo(() => createSupabaseBrowserClient() as any, []);
   const [localImages, setLocalImages] = useState<Row[]>([]);
   const [categories, setCategories] = useState<CategoryDraft[]>(defaultCategories);
@@ -116,7 +119,10 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const dragCleanupRef = useRef<(() => void) | null>(null);
-  const [dirty, setDirty] = useState(false);
+  const [edited, setDirty] = useState(false);
+  const [savedImages, setSavedImages] = useState<Row[]>([]);
+  const [savedCategories, setSavedCategories] = useState<CategoryDraft[]>(defaultCategories);
+  const dirty = edited && (JSON.stringify(localImages) !== JSON.stringify(savedImages) || JSON.stringify(categories) !== JSON.stringify(savedCategories));
 
   const imageKey = images.map((image) => `${image.id}:${image.updated_at ?? ""}:${image.display_order ?? 0}`).join("|");
 
@@ -125,20 +131,12 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
     // external snapshot into the local draft used by the editor.
     const selectedImages = images.filter((image) => image.property_id === selectedId).map((image) => ({ ...image }));
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLocalImages(selectedImages);
+    setLocalImages(selectedImages); setSavedImages(selectedImages);
     setUploadCategory(DEFAULT_UPLOAD_CATEGORY);
     setDirty(false);
   }, [selectedId, imageKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!dirty) return;
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [dirty]);
+  useDirtyGuard(dirty || uploading || saving);
 
   useEffect(() => () => {
     dragCleanupRef.current?.();
@@ -154,7 +152,7 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
     }
     let cancelled = false;
     void (async () => {
-      const result = await supabase.from("property_photo_categories").select("*").order("display_order");
+      const result = await fetchAllAdminRows<Row>(() => supabase.from("property_photo_categories").select("*").order("display_order").order("id"));
       if (cancelled) return;
       if (result.error) {
         onError(result.error.message);
@@ -205,7 +203,8 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
       if (!existingSlugs.has("other") && !imageCategories.some((category) => category.category === "other")) {
         imageCategories.push({ category: "other", category_label: "Other", category_description: "", display_order: baseCategories.length + imageCategories.length, is_visible: true, no_photo_available: false });
       }
-      setCategories(categoriesWithOtherLast([...baseCategories, ...imageCategories].sort((a, b) => a.display_order - b.display_order)));
+      const loadedCategories = categoriesWithOtherLast([...baseCategories, ...imageCategories].sort((a, b) => a.display_order - b.display_order));
+      setCategories(loadedCategories); setSavedCategories(loadedCategories);
     })();
     return () => { cancelled = true; };
   }, [imageKey, images, onError, selectedId, supabase]);
@@ -348,7 +347,7 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
     overlay.style.transform = "none";
     overlay.style.transition = "none";
     overlay.style.boxShadow = "0 24px 60px rgba(45, 38, 34, 0.24)";
-    document.body.appendChild(overlay);
+    (document.getElementById("serenity-admin") ?? document.body).appendChild(overlay);
 
     const move = (moveEvent: PointerEvent) => {
       moveEvent.preventDefault();
@@ -522,7 +521,7 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
   };
 
   const remove = async (image: Row) => {
-    if (!window.confirm("Delete this photo? This removes the uploaded file and its gallery record.")) return;
+    if (!await confirm("Delete this photo? This removes the uploaded file and its gallery record.")) return;
     setSaving(true);
     try {
       const [databaseResult, storageResult] = await Promise.all([
@@ -554,46 +553,46 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
   };
 
   return <>
-    {showPropertySelector ? <div className={`mb-5 flex flex-wrap items-center gap-2 ${embedded ? "border-b border-[#EAE1DD] pb-4" : ""}`}>
-      {embedded && <span className="mr-1 text-xs font-bold uppercase tracking-[0.14em] text-[#8B6B55]">Select house</span>}
-      {properties.map((property) => <button key={property.id} type="button" onClick={() => onSelectProperty ? onSelectProperty(property) : setSelectedId(property.id)} className={`rounded-none border px-4 py-2 text-sm font-bold ${selectedId === property.id ? "border-[#5A463A] bg-[#5A463A] text-white" : "border-[#D8CCC4] bg-white hover:bg-[#F7F4F1]"}`}>{property.name}</button>)}
-    </div> : onBackToHouses ? <div className="mb-5 border-b border-[#EAE1DD] pb-4"><button type="button" className="btn-outline-dark inline-flex min-h-10 items-center gap-2" onClick={onBackToHouses}><ChevronLeft size={16} /> Back to houses</button></div> : null}
-    {!selectedId ? <div className="card bg-white p-8 text-center text-sm text-stone-600"><Images className="mx-auto mb-3 text-[#8B6B55]" /><p>Select a house to manage its photos.</p></div> : <section className="card bg-white p-5 sm:p-7">
-      {showHeader ? <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#EAE1DD] pb-5">
-        <div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#8B6B55]">Property gallery</p><h2 className="mt-1 text-2xl font-extrabold">{propertyName}</h2><p className="mt-2 max-w-2xl text-sm text-stone-600">Upload real house photos, choose their room, set a cover, and publish only the photos you want guests to see.</p></div>
+    {showPropertySelector ? <div className={`mb-5 flex flex-wrap items-center gap-2 ${embedded ? "border-b border-[var(--admin-border)] pb-4" : ""}`}>
+      {embedded && <span className="mr-1 text-sm font-medium text-[var(--admin-text)]">Select house</span>}
+      {properties.map((property) => <button key={property.id} type="button" onClick={() => onSelectProperty ? onSelectProperty(property) : setSelectedId(property.id)} className={`rounded-xl border px-4 py-2 text-sm font-medium ${selectedId === property.id ? "border-[var(--admin-border)] bg-[var(--admin-accent)] text-[var(--admin-on-accent)]" : "border-[var(--admin-border)] bg-[var(--admin-surface)] hover:bg-[var(--admin-surface-alt)]"}`}>{property.name}</button>)}
+    </div> : onBackToHouses ? <div className="mb-5 border-b border-[var(--admin-border)] pb-4"><button type="button" className="admin-button inline-flex min-h-10 items-center gap-2" onClick={onBackToHouses}><ChevronLeft size={16} /> Back to houses</button></div> : null}
+    {!selectedId ? <div className="admin-card bg-[var(--admin-surface)] p-8 text-center text-sm text-[var(--admin-muted)]"><Images className="mx-auto mb-3 text-[var(--admin-text)]" /><p>Select a house to manage its photos.</p></div> : <section className="admin-card bg-[var(--admin-surface)] p-5 sm:p-7">
+      {showHeader ? <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--admin-border)] pb-5">
+        <div><p className="text-sm font-medium text-[var(--admin-text)]">Property gallery</p><h2 className="mt-1 text-2xl font-semibold">{propertyName}</h2><p className="mt-2 max-w-2xl text-sm text-[var(--admin-muted)]">Upload real house photos, choose their room, set a cover, and publish only the photos you want guests to see.</p></div>
         <div className="flex flex-wrap items-end gap-3">
-          <label className="btn-primary inline-flex min-h-11 cursor-pointer items-center gap-2"><Upload size={16} /> Upload photos<input type="file" multiple accept="image/jpeg,image/png,image/webp,image/avif" className="sr-only" onChange={upload} disabled={uploading} /></label>
+          <label className="admin-button admin-button-primary inline-flex min-h-11 cursor-pointer items-center gap-2"><Upload size={16} /> Upload photos<input type="file" multiple accept="image/jpeg,image/png,image/webp,image/avif" className="sr-only" onChange={upload} disabled={uploading} /></label>
         </div>
-      </div> : <div className="flex justify-end"><label className="btn-primary inline-flex min-h-10 cursor-pointer items-center gap-2"><Upload size={16} /> Upload photos<input type="file" multiple accept="image/jpeg,image/png,image/webp,image/avif" className="sr-only" onChange={upload} disabled={uploading} /></label></div>}
-      <div className="mt-5 grid gap-3 text-xs text-stone-600 sm:grid-cols-3"><p>New photos go to Unsorted uploads and stay hidden.</p><p>JPG, PNG, WebP, AVIF · max 5 MB each</p><p>Upload up to {MAX_UPLOAD_BATCH} at a time · room categories max {MAX_IMAGES_PER_HOUSE_CATEGORY}</p></div>
-      {uploading ? <div className="mt-5 rounded-none border border-[#D8CCC4] bg-[#F7F4F1] p-4" role="status"><div className="flex items-center gap-2 text-sm font-bold"><LoaderCircle size={16} className="animate-spin" /> {uploadMessage}</div><div className="mt-3 h-2 overflow-hidden rounded-none bg-[#EAE1DD]"><div className="h-full bg-[#5A463A] transition-all" style={{ width: `${Math.max(uploadProgress, 8)}%` }} /></div></div> : null}
+      </div> : <div className="flex justify-end"><label className="admin-button admin-button-primary inline-flex min-h-10 cursor-pointer items-center gap-2"><Upload size={16} /> Upload photos<input type="file" multiple accept="image/jpeg,image/png,image/webp,image/avif" className="sr-only" onChange={upload} disabled={uploading} /></label></div>}
+      <div className="mt-5 grid gap-3 text-sm text-[var(--admin-muted)] sm:grid-cols-3"><p>New photos go to Unsorted uploads and stay hidden.</p><p>JPG, PNG, WebP, AVIF · max 5 MB each</p><p>Upload up to {MAX_UPLOAD_BATCH} at a time · room categories max {MAX_IMAGES_PER_HOUSE_CATEGORY}</p></div>
+      {uploading ? <div className="mt-5 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-alt)] p-4" role="status"><div className="flex items-center gap-2 text-sm font-medium"><LoaderCircle size={16} className="animate-spin" /> {uploadMessage}</div><div className="mt-3 h-2 overflow-hidden rounded-xl bg-[var(--admin-surface-alt)]"><div className="h-full bg-[var(--admin-accent)] transition-all" style={{ width: `${Math.max(uploadProgress, 8)}%` }} /></div></div> : null}
       {sortedImages.length ? <div className="mt-6 space-y-8">
         {groupedImages.map((group) => <section key={group.category} aria-labelledby={`photo-group-${group.category}`}>
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-[#EAE1DD] pb-2">
-            <div><h3 id={`photo-group-${group.category}`} className="text-sm font-extrabold uppercase tracking-[0.14em] text-[#5A463A]">{group.label}</h3><p className="mt-1 text-xs text-stone-500">{isStagingCategory(group.category) ? "Hidden staging area — assign a room and publish when ready." : `${group.images.length} of ${MAX_IMAGES_PER_HOUSE_CATEGORY} photos used for this house category`}</p></div>
-            <span className="rounded-none bg-[#F7F4F1] px-3 py-1 text-xs font-bold text-stone-600">{categoryCountLabel(group.category, group.images.length)}</span>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--admin-border)] pb-2">
+            <div><h3 id={`photo-group-${group.category}`} className="text-sm font-semibold text-[var(--admin-text)]">{group.label}</h3><p className="mt-1 text-sm text-[var(--admin-muted)]">{isStagingCategory(group.category) ? "Hidden staging area — assign a room and publish when ready." : `${group.images.length} of ${MAX_IMAGES_PER_HOUSE_CATEGORY} photos used for this house category`}</p></div>
+            <span className="rounded-xl bg-[var(--admin-surface-alt)] px-3 py-1 text-sm font-medium text-[var(--admin-muted)]">{categoryCountLabel(group.category, group.images.length)}</span>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {group.images.map((image) => {
           const index = sortedImages.findIndex((item) => item.id === image.id);
           const src = image.storage_path ? storageUrl(image.storage_path) : String(image.external_url ?? "");
-          return <article key={image.id} data-photo-card={String(image.id)} onPointerDown={(event) => startCardDrag(event, String(image.id))} className={`will-change-transform cursor-grab overflow-hidden rounded-none border bg-white transition-[transform,box-shadow,opacity,border-color] duration-200 ease-out active:cursor-grabbing ${draggedId === image.id ? "pointer-events-none touch-none opacity-0" : dragOverId === image.id && draggedId !== null ? "translate-y-1 scale-[1.01] border-[#5A463A] shadow-xl" : "border-[#D8CCC4] shadow-sm hover:-translate-y-0.5 hover:shadow-md"}`}>
-              <div className="relative h-52 bg-[#F7F4F1] sm:h-60">
-              {src ? <Image src={src} alt={String(image.alt_text || "Property photo")} fill sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw" className="object-cover" draggable={false} unoptimized={Boolean(image.external_url)} /> : <div className="flex h-full items-center justify-center text-sm text-stone-500">No preview available</div>}
-              <span className="absolute left-3 top-3 rounded-none bg-[#5A463A] px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider text-white">{image.id === coverId ? "Cover" : `Photo ${index + 1}`}</span>
-              {isPreviewImage(image) ? <span className="absolute bottom-3 left-3 rounded-none bg-[#FFF6F3] px-2.5 py-1 text-[0.68rem] font-bold text-[#8A3325]">Preview image — replace with your photo</span> : null}
+          return <article key={image.id} data-photo-card={String(image.id)} onPointerDown={(event) => startCardDrag(event, String(image.id))} className={`will-change-transform cursor-grab overflow-hidden rounded-xl border bg-[var(--admin-surface)] transition-[transform,box-shadow,opacity,border-color] duration-200 ease-out active:cursor-grabbing ${draggedId === image.id ? "pointer-events-none touch-none opacity-0" : dragOverId === image.id && draggedId !== null ? "translate-y-1 scale-[1.01] border-[var(--admin-border)] " : "border-[var(--admin-border)]  hover:-translate-y-0.5 hover:shadow-md"}`}>
+              <div className="relative h-52 bg-[var(--admin-surface-alt)] sm:h-60">
+              {src ? <Image src={src} alt={String(image.alt_text || "Property photo")} fill sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw" className="object-cover" draggable={false} unoptimized={Boolean(image.external_url)} /> : <div className="flex h-full items-center justify-center text-sm text-[var(--admin-muted)]">No preview available</div>}
+              <span className="absolute left-3 top-3 rounded-xl bg-[var(--admin-accent)] px-2.5 py-1 text-xs font-medium text-[var(--admin-on-accent)]">{image.id === coverId ? "Cover" : `Photo ${index + 1}`}</span>
+              {isPreviewImage(image) ? <span className="absolute bottom-3 left-3 rounded-xl bg-[var(--admin-surface-alt)] px-2.5 py-1 text-xs font-medium text-[var(--admin-danger-text)]">Preview image — replace with your photo</span> : null}
             </div>
             <div className="space-y-2 p-3">
-              <label className="block text-xs font-bold text-stone-700">Category<select className="field mt-1 h-9 rounded-none px-3 py-1 text-xs" value={String(image.category ?? DEFAULT_UPLOAD_CATEGORY)} onChange={(event) => { if (event.target.value === ADD_CATEGORY_OPTION) { openCategoryForm(image.id); return; } changeImageCategory(image, event.target.value); }}>{categoryOptions.map((item) => <option key={item.category} value={item.category}>{item.category_label} ({categoryCountLabel(item.category, imageCountByCategory.get(item.category) ?? 0)})</option>)}<option value={ADD_CATEGORY_OPTION}>+ Add new category…</option></select></label>
-              {categoryFormOpen && categoryFormImageId === image.id && <form className="rounded-none border border-[#D8CCC4] bg-[#F7F4F1] p-2" onSubmit={addCategory}><label className="block text-xs font-bold">New category<input autoFocus id={`new-category-${selectedId}-${image.id}`} className="field mt-1 h-9 rounded-none px-3 py-1 text-xs" maxLength={80} value={newCategoryLabel} onChange={(event) => setNewCategoryLabel(event.target.value)} placeholder="Type a category name" /></label><div className="mt-2 flex flex-wrap gap-1.5"><button type="submit" className="btn-primary inline-flex min-h-8 items-center justify-center gap-1.5 rounded-none px-2.5 py-1 text-xs" disabled={saving}><Plus size={13} /> {saving ? "Saving…" : "Save category"}</button><button type="button" className="btn-outline-dark min-h-8 rounded-none px-2.5 py-1 text-xs" onClick={() => { setCategoryFormOpen(false); setCategoryFormImageId(null); }} disabled={saving}>Cancel</button></div></form>}
-              <div className="flex flex-wrap items-center gap-1.5 border-t border-[#EAE1DD] pt-2 text-[0.7rem] font-bold text-stone-700"><label className={`inline-flex min-h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-none border px-2 py-1 ${isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY)) ? "cursor-not-allowed border-[#EAE1DD] bg-[#F7F4F1] text-stone-400" : "border-[#D8CCC4] bg-[#F7F4F1]"}`} title={isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY)) ? "Assign a room before publishing this photo" : "Show this photo in the public gallery"}><input type="checkbox" checked={!isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY)) && image.is_visible !== false} disabled={isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY))} onChange={(event) => updateImage(image.id, { is_visible: event.target.checked })} /> Visible</label><label className={`inline-flex min-h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-none border px-2 py-1 ${image.id === coverId ? "border-[#5A463A] bg-[#F7F4F1] text-[#5A463A]" : "border-[#D8CCC4] bg-white hover:bg-[#F7F4F1]"}`}><input type="radio" name={`cover-${selectedId}`} checked={image.id === coverId} disabled={isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY))} onChange={() => { setLocalImages((current) => current.map((item) => ({ ...item, is_cover: item.id === image.id }))); setDirty(true); }} /> {image.id === coverId ? "Cover photo" : "Set as cover"}</label><button type="button" aria-label="Move photo up" title="Move photo up" className="inline-flex min-h-8 w-9 items-center justify-center rounded-none border border-[#D8CCC4] px-2 py-1" disabled={!index} onClick={() => moveImage(index, index - 1)}><ChevronUp size={13} /></button><button type="button" aria-label="Move photo down" title="Move photo down" className="inline-flex min-h-8 w-9 items-center justify-center rounded-none border border-[#D8CCC4] px-2 py-1" disabled={index === sortedImages.length - 1} onClick={() => moveImage(index, index + 1)}><ChevronDown size={13} /></button><button type="button" aria-label="Delete photo" title="Delete photo" className="ml-auto inline-flex min-h-8 w-9 items-center justify-center rounded-none border border-[#E7BDB4] px-2 py-1 text-[#8A3325]" onClick={() => void remove(image)} disabled={saving}><Trash2 size={13} /></button></div>
+              <label className="block text-sm font-medium text-[var(--admin-text)]">Category<select className="admin-field mt-1 h-9 rounded-xl px-3 py-1 text-sm" value={String(image.category ?? DEFAULT_UPLOAD_CATEGORY)} onChange={(event) => { if (event.target.value === ADD_CATEGORY_OPTION) { openCategoryForm(image.id); return; } changeImageCategory(image, event.target.value); }}>{categoryOptions.map((item) => <option key={item.category} value={item.category}>{item.category_label} ({categoryCountLabel(item.category, imageCountByCategory.get(item.category) ?? 0)})</option>)}<option value={ADD_CATEGORY_OPTION}>+ Add new category…</option></select></label>
+              {categoryFormOpen && categoryFormImageId === image.id && <form className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-alt)] p-2" onSubmit={addCategory}><label className="block text-sm font-medium">New category<input autoFocus id={`new-category-${selectedId}-${image.id}`} className="admin-field mt-1 h-9 rounded-xl px-3 py-1 text-sm" maxLength={80} value={newCategoryLabel} onChange={(event) => setNewCategoryLabel(event.target.value)} placeholder="Type a category name" /></label><div className="mt-2 flex flex-wrap gap-1.5"><button type="submit" className="admin-button admin-button-primary inline-flex min-h-8 items-center justify-center gap-1.5 rounded-xl px-2.5 py-1 text-sm" disabled={saving}><Plus size={13} /> {saving ? "Saving…" : "Save category"}</button><button type="button" className="admin-button min-h-8 rounded-xl px-2.5 py-1 text-sm" onClick={() => { setCategoryFormOpen(false); setCategoryFormImageId(null); }} disabled={saving}>Cancel</button></div></form>}
+              <div className="flex flex-wrap items-center gap-1.5 border-t border-[var(--admin-border)] pt-2 text-[0.7rem] font-medium text-[var(--admin-text)]"><label className={`inline-flex min-h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border px-2 py-1 ${isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY)) ? "cursor-not-allowed border-[var(--admin-border)] bg-[var(--admin-surface-alt)] text-[var(--admin-muted)]" : "border-[var(--admin-border)] bg-[var(--admin-surface-alt)]"}`} title={isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY)) ? "Assign a room before publishing this photo" : "Show this photo in the public gallery"}><input type="checkbox" checked={!isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY)) && image.is_visible !== false} disabled={isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY))} onChange={(event) => updateImage(image.id, { is_visible: event.target.checked })} /> Visible</label><label className={`inline-flex min-h-8 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl border px-2 py-1 ${image.id === coverId ? "border-[var(--admin-border)] bg-[var(--admin-surface-alt)] text-[var(--admin-text)]" : "border-[var(--admin-border)] bg-[var(--admin-surface)] hover:bg-[var(--admin-surface-alt)]"}`}><input type="radio" name={`cover-${selectedId}`} checked={image.id === coverId} disabled={isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY))} onChange={() => { setLocalImages((current) => current.map((item) => ({ ...item, is_cover: item.id === image.id }))); setDirty(true); }} /> {image.id === coverId ? "Cover photo" : "Set as cover"}</label><button type="button" aria-label="Move photo up" title="Move photo up" className="inline-flex min-h-8 w-9 items-center justify-center rounded-xl border border-[var(--admin-border)] px-2 py-1" disabled={!index} onClick={() => moveImage(index, index - 1)}><ChevronUp size={13} /></button><button type="button" aria-label="Move photo down" title="Move photo down" className="inline-flex min-h-8 w-9 items-center justify-center rounded-xl border border-[var(--admin-border)] px-2 py-1" disabled={index === sortedImages.length - 1} onClick={() => moveImage(index, index + 1)}><ChevronDown size={13} /></button><button type="button" aria-label="Delete photo" title="Delete photo" className="ml-auto inline-flex min-h-8 w-9 items-center justify-center rounded-xl border border-[var(--admin-border)] px-2 py-1 text-[var(--admin-danger-text)]" onClick={() => void remove(image)} disabled={saving}><Trash2 size={13} /></button></div>
             </div>
           </article>;
         })}
           </div>
         </section>)}
-      </div> : <div className="mt-6 rounded-none border border-dashed border-[#B99D88] bg-[#F7F4F1] p-8 text-center text-sm text-stone-600">No photos uploaded yet. Add the first real photo above.</div>}
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-[#EAE1DD] pt-5"><p className="text-sm text-stone-600" role={dirty ? "status" : undefined}>{dirty ? "Unsaved gallery changes. Save before leaving this house." : "Changes to category, order, cover, and visibility are saved together."}</p><button type="button" className={`inline-flex min-h-11 items-center gap-2 rounded-none px-4 py-2.5 text-sm font-bold transition ${dirty ? "bg-[#5A463A] text-white shadow-sm hover:bg-[#48362D]" : "border border-[#D8CCC4] bg-white text-stone-400 opacity-60"}`} disabled={!dirty || saving || uploading} onClick={() => void saveChanges()}><Save size={16} /> {saving ? "Saving…" : "Save gallery changes"}</button></div>
+      </div> : <div className="mt-6 rounded-xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-alt)] p-8 text-center text-sm text-[var(--admin-muted)]">No photos uploaded yet. Add the first real photo above.</div>}
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] pt-5"><p className="text-sm text-[var(--admin-muted)]" role={dirty ? "status" : undefined}>{dirty ? "Unsaved gallery changes. Save before leaving this house." : "Changes to category, order, cover, and visibility are saved together."}</p><button type="button" className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition ${dirty ? "bg-[var(--admin-accent)] text-[var(--admin-on-accent)]  hover:bg-[var(--admin-surface-alt)]" : "border border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-muted)] opacity-60"}`} disabled={!dirty || saving || uploading} onClick={() => void saveChanges()}><Save size={16} /> {saving ? "Saving…" : "Save gallery changes"}</button></div>
     </section>}
   </>;
 }

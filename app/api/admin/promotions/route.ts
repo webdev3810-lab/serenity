@@ -1,3 +1,4 @@
+import { fetchAllAdminRows } from "@/src/lib/admin-pagination";
 import { NextResponse } from "next/server";
 import { getAdminUser } from "@/src/lib/supabase/auth";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
@@ -7,7 +8,7 @@ export async function GET() {
   const admin = await getAdminUser();
   if (!admin) return NextResponse.json({ error: "Not authorised." }, { status: 403 });
   const supabase = createSupabaseAdminClient();
-  const { data, error } = await supabase.from("promotions").select("*").order("created_at", { ascending: false });
+  const { data, error } = await fetchAllAdminRows(() => supabase.from("promotions").select("*").order("created_at", { ascending: false }).order("id"));
   if (error) return NextResponse.json({ error: "Could not load promotions." }, { status: 500 });
   const promotions = (data ?? []).map((row) => {
     const promotion = normalizePromotionRow(row as Record<string, unknown>);

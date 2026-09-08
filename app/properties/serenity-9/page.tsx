@@ -1,3 +1,4 @@
+import { PropertyStructuredData } from "@/src/components/PropertyStructuredData";
 import { notFound } from "next/navigation";
 import { PropertyDetailPage } from "@/src/components/PropertyDetailPage";
 import { getPublicPropertyBySlug, getPublicProperties } from "@/src/lib/supabase/content";
@@ -10,5 +11,5 @@ export const dynamic = "force-dynamic";
 export default async function Page() {
   const [property, relatedProperties] = await Promise.all([getPublicPropertyBySlug("serenity-9"), getPublicProperties()]);
   if (!property) notFound();
-  return <PropertyDetailPage property={property} relatedProperties={relatedProperties} today={todayIso()} />;
+  return <><PropertyStructuredData property={property}/><PropertyDetailPage property={property} relatedProperties={relatedProperties} today={todayIso()} /></>;
 }

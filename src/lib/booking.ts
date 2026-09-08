@@ -42,7 +42,7 @@ export type PriceBreakdown = {
 export const defaultGuests: GuestCounts = { adults: 2, children: 0, infants: 0, pets: 0 };
 
 export const formatAud = (amount: number) =>
-  new Intl.NumberFormat(AU_LOCALE, { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(amount);
+  new Intl.NumberFormat(AU_LOCALE, { style: "currency", currency: "AUD", minimumFractionDigits: Number.isInteger(amount) ? 0 : 2, maximumFractionDigits: 2 }).format(amount);
 
 const padDatePart = (value: number) => String(value).padStart(2, "0");
 
@@ -130,6 +130,7 @@ export const validateDateRange = (property: Property, checkIn?: string, checkout
 export const totalStayingGuests = (guests: GuestCounts) => guests.adults + guests.children;
 
 export const validateGuestCapacity = (property: Property, guests: GuestCounts) => {
+  if (Object.values(guests).some(value => !Number.isInteger(value) || value < 0)) return "Guest counts must be whole numbers of zero or more.";
   if (guests.adults < 1) return "At least one adult is required.";
   if (totalStayingGuests(guests) < property.minimumGuests) return `This house requires at least ${property.minimumGuests} staying guest${property.minimumGuests === 1 ? "" : "s"}.`;
   if (totalStayingGuests(guests) > property.maxGuests) return `Maximum capacity is ${property.maxGuests} guests, excluding infants.`;

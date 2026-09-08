@@ -154,8 +154,8 @@ export default function HomepageReviewsCarousel({ reviews, fullBleed = true }: {
 
                   <div className="mt-6 flex min-w-0 items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
-                      <div className="mb-3 flex gap-0.5 text-[#E0AD38]" aria-label="Five-star guest review">
-                        {Array.from({ length: 5 }, (_, star) => <Star key={star} size={12} fill="currentColor" strokeWidth={0} aria-hidden="true" />)}
+                      <div className="mb-3 flex gap-0.5 text-[#E0AD38]" aria-label={review.rating ? `${review.rating} out of 5 stars` : "Guest review"}>
+                        {Array.from({ length: review.rating ?? 0 }, (_, star) => <Star key={star} size={12} fill="currentColor" strokeWidth={0} aria-hidden="true" />)}
                       </div>
                       <span className={`inline-flex max-w-full break-words px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] ${featured ? "bg-[#F7F4F1]/10 text-[#F7F4F1]" : "bg-[#F0E8E1] text-[#5A463A]"}`}>
                         {review.propertyName}
@@ -164,7 +164,7 @@ export default function HomepageReviewsCarousel({ reviews, fullBleed = true }: {
                     <Quote size={31} strokeWidth={1.1} className={`shrink-0 ${featured ? "text-[#B99D88]" : "text-[#C8B5A8]"}`} aria-hidden="true" />
                   </div>
 
-                  <h3 className={`homepage-review-quote display-font mt-7 min-w-0 flex-1 break-words [overflow-wrap:anywhere] ${quoteSize} ${featured ? "text-[#F7F4F1]" : "text-stone-900"}`}>
+                  <h3 className={`homepage-review-quote display-font mt-7 min-w-0 flex-1 break-words ${quoteSize} ${featured ? "text-[#F7F4F1]" : "text-stone-900"}`}>
                     &ldquo;{review.reviewText}&rdquo;
                   </h3>
 

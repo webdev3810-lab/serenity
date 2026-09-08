@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { calculatePrice, defaultGuests } from "@/src/lib/booking";
+import { calculatePrice, defaultGuests, validateGuestCapacity } from "@/src/lib/booking";
 import { getPublicPropertyBySlug } from "@/src/lib/supabase/content";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 import { getAdminUser } from "@/src/lib/supabase/auth";
@@ -38,6 +38,8 @@ export async function POST(_request: Request, { params }: { params: Promise<{ en
   for (const [index, row] of orderedRows.entries()) {
     const property = await getPublicPropertyBySlug(row.slug);
     if (!property) return NextResponse.json({ error: "Could not load a selected house for conversion." }, { status: 409 });
+    const capacityError = validateGuestCapacity(property, guestsPerHouse);
+    if (capacityError) return NextResponse.json({ error: `${property.name}: ${capacityError}` }, { status: 409 });
     const price = calculatePrice(property, arrival, departure, guestsPerHouse, true);
     bookingRows.push({
       reference: `${groupReference}-${String(index + 1).padStart(2, "0")}`,

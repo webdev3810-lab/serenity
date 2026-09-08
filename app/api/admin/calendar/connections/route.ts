@@ -1,3 +1,4 @@
+import { fetchAllAdminRows } from "@/src/lib/admin-pagination";
 import { NextResponse } from "next/server";
 import { getAdminUser } from "@/src/lib/supabase/auth";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
@@ -15,15 +16,15 @@ export async function GET() {
   if (!await getAdminUser()) return NextResponse.json({ error: "You must be signed in as an admin." }, { status: 401 });
   const supabase = createSupabaseAdminClient();
   const [{ data: properties, error: propertyError }, { data: connections, error: connectionError }] = await Promise.all([
-    supabase.from("properties").select("id, name, slug").in("slug", TARGET_PROPERTY_SLUGS).order("display_order"),
-    supabase.from("calendar_connections").select("id, property_id, platform, connection_type, external_calendar_url, is_enabled, last_synced_at, last_attempt_at, last_success_at, last_error, last_imported_event_count, sync_frequency_minutes, sync_status").order("platform"),
+    fetchAllAdminRows(() => supabase.from("properties").select("id, name, slug").in("slug", TARGET_PROPERTY_SLUGS).order("display_order").order("id")),
+    fetchAllAdminRows(() => supabase.from("calendar_connections").select("id, property_id, platform, connection_type, external_calendar_url, is_enabled, last_synced_at, last_attempt_at, last_success_at, last_error, last_imported_event_count, sync_frequency_minutes, sync_status").order("platform").order("id")),
   ]);
   if (propertyError || connectionError) return NextResponse.json({ error: propertyError?.message ?? connectionError?.message ?? "Could not load calendar connections." }, { status: 500 });
 
   const propertyIds = (properties ?? []).map((property) => property.id);
   const [{ data: events, error: eventError }, { data: bookings, error: bookingError }] = propertyIds.length ? await Promise.all([
-    supabase.from("calendar_events").select("id, property_id, connection_id, source_platform, start_date, end_date, status, is_blocking, summary, block_reason, internal_note").in("property_id", propertyIds),
-    supabase.from("bookings").select("id, property_id, check_in, checkout").in("property_id", propertyIds).in("booking_status", [...ACTIVE_BOOKING_STATUSES]),
+    fetchAllAdminRows(() => supabase.from("calendar_events").select("id, property_id, connection_id, source_platform, start_date, end_date, status, is_blocking, summary, block_reason, internal_note").in("property_id", propertyIds).order("id")),
+    fetchAllAdminRows(() => supabase.from("bookings").select("id, property_id, check_in, checkout").in("property_id", propertyIds).in("booking_status", [...ACTIVE_BOOKING_STATUSES]).order("id")),
   ]) : [{ data: [], error: null }, { data: [], error: null }];
   if (eventError || bookingError) return NextResponse.json({ error: eventError?.message ?? bookingError?.message ?? "Could not load calendar conflicts." }, { status: 500 });
 

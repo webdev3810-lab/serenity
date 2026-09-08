@@ -1,42 +1,23 @@
 "use client";
+import { AmenityIcon } from "@/src/components/AmenityIcon";
+import { PropertyReviews } from "@/src/components/PropertyReviews";
+import { AMENITY_GROUPS,normalizeAmenities } from "@/src/lib/amenities";
+import { aggregateReviews } from "@/src/lib/review-ratings";
+import { normalizeRooms,roomBedLabel,roomTotals } from "@/src/lib/rooms";
+import { Bath,MapPin,Shield,Users } from "lucide-react";
 
-import { useEffect, useState } from "react";
+import { BookingCard,MiniCalendar,RelatedHouses } from "@/src/components/BookingWidgets";
+import { SerenityLocationMap } from "@/src/components/SerenityLocationMap";
+import { Drawer,Modal,PublicDialog } from "@/src/components/UI";
+import { useBooking } from "@/src/context/BookingContext";
+import type { Property,PropertyImage } from "@/src/data/properties";
+import { calculatePrice,defaultGuests,formatAud,validateDateRange } from "@/src/lib/booking";
+import { BedDouble,CalendarDays,Car,ChevronLeft,ChevronRight,DoorOpen,Images,KeyRound,Star,X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
-import { AirVent, BedDouble, BriefcaseBusiness, CalendarDays, Car, Check, ChefHat, ChevronLeft, ChevronRight, Dog, DoorOpen, Images, KeyRound, Sparkles, Star, Tv, Utensils, WashingMachine, Wifi, X } from "lucide-react";
-import { SerenityLocationMap } from "@/src/components/SerenityLocationMap";
-import type { Property, PropertyImage } from "@/src/data/properties";
-import { BookingCard, MiniCalendar, RelatedHouses } from "@/src/components/BookingWidgets";
-import { Drawer, Modal } from "@/src/components/UI";
-import ScrollWipeText from "@/src/components/homepage/ScrollWipeText";
-import HomepageReviewsCarousel from "@/src/components/homepage/HomepageReviewsCarousel";
-import { calculatePrice, defaultGuests, formatAud, validateDateRange } from "@/src/lib/booking";
-import { formatAuNumber } from "@/src/lib/localization";
-import { useBooking } from "@/src/context/BookingContext";
+import { useEffect,useState } from "react";
 
 const isRemotePreviewImage = (src: string) => src.includes("a0.muscache.com");
-
-function amenityIcon(amenity: string): LucideIcon {
-  const label = amenity.toLowerCase();
-
-  if (label.includes("check-in") || label.includes("key safe")) return KeyRound;
-  if (label.includes("wi-fi") || label.includes("wifi")) return Wifi;
-  if (label.includes("kitchen")) return ChefHat;
-  if (label.includes("laundry") || label.includes("washing")) return WashingMachine;
-  if (label.includes("parking")) return Car;
-  if (label.includes("tv") || label.includes("television") || label.includes("netflix")) return Tv;
-  if (label.includes("heating")) return Sparkles;
-  if (label.includes("air conditioning")) return AirVent;
-  if (label.includes("dining")) return Utensils;
-  if (label.includes("entrance")) return DoorOpen;
-  if (label.includes("long-term")) return CalendarDays;
-  if (label.includes("pet")) return Dog;
-  if (label.includes("corporate")) return BriefcaseBusiness;
-  if (label.includes("family")) return BedDouble;
-
-  return Check;
-}
 
 type PhotoTourPhoto = PropertyImage & {
   categoryLabel: string;
@@ -114,20 +95,8 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
 
   useEffect(() => {
     if (!open) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        if (lightboxOpen) setLightboxOpen(false);
-        else onClose();
-      }
+
       if (lightboxOpen && event.key === "ArrowLeft") {
         setActiveIndex((current) => (current - 1 + images.length) % images.length);
       }
@@ -148,7 +117,7 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
   const showNext = () => setActiveIndex((current) => (current + 1) % photos.length);
 
   return (
-    <div className="property-photo-tour" role="dialog" aria-modal="true" aria-labelledby="photo-tour-title">
+    <PublicDialog label="Property photo tour" className="property-photo-tour" onClose={onClose}>
       <header className="property-photo-tour-header">
         <div className="property-photo-tour-header-inner">
           <button type="button" onClick={onClose} className="property-photo-tour-close" aria-label="Close photo tour">
@@ -219,7 +188,7 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
       </main>
 
       {lightboxOpen && (
-        <div className="property-photo-lightbox" role="dialog" aria-modal="true" aria-label={`Photo ${activeIndex + 1} of ${photos.length}`} onClick={() => setLightboxOpen(false)}>
+        <PublicDialog className="property-photo-lightbox" label={`Photo ${activeIndex + 1} of ${photos.length}`} onClose={() => setLightboxOpen(false)}>
           <div className="property-photo-lightbox-shell" onClick={(event) => event.stopPropagation()}>
             <div className="property-photo-lightbox-header">
               <div>
@@ -254,361 +223,33 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
               <span>Use arrow keys or controls to browse</span>
             </div>
           </div>
-        </div>
+        </PublicDialog>
       )}
-    </div>
+    </PublicDialog>
   );
 }
 
-export function PropertyDetailPage({ property, relatedProperties, today }: { property: Property; relatedProperties?: Property[]; today: string }) {
-  const [galleryOpen, setGalleryOpen] = useState(false);
-  const [amenitiesOpen, setAmenitiesOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [blockedDates, setBlockedDates] = useState<string[]>(property.unavailableDates);
-  const [availabilityLoading, setAvailabilityLoading] = useState(true);
-  const [availabilityError, setAvailabilityError] = useState("");
-  const { booking, setBooking } = useBooking();
-  const visibleImages = property.images.filter((image) => image.src && image.isVisible !== false);
-  const price = calculatePrice(property, booking.checkIn, booking.checkout, booking.guests ?? defaultGuests);
-  const mobileDisplayPrice = price.nights > 0 ? price.total : property.nightlyPrice;
-  const displayName = property.listingTitle?.trim() || property.name.replace(/\s+-\s+Whole$/i, "");
-  const longerStaySummary = [
-    property.weeklyDiscount > 0 ? `${property.weeklyDiscount}% weekly discount` : "",
-    property.monthlyDiscount > 0 ? `${property.monthlyDiscount}% monthly discount` : "",
-  ].filter(Boolean).join(" · ") || (property.longTermStaysAllowed ? "Long-term stays are available." : "");
-  const practicalDetails = [
-    ["Kitchen", property.kitchenFacilities],
-    ["Laundry", property.laundryFacilities],
-    ["Wi-Fi", property.wifiInformation],
-    ["Workspace", property.workspaceInformation],
-    ["Heating and cooling", property.heatingCooling],
-    ["Safety", property.safetyInformation],
-    ["Cancellation", property.cancellationPolicy],
-  ].filter(([, value]) => Boolean(value));
-  const stayHighlights = [
-    { Icon: KeyRound, title: "Arrival and departure", text: [property.checkIn, property.checkout, property.selfCheckInDetails].filter(Boolean).join(" · "), show: true },
-    { Icon: Car, title: "Parking", text: property.parkingType, show: Boolean(property.parkingType) },
-    { Icon: Dog, title: property.petsAllowed ? "Pets welcome" : "Pet policy", text: property.petPolicy, show: Boolean(property.petPolicy) },
-    { Icon: BriefcaseBusiness, title: "Corporate stays", text: property.corporateInformation || property.corporateInstructions, show: property.corporateBookingAllowed },
-    { Icon: CalendarDays, title: "Longer stays", text: longerStaySummary, show: property.longTermStaysAllowed && Boolean(longerStaySummary) },
-  ].filter((item) => item.show && item.text);
-  const publishedReviews = (property.reviews ?? [])
-    .filter((review) => review.published)
-    .sort((a, b) => a.displayOrder - b.displayOrder);
-  const propertyReviewCards = publishedReviews.slice(0, 6).map((review) => ({
-    id: review.id,
-    reviewerName: review.reviewerName,
-    reviewText: review.reviewText,
-    propertyName: displayName,
-    propertySlug: property.slug,
-    reviewDate: review.reviewDate,
-    reviewDateLabel: review.reviewDateLabel,
-  }));
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch(`/api/properties/${property.slug}/availability`)
-      .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Availability could not be checked.");
-        if (!cancelled) {
-          setBlockedDates(Array.isArray(data.blockedDates) ? data.blockedDates : property.unavailableDates);
-          setAvailabilityError(data.warning || "");
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setBlockedDates(property.unavailableDates);
-          setAvailabilityError("Live availability is temporarily unavailable. Local unavailable nights are still shown.");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setAvailabilityLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, [property.slug, property.unavailableDates]);
-
-  const vacationRentalJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "VacationRental",
-    name: displayName,
-    description: property.fullDescription,
-    containsPlace: { "@type": "Accommodation", occupancy: { "@type": "QuantitativeValue", value: property.maxGuests } },
-    address: { "@type": "PostalAddress", addressLocality: property.location, addressCountry: "AU" },
-  };
-
-  return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(vacationRentalJsonLd) }} />
-      
-      <div className="property-editorial-page">
-        <div className="property-editorial-shell">
-          <Link href="/houses" className="property-editorial-back-link">
-            <ChevronLeft size={15} aria-hidden="true" />
-            <span>Back to houses</span>
-          </Link>
-
-          <header className="property-editorial-heading">
-            <div>
-              <p className="property-editorial-kicker">{property.propertyType} · {property.location}</p>
-              <ScrollWipeText as="h1">{displayName}</ScrollWipeText>
-            </div>
-            <div className="property-editorial-heading-copy">
-              <p>{property.shortDescription}</p>
-              <a href="#availability">Check availability <span aria-hidden="true">↗</span></a>
-            </div>
-          </header>
-
-          <div className="property-editorial-facts" aria-label={`${displayName} key facts`}>
-            <span><b>{formatAuNumber(property.maxGuests)}</b> guests</span>
-            <span><b>{formatAuNumber(property.bedrooms)}</b> bedrooms</span>
-            <span><b>{formatAuNumber(property.beds)}</b> beds</span>
-            <span><b>{formatAuNumber(property.bathrooms)}</b> bathrooms</span>
-            <span><b>{formatAud(property.nightlyPrice)}</b> AUD / night</span>
-          </div>
-
-          {/* Only approved uploaded photos are shown publicly. */}
-          {visibleImages.length ? (
-            <div className="property-editorial-gallery">
-              <div className="property-editorial-gallery-grid">
-                <button
-                  className="property-editorial-gallery-main group"
-                  onClick={() => setGalleryOpen(true)}
-                >
-                  <Image
-                    src={visibleImages[0].src}
-                    alt={visibleImages[0].alt}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </button>
-
-                {visibleImages.slice(1, 5).map((image, idx) => (
-                  <button
-                    key={image.src + idx}
-                    className="property-editorial-gallery-tile group"
-                    onClick={() => setGalleryOpen(true)}
-                  >
-                    <Image
-                      src={image.src}
-                      alt={image.alt}
-                      fill
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </button>
-                ))}
-              </div>
-
-              <button
-                className="property-editorial-gallery-action"
-                onClick={() => setGalleryOpen(true)}
-              >
-                <Images size={16} /> View all photos ({visibleImages.length})
-              </button>
-            </div>
-          ) : (
-            <div className="property-editorial-gallery-empty">
-              Photos for this home will be added soon.
-            </div>
-          )}
-
-          {/* Content Layout */}
-          <div className="property-editorial-body">
-            <div className="property-editorial-content">
-              <section className="property-editorial-section property-editorial-highlights" aria-labelledby="stay-details-title">
-                <div className="property-editorial-section-heading">
-                  <p>Stay details</p>
-                  <ScrollWipeText as="h2" id="stay-details-title">What this home includes.</ScrollWipeText>
-                </div>
-                <div className="property-editorial-highlight-grid">
-                  {stayHighlights.map(({ Icon, title, text }) => (
-                    <article key={title}>
-                      <Icon size={19} aria-hidden="true" />
-                      <h3>{title}</h3>
-                      <p>{text}</p>
-                    </article>
-                  ))}
-                </div>
-              </section>
-
-              {practicalDetails.length ? <section className="property-editorial-section" aria-labelledby="practical-details-title">
-                <div className="property-editorial-section-heading"><p>From your host</p><ScrollWipeText as="h2" id="practical-details-title">Practical information.</ScrollWipeText></div>
-                <div className="property-editorial-practical-grid">
-                  {practicalDetails.map(([label, value]) => <div key={label as string}><h3>{label as string}</h3><p>{value as string}</p></div>)}
-                </div>
-              </section> : null}
-
-              {/* Description */}
-              <section className="property-editorial-section property-about-section" aria-labelledby="about-house-title">
-                <div className="property-editorial-section-heading property-about-heading">
-                  <p>About your stay</p>
-                  <ScrollWipeText as="h2" id="about-house-title">About this home.</ScrollWipeText>
-                </div>
-
-                <div className="property-about-copy">
-                  <p>{property.fullDescription}</p>
-                </div>
-
-              </section>
-
-              {publishedReviews.length ? (
-                <section className="property-editorial-section property-editorial-reviews" aria-labelledby="reviews-title">
-                  <div className="property-editorial-section-heading">
-                    <p>Guest reviews</p>
-                    <ScrollWipeText as="h2" id="reviews-title">What guests say.</ScrollWipeText>
-                  </div>
-                  <div className="property-editorial-review-summary">
-                    <span>5.0</span>
-                    <div aria-label="Five-star guest rating" className="property-editorial-review-stars">
-                      {Array.from({ length: 5 }, (_, index) => <Star key={index} size={15} fill="currentColor" strokeWidth={0} aria-hidden="true" />)}
-                    </div>
-                    <p>Verified notes from guests who stayed at {displayName}.</p>
-                  </div>
-                  <HomepageReviewsCarousel reviews={propertyReviewCards} fullBleed={false} />
-                </section>
-              ) : null}
-
-              {/* Sleeping arrangements */}
-              {property.bedArrangements.length ? (
-                <section className="property-editorial-section" aria-labelledby="sleeping-title">
-                  <div className="property-editorial-section-heading">
-                    <p>Room by room</p>
-                    <ScrollWipeText as="h2" id="sleeping-title">Sleeping arrangements.</ScrollWipeText>
-                  </div>
-                  <div className="property-editorial-sleep-grid">
-                    {property.bedArrangements.map((room, index) => (
-                      <article key={`${room.room}-${index}`}>
-                        <BedDouble size={21} aria-hidden="true" />
-                        <h3>{room.room}</h3>
-                        <p>{room.beds}</p>
-                      </article>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
-
-              {/* Amenities */}
-              {property.amenities.length ? (
-                <section className="property-editorial-section" aria-labelledby="amenities-title">
-                  <div className="property-editorial-section-heading">
-                    <p>Included</p>
-                    <ScrollWipeText as="h2" id="amenities-title">Amenities.</ScrollWipeText>
-                  </div>
-                  <div className="property-editorial-amenities-grid">
-                    {property.amenities.slice(0, 10).map((amenity) => {
-                      const AmenityIcon = amenityIcon(amenity);
-                      return (
-                        <div key={amenity}>
-                          <AmenityIcon size={16} strokeWidth={1.6} aria-hidden="true" />
-                          <span>{amenity}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {property.amenities.length > 10 ? (
-                    <button className="property-editorial-button" onClick={() => setAmenitiesOpen(true)}>
-                      Show all amenities ({property.amenities.length})
-                    </button>
-                  ) : null}
-                </section>
-              ) : null}
-
-              {/* Availability */}
-              <section id="availability" className="property-editorial-section property-editorial-availability" aria-labelledby="availability-title">
-                <div className="property-editorial-section-heading">
-                  <p>Plan your stay</p>
-                  <ScrollWipeText as="h2" id="availability-title">Availability.</ScrollWipeText>
-                </div>
-                <p className="property-editorial-intro">Choose your dates to check current availability and calculate the total in Australian dollars.</p>
-                <MiniCalendar property={property} today={today} checkIn={booking.checkIn} checkout={booking.checkout} blockedDates={blockedDates} availabilityLoading={availabilityLoading} onCheckInSelect={(checkIn) => setBooking({ propertySlug: property.slug, checkIn, checkout: "" })} onSelect={(checkIn, checkout) => setBooking({ propertySlug: property.slug, checkIn, checkout })} />
-                {availabilityError && <p className="property-editorial-notice">{availabilityError}</p>}
-                {booking.checkIn && booking.checkout && <p className="property-editorial-error">{validateDateRange(property, booking.checkIn, booking.checkout, today, blockedDates)}</p>}
-              </section>
-
-              {/* House Rules */}
-              {property.houseRules.length ? (
-                <section className="property-editorial-section" aria-labelledby="rules-title">
-                  <div className="property-editorial-section-heading">
-                    <p>Before booking</p>
-                    <ScrollWipeText as="h2" id="rules-title">House rules.</ScrollWipeText>
-                  </div>
-                  <div className="property-editorial-rule-grid">
-                    {property.houseRules.map((rule) => <div key={rule}>{rule}</div>)}
-                  </div>
-                </section>
-              ) : null}
-
-              {/* Location Map */}
-              <section className="property-editorial-section" aria-labelledby="location-title">
-                <div className="property-editorial-section-heading">
-                  <p>{property.location}</p>
-                  <ScrollWipeText as="h2" id="location-title">Where you&apos;ll be.</ScrollWipeText>
-                </div>
-                {property.nearbyLocations.length ? (
-                  <div className="property-editorial-nearby-grid">
-                    {property.nearbyLocations.map((location) => <p key={location}>{location}</p>)}
-                  </div>
-                ) : null}
-                <div className="property-editorial-location-map">
-                  <SerenityLocationMap />
-                </div>
-                <p className="property-editorial-caption">Exact address and access instructions are sent after a confirmed booking.</p>
-              </section>
-
-              {/* Related Houses */}
-              <section className="property-editorial-section" aria-labelledby="related-title">
-                <div className="property-editorial-section-heading">
-                  <p>Continue browsing</p>
-                  <ScrollWipeText as="h2" id="related-title">Other Serenity homes.</ScrollWipeText>
-                </div>
-                <RelatedHouses currentSlug={property.slug} properties={relatedProperties} />
-              </section>
-            </div>
-
-            {/* Desktop Sticky Booking Widget */}
-            <aside className="property-editorial-booking hidden lg:block">
-              <div className="sticky top-28">
-                <BookingCard property={property} today={today} blockedDates={blockedDates} availabilityLoading={availabilityLoading} />
-              </div>
-            </aside>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Fixed Reserve Bar */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-300 bg-white p-4 shadow-2xl lg:hidden">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-lg font-bold text-stone-900">{formatAud(mobileDisplayPrice)}</p>
-            <p className="text-xs text-stone-500">{price.nights ? `${price.nights} night${price.nights > 1 ? "s" : ""} stay` : "Select dates"}</p>
-          </div>
-          <button className="property-mobile-book-button btn-primary text-sm px-6" onClick={() => setDrawerOpen(true)}>
-            Book
-          </button>
-        </div>
-      </div>
-
-      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-            <BookingCard property={property} today={today} blockedDates={blockedDates} availabilityLoading={availabilityLoading} />
-      </Drawer>
-
-      <PhotoTour property={{ ...property, images: visibleImages }} open={galleryOpen} onClose={() => setGalleryOpen(false)} />
-
-      <Modal title="All House Amenities" open={amenitiesOpen} onClose={() => setAmenitiesOpen(false)}>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {property.amenities.map((amenity) => {
-            const AmenityIcon = amenityIcon(amenity);
-            return (
-              <div key={amenity} className="flex items-center gap-2.5 rounded-none border border-stone-200 p-3.5 text-xs font-semibold text-stone-800">
-                <AmenityIcon size={16} strokeWidth={1.6} aria-hidden="true" />
-                <span>{amenity}</span>
-              </div>
-            );
-          })}
-        </div>
-      </Modal>
-    </>
-  );
+export function PropertyDetailPage({ property,relatedProperties,today }:{property:Property;relatedProperties?:Property[];today:string}) {
+ const [galleryOpen,setGalleryOpen]=useState(false),[amenitiesOpen,setAmenitiesOpen]=useState(false),[drawerOpen,setDrawerOpen]=useState(false),[info,setInfo]=useState<{title:string;lines:string[]}|null>(null);
+ const [blockedDates,setBlockedDates]=useState(property.unavailableDates),[availabilityLoading,setAvailabilityLoading]=useState(true),[availabilityError,setAvailabilityError]=useState("");const {booking,setBooking}=useBooking();
+ const images=property.images.filter(i=>i.src&&i.isVisible!==false),name=property.listingTitle?.trim()||property.name.replace(/\s+-\s+Whole$/i,""),amenities=normalizeAmenities(property.amenities,property.amenityDetails),reviews=aggregateReviews(property.reviews??[]);
+ const rooms=normalizeRooms(property.bedArrangements),totals=roomTotals(rooms),price=calculatePrice(property,booking.checkIn,booking.checkout,booking.guests??defaultGuests);
+ const highlights=[{Icon:KeyRound,title:"Arrival",text:property.selfCheckInDetails},{Icon:Car,title:"Parking",text:property.parkingType},{Icon:CalendarDays,title:"Longer stays",text:property.longTermStaysAllowed?`${property.minimumStay}–${property.maximumStay} nights`:""}].filter(h=>h.text);
+ const practical=[["Kitchen",property.kitchenFacilities],["Laundry",property.laundryFacilities],["Internet",property.wifiInformation],["Workspace",property.workspaceInformation],["Heating and cooling",property.heatingCooling]].filter(([,v])=>v);
+ const know=[{title:"House rules",Icon:KeyRound,lines:[property.checkIn?`Check-in: ${property.checkIn}`:"",property.checkout?`Checkout: ${property.checkout}`:"",...property.houseRules,property.petPolicy].filter(Boolean)},{title:"Safety & property",Icon:Shield,lines:[property.safetyInformation].filter(Boolean) as string[]},{title:"Cancellation policy",Icon:CalendarDays,lines:[property.cancellationPolicy].filter(Boolean) as string[]}].filter(k=>k.lines.length);
+ useEffect(()=>{let cancelled=false;fetch(`/api/properties/${property.slug}/availability`).then(async response=>{const data=await response.json();if(!response.ok)throw Error(data.error||"Availability unavailable");if(!cancelled){setBlockedDates(Array.isArray(data.blockedDates)?data.blockedDates:property.unavailableDates);setAvailabilityError(data.warning||"");}}).catch(()=>{if(!cancelled)setAvailabilityError("Live availability is temporarily unavailable. Dates will be checked again before booking.");}).finally(()=>{if(!cancelled)setAvailabilityLoading(false);});return()=>{cancelled=true;};},[property.slug,property.unavailableDates]);
+ return <><div className="property-stay"><div className="stay-shell"><Link href="/houses" className="stay-back"><ChevronLeft size={16}/>All houses</Link><header className="stay-heading"><p className="stay-eyebrow">{property.propertyType}</p><h1>{name}</h1><div className="stay-heading-meta">{reviews.count>0&&<a href="#reviews"><Star size={16} fill="currentColor"/>{reviews.average!.toFixed(2)} · {reviews.count} review{reviews.count===1?"":"s"}</a>}<a href="#location"><MapPin size={16}/>{property.location}</a></div></header>
+ {images.length?<div className="stay-gallery" data-count={Math.min(images.length,5)}>{images.slice(0,5).map((image,i)=><button type="button" key={image.src+i} aria-label={`Open gallery: ${image.alt||`Photo ${i+1}`}`} className={i===0?"stay-gallery-main":""} onClick={()=>setGalleryOpen(true)}><Image src={image.src} alt={image.alt} fill priority={i===0} sizes={i===0?"(max-width:768px) 100vw, 50vw":"(max-width:768px) 50vw, 25vw"} unoptimized={isRemotePreviewImage(image.src)}/></button>)}<button type="button" className="stay-gallery-all" onClick={()=>setGalleryOpen(true)}><Images size={17}/>All {images.length} photos</button></div>:<div className="stay-gallery-empty">Photos will be added soon.</div>}
+ <nav className="stay-section-nav" aria-label="Property sections"><a href="#about">The home</a>{rooms.length>0&&<a href="#sleep">Sleeping</a>}{amenities.length>0&&<a href="#amenities">Amenities</a>}<a href="#availability">Availability</a><a href="#reviews">Reviews</a><a href="#location">Location</a>{know.length>0&&<a href="#know">Things to know</a>}</nav>
+ <div className="stay-body"><div className="stay-content"><section className="stay-section stay-intro" id="about"><h2>Your own place in {property.location.split(",")[0]}</h2><div className="stay-facts"><span><Users size={19}/>{property.maxGuests} guests</span><span><DoorOpen size={19}/>{totals?.bedrooms??property.bedrooms} bedrooms</span><span><BedDouble size={19}/>{totals?.beds??property.beds} beds</span><span><Bath size={19}/>{property.bathrooms} bathrooms</span></div><p className="stay-lead">{property.shortDescription}</p>{highlights.length>0&&<div className="stay-highlights">{highlights.map(({Icon,title,text})=><article key={title}><Icon size={24} strokeWidth={1.5}/><div><h3>{title}</h3><p>{text}</p></div></article>)}</div>}<div className="stay-description"><h3>About this home</h3><p>{property.fullDescription}</p></div>{practical.length>0&&<details className="stay-practical"><summary>Practical details</summary>{practical.map(([label,value])=><div key={label}><h3>{label}</h3><p>{value}</p></div>)}</details>}</section>
+ {rooms.length>0&&<section className="stay-section" id="sleep"><h2>Where you’ll sleep</h2><div className="stay-room-grid">{rooms.map((room,i)=><article key={room.room+i} className="stay-room-card">{room.photo?<div className="stay-room-photo"><Image src={room.photo} alt={room.room} fill sizes="(max-width:768px) 100vw, 25vw" unoptimized/></div>:<BedDouble size={30} strokeWidth={1.3}/>}<h3>{room.room}</h3><p>{roomBedLabel(room)}</p>{room.description&&<p>{room.description}</p>}</article>)}</div></section>}
+ {amenities.length>0&&<section className="stay-section" id="amenities"><h2>What this place offers</h2><div className="stay-amenity-grid">{amenities.slice(0,10).map(a=><div key={a.id + a.label}><AmenityIcon icon={a.icon}/><span>{a.label}</span></div>)}</div><button type="button" className="stay-button" onClick={()=>setAmenitiesOpen(true)}>Show all {amenities.length} amenities</button></section>}
+ <section className="stay-section" id="availability"><h2>Choose your dates</h2><p className="stay-helper">Prices are in AUD per night. Your checkout date is not charged.</p><MiniCalendar property={property} today={today} checkIn={booking.checkIn} checkout={booking.checkout} blockedDates={blockedDates} availabilityLoading={availabilityLoading} onCheckInSelect={a=>setBooking({propertySlug:property.slug,checkIn:a,checkout:""})} onSelect={(a,b)=>setBooking({propertySlug:property.slug,checkIn:a,checkout:b})}/>{availabilityError&&<p role="status" className="stay-error">{availabilityError}</p>}{booking.checkIn&&booking.checkout&&validateDateRange(property,booking.checkIn,booking.checkout,today,blockedDates)&&<p role="alert" className="stay-error">{validateDateRange(property,booking.checkIn,booking.checkout,today,blockedDates)}</p>}</section>
+ </div><aside className="stay-desktop-booking"><BookingCard property={property} today={today} blockedDates={blockedDates} availabilityLoading={availabilityLoading}/></aside></div>
+ <PropertyReviews reviews={property.reviews??[]}/>
+ <section className="stay-section" id="location"><h2>Where you’ll be</h2><p>{property.location}</p>{property.nearbyLocations.length>0&&<div className="stay-nearby">{property.nearbyLocations.map(v=><span key={v}><MapPin size={16}/>{v}</span>)}</div>}<div className="stay-location-map"><SerenityLocationMap/></div></section>
+ {know.length>0&&<section className="stay-section" id="know"><h2>Things to know</h2><div className="stay-know-grid">{know.map(({title,Icon,lines})=><article key={title}><Icon size={25}/><h3>{title}</h3><p>{lines[0]}</p><button type="button" className="stay-text-button" onClick={()=>setInfo({title,lines})}>Show details<ChevronRight size={16}/></button></article>)}</div></section>}
+ {relatedProperties?.some(p=>p.slug!==property.slug)&&<section className="stay-section"><h2>More Serenity homes</h2><RelatedHouses currentSlug={property.slug} properties={relatedProperties}/></section>}
+ </div></div><div className="stay-mobile-reserve"><div><strong>{formatAud(price.nights?price.total:property.nightlyPrice)}</strong><span>{price.nights?`${price.nights} nights · total incl. fees & tax`:"Default rate / night · AUD"}</span></div><button type="button" className="stay-reserve-button" onClick={()=>setDrawerOpen(true)}>Check your stay</button></div><Drawer open={drawerOpen} onClose={()=>setDrawerOpen(false)}><BookingCard property={property} today={today} blockedDates={blockedDates} availabilityLoading={availabilityLoading}/></Drawer>
+ <PhotoTour property={{...property,images}} open={galleryOpen} onClose={()=>setGalleryOpen(false)}/><Modal title="All amenities" open={amenitiesOpen} onClose={()=>setAmenitiesOpen(false)}><div className="stay-all-amenities">{Object.entries(AMENITY_GROUPS).map(([group,label])=>{const list=amenities.filter(a=>a.group===group);return list.length?<section key={group}><h3>{label}</h3>{list.map(a=><div key={a.id + a.label}><AmenityIcon icon={a.icon}/>{a.label}</div>)}</section>:null;})}</div></Modal><Modal title={info?.title??"Things to know"} open={!!info} onClose={()=>setInfo(null)}><div className="stay-policy">{info?.lines.map((line,i)=><p key={i}>{/^https:\/\/\S+$|^\/(?!\/)\S+$/.test(line)?<a href={line} className="underline">Read the applicable policy</a>:line}</p>)}</div></Modal></>;
 }

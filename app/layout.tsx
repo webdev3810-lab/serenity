@@ -1,7 +1,10 @@
+import Script from "next/script";
+import { ADMIN_THEME_STYLE_ID, adminThemeCss, adminThemeBootstrap } from "@/src/lib/admin-theme";
 import type { Metadata, Viewport } from "next";
 import { AppShell } from "@/src/components/Layout";
 import { getPublicContactSettings, getPublicPromoSettings } from "@/src/lib/supabase/content";
 import "./globals.css";
+import "./property-stay.css";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +29,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en-AU" className="h-full antialiased" data-scroll-behavior="smooth">
+      <head><style id={ADMIN_THEME_STYLE_ID}>{adminThemeCss}</style><Script id="serenity-admin-theme-init" strategy="beforeInteractive">{adminThemeBootstrap}</Script></head>
       <body className="min-h-full font-sans">
         <AppShell contactSettings={contactSettings} promoSettings={promoSettings}>{children}</AppShell>
       </body>

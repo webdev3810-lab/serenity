@@ -1,3 +1,4 @@
+import { fetchAllAdminRows } from "@/src/lib/admin-pagination";
 import { NextResponse } from "next/server";
 import { getSuperAdminUser } from "@/src/lib/supabase/auth";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
@@ -9,7 +10,7 @@ export async function GET() {
   const current = await getSuperAdminUser();
   if (!current) return NextResponse.json({ error: "Not authorised." }, { status: 403 });
   const supabase = createSupabaseAdminClient();
-  const { data, error } = await supabase.from("admin_users").select("user_id, email, role, active, created_at").order("created_at", { ascending: true });
+  const { data, error } = await fetchAllAdminRows(() => supabase.from("admin_users").select("user_id, email, role, active, created_at").order("created_at", { ascending: true }).order("user_id"));
   if (error) return NextResponse.json({ error: "Could not load admin users." }, { status: 500 });
   return NextResponse.json({ users: data ?? [] });
 }

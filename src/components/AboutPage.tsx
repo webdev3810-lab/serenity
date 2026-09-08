@@ -77,6 +77,7 @@ export function AboutPage({ properties }: { properties: Property[] }) {
       id: review.id,
       reviewerName: review.reviewerName,
       reviewText: review.reviewText,
+      rating: review.rating,
       propertyName: property.name.replace(" - Whole", ""),
       propertySlug: property.slug,
       reviewDate: review.reviewDate,

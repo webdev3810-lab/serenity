@@ -1,3 +1,5 @@
+import { validateRooms } from "@/src/lib/rooms";
+import { isCalendarDate } from "@/src/lib/date-pricing";
 export const CMS_LIMITS = {
   hero_heading: 70,
   hero_subtitle: 180,
@@ -106,6 +108,24 @@ function addPhoneError(errors: string[], label: string, value: unknown, required
 
 export function validatePropertyContent(payload: CmsPayload) {
   const errors: string[] = [];
+  errors.push(...validateRooms(payload.bed_arrangements));
+  for (const key of ["max_guests", "minimum_guests", "maximum_adults", "maximum_children", "maximum_infants", "maximum_pets", "extra_guest_threshold"]) {
+    if (payload[key] !== undefined && (!Number.isInteger(Number(payload[key])) || Number(payload[key]) < (["max_guests","minimum_guests","maximum_adults"].includes(key) ? 1 : 0))) errors.push(key.replaceAll("_", " ") + " must be a valid whole number.");
+  }
+  if (Number(payload.maximum_adults) > Number(payload.max_guests) || Number(payload.maximum_children) > Number(payload.max_guests)) errors.push("Adult and child limits cannot exceed total staying guest capacity.");
+  if (Number(payload.maximum_adults) + Number(payload.maximum_children) < Number(payload.minimum_guests)) errors.push("Allowed adults and children must accommodate the minimum guest count.");
+  for (const key of ["weekly_discount", "monthly_discount"]) if (payload[key] !== undefined && (!Number.isFinite(Number(payload[key])) || Number(payload[key]) < 0 || Number(payload[key]) > 100)) errors.push(key.replaceAll("_", " ") + " must be between 0 and 100%.");
+  for (const key of ["nightly_price", "extra_guest_fee", "pet_fee", "cleaning_fee"]) if (payload[key] !== undefined && (!Number.isFinite(Number(payload[key])) || Number(payload[key]) < 0)) errors.push(key.replaceAll("_", " ") + " must be zero or more.");
+  if (payload.date_prices !== undefined) {
+    if (!Array.isArray(payload.date_prices)) errors.push("Nightly overrides must be a list.");
+    else {
+      const seen = new Set<string>();
+      for (const rate of payload.date_prices as Record<string, unknown>[]) {
+        if (!rate || !isCalendarDate(String(rate.price_date)) || !Number.isFinite(Number(rate.nightly_price)) || Number(rate.nightly_price) < 0 || Number(rate.nightly_price) > 100000 || String(rate.label ?? "").length > 120 || seen.has(String(rate.price_date))) errors.push("Each override needs a unique valid date, a non-negative rate and a label up to 120 characters.");
+        seen.add(String(rate?.price_date));
+      }
+    }
+  }
   addTextError(errors, "Property name", payload.name, CMS_LIMITS.property_name);
   addTextError(errors, "Short description", payload.short_description, CMS_LIMITS.property_short_description);
   addTextError(errors, "Full description", payload.full_description, CMS_LIMITS.property_full_description);

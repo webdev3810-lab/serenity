@@ -1,13 +1,11 @@
-export type BedArrangement = {
-  room: string;
-  beds: string;
-};
+export type BedArrangement = import("@/src/lib/rooms").RoomArrangement;
 
 export type PropertyReview = {
   id: string;
   reviewerName: string;
   reviewText: string;
-  rating: 5;
+  rating: number;
+  categoryRatings?: import("@/src/lib/review-ratings").CategoryRatings;
   reviewDate: string | null;
   reviewDateLabel: string | null;
   source: string;
@@ -50,6 +48,7 @@ export type Property = {
   bathrooms: number;
   bedArrangements: BedArrangement[];
   amenities: string[];
+  amenityDetails?: import("@/src/lib/amenities").Amenity[];
   checkIn: string;
   checkout: string;
   petPolicy: string;

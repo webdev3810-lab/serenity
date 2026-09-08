@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:calendar": "node --experimental-strip-types --test scripts/calendar-ical.test.mts",
+    "test:property": "node --test scripts/property-experience.test.cjs",
     "test:promotions": "node --experimental-strip-types --test scripts/promotions.test.mts",
     "test:reservations": "node --experimental-strip-types --test scripts/reservations.test.mts"
   },
@@ -33,7 +34,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
-    "supabase": "^2.115.0",
+    "supabase": "^2.116.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

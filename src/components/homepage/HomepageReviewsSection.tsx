@@ -7,6 +7,7 @@ export interface HomepageReview {
   id: string;
   reviewerName: string;
   reviewText: string;
+  rating?: number;
   propertyName: string;
   propertySlug: string;
   reviewDate: string | null;

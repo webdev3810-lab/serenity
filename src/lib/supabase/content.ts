@@ -1,3 +1,7 @@
+import { normalizeAmenities } from "@/src/lib/amenities";
+import { normalizeRooms, roomTotals } from "@/src/lib/rooms";
+import { normalizeCategoryRatings, validRating } from "@/src/lib/review-ratings";
+import { fetchAllAdminRows } from "@/src/lib/admin-pagination";
 /* Supabase rows are intentionally mapped at this boundary because this project
    keeps the public Property shape independent from the database column names. */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -112,13 +116,14 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
     shortDescription: row.short_description,
     fullDescription: row.full_description,
     maxGuests: row.max_guests,
-    bedrooms: row.bedrooms,
-    beds: row.beds,
+    bedrooms: roomTotals(normalizeRooms(row.bed_arrangements))?.bedrooms ?? row.bedrooms,
+    beds: roomTotals(normalizeRooms(row.bed_arrangements))?.beds ?? row.beds,
     bathrooms: Number(row.bathrooms),
-    bedArrangements: Array.isArray(row.bed_arrangements) ? row.bed_arrangements : [],
+    bedArrangements: normalizeRooms(row.bed_arrangements),
+    amenityDetails: normalizeAmenities(amenities.filter(a=>a.property_id===row.id).sort((a,b)=>a.display_order-b.display_order).map(a=>a.name), amenities.filter(a=>a.property_id===row.id).map(a=>({id:a.catalog_id,label:a.name,icon:a.icon_id,group:a.amenity_group}))),
     amenities: amenities.filter((amenity) => amenity.property_id === row.id).sort((a, b) => a.display_order - b.display_order).map((amenity) => amenity.name),
-    checkIn: `After ${row.check_in_time}`,
-    checkout: `Before ${row.checkout_time}`,
+    checkIn: row.check_in_time ? (/^(after|from)\b/i.test(row.check_in_time) ? row.check_in_time : `After ${row.check_in_time}`) : "",
+    checkout: row.checkout_time ? (/^(before|by)\b/i.test(row.checkout_time) ? row.checkout_time : `Before ${row.checkout_time}`) : "",
     petPolicy: row.pet_policy,
     parkingType: row.parking_type,
     nightlyPrice: Number(row.nightly_price),
@@ -181,13 +186,14 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
     displayOrder: Number(row.display_order),
     listingDetails: (row.listing_details ?? {}) as Record<string, unknown>,
     reviews: reviews
-      .filter((review) => review.property_id === row.id && review.published !== false && Number(review.rating) === 5)
+      .filter((review) => review.property_id === row.id && review.published !== false && validRating(Number(review.rating)))
       .sort((a, b) => Number(a.display_order ?? 0) - Number(b.display_order ?? 0))
       .map((review): PropertyReview => ({
         id: String(review.id),
         reviewerName: String(review.reviewer_name ?? "Guest"),
         reviewText: String(review.review_text ?? ""),
-        rating: 5,
+        rating: Number(review.rating),
+        categoryRatings: normalizeCategoryRatings(review.category_ratings),
         reviewDate: review.review_date ? String(review.review_date) : null,
         reviewDateLabel: review.review_date_label ? String(review.review_date_label) : null,
         source: String(review.source ?? "Airbnb"),
@@ -206,8 +212,8 @@ async function queryPublicProperties() {
   const [{ data: images, error: imagesError }, { data: amenities, error: amenitiesError }, { data: reviews, error: reviewsError }, { data: datePrices, error: datePricesError }, { data: categories, error: categoriesError }] = await Promise.all([
     supabase.from("property_images").select("*").in("property_id", ids).order("display_order"),
     supabase.from("amenities").select("*").in("property_id", ids).order("display_order"),
-    supabase.from("property_reviews").select("*").in("property_id", ids).eq("published", true).eq("rating", 5).order("display_order"),
-    supabase.from("property_date_prices").select("*").in("property_id", ids).order("price_date"),
+    fetchAllAdminRows(() => supabase.from("property_reviews").select("*").in("property_id", ids).eq("published", true).order("display_order").order("id")),
+    fetchAllAdminRows(() => supabase.from("property_date_prices").select("*").in("property_id", ids).order("price_date").order("id")),
     supabase.from("property_photo_categories").select("*").in("property_id", ids).order("display_order"),
   ]);
   if (imagesError) throw imagesError;
@@ -228,10 +234,10 @@ export async function getPublicProperties(): Promise<Property[]> {
   if (isLocalContentPreview || !isSupabaseConfigured) return publicLocalProperties;
   try {
     const remoteProperties = await queryPublicProperties();
-    return remoteProperties.length ? remoteProperties : publicLocalProperties;
+    return remoteProperties;
   } catch (error) {
     logSupabaseLoadFailure("Unable to load public properties from Supabase", error);
-    return publicLocalProperties;
+    throw new Error("Current property information is unavailable. Please try again shortly.");
   }
 }
 
@@ -248,7 +254,7 @@ export async function getPublicPropertyBySlug(slug: string): Promise<Property | 
     const [{ data: images, error: imagesError }, { data: amenities, error: amenitiesError }, { data: reviews, error: reviewsError }, { data: categories, error: categoriesError }] = await Promise.all([
       supabase.from("property_images").select("*").eq("property_id", row.id).eq("is_visible", true).eq("is_placeholder", false).order("display_order"),
       supabase.from("amenities").select("*").eq("property_id", row.id).order("display_order"),
-      supabase.from("property_reviews").select("*").eq("property_id", row.id).eq("published", true).eq("rating", 5).order("display_order"),
+      fetchAllAdminRows(() => supabase.from("property_reviews").select("*").eq("property_id", row.id).eq("published", true).order("display_order").order("id")),
       supabase.from("property_photo_categories").select("*").eq("property_id", row.id).order("display_order"),
     ]);
     if (imagesError) throw imagesError;
@@ -257,11 +263,12 @@ export async function getPublicPropertyBySlug(slug: string): Promise<Property | 
     if (categoriesError) {
       console.warn("Unable to load public property photo categories", describeSupabaseError(categoriesError));
     }
-    const { data: datePrices } = await supabase.from("property_date_prices").select("*").eq("property_id", row.id).order("price_date");
+    const { data: datePrices, error: rateError } = await fetchAllAdminRows(() => supabase.from("property_date_prices").select("*").eq("property_id", row.id).order("price_date").order("id"));
+    if (rateError) throw new Error(rateError.message);
     return mapProperty(row, images ?? [], amenities ?? [], reviews ?? [], datePrices ?? [], categories ?? []);
   } catch (error) {
     logSupabaseLoadFailure("Unable to load public property from Supabase", error);
-    return localPublicProperty;
+    throw new Error("Current property rates are unavailable. Please try again shortly.");
   }
 }
 

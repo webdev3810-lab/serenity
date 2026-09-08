@@ -1,3 +1,4 @@
+import { PropertyStructuredData } from "@/src/components/PropertyStructuredData";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { PropertyDetailPage } from "@/src/components/PropertyDetailPage";
@@ -17,5 +18,5 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Page() {
   const [property, relatedProperties] = await Promise.all([getPublicPropertyBySlug("serenity-7"), getPublicProperties()]);
   if (!property) notFound();
-  return <PropertyDetailPage property={property} relatedProperties={relatedProperties} today={todayIso()} />;
+  return <><PropertyStructuredData property={property}/><PropertyDetailPage property={property} relatedProperties={relatedProperties} today={todayIso()} /></>;
 }

@@ -1,3 +1,5 @@
+import { isCalendarDate } from "@/src/lib/date-pricing";
+import { reviewRatingErrors, normalizeCategoryRatings } from "@/src/lib/review-ratings";
 import { NextResponse } from "next/server";
 import { getAdminUser } from "@/src/lib/supabase/auth";
 import { createSupabaseServerClient } from "@/src/lib/supabase/server";
@@ -8,7 +10,7 @@ function readText(value: unknown) {
 }
 
 function validateReview(body: Record<string, unknown>) {
-  const errors: string[] = [];
+  const errors: string[] = reviewRatingErrors(body.rating === undefined ? 5 : body.rating, body.category_ratings);
   const reviewerName = readText(body.reviewer_name);
   const reviewText = readText(body.review_text);
   const reviewDateLabel = readText(body.review_date_label);
@@ -19,7 +21,7 @@ function validateReview(body: Record<string, unknown>) {
   if (reviewerName.length > CMS_LIMITS.reviewer_name) errors.push(`Reviewer name must be ${CMS_LIMITS.reviewer_name} characters or fewer.`);
   if (reviewText.length > CMS_LIMITS.review_text) errors.push(`Review text must be ${CMS_LIMITS.review_text} characters or fewer.`);
   if (reviewDateLabel.length > CMS_LIMITS.review_date_label) errors.push(`Date label must be ${CMS_LIMITS.review_date_label} characters or fewer.`);
-  if (reviewDate && !/^\d{4}-\d{2}-\d{2}$/.test(reviewDate)) errors.push("Review date must use YYYY-MM-DD format.");
+  if (reviewDate && !isCalendarDate(reviewDate)) errors.push("Review date must use YYYY-MM-DD format.");
 
   const displayOrder = Number(body.display_order ?? 0);
   if (!Number.isInteger(displayOrder) || displayOrder < 0) errors.push("Display order must be a whole number of zero or more.");
@@ -41,7 +43,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ revie
   const { data, error } = await supabase.from("property_reviews").update({
     reviewer_name: validation.reviewerName,
     review_text: validation.reviewText,
-    rating: 5,
+    ...(body.rating === undefined ? {} : { rating: Number(body.rating) }),
+    ...(body.category_ratings === undefined ? {} : { category_ratings: normalizeCategoryRatings(body.category_ratings) }),
     review_date: validation.reviewDate,
     review_date_label: validation.reviewDateLabel || null,
     display_order: validation.displayOrder,
