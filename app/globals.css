@@ -1318,6 +1318,58 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
   touch-action: none;
 }
 
+.location-openseadragon-shell {
+  position: relative;
+  overflow: hidden;
+  background: #e9eeeb;
+}
+
+.location-openseadragon-shell > .location-openseadragon-map {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+.location-map-zoom-controls {
+  position: absolute;
+  z-index: 12;
+  right: clamp(0.75rem, 1.8vw, 1.25rem);
+  bottom: clamp(0.75rem, 1.8vw, 1.25rem);
+  display: grid;
+  overflow: hidden;
+  border: 1px solid rgba(4, 73, 57, 0.3);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 0.55rem 1.5rem rgba(4, 48, 37, 0.16);
+  backdrop-filter: blur(8px);
+}
+
+.location-map-zoom-controls button {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--hero-green-deep, #043d30);
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.location-map-zoom-controls button + button {
+  border-top: 1px solid rgba(4, 73, 57, 0.2);
+}
+
+.location-map-zoom-controls button:hover {
+  background: var(--hero-yellow, #ffd21c);
+}
+
+.location-map-zoom-controls button:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--hero-green-deep, #043d30);
+  outline-offset: -3px;
+}
+
 .location-openseadragon-map:active {
   cursor: grabbing;
 }

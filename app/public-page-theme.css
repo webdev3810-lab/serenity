@@ -1673,6 +1673,10 @@
   margin-inline: calc(50% - 50vw);
 }
 
+.about-editorial-page .homepage-reviews-shell {
+  width: min(calc(100% - clamp(2rem, 5vw, 6rem)), var(--public-content-max));
+}
+
 .about-editorial-page .homepage-reviews-track {
   padding-inline: clamp(1rem, 2.5vw, 3rem);
 }

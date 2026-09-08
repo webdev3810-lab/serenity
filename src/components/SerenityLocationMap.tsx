@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { Building2, MapPin, ShoppingBag, TrainFront, Trees, Utensils } from "lucide-react";
+import { Building2, MapPin, Minus, Plus, ShoppingBag, TrainFront, Trees, Utensils } from "lucide-react";
 
 const MAP_IMAGE_SIZE = { width: 1791, height: 878 };
 
@@ -65,6 +65,7 @@ const LOCATION_MAP_MARKERS = [
 
 export function SerenityLocationMap() {
   const mapViewerRef = useRef<HTMLDivElement>(null);
+  const mapControlsRef = useRef<{ zoomBy: (factor: number) => void } | null>(null);
 
   useEffect(() => {
     const mapElement = mapViewerRef.current;
@@ -83,9 +84,9 @@ export function SerenityLocationMap() {
         constrainDuringPan: true,
         gestureSettingsMouse: {
           clickToZoom: false,
-          dblClickToZoom: true,
+          dblClickToZoom: false,
           dragToPan: true,
-          scrollToZoom: true,
+          scrollToZoom: false,
         },
         gestureSettingsTouch: {
           clickToZoom: false,
@@ -105,6 +106,16 @@ export function SerenityLocationMap() {
         visibilityRatio: 1,
       });
       viewerInstance = viewer;
+      viewer.addHandler("canvas-scroll", (event) => {
+        event.preventDefaultAction = true;
+        event.preventDefault = false;
+      });
+      mapControlsRef.current = {
+        zoomBy: (factor) => {
+          viewer.viewport.zoomBy(factor);
+          viewer.viewport.applyConstraints();
+        },
+      };
 
       viewer.addOnceHandler("open", () => {
         if (disposed) return;
@@ -163,16 +174,27 @@ export function SerenityLocationMap() {
 
     return () => {
       disposed = true;
+      mapControlsRef.current = null;
       viewerInstance?.destroy();
       queueMicrotask(() => markerRoots.forEach((root) => root.unmount()));
     };
   }, []);
 
   return (
-    <div
-      ref={mapViewerRef}
-      className="location-editorial-map location-openseadragon-map"
-      aria-label="Interactive map of Pakenham. Drag to pan and pinch to zoom."
-    />
+    <div className="location-editorial-map location-openseadragon-shell">
+      <div
+        ref={mapViewerRef}
+        className="location-openseadragon-map"
+        aria-label="Interactive map of Pakenham. Drag to pan, pinch on a touch screen, or use the zoom controls."
+      />
+      <div className="location-map-zoom-controls" role="group" aria-label="Map zoom controls">
+        <button type="button" onClick={() => mapControlsRef.current?.zoomBy(1.4)} aria-label="Zoom in" title="Zoom in">
+          <Plus size={19} aria-hidden="true" />
+        </button>
+        <button type="button" onClick={() => mapControlsRef.current?.zoomBy(1 / 1.4)} aria-label="Zoom out" title="Zoom out">
+          <Minus size={19} aria-hidden="true" />
+        </button>
+      </div>
+    </div>
   );
 }

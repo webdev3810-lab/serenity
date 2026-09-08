@@ -76,21 +76,12 @@ export function ApproximateMap({ compact = false, borderless = false, areaOnly =
       setViewport({ width, height });
     };
 
-    const handleWheel = (event: globalThis.WheelEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
-      if (Math.abs(event.deltaY) < 6) return;
-      setZoom((value) => clamp(value + (event.deltaY > 0 ? -1 : 1), minZoom, maxZoom));
-    };
-
     const observer = new ResizeObserver(updateSize);
     observer.observe(el);
     updateSize();
 
-    el.addEventListener("wheel", handleWheel, { passive: false });
     return () => {
       observer.disconnect();
-      el.removeEventListener("wheel", handleWheel);
     };
   }, []);
 
@@ -231,7 +222,8 @@ export function ApproximateMap({ compact = false, borderless = false, areaOnly =
             <button
               type="button"
               onClick={() => changeZoom(1)}
-              className="flex h-9 w-9 items-center justify-center border-b border-stone-200 hover:bg-stone-50 hover:text-stone-900 transition-colors"
+              disabled={zoom >= maxZoom}
+              className="flex h-9 w-9 items-center justify-center border-b border-stone-200 transition-colors hover:bg-stone-50 hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-40"
               aria-label="Zoom in"
             >
               <ZoomIn size={16} />
@@ -239,7 +231,8 @@ export function ApproximateMap({ compact = false, borderless = false, areaOnly =
             <button
               type="button"
               onClick={() => changeZoom(-1)}
-              className="flex h-9 w-9 items-center justify-center hover:bg-stone-50 hover:text-stone-900 transition-colors"
+              disabled={zoom <= minZoom}
+              className="flex h-9 w-9 items-center justify-center transition-colors hover:bg-stone-50 hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-40"
               aria-label="Zoom out"
             >
               <ZoomOut size={16} />
