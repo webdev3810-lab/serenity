@@ -285,21 +285,21 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
         </div>
       </section>
 
-      <section className="bg-white py-16 sm:py-24 border-b border-stone-200">
-        <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
-          <div className="grid gap-12 lg:grid-cols-4">
-            <div className="lg:col-span-1 border-b border-stone-200 lg:border-none pb-6 lg:pb-0">
-              <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-stone-500 block mb-3">Why Serenity</span>
-              <ScrollWipeText as="h2" className="display-font text-3xl sm:text-4xl leading-tight font-bold text-stone-900">A simpler way to house a team.</ScrollWipeText>
+      <section className="corporate-benefits-section bg-white py-16 sm:py-24 border-b border-stone-200">
+        <div className="corporate-benefits-shell container max-w-[92rem] px-5 sm:px-8 lg:px-12">
+          <div className="corporate-benefits-layout grid gap-12 lg:grid-cols-4">
+            <div className="corporate-benefits-intro lg:col-span-1 border-b border-stone-200 lg:border-none pb-6 lg:pb-0">
+              <span className="corporate-benefits-eyebrow text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-stone-500 block mb-3">Why Serenity</span>
+              <ScrollWipeText as="h2" className="corporate-benefits-title display-font text-3xl sm:text-4xl leading-tight font-bold text-stone-900">A simpler way to house a team.</ScrollWipeText>
             </div>
-            <div className="lg:col-span-3 grid gap-10 sm:grid-cols-3">
+            <div className="corporate-benefits-grid lg:col-span-3 grid gap-10 sm:grid-cols-3">
               {[
                 [Home, "Private homes", "Whole-house privacy, living areas, furnished kitchens, and enclosed yards for space to decompress."],
                 [Users, "Keep teams close", "Book adjacent houses so everyone stays nearby without sharing one crowded space."],
                 [Receipt, "Company-ready", "Direct pricing, tax invoices, ABN billing, and purchase order support for easy administration."],
               ].map(([Icon, title, description]) => (
-                <article key={title as string} className="flex flex-col">
-                  <div className="mb-5 inline-flex h-12 w-12 items-center justify-center bg-white rounded-none border border-stone-200">
+                <article key={title as string} className="corporate-benefit-card flex flex-col">
+                  <div className="corporate-benefit-icon mb-5 inline-flex h-12 w-12 items-center justify-center bg-white rounded-none border border-stone-200">
                     <Icon size={20} className="text-[#85644E]" />
                   </div>
                   <h3 className="font-marcellus text-xl text-stone-900 mb-3">{title as string}</h3>
