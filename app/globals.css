@@ -24,6 +24,7 @@
   --hero-green: #07583f;
   --hero-green-deep: #063f30;
   --hero-yellow: #ffd21a;
+  --homepage-promo-height: 3rem;
 
   /* Accent Palette */
   --accent-sage: #71836B;
@@ -10226,7 +10227,7 @@ body {
   position: absolute;
   right: auto;
   top: auto;
-  bottom: clamp(1.75rem, 5.5%, 4.5rem);
+  bottom: clamp(1rem, 2.25%, 2.25rem);
   left: 50%;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -10922,7 +10923,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 }
 
 .pill-nav-header-home + div + main .serenity-hero {
-  height: calc(100svh - clamp(5.75rem, 7.5vw, 7.5rem));
+  height: calc(100svh - var(--homepage-promo-height) - clamp(5.75rem, 7.5vw, 7.5rem));
   min-height: 0;
 }
 
@@ -10958,7 +10959,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 
 @media (max-width: 767px) {
   .pill-nav-header-home + div + main .serenity-hero {
-    height: 100svh;
+    height: calc(100svh - var(--homepage-promo-height));
     min-height: 0;
   }
 
@@ -14995,4 +14996,111 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 .property-editorial-content > .property-editorial-section > .property-editorial-section-heading h2 {
   max-width: 10ch !important;
   font-size: clamp(2.1rem, 3vw, 3.65rem) !important;
+}
+
+/* Keep the homepage hero fluid at browser zoom and intermediate desktop widths. */
+.serenity-hero-title-main,
+.serenity-hero-title-sub {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 768px) and (max-width: 1199px),
+  (min-width: 768px) and (max-height: 760px) {
+  .pill-nav-header-home > div {
+    gap: 0.75rem;
+    padding-inline: clamp(1rem, 3vw, 2.5rem) !important;
+  }
+
+  .pill-nav-header-home .pill-nav-brand img {
+    max-height: 4.5rem;
+  }
+
+  .pill-nav-header-home nav > div {
+    gap: clamp(0.75rem, 1.8vw, 1.5rem);
+  }
+
+  .pill-nav-header-home nav a {
+    min-height: 2.75rem;
+    font-size: clamp(0.65rem, 1vw, 0.8rem) !important;
+    letter-spacing: 0.1em;
+  }
+
+  .pill-nav-header-home > div > a:last-child {
+    padding-inline: 1rem;
+    font-size: 0.65rem;
+  }
+
+  .serenity-hero {
+    height: auto !important;
+    min-height: 0;
+  }
+
+  .serenity-hero-shell {
+    display: flex;
+    height: auto;
+    min-height: calc(100svh - var(--homepage-promo-height) - clamp(5.75rem, 7.5vw, 7.5rem));
+    flex-direction: column;
+    justify-content: space-between;
+    gap: clamp(1.5rem, 4vh, 3rem);
+    padding-block: clamp(2rem, 5vh, 4rem) clamp(1.25rem, 3vh, 2.5rem);
+  }
+
+  .serenity-hero-copy {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    max-width: 58rem;
+    padding-block: 0;
+  }
+
+  .serenity-hero-title-main {
+    font-size: clamp(2.7rem, 5.5vw, 5.25rem);
+    line-height: 0.9;
+  }
+
+  .serenity-hero-title-sub {
+    font-size: clamp(2.45rem, 5vw, 4.8rem);
+    line-height: 0.92;
+  }
+
+  .serenity-hero-support {
+    max-width: 45rem;
+    font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+  }
+
+  .serenity-hero-stats {
+    position: relative;
+    inset: auto;
+    align-self: center;
+    width: 100%;
+    max-width: 92rem;
+    margin: clamp(1rem, 3vh, 2rem) auto 0;
+    transform: none;
+    animation-name: serenity-hero-stats-rise-flow;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 900px) {
+  .serenity-hero-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .serenity-hero-stat {
+    min-height: 4.5rem;
+  }
+
+  .serenity-hero-stat:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .serenity-hero-stat:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+}
+
+@keyframes serenity-hero-stats-rise-flow {
+  from { opacity: 0; transform: translateY(1rem); }
+  to { opacity: 1; transform: translateY(0); }
 }
