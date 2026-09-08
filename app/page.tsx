@@ -82,32 +82,34 @@ export default async function Home() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd) }} />
 
-      <HomepageHeroSection
-        images={heroImages}
-        heading={heroHeading}
-        tagline={heroTagline}
-        ctaLabel={heroCtaLabel}
-        ctaHref={heroCtaHref}
-      />
-      <HomepageCorporateSection
-        heading={corporateHeading}
-        description={corporateDescription}
-        ctaLabel={corporateCtaLabel}
-        ctaHref={corporateCtaHref}
-      />
-      <HomepageFeaturedHousesSection
-        heading={featuredHeading}
-        description={featuredDescription}
-        properties={homepageProperties}
-        displayName={displayName}
-      />
-      <HomepageServicesSection />
-      <HomepageDraggableGallery images={houseGalleryImages} />
-      <HomepageFaqSection
-        heading={textValue(content.faq_heading, "Before you arrive.")}
-        description={textValue(content.faq_description, "Clear answers for families, business travellers, contractors, and longer-stay guests.")}
-        faqs={homepageFaqs.length ? homepageFaqs : defaultHomepageFaqs}
-      />
+      <div className="homepage-theme">
+        <HomepageHeroSection
+          images={heroImages}
+          heading={heroHeading}
+          tagline={heroTagline}
+          ctaLabel={heroCtaLabel}
+          ctaHref={heroCtaHref}
+        />
+        <HomepageCorporateSection
+          heading={corporateHeading}
+          description={corporateDescription}
+          ctaLabel={corporateCtaLabel}
+          ctaHref={corporateCtaHref}
+        />
+        <HomepageFeaturedHousesSection
+          heading={featuredHeading}
+          description={featuredDescription}
+          properties={homepageProperties}
+          displayName={displayName}
+        />
+        <HomepageServicesSection />
+        <HomepageDraggableGallery images={houseGalleryImages} />
+        <HomepageFaqSection
+          heading={textValue(content.faq_heading, "Before you arrive.")}
+          description={textValue(content.faq_description, "Clear answers for families, business travellers, contractors, and longer-stay guests.")}
+          faqs={homepageFaqs.length ? homepageFaqs : defaultHomepageFaqs}
+        />
+      </div>
     </>
   );
 }

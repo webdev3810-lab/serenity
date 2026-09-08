@@ -24,6 +24,7 @@
   --hero-green: #07583f;
   --hero-green-deep: #063f30;
   --hero-yellow: #ffd21a;
+  --homepage-line: rgba(6, 63, 48, 0.2);
   --homepage-promo-height: 3rem;
 
   /* Accent Palette */
@@ -15026,4 +15027,515 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 .property-editorial-content > .property-editorial-section > .property-editorial-section-heading h2 {
   max-width: 10ch !important;
   font-size: clamp(2.1rem, 3vw, 3.65rem) !important;
+}
+
+/* Homepage source-of-truth theme ----------------------------------------
+   The hero defines the homepage system: Baskerville-style display type,
+   Avenir/Plus Jakarta-style sans text, deep green, booking yellow, square
+   controls, compact spacing, and natural photography with only a neutral
+   contrast overlay where it is needed. Keep these tokens scoped so the
+   unrelated public pages can retain their own visual language. */
+.homepage-theme {
+  --homepage-ink: var(--hero-green-deep);
+  --homepage-body: #2d2622;
+  --homepage-muted: #5f6a64;
+  --homepage-line: rgba(6, 63, 48, 0.2);
+  --homepage-surface: #ffffff;
+  --homepage-dark: var(--hero-green);
+  --homepage-dark-deep: var(--hero-green-deep);
+  --homepage-accent: var(--hero-yellow);
+  --homepage-content-max: 112rem;
+  --homepage-section-pad: clamp(4.25rem, 7.5vw, 7.5rem);
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+  background: var(--homepage-surface);
+  color: var(--homepage-body);
+  font-family: var(--font-sans);
+}
+
+.homepage-theme :is(.homepage-business-container, .homepage-house-collection-container, .homepage-services-container, .homepage-faq-editorial-inner) {
+  width: min(calc(100% - clamp(2rem, 5vw, 6rem)), var(--homepage-content-max));
+  margin-inline: auto;
+}
+
+.homepage-theme :is(.homepage-business-section, .homepage-house-collection, .homepage-photo-rail, .homepage-faq-editorial) {
+  background: var(--homepage-surface);
+  color: var(--homepage-body);
+}
+
+.homepage-theme :is(.homepage-business-title, .homepage-house-collection-title, .homepage-photo-rail-intro h2, .homepage-faq-editorial-title, .homepage-business-card h3, .homepage-house-collection-body h3, .homepage-faq-editorial-question) {
+  color: var(--homepage-ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  line-height: 0.94;
+}
+
+.homepage-theme :is(.homepage-business-eyebrow, .homepage-house-collection-eyebrow, .homepage-photo-rail-eyebrow, .homepage-services-eyebrow, .homepage-services-number, .homepage-business-number) {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.homepage-theme :is(.serenity-hero-cta, .serenity-hero-text-link, .homepage-business-link, .homepage-house-collection-link, .site-footer-action) {
+  border-radius: 0 !important;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+/* Keep the reveal animation, but make both its resting and revealed colors
+   part of the same green-and-yellow system. */
+.homepage-theme .scroll-wipe-text {
+  color: rgba(6, 63, 48, 0.24) !important;
+}
+
+.homepage-theme .scroll-wipe-text-reveal {
+  color: var(--homepage-ink) !important;
+}
+
+/* Business introduction ------------------------------------------------- */
+.homepage-theme .homepage-business-section {
+  padding: var(--homepage-section-pad) 0 clamp(3.75rem, 6vw, 6rem);
+}
+
+.homepage-theme .homepage-business-intro {
+  gap: clamp(2rem, 7vw, 6rem);
+  padding-bottom: clamp(3rem, 6vw, 5.75rem);
+}
+
+.homepage-theme .homepage-business-eyebrow,
+.homepage-theme .homepage-house-collection-eyebrow,
+.homepage-theme .homepage-photo-rail-eyebrow {
+  color: var(--homepage-ink);
+  font-size: clamp(0.68rem, 0.78vw, 0.78rem);
+}
+
+.homepage-theme .homepage-business-title {
+  font-size: clamp(2.8rem, 5.8vw, 5.5rem);
+}
+
+.homepage-theme .homepage-business-copy > p,
+.homepage-theme .homepage-house-collection-description {
+  color: var(--homepage-body);
+  font-size: clamp(1rem, 1.35vw, 1.2rem);
+  line-height: 1.58;
+}
+
+.homepage-theme .homepage-business-link {
+  margin-top: 1.85rem;
+  border-bottom-color: var(--homepage-ink);
+  color: var(--homepage-ink);
+}
+
+.homepage-theme .homepage-business-link:hover,
+.homepage-theme .homepage-business-link:focus-visible {
+  border-bottom-color: var(--homepage-accent);
+  color: var(--homepage-ink);
+}
+
+.homepage-theme .homepage-business-grid {
+  border-color: var(--homepage-line);
+}
+
+.homepage-theme .homepage-business-card {
+  border-right-color: var(--homepage-line);
+}
+
+.homepage-theme .homepage-business-number {
+  color: var(--homepage-ink);
+  font-size: 0.72rem;
+}
+
+.homepage-theme .homepage-business-card h3 {
+  margin-top: 1.8rem;
+  font-size: clamp(1.35rem, 1.8vw, 1.65rem);
+  line-height: 1;
+}
+
+.homepage-theme .homepage-business-card p {
+  color: var(--homepage-muted);
+  line-height: 1.58;
+}
+
+/* Featured houses ------------------------------------------------------- */
+.homepage-theme .homepage-house-collection {
+  padding: clamp(4rem, 7vw, 7rem) 0 clamp(3.5rem, 6vw, 6rem);
+}
+
+.homepage-theme .homepage-house-collection-intro {
+  gap: clamp(2rem, 7vw, 6rem);
+  margin-bottom: clamp(2.75rem, 5vw, 4.75rem);
+}
+
+.homepage-theme .homepage-house-collection-title {
+  font-size: clamp(2.8rem, 5.8vw, 5.5rem);
+}
+
+.homepage-theme .homepage-house-collection-card {
+  border-color: var(--homepage-line);
+  background: var(--homepage-surface);
+  box-shadow: 0 0.8rem 1.8rem rgba(6, 63, 48, 0.07);
+}
+
+.homepage-theme .homepage-house-collection-card:hover,
+.homepage-theme .homepage-house-collection-card:focus-within {
+  border-color: var(--homepage-dark);
+  box-shadow: 0 1rem 2rem rgba(6, 63, 48, 0.12);
+}
+
+.homepage-theme .homepage-house-collection-body h3 {
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  line-height: 1;
+}
+
+.homepage-theme .homepage-house-collection-body p {
+  color: var(--homepage-muted);
+}
+
+.homepage-theme .homepage-house-collection-link {
+  border-color: var(--homepage-ink);
+  color: var(--homepage-ink);
+}
+
+.homepage-theme .homepage-house-collection-link:hover,
+.homepage-theme .homepage-house-collection-link:focus-visible {
+  border-color: var(--homepage-accent);
+  background: var(--homepage-accent);
+  color: var(--homepage-ink);
+}
+
+/* Services: use the hero's solid dark green as the homepage's dark panel. */
+.homepage-theme .homepage-services-section {
+  padding: clamp(4.5rem, 8vw, 8rem) 0;
+  background: var(--homepage-dark);
+  color: #ffffff;
+}
+
+.homepage-theme .homepage-services-layout {
+  gap: clamp(3rem, 8vw, 7rem);
+}
+
+.homepage-theme .homepage-services-eyebrow,
+.homepage-theme .homepage-services-number {
+  color: var(--homepage-accent);
+}
+
+.homepage-theme .homepage-services-intro h2,
+.homepage-theme .homepage-services-item h3 {
+  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+}
+
+.homepage-theme .homepage-services-intro h2 {
+  font-size: clamp(2.8rem, 5.5vw, 5.25rem);
+  line-height: 0.94;
+}
+
+.homepage-theme .homepage-services-intro-copy,
+.homepage-theme .homepage-services-item p {
+  color: rgba(255, 255, 255, 0.84);
+  line-height: 1.58;
+}
+
+.homepage-theme .homepage-services-list,
+.homepage-theme .homepage-services-item {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.homepage-theme .homepage-services-item h3 {
+  font-size: clamp(1.25rem, 1.7vw, 1.5rem);
+  line-height: 1.08;
+}
+
+.homepage-theme .homepage-services-section .scroll-wipe-text {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.homepage-theme .homepage-services-section .scroll-wipe-text-reveal {
+  color: #ffffff !important;
+}
+
+/* Photography ----------------------------------------------------------- */
+.homepage-theme .homepage-photo-rail {
+  padding: clamp(4.25rem, 8vw, 8rem) 0 clamp(2.25rem, 4vw, 4rem);
+}
+
+.homepage-theme .homepage-photo-rail-intro {
+  width: min(calc(100% - clamp(2rem, 5vw, 6rem)), var(--homepage-content-max));
+  margin-bottom: clamp(2rem, 4vw, 3.25rem);
+  padding-inline: 0;
+}
+
+.homepage-theme .homepage-photo-rail-intro h2 {
+  font-size: clamp(2.8rem, 5.8vw, 5.5rem);
+}
+
+.homepage-theme .homepage-photo-rail-instruction,
+.homepage-theme .homepage-photo-rail-note {
+  color: var(--homepage-muted);
+}
+
+.homepage-theme .homepage-photo-rail-image img {
+  filter: none;
+}
+
+.homepage-theme .homepage-photo-rail-card:hover .homepage-photo-rail-image img,
+.homepage-theme .homepage-photo-rail-card:focus-within .homepage-photo-rail-image img {
+  filter: none;
+}
+
+.homepage-theme .homepage-photo-rail-card::after {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.02) 48%, rgba(0, 0, 0, 0.7) 100%);
+}
+
+.homepage-theme .homepage-photo-rail-track:focus-visible {
+  outline-color: var(--homepage-ink);
+}
+
+.homepage-theme .homepage-photo-rail-note span {
+  color: var(--homepage-accent);
+}
+
+/* FAQ ------------------------------------------------------------------- */
+.homepage-theme .homepage-faq-editorial {
+  padding: clamp(4.5rem, 8vw, 7.5rem) 1.25rem;
+}
+
+.homepage-theme .homepage-faq-editorial-header {
+  margin-bottom: clamp(3.5rem, 6vw, 5.5rem);
+}
+
+.homepage-theme .homepage-faq-editorial-title {
+  color: var(--homepage-ink);
+  font-size: clamp(2.8rem, 5.8vw, 5.5rem);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+}
+
+.homepage-theme .homepage-faq-editorial-description,
+.homepage-theme .homepage-faq-editorial-answer {
+  color: var(--homepage-muted);
+  line-height: 1.65;
+}
+
+.homepage-theme .homepage-faq-editorial-list,
+.homepage-theme .homepage-faq-editorial-item {
+  border-color: var(--homepage-line);
+}
+
+.homepage-theme .homepage-faq-editorial-question {
+  color: var(--homepage-ink);
+  font-size: clamp(1.1rem, 1.8vw, 1.4rem);
+  line-height: 1.12;
+}
+
+.homepage-theme .homepage-faq-editorial-toggle {
+  border-color: var(--homepage-line);
+  color: var(--homepage-ink);
+}
+
+.homepage-theme .homepage-faq-editorial-item[open] .homepage-faq-editorial-toggle {
+  border-color: var(--homepage-accent);
+  background: var(--homepage-accent);
+  color: var(--homepage-ink);
+}
+
+.homepage-theme :is(a, button, summary, input, select, textarea):focus-visible {
+  outline-color: var(--homepage-ink);
+}
+
+/* Header, promotion banner, and footer are shared components. The :has()
+   scope applies the homepage theme only when this page is present. */
+body:has(.homepage-theme) .promotion-banner {
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  background: var(--hero-green-deep) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-family: var(--font-sans);
+}
+
+body:has(.homepage-theme) .promotion-banner button {
+  border-color: rgba(255, 210, 26, 0.78) !important;
+  font-family: var(--font-sans) !important;
+  color: #ffffff !important;
+}
+
+body:has(.homepage-theme) .promotion-banner button:hover,
+body:has(.homepage-theme) .promotion-banner button:focus-visible {
+  border-color: var(--hero-yellow) !important;
+  background: var(--hero-yellow) !important;
+  color: var(--hero-green-deep) !important;
+}
+
+body:has(.homepage-theme) .pill-nav-header-home {
+  border-bottom-color: var(--homepage-line) !important;
+  box-shadow: 0 0.35rem 1.2rem rgba(6, 63, 48, 0.06) !important;
+  font-family: var(--font-sans);
+}
+
+body:has(.homepage-theme) .pill-nav-header-home nav a {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+body:has(.homepage-theme) .pill-nav-header-home > div > a:last-child {
+  border-color: var(--hero-yellow) !important;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+body:has(.homepage-theme) .site-footer-editorial {
+  --footer-ink: var(--hero-green-deep);
+  --footer-paper: #ffffff;
+  --footer-muted: #5f6a64;
+  --footer-accent: var(--hero-green);
+  --footer-line: var(--homepage-line);
+  border-top-color: var(--homepage-line);
+  background: #ffffff;
+  color: var(--hero-green-deep);
+  font-family: var(--font-sans);
+}
+
+body:has(.homepage-theme) .site-footer-intro {
+  --footer-ink: #ffffff;
+  --footer-paper: var(--hero-green-deep);
+  --footer-muted: rgba(255, 255, 255, 0.78);
+  --footer-accent: var(--hero-yellow);
+  --footer-line: rgba(255, 255, 255, 0.28);
+  background: var(--hero-green-deep);
+}
+
+body:has(.homepage-theme) .site-footer-intro h2,
+body:has(.homepage-theme) .site-footer-directory-mark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+}
+
+body:has(.homepage-theme) .site-footer-action {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+body:has(.homepage-theme) .site-footer-action-primary {
+  border-color: var(--hero-yellow);
+  background: var(--hero-yellow);
+  color: var(--hero-green-deep);
+}
+
+body:has(.homepage-theme) .site-footer-action-primary:hover,
+body:has(.homepage-theme) .site-footer-action-primary:focus-visible {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: var(--hero-green-deep);
+}
+
+body:has(.homepage-theme) .site-footer-action-secondary {
+  border-color: rgba(255, 255, 255, 0.78);
+  color: #ffffff;
+}
+
+body:has(.homepage-theme) .site-footer-action-secondary:hover,
+body:has(.homepage-theme) .site-footer-action-secondary:focus-visible {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: var(--hero-green-deep);
+}
+
+body:has(.homepage-theme) .site-footer-wordmark span {
+  color: rgba(7, 88, 63, 0.14);
+}
+
+@media (max-width: 1023px) {
+  .homepage-theme :is(.homepage-business-intro, .homepage-house-collection-intro, .homepage-services-layout) {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .homepage-theme :is(.homepage-business-intro, .homepage-house-collection-intro) {
+    gap: 2rem;
+  }
+
+  .homepage-theme .homepage-services-layout {
+    gap: 3.5rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .homepage-theme :is(.homepage-business-container, .homepage-house-collection-container, .homepage-services-container, .homepage-faq-editorial-inner) {
+    width: calc(100% - 2rem);
+  }
+
+  .homepage-theme :is(.homepage-business-section, .homepage-house-collection, .homepage-services-section) {
+    padding-block: 4.5rem;
+  }
+
+  .homepage-theme .homepage-business-intro {
+    padding-bottom: 3.25rem;
+  }
+
+  .homepage-theme .homepage-business-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .homepage-theme .homepage-business-card {
+    min-height: 0;
+    padding: 1.5rem 0 1.7rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--homepage-line);
+  }
+
+  .homepage-theme .homepage-business-card:first-child {
+    padding-left: 0;
+  }
+
+  .homepage-theme .homepage-business-card:last-child {
+    border-bottom: 0;
+  }
+
+  .homepage-theme .homepage-business-card h3 {
+    margin-top: 1.15rem;
+  }
+
+  .homepage-theme .homepage-house-collection-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .homepage-theme .homepage-house-collection-intro {
+    margin-bottom: 2.75rem;
+  }
+
+  .homepage-theme .homepage-photo-rail-intro {
+    width: calc(100% - 2rem);
+    margin-bottom: 2rem;
+  }
+
+  .homepage-theme .homepage-faq-editorial {
+    padding-inline: 1rem;
+  }
+
+  .homepage-theme .homepage-faq-editorial-header {
+    margin-bottom: 3.5rem;
+  }
+
+  .homepage-theme .homepage-faq-editorial-summary {
+    min-height: 5.25rem;
+    gap: 1rem;
+    padding-block: 1.2rem;
+  }
+
+  .homepage-theme .homepage-faq-editorial-answer {
+    padding-right: 2.75rem;
+    font-size: 0.95rem;
+  }
 }
