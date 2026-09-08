@@ -10225,7 +10225,8 @@ body {
 .serenity-hero-stats {
   position: absolute;
   right: auto;
-  bottom: 8.5%;
+  top: 68%;
+  bottom: auto;
   left: 50%;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -10234,8 +10235,8 @@ body {
   border: 0;
   background: var(--hero-green);
   box-shadow: 0 0.8rem 2rem rgba(0, 44, 31, 0.2);
-  transform: translateX(-50%);
-  animation: serenity-hero-rise 800ms 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform: translate(-50%, -50%);
+  animation: serenity-hero-stats-rise 800ms 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .serenity-hero-stat {
@@ -10284,6 +10285,16 @@ body {
 }
 
 @keyframes serenity-hero-rise {
+  from { opacity: 0; transform: translateY(1rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes serenity-hero-stats-rise {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 1rem)); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+@keyframes serenity-hero-stats-rise-mobile {
   from { opacity: 0; transform: translateY(1rem); }
   to { opacity: 1; transform: translateY(0); }
 }
@@ -10348,11 +10359,13 @@ body {
 
   .serenity-hero-stats {
     right: 0;
+    top: auto;
     bottom: 1.25rem;
     left: 0;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
     transform: none;
+    animation-name: serenity-hero-stats-rise-mobile;
   }
 
   .serenity-hero-stat {
