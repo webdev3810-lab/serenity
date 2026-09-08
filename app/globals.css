@@ -10903,12 +10903,12 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
   box-shadow: none !important;
 }
 
-/* The homepage hero owns the first viewport. Keep the navbar over it so its
-   fixed position cannot leave an empty header-height strip around the image.
+/* The homepage hero owns the first viewport. Keep the navbar over it so hiding
+   the header on scroll never leaves an empty header-height strip above it.
    The mobile menu wrapper sits between the header and main in the DOM. */
 .pill-nav-header-home {
-  position: relative !important;
-  top: auto;
+  position: fixed !important;
+  top: 0;
   right: auto;
   left: auto;
   width: 100%;
@@ -10918,7 +10918,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 }
 
 .pill-nav-header-home + div + main .serenity-hero {
-  height: max(40rem, calc(100svh - 7.5rem));
+  height: 100svh;
   min-height: 36rem;
 }
 
