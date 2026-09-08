@@ -16003,24 +16003,24 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 
 /* Mobile navigation uses its own component styles, so keep its open state in
    the same hero-derived green/yellow language as the desktop header. */
-body:has(.homepage-theme) .staggered-menu-header {
+.staggered-menu-header {
   border-bottom-color: var(--homepage-line) !important;
   background: rgba(255, 255, 255, 0.98) !important;
   box-shadow: 0 0.35rem 1.2rem rgba(6, 63, 48, 0.06) !important;
 }
 
-body:has(.homepage-theme) .staggered-menu-header .sm-toggle {
+.staggered-menu-header .sm-toggle {
   border-color: var(--hero-yellow) !important;
   background: var(--hero-yellow) !important;
   color: var(--hero-green-deep) !important;
 }
 
-body:has(.homepage-theme) .staggered-menu-panel {
+.staggered-menu-panel {
   background: var(--hero-green-deep) !important;
   color: #ffffff !important;
 }
 
-body:has(.homepage-theme) .staggered-menu-panel .sm-panel-item {
+.staggered-menu-panel .sm-panel-item {
   border-color: rgba(255, 255, 255, 0.24) !important;
   color: #ffffff !important;
   font-family: var(--font-display) !important;
@@ -16028,12 +16028,12 @@ body:has(.homepage-theme) .staggered-menu-panel .sm-panel-item {
   letter-spacing: -0.06em !important;
 }
 
-body:has(.homepage-theme) .staggered-menu-panel .sm-panel-item:hover,
-body:has(.homepage-theme) .staggered-menu-panel .sm-panel-item:focus-visible {
+.staggered-menu-panel .sm-panel-item:hover,
+.staggered-menu-panel .sm-panel-item:focus-visible {
   color: var(--hero-yellow) !important;
 }
 
-body:has(.homepage-theme) .staggered-menu-panel .sm-panel-cta {
+.staggered-menu-panel .sm-panel-cta {
   border-color: var(--hero-yellow) !important;
   background: var(--hero-yellow) !important;
   color: var(--hero-green-deep) !important;
@@ -16045,8 +16045,8 @@ body:has(.homepage-theme) .staggered-menu-panel .sm-panel-cta {
   text-transform: uppercase;
 }
 
-body:has(.homepage-theme) .staggered-menu-panel .sm-panel-cta:hover,
-body:has(.homepage-theme) .staggered-menu-panel .sm-panel-cta:focus-visible {
+.staggered-menu-panel .sm-panel-cta:hover,
+.staggered-menu-panel .sm-panel-cta:focus-visible {
   background: #ffe36c !important;
   color: var(--hero-green-deep) !important;
 }
