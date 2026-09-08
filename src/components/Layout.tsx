@@ -75,7 +75,8 @@ function PromoBanner({ settings }: { settings: PromoSettings }) {
 }
 
 function Header({ pathname }: { pathname: string | null }) {
-  return <PillNav logo="/LOGO.png" logoAlt="Serenity Stays" items={nav} activeHref={pathname ?? undefined} className={pathname === "/" ? "pill-nav-header-home" : ""} />;
+  const headerClassName = pathname === "/" ? "pill-nav-header-home" : pathname === "/houses" ? "pill-nav-header-houses" : "";
+  return <PillNav logo="/LOGO.png" logoAlt="Serenity Stays" items={nav} activeHref={pathname ?? undefined} className={headerClassName} />;
 }
 
 function Footer({ pathname }: { pathname: string | null }) {

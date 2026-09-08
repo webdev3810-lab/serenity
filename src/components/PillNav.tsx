@@ -96,6 +96,7 @@ export default function PillNav({
     isActive: isActivePath(pathname ?? activeHref, item.href, currentHash),
   }));
   const isHomepage = className.includes("pill-nav-header-home");
+  const isThemedRoute = isHomepage || className.includes("pill-nav-header-houses");
 
   return (
     <>
@@ -137,15 +138,15 @@ export default function PillNav({
           items={mobileItems}
           displaySocials={false}
           displayItemNumbering={false}
-          colors={["#5A463A", "#B99D88", "#D8CCC4"]}
+          colors={isThemedRoute ? ["#063F30", "#07583F", "#FFD21A"] : ["#5A463A", "#B99D88", "#D8CCC4"]}
           logoUrl={logo}
           logoAlt={logoAlt}
           ctaLabel={ctaLabel}
           ctaHref={ctaHref}
-          menuButtonColor="#2D2622"
-          openMenuButtonColor="#2D2622"
+          menuButtonColor={isThemedRoute ? "#063F30" : "#2D2622"}
+          openMenuButtonColor={isThemedRoute ? "#063F30" : "#2D2622"}
           changeMenuColorOnOpen={false}
-          accentColor="#B7664E"
+          accentColor={isThemedRoute ? "#FFD21A" : "#B7664E"}
           isFixed
           className={reducedMotion ? "transition-none" : "transition-transform duration-300 ease-out"}
         />

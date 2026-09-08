@@ -4476,7 +4476,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
    homepage collection cards. */
 .houses-page .homepage-house-collection-body h3 {
   font-family: var(--font-display);
-  font-weight: 400 !important;
+  font-weight: 600;
 }
 
 .houses-reference-card-body h2 a {
@@ -15029,7 +15029,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
   font-size: clamp(2.1rem, 3vw, 3.65rem) !important;
 }
 
-/* Homepage source-of-truth theme ----------------------------------------
+/* Shared homepage/Houses source-of-truth theme ---------------------------
    The hero defines the homepage system: Baskerville-style display type,
    Avenir/Plus Jakarta-style sans text, deep green, booking yellow, square
    controls, compact spacing, and natural photography with only a neutral
@@ -15352,7 +15352,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 }
 
 /* Header, promotion banner, and footer are shared components. The :has()
-   scope applies the homepage theme only when this page is present. */
+   scope applies the shared public theme only when a themed route is present. */
 body:has(.homepage-theme) .promotion-banner {
   border-color: rgba(255, 255, 255, 0.22) !important;
   background: var(--hero-green-deep) !important;
@@ -15538,4 +15538,515 @@ body:has(.homepage-theme) .site-footer-wordmark span {
     padding-right: 2.75rem;
     font-size: 0.95rem;
   }
+}
+
+/* Houses page adaptation -----------------------------------------------
+   Reuse the homepage's token scope and component language, then adapt it to
+   a property-listing task: a clear title, immediately scannable cards, and a
+   dark comfort panel that uses the same green/white/yellow contrast as the
+   hero stats rail. */
+.houses-theme {
+  background: var(--homepage-surface);
+  color: var(--homepage-body);
+  font-family: var(--font-sans);
+}
+
+body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) {
+  border-bottom-color: var(--homepage-line) !important;
+  box-shadow: 0 0.35rem 1.2rem rgba(6, 63, 48, 0.06) !important;
+  font-family: var(--font-sans);
+}
+
+body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) nav a {
+  color: var(--hero-green-deep) !important;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) nav a:hover,
+body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) nav a[aria-current="page"] {
+  color: var(--hero-green) !important;
+}
+
+body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:last-child {
+  border-color: var(--hero-yellow) !important;
+  background: var(--hero-yellow) !important;
+  color: var(--hero-green-deep) !important;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:last-child:hover,
+body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:last-child:focus-visible {
+  background: #ffe36c !important;
+  color: var(--hero-green-deep) !important;
+}
+
+.houses-theme .houses-page-container {
+  width: min(calc(100% - clamp(2rem, 5vw, 6rem)), var(--homepage-content-max));
+}
+
+.houses-theme .houses-results-section {
+  padding: clamp(3.5rem, 6vw, 5.75rem) 0 clamp(4rem, 7vw, 7rem);
+  background: var(--homepage-surface);
+}
+
+.houses-theme .houses-results-section > .houses-page-container {
+  width: min(calc(100% - clamp(2rem, 5vw, 6rem)), var(--homepage-content-max));
+}
+
+.houses-theme .houses-reference-eyebrow {
+  margin: 0 0 clamp(2.5rem, 5vw, 4.5rem);
+  color: var(--homepage-ink);
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 6.8rem);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  line-height: 0.88;
+  text-align: left;
+  text-transform: none;
+}
+
+.houses-theme .homepage-house-collection-grid {
+  gap: clamp(0.85rem, 1.35vw, 1.25rem);
+}
+
+.houses-theme .homepage-house-collection-card {
+  border-color: var(--homepage-line);
+  background: var(--homepage-surface);
+  box-shadow: 0 0.8rem 1.8rem rgba(6, 63, 48, 0.07);
+}
+
+.houses-theme .homepage-house-collection-card:hover,
+.houses-theme .homepage-house-collection-card:focus-within {
+  border-color: var(--homepage-dark);
+  box-shadow: 0 1rem 2rem rgba(6, 63, 48, 0.12);
+}
+
+.houses-theme .homepage-house-collection-media {
+  aspect-ratio: 1.22;
+  background: #eef2ef;
+}
+
+.houses-theme .homepage-house-collection-image {
+  filter: none;
+}
+
+.houses-theme .homepage-house-collection-body {
+  min-height: 7rem;
+  padding: 1.25rem 1.35rem 1.4rem;
+}
+
+.houses-theme .homepage-house-collection-body h3 {
+  color: var(--homepage-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+  font-weight: 600 !important;
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+
+.houses-theme .homepage-house-collection-body h3 a:hover,
+.houses-theme .homepage-house-collection-body h3 a:focus-visible {
+  color: var(--homepage-dark);
+}
+
+.houses-theme .homepage-house-collection-body p {
+  color: var(--homepage-muted);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.houses-theme .homepage-house-collection-link {
+  border-color: var(--homepage-ink);
+  color: var(--homepage-ink);
+}
+
+.houses-theme .homepage-house-collection-link:hover,
+.houses-theme .homepage-house-collection-link:focus-visible {
+  border-color: var(--homepage-accent);
+  background: var(--homepage-accent);
+  color: var(--homepage-ink);
+}
+
+/* Keep the same visual language ready for the existing booking/search
+   controls when a query-driven listing state renders them. */
+.houses-theme :is(.search-panel, .search-panel-luxury) {
+  border: 1px solid var(--homepage-line);
+  border-radius: 0 !important;
+  background: var(--homepage-surface);
+  box-shadow: 0 0.8rem 1.8rem rgba(6, 63, 48, 0.07);
+}
+
+.houses-theme .search-box {
+  border-color: var(--homepage-line) !important;
+  border-radius: 0 !important;
+  background: var(--homepage-surface) !important;
+  font-family: var(--font-sans);
+}
+
+.houses-theme .search-box:hover,
+.houses-theme .search-box:focus-within {
+  border-color: var(--homepage-dark) !important;
+  box-shadow: inset 0 0 0 1px var(--homepage-dark);
+}
+
+.houses-theme .search-box :is(label, span) {
+  color: var(--homepage-muted) !important;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.houses-theme .search-box :is(input, button, div) {
+  font-family: var(--font-sans);
+}
+
+.houses-theme :is(.search-submit, .search-panel-luxury > button[type="submit"]) {
+  min-height: 3rem;
+  border: 1px solid var(--homepage-accent) !important;
+  border-radius: 0 !important;
+  background: var(--homepage-accent) !important;
+  color: var(--homepage-ink) !important;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.houses-theme :is(.search-submit, .search-panel-luxury > button[type="submit"]):hover,
+.houses-theme :is(.search-submit, .search-panel-luxury > button[type="submit"]):focus-visible {
+  border-color: #ffe36c !important;
+  background: #ffe36c !important;
+  color: var(--homepage-ink) !important;
+}
+
+/* Property-card compatibility for the existing booking/listing primitives. */
+.houses-theme .property-card {
+  border-color: var(--homepage-line);
+  border-radius: 0 !important;
+  background: var(--homepage-surface);
+  box-shadow: 0 0.8rem 1.8rem rgba(6, 63, 48, 0.07);
+}
+
+.houses-theme .property-card:hover {
+  border-color: var(--homepage-dark);
+  box-shadow: 0 1rem 2rem rgba(6, 63, 48, 0.12);
+}
+
+.houses-theme .property-card img,
+.houses-theme .property-card:hover img {
+  filter: none;
+}
+
+.houses-theme .property-badge {
+  border-color: var(--homepage-accent);
+  border-radius: 0 !important;
+  background: var(--homepage-accent);
+  color: var(--homepage-ink);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.houses-theme .property-stats {
+  color: var(--homepage-muted);
+  font-family: var(--font-sans);
+}
+
+.houses-theme .property-stats span {
+  border-color: var(--homepage-line);
+  border-radius: 0 !important;
+  background: var(--homepage-surface);
+}
+
+.houses-theme .properties-availability-note {
+  border-color: var(--homepage-line);
+  border-radius: 0 !important;
+  background: color-mix(in srgb, var(--homepage-dark) 12%, white);
+  color: var(--homepage-ink);
+  font-family: var(--font-sans);
+}
+
+.houses-theme .property-card-body :is(h3, .text-stone-900) {
+  color: var(--homepage-ink) !important;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+}
+
+.houses-theme .property-card-body :is(p, .text-stone-500, .text-stone-600) {
+  color: var(--homepage-muted) !important;
+  font-family: var(--font-sans);
+}
+
+.houses-theme .property-card > .border-t {
+  border-color: var(--homepage-line) !important;
+  background: var(--homepage-surface);
+}
+
+.houses-theme :is(.btn-primary, .btn-secondary, .btn-outline-dark, .btn-dark-primary) {
+  min-height: 3rem;
+  border-radius: 0 !important;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.houses-theme .btn-primary,
+.houses-theme .btn-dark-primary {
+  border-color: var(--homepage-accent) !important;
+  background: var(--homepage-accent) !important;
+  color: var(--homepage-ink) !important;
+}
+
+.houses-theme :is(.btn-primary, .btn-dark-primary):hover,
+.houses-theme :is(.btn-primary, .btn-dark-primary):focus-visible {
+  border-color: #ffe36c !important;
+  background: #ffe36c !important;
+  color: var(--homepage-ink) !important;
+}
+
+.houses-theme :is(.btn-secondary, .btn-outline-dark) {
+  border-color: var(--homepage-ink) !important;
+  background: transparent !important;
+  color: var(--homepage-ink) !important;
+}
+
+.houses-theme :is(.btn-secondary, .btn-outline-dark):hover,
+.houses-theme :is(.btn-secondary, .btn-outline-dark):focus-visible {
+  border-color: var(--homepage-ink) !important;
+  background: var(--homepage-ink) !important;
+  color: #ffffff !important;
+}
+
+/* Comfort panel --------------------------------------------------------- */
+.houses-theme .houses-comfort-section {
+  padding: clamp(4.25rem, 7.5vw, 7.5rem) 0 clamp(4.5rem, 8vw, 8rem);
+  border-top: 1px solid var(--homepage-line);
+  background: var(--homepage-surface);
+}
+
+.houses-theme .houses-comfort-heading {
+  max-width: 23ch;
+  margin: 0 auto clamp(3rem, 6vw, 5.5rem);
+  color: var(--homepage-ink);
+  font-family: var(--font-display);
+  font-size: clamp(2.65rem, 5.8vw, 5.5rem);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  line-height: 0.9;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.houses-theme .houses-comfort-grid {
+  gap: 1px;
+  background: var(--homepage-line);
+}
+
+.houses-theme .houses-comfort-card {
+  min-height: clamp(22rem, 31vw, 32rem);
+  border: 0;
+  border-radius: 0 !important;
+  background: var(--homepage-dark);
+  color: #ffffff;
+}
+
+.houses-theme .houses-comfort-card-dark {
+  background: var(--homepage-dark-deep);
+  color: #ffffff;
+}
+
+.houses-theme .houses-comfort-card-stone {
+  background: #ffffff;
+  color: var(--homepage-ink);
+}
+
+.houses-theme .houses-comfort-card-copy {
+  padding: clamp(1.5rem, 2.8vw, 2.5rem);
+}
+
+.houses-theme .houses-comfort-card-copy h3 {
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 1.8vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  line-height: 0.98;
+}
+
+.houses-theme .houses-comfort-card-copy p {
+  color: inherit;
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 1vw, 1.05rem);
+  line-height: 1.55;
+  opacity: 0.82;
+}
+
+.houses-theme .houses-comfort-card-number {
+  color: var(--homepage-accent);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3vw, 3.2rem);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+}
+
+.houses-theme .houses-comfort-card-stone .houses-comfort-card-number {
+  color: var(--homepage-ink);
+}
+
+.houses-theme .houses-comfort-graphic {
+  opacity: 0.16;
+}
+
+.houses-theme .houses-empty-state {
+  border-color: var(--homepage-line);
+  border-radius: 0 !important;
+  background: var(--homepage-surface);
+}
+
+.houses-theme .houses-empty-state h2 {
+  color: var(--homepage-ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+}
+
+.houses-theme .houses-empty-state p {
+  color: var(--homepage-muted);
+  font-family: var(--font-sans);
+  line-height: 1.58;
+}
+
+.houses-theme .houses-view-link {
+  border-bottom-color: var(--homepage-ink);
+  color: var(--homepage-ink);
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.houses-theme .houses-view-link:hover,
+.houses-theme .houses-view-link:focus-visible {
+  border-bottom-color: var(--homepage-accent);
+  color: var(--homepage-dark);
+}
+
+.houses-theme :is(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--homepage-ink);
+  outline-offset: 3px;
+}
+
+@media (max-width: 1023px) {
+  .houses-theme .homepage-house-collection-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .houses-theme .houses-comfort-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .houses-theme .houses-results-section {
+    padding-block: 3.5rem 4.5rem;
+  }
+
+  .houses-theme .houses-results-section > .houses-page-container,
+  .houses-theme .houses-page-container {
+    width: calc(100% - 2rem);
+  }
+
+  .houses-theme .houses-reference-eyebrow {
+    margin-bottom: 2.75rem;
+    font-size: clamp(3rem, 14vw, 4.5rem);
+  }
+
+  .houses-theme .homepage-house-collection-grid,
+  .houses-theme .houses-comfort-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .houses-theme .homepage-house-collection-body {
+    min-height: 6.25rem;
+    padding: 1rem 1.1rem 1.2rem;
+  }
+
+  .houses-theme .homepage-house-collection-body p {
+    font-size: 0.9rem;
+  }
+
+  .houses-theme .houses-comfort-section {
+    padding-block: 4.5rem 5rem;
+  }
+
+  .houses-theme .houses-comfort-heading {
+    max-width: 100%;
+    margin-bottom: 2.75rem;
+    font-size: clamp(2.45rem, 11vw, 4rem);
+    text-align: left;
+  }
+
+  .houses-theme .houses-comfort-card {
+    min-height: 22rem;
+  }
+
+  .houses-theme .houses-comfort-card-copy {
+    padding: 1.5rem;
+  }
+}
+
+/* Mobile navigation uses its own component styles, so keep its open state in
+   the same hero-derived green/yellow language as the desktop header. */
+body:has(.homepage-theme) .staggered-menu-header {
+  border-bottom-color: var(--homepage-line) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  box-shadow: 0 0.35rem 1.2rem rgba(6, 63, 48, 0.06) !important;
+}
+
+body:has(.homepage-theme) .staggered-menu-header .sm-toggle {
+  border-color: var(--hero-yellow) !important;
+  background: var(--hero-yellow) !important;
+  color: var(--hero-green-deep) !important;
+}
+
+body:has(.homepage-theme) .staggered-menu-panel {
+  background: var(--hero-green-deep) !important;
+  color: #ffffff !important;
+}
+
+body:has(.homepage-theme) .staggered-menu-panel .sm-panel-item {
+  border-color: rgba(255, 255, 255, 0.24) !important;
+  color: #ffffff !important;
+  font-family: var(--font-display) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.06em !important;
+}
+
+body:has(.homepage-theme) .staggered-menu-panel .sm-panel-item:hover,
+body:has(.homepage-theme) .staggered-menu-panel .sm-panel-item:focus-visible {
+  color: var(--hero-yellow) !important;
+}
+
+body:has(.homepage-theme) .staggered-menu-panel .sm-panel-cta {
+  border-color: var(--hero-yellow) !important;
+  background: var(--hero-yellow) !important;
+  color: var(--hero-green-deep) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.13em !important;
+  line-height: 1.2 !important;
+  text-transform: uppercase;
+}
+
+body:has(.homepage-theme) .staggered-menu-panel .sm-panel-cta:hover,
+body:has(.homepage-theme) .staggered-menu-panel .sm-panel-cta:focus-visible {
+  background: #ffe36c !important;
+  color: var(--hero-green-deep) !important;
 }

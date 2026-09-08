@@ -232,7 +232,7 @@ function PropertiesSearchContent({ properties }: { properties: Property[] }) {
   }, { scope: comfortSectionRef });
 
   return (
-    <div className="houses-page">
+    <div className="houses-page homepage-theme houses-theme">
       <section className="houses-results-section">
         <div className="houses-page-container">
           <div className="houses-results-layout">
