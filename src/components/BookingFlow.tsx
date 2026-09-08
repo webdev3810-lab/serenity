@@ -56,13 +56,13 @@ function VoucherForm({ value, onChange, onApply, onClear, error, busy, applied }
 
 export function BookingProgress({ active }: { active: number }) {
   return (
-    <ol className="mb-8 grid gap-2 sm:grid-cols-4">
+    <ol className="booking-progress mb-8 grid gap-2 sm:grid-cols-4">
       {steps.map((step, index) => (
         <li
           key={step}
-          className={`rounded-none border p-4 text-sm font-bold transition-colors ${
+          className={`booking-progress-step rounded-none border p-4 text-sm font-bold transition-colors ${
             index <= active
-              ? "border-[#111111] bg-[#111111] text-white shadow-xs"
+              ? "is-complete border-[#111111] bg-[#111111] text-white shadow-xs"
               : "border-stone-200 bg-white text-stone-600"
           }`}
         >
@@ -506,7 +506,7 @@ export function ConfirmationPage() {
 
 function BookingFrame({ active, children }: { active: number; children: React.ReactNode }) {
   return (
-    <div className="section bg-white pt-8 pb-16">
+    <div className="booking-flow-page section bg-white pt-8 pb-16">
       <div className="container">
         <BookingProgress active={active} />
         {children}

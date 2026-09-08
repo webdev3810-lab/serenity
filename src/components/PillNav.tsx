@@ -102,7 +102,7 @@ export default function PillNav({
     <>
       <header className={`pill-nav-header hidden sticky top-0 z-[80] transform-gpu border-b border-[#D7E2DA] bg-white text-[#063F30] shadow-[0_0.75rem_2rem_rgba(6,63,48,0.06)] md:block ${reducedMotion ? "transition-none" : "transition-transform duration-300 ease-out"} ${navHidden ? "-translate-y-full" : "translate-y-0"} ${className}`}>
         <div className="mx-auto flex h-[5.75rem] w-full max-w-[100rem] items-center gap-4 px-4 sm:px-8 lg:h-32 lg:px-12">
-          <Link href="/" aria-label="Serenity Stays home" className="pill-nav-brand relative z-10 flex shrink-0 items-center">
+          <Link href="/" aria-label="Serenity on the Rocks home" className="pill-nav-brand relative z-10 flex shrink-0 items-center">
             <Image src={logo} alt={logoAlt} width={148} height={112} priority className="h-14 w-auto object-contain lg:h-20" />
           </Link>
 

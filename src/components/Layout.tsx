@@ -31,10 +31,12 @@ export function AppShell({ children, contactSettings, promoSettings }: { childre
   return (
     <ContactSettingsProvider settings={contactSettings}>
       <BookingProvider>
-        <PromoBanner settings={promoSettings} />
-        <Header pathname={pathname} />
-        <main className="min-h-screen bg-background">{children}</main>
-        <Footer pathname={pathname} />
+        <div className="public-site">
+          <PromoBanner settings={promoSettings} />
+          <Header pathname={pathname} />
+          <main className="min-h-screen bg-background">{children}</main>
+          <Footer pathname={pathname} />
+        </div>
       </BookingProvider>
     </ContactSettingsProvider>
   );
@@ -76,7 +78,7 @@ function PromoBanner({ settings }: { settings: PromoSettings }) {
 
 function Header({ pathname }: { pathname: string | null }) {
   const headerClassName = pathname === "/" ? "pill-nav-header-home" : pathname === "/houses" ? "pill-nav-header-houses" : "";
-  return <PillNav logo="/LOGO.png" logoAlt="Serenity Stays" items={nav} activeHref={pathname ?? undefined} className={headerClassName} />;
+  return <PillNav logo="/LOGO.png" logoAlt="Serenity on the Rocks" items={nav} activeHref={pathname ?? undefined} className={headerClassName} />;
 }
 
 function Footer({ pathname }: { pathname: string | null }) {

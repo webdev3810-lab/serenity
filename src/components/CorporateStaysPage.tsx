@@ -267,8 +267,8 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/5" aria-hidden="true" />
                 <div className="absolute inset-6 sm:inset-8 border border-white/60 pointer-events-none" aria-hidden="true" />
                 <div className="absolute bottom-6 sm:bottom-8 left-6 sm:left-8 right-6 sm:right-8 border-t border-white/70 pt-5 pb-6 px-1 sm:px-3 text-white text-left pointer-events-none">
-                  <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.25em]">Serenity Stays</p>
-                  <p className="mt-2 font-marcellus text-[1.65rem] sm:text-4xl leading-tight">Space to settle in.</p>
+                  <p className="corporate-image-caption-label text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.25em]">Serenity Stays</p>
+                  <p className="corporate-image-caption-title mt-2 text-[1.65rem] sm:text-4xl leading-tight">Space to settle in.</p>
                 </div>
               </div>
               <div className="absolute -bottom-8 -right-2 sm:-right-4 lg:-bottom-12 lg:-right-6 z-10 w-[min(18rem,75%)] bg-white p-3 shadow-2xl">
@@ -276,7 +276,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                   <Image src="/corp-2.png" alt="Furnished kitchen and living area inside a Serenity house" fill sizes="(max-width: 639px) 75vw, 18rem" className="object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" aria-hidden="true" />
                   <div className="absolute bottom-0 left-0 right-0 p-5 text-white pointer-events-none">
-                    <p className="font-marcellus text-xl sm:text-[1.35rem] leading-[1.25]">Private homes, thoughtfully prepared.</p>
+                    <p className="corporate-image-caption-title text-xl sm:text-[1.35rem] leading-[1.25]">Private homes, thoughtfully prepared.</p>
                   </div>
                 </div>
               </div>
@@ -565,7 +565,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
         </div>
       </section>
 
-      <section className="bg-white py-20 sm:py-28 border-y border-stone-200">
+      <section id="corporate-location" className="bg-white py-20 sm:py-28 border-y border-stone-200">
         <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
           <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -574,7 +574,9 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
             </div>
             <Link href="/contact" className="inline-flex items-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-stone-500 hover:text-stone-900 transition-colors border-b border-stone-300 hover:border-stone-900 pb-1">Discover the setting</Link>
           </div>
-          <div className="corporate-location-map-frame h-[26rem] sm:h-[34rem]"><SerenityLocationMap /></div>
+        </div>
+        <div className="corporate-location-map-shell">
+          <div className="corporate-location-map-frame public-map-frame"><SerenityLocationMap /></div>
         </div>
       </section>
 

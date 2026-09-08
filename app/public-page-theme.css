@@ -2,7 +2,7 @@
    The homepage hero is the source of truth for public-facing typography,
    colour, controls, rules, and spacing. Each page keeps its own composition
    while this layer removes the older one-off brown treatment. */
-.public-page-theme {
+.public-site {
   --public-ink: var(--hero-green-deep);
   --public-green: var(--hero-green);
   --public-yellow: var(--hero-yellow);
@@ -12,6 +12,23 @@
   --public-surface: #ffffff;
   --public-soft: #f4f8f5;
   --public-error: #8a3325;
+  --public-content-max: 112rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+  background: var(--public-surface);
+  color: var(--public-body);
+  font-family: var(--font-sans);
+}
+
+.public-site > main {
+  min-width: 0;
+  background: var(--public-surface);
+  color: var(--public-body);
+  font-family: var(--font-sans);
+}
+
+.public-page-theme {
   min-width: 0;
   max-width: 100%;
   overflow-x: clip;
@@ -40,11 +57,22 @@
   border-radius: 0;
 }
 
-/* Public-page headings remain readable even before the shared reveal
-   animation has observed them in the viewport. */
-.public-page-theme .scroll-wipe-text,
-.public-page-theme .scroll-wipe-text-reveal {
+/* Public-page headings use the same soft green resting layer as the homepage
+   before the darker final layer wipes in from the left. */
+.public-page-theme :is(h1, h2, h3, h4).scroll-wipe-text:not(.scroll-wipe-text-light) {
+  color: color-mix(in srgb, var(--public-green) 24%, transparent) !important;
+}
+
+.public-page-theme :is(h1, h2, h3, h4).scroll-wipe-text:not(.scroll-wipe-text-light) .scroll-wipe-text-reveal {
   color: var(--public-ink) !important;
+}
+
+.public-page-theme .scroll-wipe-text-light {
+  color: rgba(255, 255, 255, 0.58) !important;
+}
+
+.public-page-theme .scroll-wipe-text-light .scroll-wipe-text-reveal {
+  color: #ffffff !important;
 }
 
 .public-page-theme input,
@@ -66,7 +94,7 @@
 }
 
 .about-editorial-page.public-page-theme .about-editorial-shell {
-  width: min(calc(100% - clamp(2rem, 5vw, 6rem)), var(--homepage-content-max));
+  width: min(calc(100% - clamp(2rem, 5vw, 6rem)), var(--public-content-max));
 }
 
 .about-editorial-page.public-page-theme .about-editorial-hero {
@@ -225,7 +253,7 @@
 }
 
 .contact-editorial-page.public-page-theme > div {
-  width: min(calc(100% - clamp(2rem, 5vw, 6rem)), var(--homepage-content-max));
+  width: min(calc(100% - clamp(2rem, 5vw, 6rem)), var(--public-content-max));
   max-width: none;
   padding: clamp(1.5rem, 3vw, 3.5rem) 0 5rem;
 }
@@ -399,7 +427,7 @@
 }
 
 .corporate-stays-page.public-page-theme .container {
-  width: min(calc(100% - clamp(2rem, 5vw, 6rem)), var(--homepage-content-max));
+  width: min(calc(100% - clamp(2rem, 5vw, 6rem)), var(--public-content-max));
   max-width: none;
   margin-inline: auto;
 }
@@ -509,6 +537,30 @@
   text-transform: uppercase;
 }
 
+/* Image captions are a separate contrast context from the page copy. Keep
+   them white over the local photo gradient instead of inheriting the green
+   editorial heading treatment above. */
+.corporate-stays-page.public-page-theme > section:first-child .corporate-image-caption-label,
+.corporate-stays-page.public-page-theme > section:first-child .corporate-image-caption-title {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+.corporate-stays-page.public-page-theme > section:first-child .corporate-image-caption-label {
+  font-family: var(--font-sans) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.25em !important;
+  text-transform: uppercase !important;
+}
+
+.corporate-stays-page.public-page-theme > section:first-child .corporate-image-caption-title {
+  font-family: var(--font-display) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.04em !important;
+  line-height: 1.1 !important;
+  text-transform: none !important;
+}
+
 .corporate-stays-page.public-page-theme img {
   filter: none;
 }
@@ -595,6 +647,12 @@
 .corporate-stays-page.public-page-theme .corporate-location-map-frame {
   border-color: var(--public-line);
   background: var(--public-surface);
+}
+
+.corporate-stays-page.public-page-theme .corporate-location-map-shell {
+  width: min(calc(100% - clamp(2rem, 5vw, 6rem)), var(--public-content-max));
+  max-width: none;
+  margin-inline: auto;
 }
 
 .corporate-stays-page.public-page-theme details summary {
@@ -714,6 +772,956 @@
   }
 
   .corporate-stays-page.public-page-theme .corporate-location-map-frame {
-    height: 22rem;
+    width: calc(100% - 2rem);
+  }
+}
+
+/* Shared booking calendar -------------------------------------------------
+   The date picker uses the hero's green, yellow, serif-display and square
+   control language while retaining round date states for quick scanning. */
+.homepage-theme .booking-calendar,
+.homepage-theme .booking-calendar-popover {
+  border-color: var(--homepage-line) !important;
+  background: var(--homepage-surface);
+  color: var(--homepage-body);
+  font-family: var(--font-sans);
+  box-shadow: 0 1rem 2.5rem rgba(6, 63, 48, 0.09);
+}
+
+.homepage-theme .booking-calendar-header {
+  gap: 1rem;
+  border-bottom: 1px solid var(--homepage-line);
+  padding-bottom: 1rem;
+}
+
+.homepage-theme .booking-calendar-header > span:not(.sr-only) {
+  color: var(--homepage-ink);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.homepage-theme .booking-calendar .icon-button {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-color: var(--homepage-line);
+  border-radius: 0;
+  background: var(--homepage-surface);
+  color: var(--homepage-ink);
+}
+
+.homepage-theme .booking-calendar .icon-button:hover,
+.homepage-theme .booking-calendar .icon-button:focus-visible {
+  border-color: var(--homepage-green);
+  background: var(--homepage-green);
+  color: #ffffff;
+}
+
+.homepage-theme .booking-calendar-month-title {
+  color: var(--homepage-ink) !important;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+}
+
+.homepage-theme .booking-calendar-weekdays {
+  color: var(--homepage-muted) !important;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.homepage-theme .booking-calendar-days {
+  row-gap: 0.2rem;
+}
+
+.homepage-theme .booking-calendar .calendar-day-cell.in-range::before,
+.homepage-theme .booking-calendar .calendar-day-cell.range-start::after,
+.homepage-theme .booking-calendar .calendar-day-cell.range-end::after {
+  height: 2.75rem;
+  background-color: color-mix(in srgb, var(--homepage-accent) 24%, white);
+}
+
+.homepage-theme .booking-calendar .calendar-day {
+  min-height: 3.25rem;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--homepage-ink);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+  transform: none;
+}
+
+.homepage-theme .booking-calendar .calendar-day-price {
+  color: currentColor;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+  opacity: 0.72;
+}
+
+.homepage-theme .booking-calendar .calendar-day:hover:not(:disabled),
+.homepage-theme .booking-calendar .calendar-day:focus-visible {
+  background: var(--homepage-accent);
+  color: var(--homepage-ink);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--homepage-accent) 36%, transparent);
+  transform: none;
+}
+
+.homepage-theme .booking-calendar .calendar-day.selected {
+  background: var(--homepage-dark);
+  color: #ffffff;
+}
+
+.homepage-theme .booking-calendar .calendar-day.selected:hover,
+.homepage-theme .booking-calendar .calendar-day.selected:focus-visible {
+  background: var(--homepage-green);
+  color: #ffffff;
+}
+
+.homepage-theme .booking-calendar .calendar-day.disabled {
+  cursor: not-allowed;
+  background: #e5ebe7;
+  color: #66756e;
+  text-decoration: line-through;
+}
+
+.homepage-theme .booking-calendar .calendar-day.disabled:hover,
+.homepage-theme .booking-calendar .calendar-day.disabled:focus-visible {
+  background: #e5ebe7;
+  color: #66756e;
+  box-shadow: none;
+  transform: none;
+}
+
+.homepage-theme .booking-calendar .calendar-day.minimum-stay {
+  cursor: not-allowed;
+  background: color-mix(in srgb, var(--homepage-accent) 20%, white);
+  color: var(--homepage-ink);
+  text-decoration: none;
+}
+
+.homepage-theme .booking-calendar .calendar-day.minimum-stay:hover,
+.homepage-theme .booking-calendar .calendar-day.minimum-stay:focus-visible {
+  background: color-mix(in srgb, var(--homepage-accent) 30%, white);
+  color: var(--homepage-ink);
+  box-shadow: none;
+  transform: none;
+}
+
+.homepage-theme .booking-calendar-status,
+.homepage-theme .booking-calendar-hint {
+  color: var(--homepage-muted) !important;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+}
+
+.homepage-theme .booking-calendar-error {
+  border-color: #e7bdb4 !important;
+  background: #fff6f3 !important;
+  color: #7a302a !important;
+  font-family: var(--font-sans);
+}
+
+.homepage-theme .corporate-calendar-popover {
+  border-color: var(--homepage-line) !important;
+  border-radius: 0;
+  background: var(--homepage-surface);
+  box-shadow: 0 1rem 2.5rem rgba(6, 63, 48, 0.09);
+}
+
+.homepage-theme .corporate-calendar-popover > .booking-calendar {
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.homepage-theme .corporate-calendar-popover .booking-calendar-popover-header {
+  border-bottom: 1px solid var(--homepage-line);
+  padding: 1.15rem 1.25rem 1rem;
+}
+
+.homepage-theme .corporate-calendar-popover .booking-calendar-tabs {
+  border-color: var(--homepage-line);
+  border-radius: 0;
+}
+
+.homepage-theme .corporate-calendar-popover .booking-calendar-tab {
+  background: var(--homepage-surface);
+  color: var(--homepage-muted);
+}
+
+.homepage-theme .corporate-calendar-popover .booking-calendar-tab + .booking-calendar-tab {
+  border-left-color: var(--homepage-line);
+}
+
+.homepage-theme .corporate-calendar-popover .booking-calendar-tab strong {
+  color: var(--homepage-ink);
+}
+
+.homepage-theme .corporate-calendar-popover .booking-calendar-tab.is-active {
+  box-shadow: inset 0 0 0 2px var(--homepage-green);
+  color: var(--homepage-green);
+}
+
+.homepage-theme .corporate-calendar-popover .booking-calendar-popover-footer {
+  border-top-color: var(--homepage-line);
+}
+
+@media (max-width: 767px) {
+  .homepage-theme .booking-calendar {
+    padding: 1rem !important;
+  }
+
+  .homepage-theme .booking-calendar-header {
+    gap: 0.75rem;
+  }
+
+  .homepage-theme .booking-calendar-header > span:not(.sr-only) {
+    font-size: 0.8125rem;
+    line-height: 1.35;
+  }
+
+  .homepage-theme .booking-calendar-months {
+    gap: 1.75rem;
+  }
+
+  .homepage-theme .booking-calendar .calendar-day {
+    min-height: 3rem;
+    font-size: 0.875rem;
+  }
+
+  .homepage-theme .booking-calendar .calendar-day-price {
+    font-size: 0.625rem;
+  }
+
+  .homepage-theme .booking-calendar .calendar-day-cell.in-range::before,
+  .homepage-theme .booking-calendar .calendar-day-cell.range-start::after,
+  .homepage-theme .booking-calendar .calendar-day-cell.range-end::after {
+    height: 2.5rem;
+  }
+
+  .homepage-theme .corporate-calendar-popover > .booking-calendar {
+    padding: 1rem !important;
+  }
+}
+
+/* Public shell and shared controls ---------------------------------------
+   This block is intentionally scoped below .public-site. The admin branch in
+   AppShell never renders this wrapper, so its AdminThemeProvider and
+   app/admin/admin.css remain isolated from the public visual system. */
+.public-site .promotion-banner {
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  background: var(--public-ink) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-family: var(--font-sans);
+}
+
+.public-site .promotion-banner button {
+  border-color: color-mix(in srgb, var(--public-yellow) 78%, white) !important;
+  border-radius: 0;
+  font-family: var(--font-sans) !important;
+  color: #ffffff !important;
+}
+
+.public-site .promotion-banner button:hover,
+.public-site .promotion-banner button:focus-visible {
+  border-color: var(--public-yellow) !important;
+  background: var(--public-yellow) !important;
+  color: var(--public-ink) !important;
+}
+
+.public-site .pill-nav-header {
+  border-bottom-color: var(--public-line) !important;
+  background: var(--public-surface) !important;
+  color: var(--public-ink) !important;
+  font-family: var(--font-sans);
+}
+
+.public-site .pill-nav-header nav a {
+  color: var(--public-ink) !important;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.public-site .pill-nav-header nav a:hover,
+.public-site .pill-nav-header nav a[aria-current="page"] {
+  color: var(--public-green) !important;
+}
+
+.public-site .pill-nav-header nav a span {
+  background: var(--public-yellow);
+}
+
+.public-site .pill-nav-header > div > a:last-child {
+  border-color: var(--public-yellow) !important;
+  background: var(--public-yellow) !important;
+  color: var(--public-ink) !important;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.public-site .pill-nav-header > div > a:last-child:hover,
+.public-site .pill-nav-header > div > a:last-child:focus-visible {
+  border-color: #ffe36c !important;
+  background: #ffe36c !important;
+  color: var(--public-ink) !important;
+}
+
+.public-site .site-footer-editorial {
+  --footer-ink: var(--public-ink);
+  --footer-paper: var(--public-surface);
+  --footer-muted: var(--public-muted);
+  --footer-accent: var(--public-green);
+  --footer-line: var(--public-line);
+  border-top-color: var(--public-line);
+  background: var(--public-surface);
+  color: var(--public-ink);
+  font-family: var(--font-sans);
+}
+
+.public-site .site-footer-intro {
+  --footer-ink: #ffffff;
+  --footer-paper: var(--public-ink);
+  --footer-muted: rgba(255, 255, 255, 0.78);
+  --footer-accent: var(--public-yellow);
+  --footer-line: rgba(255, 255, 255, 0.28);
+  background: var(--public-ink);
+}
+
+.public-site .site-footer-intro h2,
+.public-site .site-footer-directory-mark {
+  color: var(--footer-ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+}
+
+.public-site .site-footer-action {
+  border-radius: 0;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.public-site .site-footer-action-primary {
+  border-color: var(--public-yellow);
+  background: var(--public-yellow);
+  color: var(--public-ink);
+}
+
+.public-site .site-footer-action-primary:hover,
+.public-site .site-footer-action-primary:focus-visible {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: var(--public-ink);
+}
+
+.public-site .site-footer-action-secondary {
+  border-color: rgba(255, 255, 255, 0.78);
+  color: #ffffff;
+}
+
+.public-site .site-footer-action-secondary:hover,
+.public-site .site-footer-action-secondary:focus-visible {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: var(--public-ink);
+}
+
+.public-site .site-footer-wordmark span {
+  color: color-mix(in srgb, var(--public-green) 14%, transparent);
+}
+
+.public-site .page-frame,
+.public-site .booking-flow-page,
+.public-site .public-error-page {
+  background: var(--public-surface) !important;
+  color: var(--public-body);
+}
+
+.public-site .page-frame {
+  padding: clamp(2.75rem, 5vw, 5rem) 0 clamp(4rem, 8vw, 7rem) !important;
+}
+
+.public-site .page-frame > .container,
+.public-site .booking-flow-page > .container,
+.public-site .public-error-page > .container {
+  width: min(calc(100% - clamp(2rem, 5vw, 6rem)), var(--public-content-max));
+  max-width: none;
+}
+
+.public-site .page-frame .eyebrow,
+.public-site .booking-flow-page .eyebrow,
+.public-site .public-error-page .eyebrow {
+  color: var(--public-green);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  line-height: 1.25;
+}
+
+.public-site .page-frame .page-heading,
+.public-site .public-error-page h1,
+.public-site .booking-flow-page h1,
+.public-site .booking-flow-page h2 {
+  color: var(--public-ink) !important;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+}
+
+.public-site .page-frame .page-heading {
+  font-size: clamp(3rem, 6vw, 6.5rem);
+  line-height: 0.94;
+}
+
+.public-site .page-frame .page-intro {
+  color: var(--public-muted) !important;
+  font-size: clamp(1rem, 1.4vw, 1.2rem);
+  line-height: 1.65;
+}
+
+.public-site .page-frame .mt-10 {
+  margin-top: clamp(2.5rem, 5vw, 4.5rem) !important;
+}
+
+.public-site .page-frame .card,
+.public-site .booking-flow-page .card,
+.public-site .public-error-page .card {
+  border-color: var(--public-line) !important;
+  border-radius: 0;
+  background: var(--public-surface) !important;
+  box-shadow: 0 0.8rem 2rem rgba(6, 63, 48, 0.07);
+  color: var(--public-body);
+}
+
+.public-site .page-frame .card :is(.text-stone-900, .text-stone-800, .text-stone-700),
+.public-site .booking-flow-page :is(.text-stone-900, .text-stone-800, .text-stone-700) {
+  color: var(--public-ink) !important;
+}
+
+.public-site .page-frame .card :is(.text-stone-600, .text-stone-500),
+.public-site .booking-flow-page :is(.text-stone-600, .text-stone-500) {
+  color: var(--public-muted) !important;
+}
+
+.public-site .page-frame .card p,
+.public-site .page-frame .card li {
+  line-height: 1.6;
+}
+
+.public-site .page-frame .card > section p {
+  font-size: 1rem;
+}
+
+.public-site .page-frame .discount-summary {
+  border-color: var(--public-line);
+  border-radius: 0;
+  background: var(--public-soft);
+}
+
+.public-site .page-frame .discount-summary .discount-value {
+  color: var(--public-green) !important;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.public-site .page-frame .card img {
+  filter: none;
+}
+
+.public-site :is(.btn-primary, .btn-dark-primary) {
+  min-height: 3.25rem;
+  border: 1px solid var(--public-yellow) !important;
+  border-radius: 0 !important;
+  background: var(--public-yellow) !important;
+  box-shadow: none !important;
+  color: var(--public-ink) !important;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.public-site :is(.btn-primary, .btn-dark-primary):hover,
+.public-site :is(.btn-primary, .btn-dark-primary):focus-visible {
+  border-color: #ffe36c !important;
+  background: #ffe36c !important;
+  color: var(--public-ink) !important;
+  transform: translateY(-1px);
+}
+
+.public-site :is(.btn-primary, .btn-dark-primary):disabled {
+  border-color: var(--public-line) !important;
+  background: #e5ebe7 !important;
+  color: var(--public-muted) !important;
+  transform: none;
+}
+
+.public-site :is(.btn-secondary, .btn-outline-dark) {
+  min-height: 3.25rem;
+  border: 1px solid var(--public-green) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--public-green) !important;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.public-site :is(.btn-secondary, .btn-outline-dark):hover,
+.public-site :is(.btn-secondary, .btn-outline-dark):focus-visible {
+  border-color: var(--public-green) !important;
+  background: var(--public-green) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+.public-site .field {
+  min-height: 3.25rem;
+  border: 1px solid var(--public-line) !important;
+  border-radius: 0 !important;
+  background: var(--public-surface) !important;
+  color: var(--public-ink) !important;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+}
+
+.public-site .field::placeholder {
+  color: #758078;
+  opacity: 1;
+}
+
+.public-site .field:hover,
+.public-site .field:focus {
+  border-color: var(--public-green) !important;
+  box-shadow: 0 0 0 1px var(--public-green);
+}
+
+.public-site .booking-flow-page {
+  padding: clamp(2rem, 4vw, 4rem) 0 clamp(4rem, 7vw, 6.5rem) !important;
+}
+
+.public-site .booking-progress {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: clamp(2rem, 4vw, 3.5rem) !important;
+}
+
+.public-site .booking-progress-step {
+  min-width: 0;
+  border-color: var(--public-line) !important;
+  border-radius: 0;
+  background: var(--public-surface) !important;
+  color: var(--public-muted) !important;
+  font-family: var(--font-sans);
+  line-height: 1.4;
+}
+
+.public-site .booking-progress-step.is-complete {
+  border-color: var(--public-green) !important;
+  background: var(--public-green) !important;
+  color: #ffffff !important;
+}
+
+.public-site .booking-progress-step span {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.public-site .booking-review-panel,
+.public-site .booking-review-price {
+  border-color: var(--public-line);
+  background: var(--public-surface);
+}
+
+.public-site .booking-review-kicker,
+.public-site .booking-review-property-type,
+.public-site .booking-promotion-code-label,
+.public-site .booking-review-stay-facts dt {
+  color: var(--public-green);
+  font-family: var(--font-sans);
+}
+
+.public-site .booking-review-header h1,
+.public-site .booking-review-property-copy h2,
+.public-site .booking-review-price h2 {
+  color: var(--public-ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.public-site .booking-review-property,
+.public-site .booking-review-stay-facts,
+.public-site .booking-review-property-copy,
+.public-site .booking-review-advantage,
+.public-site .booking-promotion-code,
+.public-site .booking-review-price h2 {
+  border-color: var(--public-line);
+}
+
+.public-site .booking-review-property-location,
+.public-site .booking-review-advantage span,
+.public-site .booking-promotion-code-copy > p:last-child,
+.public-site .booking-review-price h2 small {
+  color: var(--public-muted);
+}
+
+.public-site .booking-review-stay-facts dd {
+  color: var(--public-ink);
+}
+
+.public-site .booking-review-advantage p {
+  color: var(--public-ink);
+  font-family: var(--font-display);
+}
+
+.public-site .booking-promotion-code-status.is-success {
+  background: #e6efe9;
+  color: #2f5d4b;
+}
+
+.public-site .booking-promotion-code-status.is-error {
+  background: #fff6f3;
+  color: var(--public-error);
+}
+
+.public-site .public-error-page {
+  min-height: 50vh;
+}
+
+.public-site .public-error-page .card {
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.public-site :is(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--public-green);
+  outline-offset: 4px;
+}
+
+.public-site :is(button, input, select, textarea) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.public-site input[type="checkbox"] {
+  accent-color: var(--public-green);
+}
+
+.public-site .serenity-modal {
+  border-color: var(--public-line);
+  border-radius: 0;
+  background: var(--public-surface);
+  color: var(--public-body);
+  font-family: var(--font-sans);
+}
+
+.public-site .serenity-modal::backdrop {
+  background: rgba(6, 63, 48, 0.62);
+}
+
+.public-site .serenity-modal-heading {
+  border-bottom-color: var(--public-line);
+}
+
+.public-site .serenity-modal-heading h2 {
+  color: var(--public-ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+
+@media (max-width: 767px) {
+  .public-site .page-frame {
+    padding-block: 2.5rem 4.5rem !important;
+  }
+
+  .public-site .page-frame .page-heading {
+    font-size: clamp(2.8rem, 13vw, 4.5rem);
+  }
+
+  .public-site .page-frame .mt-10 {
+    margin-top: 2.5rem !important;
+  }
+
+  .public-site .booking-progress {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .public-site .booking-progress-step {
+    padding: 0.8rem;
+    font-size: 0.8125rem;
+  }
+
+  .public-site .booking-review-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Guestbook --------------------------------------------------------------
+   Review cards use the same sharp geometry and green/yellow contrast as the
+   hero, while keeping the alternating editorial card treatment from the
+   existing guestbook. */
+.public-site .homepage-reviews-section {
+  padding-block: clamp(4rem, 6vw, 6.5rem);
+  background: var(--public-surface);
+  color: var(--public-body);
+}
+
+.public-site .homepage-reviews-rule {
+  border-color: var(--public-line);
+}
+
+.public-site .homepage-reviews-shell {
+  max-width: var(--public-content-max);
+  margin-inline: auto;
+}
+
+.public-site .homepage-reviews-intro {
+  border-color: var(--public-line);
+}
+
+.public-site .homepage-reviews-eyebrow {
+  color: var(--public-green) !important;
+}
+
+.public-site .homepage-reviews-eyebrow > span:first-child {
+  background: var(--public-yellow);
+}
+
+.public-site .homepage-review-heading {
+  color: var(--public-ink) !important;
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.public-site .homepage-reviews-description {
+  color: var(--public-muted) !important;
+}
+
+.public-site .homepage-reviews-carousel {
+  margin-top: clamp(2.5rem, 4vw, 4rem);
+  margin-bottom: clamp(2rem, 3vw, 3rem);
+}
+
+.public-site .homepage-reviews-track {
+  display: flex;
+  grid-auto-columns: auto;
+  grid-auto-flow: row;
+  gap: 1.25rem;
+  scrollbar-color: var(--public-green) transparent;
+}
+
+.public-site .homepage-review-item {
+  min-width: 0;
+  width: min(24rem, 78vw);
+  max-width: 24rem;
+}
+
+.public-site .homepage-review-card {
+  min-height: 24rem;
+  border: 1px solid var(--public-line) !important;
+  border-radius: 0 !important;
+  background: var(--public-surface) !important;
+  color: var(--public-ink) !important;
+  box-shadow: 0 1.25rem 2.75rem -2rem rgba(6, 63, 48, 0.42) !important;
+}
+
+.public-site .homepage-review-card:hover {
+  border-color: var(--public-green) !important;
+  box-shadow: 0 1.5rem 3rem -2rem rgba(6, 63, 48, 0.58) !important;
+}
+
+.public-site .homepage-review-card.is-featured {
+  border-color: color-mix(in srgb, var(--public-yellow) 22%, var(--hero-green-deep)) !important;
+  background: var(--hero-green-deep) !important;
+  color: #ffffff !important;
+}
+
+.public-site .homepage-review-card.is-featured:hover {
+  border-color: var(--public-yellow) !important;
+}
+
+.public-site .homepage-review-card-inner {
+  padding: clamp(1.5rem, 2.5vw, 1.75rem);
+}
+
+.public-site .homepage-review-card-top,
+.public-site .homepage-review-card-footer {
+  border-color: var(--public-line);
+}
+
+.public-site .homepage-review-card.is-featured .homepage-review-card-top,
+.public-site .homepage-review-card.is-featured .homepage-review-card-footer {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.public-site .homepage-review-card-index {
+  color: var(--public-green);
+}
+
+.public-site .homepage-review-card.is-featured .homepage-review-card-index {
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.public-site .homepage-review-date {
+  color: var(--public-muted);
+}
+
+.public-site .homepage-review-card.is-featured .homepage-review-date {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.public-site .homepage-review-stars {
+  color: var(--public-yellow);
+}
+
+.public-site .homepage-review-property {
+  background: color-mix(in srgb, var(--public-green) 9%, white);
+  color: var(--public-ink);
+}
+
+.public-site .homepage-review-card.is-featured .homepage-review-property {
+  background: rgba(255, 255, 255, 0.11);
+  color: #ffffff;
+}
+
+.public-site .homepage-review-mark {
+  color: color-mix(in srgb, var(--public-green) 48%, white);
+}
+
+.public-site .homepage-review-card.is-featured .homepage-review-mark {
+  color: color-mix(in srgb, var(--public-yellow) 52%, white);
+}
+
+.public-site .homepage-review-quote {
+  color: var(--public-ink) !important;
+  font-family: var(--font-display);
+  font-weight: 500;
+}
+
+.public-site .homepage-review-card.is-featured .homepage-review-quote {
+  color: #ffffff !important;
+}
+
+.public-site .homepage-review-name {
+  color: var(--public-ink);
+}
+
+.public-site .homepage-review-card.is-featured .homepage-review-name {
+  color: #ffffff;
+}
+
+.public-site .homepage-review-verified {
+  color: var(--public-muted);
+}
+
+.public-site .homepage-review-card.is-featured .homepage-review-verified {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.public-site .homepage-review-link {
+  color: var(--public-green);
+}
+
+.public-site .homepage-review-link:hover,
+.public-site .homepage-review-link:focus-visible {
+  color: var(--public-yellow);
+}
+
+.public-site .homepage-review-card.is-featured .homepage-review-link {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.public-site .homepage-review-card.is-featured .homepage-review-link:hover,
+.public-site .homepage-review-card.is-featured .homepage-review-link:focus-visible {
+  color: var(--public-yellow);
+}
+
+.public-site .homepage-reviews-all-link {
+  border-color: var(--public-green);
+  color: var(--public-green);
+}
+
+.public-site .homepage-reviews-all-link:hover,
+.public-site .homepage-reviews-all-link:focus-visible {
+  border-color: var(--public-yellow);
+  color: var(--public-green);
+}
+
+/* The About page uses the guestbook as a full-bleed reading rail. Keep the
+   intro aligned to the editorial column, but let the cards reach the viewport
+   edge on large displays instead of stopping at the content max-width. */
+.about-editorial-page .homepage-reviews-carousel {
+  width: 100vw;
+  max-width: none;
+  margin-inline: calc(50% - 50vw);
+}
+
+.about-editorial-page .homepage-reviews-track {
+  padding-inline: clamp(1rem, 2.5vw, 3rem);
+}
+
+@media (max-width: 767px) {
+  .public-site .homepage-reviews-section {
+    padding-block: 3.75rem 4.5rem;
+  }
+
+  .public-site .homepage-reviews-intro {
+    gap: 1.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .public-site .homepage-review-heading {
+    font-size: clamp(2.7rem, 12vw, 4.2rem);
+    line-height: 0.98;
+  }
+
+  .public-site .homepage-reviews-description {
+    font-size: 1rem;
+  }
+
+  .public-site .homepage-reviews-carousel {
+    margin-top: 2rem;
+    margin-bottom: 2.25rem;
+  }
+
+  .public-site .homepage-reviews-track {
+    gap: 1rem;
+    padding-inline: 1rem;
+  }
+
+  .public-site .homepage-review-item {
+    width: min(24rem, calc(100vw - 2rem));
+    max-width: none;
+  }
+
+  .public-site .homepage-review-card {
+    min-height: 26rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-site .homepage-review-card {
+    transition: none;
+  }
+
+  .public-site .homepage-review-card:hover {
+    transform: none;
   }
 }

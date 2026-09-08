@@ -75,7 +75,7 @@ export default function HomepageHeroGallery({
       <div className="serenity-hero-media" aria-hidden="true">
         {images.map((image, index) => {
           const previewImage = isPreviewImage(image.src);
-          const directImage = previewImage;
+          const directImage = previewImage || isSupabaseImage(image.src);
           const isActive = index === activeIndex;
           const isVideo = image.type === "video";
           return (
@@ -102,10 +102,10 @@ export default function HomepageHeroGallery({
                     src={image.poster}
                     alt=""
                     fill
-                    priority={index === 0}
-                    loading="eager"
+                    loading={index === 0 ? "eager" : "lazy"}
+                    fetchPriority={index === 0 ? "high" : "auto"}
                     sizes="100vw"
-                    unoptimized={isPreviewImage(image.poster)}
+                    unoptimized={isPreviewImage(image.poster) || isSupabaseImage(image.poster)}
                     className="serenity-hero-image-asset"
                   />
                 ) : null
@@ -114,8 +114,8 @@ export default function HomepageHeroGallery({
                   src={image.src}
                   alt=""
                   fill
-                  priority={index === 0}
-                  loading="eager"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
                   unoptimized={directImage}
                   referrerPolicy={previewImage ? "no-referrer" : undefined}
                   sizes="100vw"

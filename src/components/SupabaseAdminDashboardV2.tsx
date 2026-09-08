@@ -228,7 +228,7 @@ useEffect(() => {
   const editProperty = (property: Row) => { const next = normalizeProperty(property); setSelectedId(property.id); setDraft(next); setSavedDraft(next); setTab("houses"); };
   const newProperty = () => { setSelectedId(""); setDraft(emptyProperty()); setSavedDraft(emptyProperty()); setTab("houses"); };
 
-  const saveProperty = async (published: boolean) => {
+  const saveProperty = async (published: boolean): Promise<boolean> => {
     setSaving(true);
     const amenities = asList(draft.amenities).map((item) => item.trim()).filter(Boolean);
     const houseRules = asList(draft.house_rules).map((item) => item.trim()).filter(Boolean);
@@ -278,8 +278,10 @@ useEffect(() => {
       notify(published ? "House published." : "House draft saved.");
       await load();
       if (propertyId) { setSelectedId(propertyId); if (initialNewHouse) router.replace(`/admin/houses/${propertyId}`); }
+      return true;
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Could not save house content.");
+      return false;
     } finally { setSaving(false); }
   };
 

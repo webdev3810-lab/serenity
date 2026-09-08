@@ -341,8 +341,8 @@ export function MiniCalendar({ property, checkIn, checkout, today, onSelect, onC
   };
 
   return (
-    <div className={`rounded-none border border-stone-200 bg-white shadow-sm ${singleMonth ? "p-4" : "p-5"}`}>
-      <div className="mb-4 flex items-center justify-between">
+    <div className={`booking-calendar rounded-none border border-stone-200 bg-white shadow-sm ${singleMonth ? "p-4" : "p-5"}`}>
+      <div className="booking-calendar-header mb-4 flex items-center justify-between">
         <button className="icon-button" type="button" aria-label="Previous month" onClick={() => setMonthOffset((value) => Math.max(0, value - 1))}>
           <ChevronLeft size={18} />
         </button>
@@ -351,14 +351,14 @@ export function MiniCalendar({ property, checkIn, checkout, today, onSelect, onC
           <ChevronRight size={18} />
         </button>
       </div>
-      <div className={`grid gap-6 ${singleMonth ? "" : "md:grid-cols-2"}`}>
+      <div className={`booking-calendar-months grid gap-6 ${singleMonth ? "" : "md:grid-cols-2"}`}>
         {months.map((month) => (
           <Month key={month.toISOString()} month={month} property={property} today={today} checkIn={pendingStart || checkIn} checkout={checkout} blockedDates={blockedDates} onPick={pick} />
         ))}
       </div>
-      {availabilityLoading && <p className="mt-4 text-sm font-semibold text-stone-600" role="status">Checking live availability…</p>}
-      {message && <p className="mt-4 rounded-none border border-[#E7BDB4] bg-[#FFF6F3] px-3 py-2 text-sm font-semibold text-[#8A3325]" role="alert">{message}</p>}
-      {showHint && <p className="mt-4 text-xs text-stone-500">Unavailable nights are disabled. Select a check-in date, then a checkout date.</p>}
+      {availabilityLoading && <p className="booking-calendar-status mt-4 text-sm font-semibold text-stone-600" role="status">Checking live availability…</p>}
+      {message && <p className="booking-calendar-error mt-4 rounded-none border border-[#E7BDB4] bg-[#FFF6F3] px-3 py-2 text-sm font-semibold text-[#8A3325]" role="alert">{message}</p>}
+      {showHint && <p className="booking-calendar-hint mt-4 text-xs text-stone-500">Unavailable nights are disabled. Select a check-in date, then a checkout date.</p>}
     </div>
   );
 }
@@ -373,14 +373,14 @@ function Month({ month, property, today, checkIn, checkout, blockedDates, onPick
   const blocked = new Set([...property.unavailableDates, ...blockedDates]);
 
   return (
-    <div>
-      <h3 className="mb-3 text-center font-bold text-stone-800">{month.toLocaleDateString(AU_LOCALE, { month: "long", year: "numeric", timeZone: AU_TIME_ZONE })}</h3>
-      <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-stone-600">
+    <div className="booking-calendar-month">
+      <h3 className="booking-calendar-month-title mb-3 text-center font-bold text-stone-800">{month.toLocaleDateString(AU_LOCALE, { month: "long", year: "numeric", timeZone: AU_TIME_ZONE })}</h3>
+      <div className="booking-calendar-weekdays grid grid-cols-7 gap-1 text-center text-xs font-semibold text-stone-600">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d, index) => (
           <span key={`${d}-${index}`}>{d}</span>
         ))}
       </div>
-      <div className="mt-2 grid grid-cols-7 gap-1">
+      <div className="booking-calendar-days mt-2 grid grid-cols-7 gap-1">
         {days.map((iso, index) => {
           const choosingCheckout = Boolean(iso && checkIn && checkIn >= today && !checkout && iso > checkIn);
           const dateValidation = choosingCheckout ? validateDateRange(property, checkIn, iso!, today, blockedDates) : "";

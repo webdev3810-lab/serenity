@@ -9,7 +9,7 @@ import { fetchAllAdminRows } from "@/src/lib/admin-pagination";
 import { createSupabaseBrowserClient } from "@/src/lib/supabase/client";
 import { ChevronDown,ChevronLeft,ChevronUp,Images,LoaderCircle,Plus,Save,Trash2,Upload } from "lucide-react";
 import Image from "next/image";
-import { useEffect,useMemo,useRef,useState } from "react";
+import { forwardRef,useEffect,useImperativeHandle,useMemo,useRef,useState } from "react";
 
 type Row = Record<string, any>;
 
@@ -26,6 +26,12 @@ type PropertyPhotoManagerProps = {
   showHeader?: boolean;
   showPropertySelector?: boolean;
   onBackToHouses?: () => void;
+  onDirtyChange?: (dirty: boolean) => void;
+};
+
+export type PropertyPhotoManagerHandle = {
+  discardChanges: () => void;
+  saveChanges: () => Promise<boolean>;
 };
 
 type CategoryDraft = {
@@ -102,7 +108,7 @@ async function compressImage(file: File) {
   return { blob, width: canvas.width, height: canvas.height };
 }
 
-export default function PropertyPhotoManager({ properties, selectedId, setSelectedId, images, reload, notify, onError, onSelectProperty, embedded = false, showHeader = true, showPropertySelector = true, onBackToHouses }: PropertyPhotoManagerProps) {
+const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhotoManagerProps>(function PropertyPhotoManager({ properties, selectedId, setSelectedId, images, reload, notify, onError, onSelectProperty, embedded = false, showHeader = true, showPropertySelector = true, onBackToHouses, onDirtyChange }, ref) {
   const { confirm } = useAdminWorkspace();
   const supabase = useMemo(() => createSupabaseBrowserClient() as any, []);
   const [localImages, setLocalImages] = useState<Row[]>([]);
@@ -130,13 +136,20 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
     // The parent reloads from Supabase after uploads and saves; mirror that
     // external snapshot into the local draft used by the editor.
     const selectedImages = images.filter((image) => image.property_id === selectedId).map((image) => ({ ...image }));
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalImages(selectedImages); setSavedImages(selectedImages);
     setUploadCategory(DEFAULT_UPLOAD_CATEGORY);
     setDirty(false);
   }, [selectedId, imageKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useDirtyGuard(dirty || uploading || saving);
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
+
+  useEffect(() => () => {
+    onDirtyChange?.(false);
+  }, [onDirtyChange]);
 
   useEffect(() => () => {
     dragCleanupRef.current?.();
@@ -145,7 +158,6 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
   useEffect(() => {
     if (!selectedId) {
       // Reset category state when the selected property changes.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCategories(defaultCategories());
       setSavedCategorySlugs([]);
       return;
@@ -231,6 +243,7 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
     });
     return categoriesWithOtherLast(Array.from(groups.values()).filter((group) => group.images.length));
   })();
+  const eagerlyLoadedImageIds = new Set(groupedImages.slice(0, 2).map((group) => String(group.images[0]?.id ?? "")).filter(Boolean));
 
   const propertyIds = Array.from(new Set([
     selectedId,
@@ -477,11 +490,12 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
     }
   };
 
-  const saveChanges = async () => {
-    if (!selectedId) return;
+  const saveChanges = async (): Promise<boolean> => {
+    if (!dirty) return true;
+    if (!selectedId) return false;
     if (categories.some((category) => !category.category_label.trim())) {
       onError("Every photo category needs a name before you save.");
-      return;
+      return false;
     }
     setSaving(true);
     try {
@@ -513,12 +527,26 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
       notify("Photo gallery saved and published settings updated.");
       await reload();
       setDirty(false);
+      return true;
     } catch (error) {
       onError(error instanceof Error ? error.message : "Could not save the photo gallery.");
+      return false;
     } finally {
       setSaving(false);
     }
   };
+
+  const saveChangesRef = useRef(saveChanges);
+  saveChangesRef.current = saveChanges;
+
+  useImperativeHandle(ref, () => ({
+    discardChanges: () => {
+      setLocalImages(savedImages.map((image) => ({ ...image })));
+      setCategories(savedCategories.map((category) => ({ ...category })));
+      setDirty(false);
+    },
+    saveChanges: () => saveChangesRef.current(),
+  }), [savedCategories, savedImages]);
 
   const remove = async (image: Row) => {
     if (!await confirm("Delete this photo? This removes the uploaded file and its gallery record.")) return;
@@ -578,7 +606,7 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
           const src = image.storage_path ? storageUrl(image.storage_path) : String(image.external_url ?? "");
           return <article key={image.id} data-photo-card={String(image.id)} onPointerDown={(event) => startCardDrag(event, String(image.id))} className={`will-change-transform cursor-grab overflow-hidden rounded-xl border bg-[var(--admin-surface)] transition-[transform,box-shadow,opacity,border-color] duration-200 ease-out active:cursor-grabbing ${draggedId === image.id ? "pointer-events-none touch-none opacity-0" : dragOverId === image.id && draggedId !== null ? "translate-y-1 scale-[1.01] border-[var(--admin-border)] " : "border-[var(--admin-border)]  hover:-translate-y-0.5 hover:shadow-md"}`}>
               <div className="relative h-52 bg-[var(--admin-surface-alt)] sm:h-60">
-              {src ? <Image src={src} alt={String(image.alt_text || "Property photo")} fill sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw" className="object-cover" draggable={false} unoptimized={Boolean(image.external_url)} /> : <div className="flex h-full items-center justify-center text-sm text-[var(--admin-muted)]">No preview available</div>}
+              {src ? <Image src={src} alt={String(image.alt_text || "Property photo")} fill sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw" loading={eagerlyLoadedImageIds.has(String(image.id)) ? "eager" : "lazy"} className="object-cover" draggable={false} unoptimized={Boolean(image.external_url)} /> : <div className="flex h-full items-center justify-center text-sm text-[var(--admin-muted)]">No preview available</div>}
               <span className="absolute left-3 top-3 rounded-xl bg-[var(--admin-accent)] px-2.5 py-1 text-xs font-medium text-[var(--admin-on-accent)]">{image.id === coverId ? "Cover" : `Photo ${index + 1}`}</span>
               {isPreviewImage(image) ? <span className="absolute bottom-3 left-3 rounded-xl bg-[var(--admin-surface-alt)] px-2.5 py-1 text-xs font-medium text-[var(--admin-danger-text)]">Preview image — replace with your photo</span> : null}
             </div>
@@ -595,4 +623,6 @@ export default function PropertyPhotoManager({ properties, selectedId, setSelect
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] pt-5"><p className="text-sm text-[var(--admin-muted)]" role={dirty ? "status" : undefined}>{dirty ? "Unsaved gallery changes. Save before leaving this house." : "Changes to category, order, cover, and visibility are saved together."}</p><button type="button" className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition ${dirty ? "bg-[var(--admin-accent)] text-[var(--admin-on-accent)]  hover:bg-[var(--admin-surface-alt)]" : "border border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-muted)] opacity-60"}`} disabled={!dirty || saving || uploading} onClick={() => void saveChanges()}><Save size={16} /> {saving ? "Saving…" : "Save gallery changes"}</button></div>
     </section>}
   </>;
-}
+});
+
+export default PropertyPhotoManager;

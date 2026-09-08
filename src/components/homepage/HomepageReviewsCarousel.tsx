@@ -112,7 +112,7 @@ export default function HomepageReviewsCarousel({ reviews, fullBleed = true }: {
   };
 
   return (
-    <div className={`relative mt-14 mb-10 sm:mt-16 sm:mb-12 ${fullBleed ? "w-[calc(100%+3rem)] -mx-6 sm:w-[calc(100%+5rem)] sm:-mx-10 lg:w-[calc(100%+8rem)] lg:-mx-16" : "w-full"}`}>
+    <div className={`homepage-reviews-carousel relative mt-14 mb-10 sm:mt-16 sm:mb-12 ${fullBleed ? "w-[calc(100%+3rem)] -mx-6 sm:w-[calc(100%+5rem)] sm:-mx-10 lg:w-[calc(100%+8rem)] lg:-mx-16" : "w-full"}`}>
       <div 
         ref={trackRef}
         onPointerDown={beginDrag}
@@ -126,7 +126,7 @@ export default function HomepageReviewsCarousel({ reviews, fullBleed = true }: {
           suppressClickRef.current = false;
         }}
         aria-label="Guest reviews"
-        className="flex w-full cursor-grab gap-4 select-none overflow-x-auto overscroll-x-contain px-6 pb-3 pt-4 active:cursor-grabbing sm:gap-5 sm:px-10 lg:px-16"
+        className="homepage-reviews-track flex w-full cursor-grab gap-4 select-none overflow-x-auto overscroll-x-contain px-6 pb-3 pt-4 active:cursor-grabbing sm:gap-5 sm:px-10 lg:px-16"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none", touchAction: "pan-y", WebkitOverflowScrolling: "touch", scrollBehavior: "auto" }}
       >
         {reviews.map((review, index) => {
@@ -144,36 +144,36 @@ export default function HomepageReviewsCarousel({ reviews, fullBleed = true }: {
                     ? "text-[1.16rem] leading-[1.28] tracking-[-0.015em]"
                     : "text-[clamp(1.2rem,1.6vw,1.45rem)] leading-[1.2] tracking-[-0.02em]";
           return (
-            <div key={review.id} className="flex w-[84vw] max-w-[30rem] flex-shrink-0 sm:w-[22rem] sm:max-w-[22rem] md:w-[24rem] md:max-w-[24rem]">
-              <article className={`group relative flex h-auto min-h-[28rem] w-full overflow-hidden border shadow-[0_24px_60px_-42px_rgba(45,37,33,0.7)] transition-[transform,box-shadow] duration-500 hover:-translate-y-2 hover:shadow-[0_28px_65px_-38px_rgba(45,37,33,0.42)] sm:min-h-[22rem] md:min-h-[24rem] ${featured ? "border-[#5A463A] bg-[#2D2521] text-[#F7F4F1]" : "border-[#DDD1C8] bg-[#FFFEFC] text-stone-900"}`}>
-                <div className="flex min-w-0 w-full flex-col p-6 sm:p-7">
-                  <div className="flex min-w-0 items-center justify-between gap-4 border-b border-current/15 pb-5 text-[10px] font-bold uppercase tracking-[0.18em]">
-                    <span className={`min-w-0 ${featured ? "text-[#DCC9BA]" : "text-[#8B6B55]"}`}>{String(index + 1).padStart(2, "0")} <span className="mx-1 text-current/45">/</span> guest note</span>
-                    <time className={`shrink-0 ${featured ? "text-[#F7F4F1]/60" : "text-stone-400"}`}>{review.reviewDateLabel ?? review.reviewDate ?? ""}</time>
+            <div key={review.id} className="homepage-review-item flex w-[84vw] max-w-[30rem] flex-shrink-0 sm:w-[22rem] sm:max-w-[22rem] md:w-[24rem] md:max-w-[24rem]">
+              <article className={`homepage-review-card group relative flex h-auto min-h-[28rem] w-full overflow-hidden border transition-[transform,box-shadow] duration-500 hover:-translate-y-2 sm:min-h-[22rem] md:min-h-[24rem] ${featured ? "is-featured" : ""}`}>
+                <div className="homepage-review-card-inner flex min-w-0 w-full flex-col p-6 sm:p-7">
+                  <div className="homepage-review-card-top flex min-w-0 items-center justify-between gap-4 border-b pb-5 text-[10px] font-bold uppercase tracking-[0.18em]">
+                    <span className="homepage-review-card-index min-w-0">{String(index + 1).padStart(2, "0")} <span className="mx-1">/</span> guest note</span>
+                    <time className="homepage-review-date shrink-0">{review.reviewDateLabel ?? review.reviewDate ?? ""}</time>
                   </div>
 
-                  <div className="mt-6 flex min-w-0 items-start justify-between gap-4">
+                  <div className="homepage-review-card-details mt-6 flex min-w-0 items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
-                      <div className="mb-3 flex gap-0.5 text-[#E0AD38]" aria-label={review.rating ? `${review.rating} out of 5 stars` : "Guest review"}>
+                      <div className="homepage-review-stars mb-3 flex gap-0.5" aria-label={review.rating ? `${review.rating} out of 5 stars` : "Guest review"}>
                         {Array.from({ length: review.rating ?? 0 }, (_, star) => <Star key={star} size={12} fill="currentColor" strokeWidth={0} aria-hidden="true" />)}
                       </div>
-                      <span className={`inline-flex max-w-full break-words px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] ${featured ? "bg-[#F7F4F1]/10 text-[#F7F4F1]" : "bg-[#F0E8E1] text-[#5A463A]"}`}>
+                      <span className="homepage-review-property inline-flex max-w-full break-words px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em]">
                         {review.propertyName}
                       </span>
                     </div>
-                    <Quote size={31} strokeWidth={1.1} className={`shrink-0 ${featured ? "text-[#B99D88]" : "text-[#C8B5A8]"}`} aria-hidden="true" />
+                    <Quote size={31} strokeWidth={1.1} className="homepage-review-mark shrink-0" aria-hidden="true" />
                   </div>
 
-                  <h3 className={`homepage-review-quote display-font mt-7 min-w-0 flex-1 break-words ${quoteSize} ${featured ? "text-[#F7F4F1]" : "text-stone-900"}`}>
+                  <h3 className={`homepage-review-quote display-font mt-7 min-w-0 flex-1 break-words ${quoteSize}`}>
                     &ldquo;{review.reviewText}&rdquo;
                   </h3>
 
-                  <div className="mt-auto flex items-end justify-between gap-4 border-t border-current/15 pt-7">
+                  <div className="homepage-review-card-footer mt-auto flex items-end justify-between gap-4 border-t pt-7">
                     <div className="min-w-0">
-                      <p className="break-words text-[11px] font-bold uppercase tracking-[0.18em]">{review.reviewerName}</p>
-                      <p className={`mt-1 text-[9px] font-bold uppercase tracking-[0.15em] ${featured ? "text-[#F7F4F1]/55" : "text-stone-400"}`}>Verified guest</p>
+                      <p className="homepage-review-name break-words text-[11px] font-bold uppercase tracking-[0.18em]">{review.reviewerName}</p>
+                      <p className="homepage-review-verified mt-1 text-[9px] font-bold uppercase tracking-[0.15em]">Verified guest</p>
                     </div>
-                    <Link href={`/properties/${review.propertySlug}`} className={`group/link inline-flex shrink-0 items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] transition-colors ${featured ? "text-[#F7F4F1]/65 hover:text-[#F7F4F1]" : "text-stone-400 hover:text-[#B88A5A]"}`}>
+                    <Link href={`/properties/${review.propertySlug}`} className="homepage-review-link group/link inline-flex shrink-0 items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] transition-colors">
                       View stay
                       <ArrowRight size={13} className="transition-transform group-hover/link:translate-x-1" aria-hidden="true" />
                     </Link>

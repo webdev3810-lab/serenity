@@ -92,7 +92,7 @@
 .stay-review-card p { white-space:pre-line;overflow-wrap:anywhere; }
 .stay-nearby { display:flex;flex-wrap:wrap;gap:14px 24px;margin:20px 0; }
 .stay-nearby span { display:flex;align-items:center;gap:7px;font-size:14px; }
-.stay-location-map { height:360px;overflow:hidden;margin-top:22px;border-radius:14px; }
+.stay-location-map { height:auto;aspect-ratio:1791 / 878;overflow:hidden;margin-top:22px;border-radius:14px; }
 .stay-know-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px; }
 .stay-know-grid article { display:flex;flex-direction:column;align-items:flex-start; }
 .stay-know-grid article > svg { margin-bottom:18px; }
@@ -111,7 +111,7 @@
 .property-stay :is(a,button,input,select,summary):focus-visible,.serenity-modal :is(a,button,input,select,summary):focus-visible,.stay-mobile-reserve button:focus-visible { outline:2px solid var(--deep-brown);outline-offset:4px; }
 @media(max-width:1100px) { .stay-body { gap:32px;grid-template-columns:minmax(0,1fr) 330px; }.stay-review-overview { grid-template-columns:150px 1fr;gap:20px; }.stay-category-ratings { grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 0; } }
 @media(max-width:1023px) { .stay-body { display:block; }.stay-desktop-booking { display:none; }.stay-mobile-reserve { position:fixed;display:flex;justify-content:space-between;align-items:center;gap:16px;bottom:0;inset-inline:0;z-index:45;padding:14px 24px max(14px,env(safe-area-inset-bottom));border-top:1px solid var(--border-warm);background:white;color:var(--espresso); }.stay-mobile-reserve strong { display:block;font-size:20px; }.stay-mobile-reserve span { display:block;font-size:12px; }.property-stay { padding-bottom:120px; }.stay-gallery { height:360px; }.serenity-booking-drawer { margin:auto auto 0;max-width:100%;max-height:94dvh;border-radius:16px 16px 0 0;padding:20px; }.serenity-booking-drawer .stay-booking-card { padding:0;border:0;box-shadow:none; } }
-@media(max-width:600px) { .property-stay { padding:20px 20px 110px; }.stay-back { margin-bottom:18px; }.stay-heading-meta { gap:10px; }.stay-gallery { height:320px;grid-template-columns:1fr 1fr;grid-template-rows:2fr 1fr;margin-top:22px; }.stay-gallery .stay-gallery-main { grid-column:span 2;grid-row:auto; }.stay-gallery>button:nth-child(4),.stay-gallery>button:nth-child(5) { display:none; }.stay-gallery-all { bottom:12px;right:12px;padding:9px 12px; }.stay-section-nav { gap:22px;padding:16px 0; }.stay-section { padding:30px 0; }.property-stay h2 { font-size:25px; }.stay-facts { gap:10px 16px; }.stay-room-grid { grid-template-columns:1fr; }.stay-room-card { padding:22px; }.stay-amenity-grid { gap:20px 12px; }.stay-amenity-grid>div { font-size:14px;gap:10px; }.stay-review-overview { grid-template-columns:1fr; }.stay-rating-distribution { max-width:280px; }.stay-category-ratings>div { padding:6px 10px; }.stay-category-ratings h3 { font-size:13px; }.stay-review-grid { grid-template-columns:1fr;gap:26px; }.stay-know-grid { grid-template-columns:1fr;gap:24px; }.stay-know-grid article { border-bottom:1px solid var(--border-warm);padding-bottom:24px; }.stay-location-map { height:300px; }.stay-mobile-reserve { padding-inline:16px;gap:10px; }.stay-mobile-reserve .stay-reserve-button { font-size:14px;padding-inline:14px; }.serenity-modal { padding:20px; }.serenity-modal h2 { font-size:24px; }.stay-all-amenities { grid-template-columns:1fr; }.stay-booking-price strong { font-size:26px; } }
+@media(max-width:600px) { .property-stay { padding:20px 20px 110px; }.stay-back { margin-bottom:18px; }.stay-heading-meta { gap:10px; }.stay-gallery { height:320px;grid-template-columns:1fr 1fr;grid-template-rows:2fr 1fr;margin-top:22px; }.stay-gallery .stay-gallery-main { grid-column:span 2;grid-row:auto; }.stay-gallery>button:nth-child(4),.stay-gallery>button:nth-child(5) { display:none; }.stay-gallery-all { bottom:12px;right:12px;padding:9px 12px; }.stay-section-nav { gap:22px;padding:16px 0; }.stay-section { padding:30px 0; }.property-stay h2 { font-size:25px; }.stay-facts { gap:10px 16px; }.stay-room-grid { grid-template-columns:1fr; }.stay-room-card { padding:22px; }.stay-amenity-grid { gap:20px 12px; }.stay-amenity-grid>div { font-size:14px;gap:10px; }.stay-review-overview { grid-template-columns:1fr; }.stay-rating-distribution { max-width:280px; }.stay-category-ratings>div { padding:6px 10px; }.stay-category-ratings h3 { font-size:13px; }.stay-review-grid { grid-template-columns:1fr;gap:26px; }.stay-know-grid { grid-template-columns:1fr;gap:24px; }.stay-know-grid article { border-bottom:1px solid var(--border-warm);padding-bottom:24px; }.stay-location-map { height:auto;aspect-ratio:1791 / 878; }.stay-mobile-reserve { padding-inline:16px;gap:10px; }.stay-mobile-reserve .stay-reserve-button { font-size:14px;padding-inline:14px; }.serenity-modal { padding:20px; }.serenity-modal h2 { font-size:24px; }.stay-all-amenities { grid-template-columns:1fr; }.stay-booking-price strong { font-size:26px; } }
 @media(prefers-reduced-motion:reduce) { .property-stay *, .serenity-modal * { scroll-behavior:auto;transition:none;animation:none; } }
 
 /* Zoom resilience for the stay template. These rules intentionally key off
@@ -584,13 +584,17 @@
 }
 
 .property-theme .stay-room-grid {
-  gap: 1px;
-  background: var(--property-line);
+  gap: 0;
+  border-top: 1px solid var(--property-line);
+  border-left: 1px solid var(--property-line);
+  background: #ffffff;
 }
 
 .property-theme .stay-room-card {
   min-width: 0;
   border: 0;
+  border-right: 1px solid var(--property-line);
+  border-bottom: 1px solid var(--property-line);
   border-radius: 0;
   background: var(--homepage-surface);
   padding: 1.5rem;
@@ -789,17 +793,37 @@
 }
 
 .property-theme .stay-location-map {
+  width: min(calc(100% - clamp(2rem, 4vw, 5rem)), 78rem);
+  aspect-ratio: 1791 / 878;
+  height: auto;
+  margin: clamp(1.5rem, 2.5vw, 2.5rem) auto 0;
   border-radius: 0;
   border: 1px solid var(--property-line);
 }
 
+.property-theme .stay-location-map .location-editorial-map {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+}
+
+.property-theme .stay-location-map .location-openseadragon-map {
+  height: 100%;
+  aspect-ratio: auto;
+}
+
 .property-theme .stay-know-grid {
-  gap: 1px;
-  background: var(--property-line);
+  gap: 0;
+  border-top: 1px solid var(--property-line);
+  border-left: 1px solid var(--property-line);
+  background: #ffffff;
 }
 
 .property-theme .stay-know-grid article {
   min-width: 0;
+  border-right: 1px solid var(--property-line);
+  border-bottom: 1px solid var(--property-line);
   padding: 1.5rem;
   background: var(--homepage-surface);
 }
@@ -997,6 +1021,11 @@ body:has(.property-theme) .serenity-booking-drawer .stay-booking-card {
   .property-theme .stay-amenity-grid > div,
   .property-theme .stay-know-grid article {
     padding: 1rem;
+  }
+
+  .property-theme .stay-location-map {
+    width: 100%;
+    margin-inline: 0;
   }
 
   .property-theme .stay-review-overview {

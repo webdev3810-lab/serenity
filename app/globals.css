@@ -4153,6 +4153,26 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
   box-shadow: 0 1rem 2.5rem rgba(45, 38, 34, 0.07);
 }
 
+/* Public location pages share the contact page's wide, map-first frame. */
+.public-map-frame {
+  width: min(calc(100% - clamp(2rem, 4vw, 5rem)), 118rem);
+  aspect-ratio: 1791 / 878;
+  margin-inline: auto;
+  overflow: hidden;
+}
+
+.public-map-frame .location-editorial-map {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+}
+
+.public-map-frame .location-openseadragon-map {
+  height: 100%;
+  aspect-ratio: auto;
+}
+
 .corporate-location-map-frame .location-editorial-map,
 .property-editorial-location-map .location-editorial-map {
   width: 100%;
@@ -10030,7 +10050,7 @@ body {
   min-height: 0;
   overflow: hidden;
   isolation: isolate;
-  background: var(--deep-brown);
+  background: #596260;
   color: var(--background);
 }
 
@@ -10044,7 +10064,7 @@ body {
 .serenity-hero-media {
   z-index: -3;
   overflow: hidden;
-  background: var(--deep-brown);
+  background: #596260;
 }
 
 .serenity-hero-image {
@@ -10308,9 +10328,10 @@ body {
 
   .serenity-hero-shell {
     width: min(calc(100% - 1.25rem), 40rem);
-    gap: 1rem;
+    justify-content: flex-start;
+    gap: 1.1rem;
     /* The mobile menu header is intentionally overlaid; keep hero copy clear of it. */
-    padding-block: 6.5rem 1rem;
+    padding-block: 6.5rem 1.25rem;
   }
 
   .serenity-hero-copy {
@@ -10319,7 +10340,7 @@ body {
 
   .serenity-hero-eyebrow {
     max-width: 28rem;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.9rem;
     font-size: 0.62rem;
     letter-spacing: 0.14em;
   }
@@ -10340,13 +10361,13 @@ body {
   .serenity-hero-actions {
     align-items: stretch;
     flex-direction: column;
-    gap: 0.55rem;
+    gap: 0.65rem;
     margin-top: 1.1rem;
   }
 
   .serenity-hero-support {
     max-width: 100%;
-    margin-top: 1rem;
+    margin-top: 1.05rem;
     font-size: 0.98rem;
     line-height: 1.5;
   }
@@ -10362,13 +10383,17 @@ body {
     align-self: stretch;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
-    margin: 0 0 1.25rem;
+    margin: 1.6rem 0 0;
     transform: none;
     animation-name: serenity-hero-stats-rise-flow;
   }
 
+  .pill-nav-header-home + div + main .serenity-hero .serenity-hero-stats {
+    width: 100%;
+  }
+
   .serenity-hero-stat {
-    min-height: 4.5rem;
+    min-height: 4.25rem;
     padding: 0.8rem 0.7rem;
     border-bottom: 1px solid rgba(250, 248, 245, 0.2);
   }
@@ -10954,8 +10979,12 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 }
 
 .pill-nav-header-home + div + main .serenity-hero {
-  height: clamp(38rem, calc(100svh - var(--homepage-promo-height) - clamp(5.75rem, 7.5vw, 7.5rem)), 52rem);
+  height: calc(100svh - var(--homepage-promo-height) - clamp(5.75rem, 7.5vw, 7.5rem));
   min-height: 0;
+}
+
+.pill-nav-header-home + div + main .serenity-hero .serenity-hero-stats {
+  width: min(62%, 92rem);
 }
 
 .pill-nav-header-home > div {
@@ -10990,12 +11019,58 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 
 @media (max-width: 767px) {
   .pill-nav-header-home + div + main .serenity-hero {
-    height: clamp(40rem, calc(100svh - var(--homepage-promo-height)), 48rem);
+    height: 100svh;
     min-height: 0;
+    margin-inline: 0.75rem;
   }
 
   .pill-nav-header-home > div {
     height: 5.75rem !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1100px) {
+  .pill-nav-header-home + div + main .serenity-hero .serenity-hero-stats {
+    width: 100%;
+  }
+}
+
+/* Keep the full-bleed treatment for desktop, but let tablet use a compact,
+   inset hero whose height follows its content instead of the viewport. */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .pill-nav-header-home + div + main .serenity-hero {
+    height: auto;
+    min-height: 0;
+    margin-inline: 1rem;
+  }
+
+  .pill-nav-header-home + div + main .serenity-hero .serenity-hero-shell {
+    height: auto;
+    min-height: 0;
+    justify-content: flex-start;
+    gap: 1.5rem;
+    padding-block: clamp(2.25rem, 5vh, 3.5rem) 1.5rem;
+  }
+
+  .pill-nav-header-home + div + main .serenity-hero .serenity-hero-stats {
+    width: 100%;
+    margin: 1.25rem 0 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .pill-nav-header-home + div + main .serenity-hero .serenity-hero-stats {
+    width: 100%;
+  }
+
+  .pill-nav-header-home + div + main .serenity-hero {
+    height: auto;
+    min-height: 0;
+  }
+
+  .pill-nav-header-home + div + main .serenity-hero .serenity-hero-shell {
+    height: auto;
+    min-height: 0;
   }
 }
 
@@ -15044,6 +15119,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
   --homepage-dark: var(--hero-green);
   --homepage-dark-deep: var(--hero-green-deep);
   --homepage-accent: var(--hero-yellow);
+  --homepage-soft: #d8eee2;
   --homepage-content-max: 112rem;
   --homepage-section-pad: clamp(4.25rem, 7.5vw, 7.5rem);
   min-width: 0;
@@ -15857,13 +15933,18 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
   color: #ffffff;
 }
 
+.houses-theme .houses-comfort-card-soft {
+  background: var(--homepage-soft);
+  color: var(--homepage-ink);
+}
+
 .houses-theme .houses-comfort-card-dark {
   background: var(--homepage-dark-deep);
   color: #ffffff;
 }
 
 .houses-theme .houses-comfort-card-stone {
-  background: #ffffff;
+  background: color-mix(in srgb, var(--homepage-accent) 10%, var(--homepage-surface));
   color: var(--homepage-ink);
 }
 
@@ -15896,7 +15977,7 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
   letter-spacing: -0.06em;
 }
 
-.houses-theme .houses-comfort-card-stone .houses-comfort-card-number {
+.houses-theme :is(.houses-comfort-card-soft, .houses-comfort-card-stone) .houses-comfort-card-number {
   color: var(--homepage-ink);
 }
 

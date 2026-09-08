@@ -91,7 +91,7 @@ const comfortFeatures = [
     number: "02",
     title: "Convenient parking",
     description: "Off-street parking makes every arrival and daily trip seamless.",
-    tone: "dark",
+    tone: "soft",
   },
   {
     number: "03",
@@ -103,7 +103,7 @@ const comfortFeatures = [
     number: "04",
     title: "Prepared for your arrival",
     description: "Fresh, meticulously prepared environments ensuring a calm standard for every stay.",
-    tone: "stone",
+    tone: "soft",
   },
 ] as const;
 

@@ -9,10 +9,10 @@ import { RoomsEditor } from "./RoomsEditor";
 /* The CMS reads flexible Supabase rows, so the boundary is intentionally defensive. */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import PropertyPhotoManager from "@/src/components/PropertyPhotoManager";
+import PropertyPhotoManager,{type PropertyPhotoManagerHandle} from "@/src/components/PropertyPhotoManager";
 import { Building2,ChevronLeft,ChevronRight,Plus,Save,Search,Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef,useState } from "react";
 
 import { AdminBadge as StatusBadge,useAdminWorkspace } from "@/src/components/admin/AdminUI";
 
@@ -35,6 +35,9 @@ export function LegacyHouseEditor({ draft, setDraft, selectedId, images }: { dra
 export function HouseEditor(props: any) {
   const { confirm } = useAdminWorkspace();
   const [query, setQuery] = useState("");
+  const [galleryDirty, setGalleryDirty] = useState(false);
+  const [savingAll, setSavingAll] = useState(false);
+  const photoManagerRef = useRef<PropertyPhotoManagerHandle>(null);
   const creatingNew = Boolean(props.initialNewHouse);
   const matchingProperties = props.properties.filter((property: Row) => String(property.name ?? "").toLowerCase().includes(query.toLowerCase()) || String(property.location ?? "").toLowerCase().includes(query.toLowerCase()));
   const selectedProperty = props.properties.find((property: Row) => String(property.id) === String(props.selectedId));
@@ -42,13 +45,21 @@ export function HouseEditor(props: any) {
   const handleNew = () => { props.openNewHouse(); };
   const handleBack = () => props.onBackToHouses();
   const handleCancel = async () => {
-    if (props.dirty && !await confirm({ title: "Discard house edits?", description: "Restore the last saved house details.", confirmLabel: "Discard changes", destructive: true })) return;
+    if ((props.dirty || galleryDirty) && !await confirm({ title: "Discard house edits?", description: "Restore the last saved house details and gallery settings.", confirmLabel: "Discard changes", destructive: true })) return;
+    photoManagerRef.current?.discardChanges();
     if (creatingNew && !props.selectedId) return props.onBackToHouses();
     if (selectedProperty) props.editProperty(selectedProperty);
     else props.onBackToHouses();
   };
-  const handleSave = () => {
-    void props.saveProperty(Boolean(props.draft.published));
+  const handleSave = async () => {
+    setSavingAll(true);
+    try {
+      const gallerySaved = await photoManagerRef.current?.saveChanges();
+      if (gallerySaved === false) return;
+      await props.saveProperty(Boolean(props.draft.published));
+    } finally {
+      setSavingAll(false);
+    }
   };
   const showEditor = Boolean(props.selectedId) || creatingNew;
   const bookingErrors = getBookingRuleErrors(props.draft, props.properties.length);
@@ -62,11 +73,11 @@ export function HouseEditor(props: any) {
     </section></>}
     {isDetailPage && showEditor ? <>
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface-alt)] p-4 sm:p-5"><div className="min-w-0"><p className="text-sm font-medium text-[var(--admin-text)]">{creatingNew && !props.selectedId ? "New house" : "Selected house"}</p><h2 className="mt-1 truncate text-xl font-semibold text-[var(--admin-text)]">{creatingNew && !props.selectedId ? "Create a new furnished house" : selectedProperty?.name || "House details"}</h2><p className="mt-1 text-sm text-[var(--admin-muted)]">{creatingNew && !props.selectedId ? "Add the core listing details, then save a draft or publish it." : "Update the sections below without losing your place."}</p></div><select className="admin-field max-w-xs" aria-label="Select property to edit" value={props.selectedId || ""} onChange={e=>props.openHouse(e.target.value)}><option value="" disabled>New house</option>{props.properties.map((p:Row)=><option key={p.id} value={p.id}>{p.name}</option>)}</select><button type="button" className="admin-button inline-flex min-h-10 items-center gap-2" onClick={handleBack}><ChevronLeft size={16} /> Back to houses</button></div>
-      {props.selectedId && <section className="admin-card overflow-hidden bg-[var(--admin-surface)]"><div className="border-b border-[var(--admin-border)] px-5 py-4 sm:px-7"><p className="text-sm font-medium text-[var(--admin-text)]">Media</p><h2 className="mt-1 text-xl font-semibold">Property gallery</h2><p className="mt-1 text-sm text-[var(--admin-muted)]">Upload, organise, and publish photos for the selected house.</p></div><div className="p-5 sm:p-7"><PropertyPhotoManager properties={props.properties} selectedId={props.selectedId} setSelectedId={props.setSelectedId} onSelectProperty={handleSelect} images={props.images} reload={props.reload} notify={props.notify} onError={props.onError} embedded showHeader={false} showPropertySelector={false} /></div></section>}
+      {props.selectedId && <section className="admin-card overflow-hidden bg-[var(--admin-surface)]"><div className="border-b border-[var(--admin-border)] px-5 py-4 sm:px-7"><p className="text-sm font-medium text-[var(--admin-text)]">Media</p><h2 className="mt-1 text-xl font-semibold">Property gallery</h2><p className="mt-1 text-sm text-[var(--admin-muted)]">Upload, organise, and publish photos for the selected house.</p></div><div className="p-5 sm:p-7"><PropertyPhotoManager ref={photoManagerRef} properties={props.properties} selectedId={props.selectedId} setSelectedId={props.setSelectedId} onSelectProperty={handleSelect} images={props.images} reload={props.reload} notify={props.notify} onError={props.onError} onDirtyChange={setGalleryDirty} embedded showHeader={false} showPropertySelector={false} /></div></section>}
       <LegacyHouseEditor images={props.images} draft={props.draft} setDraft={props.setDraft} selectedId={props.selectedId} />
       <HouseDetailsEditor draft={props.draft} setDraft={props.setDraft} />
       <BookingRulesEditor draft={props.draft} setDraft={props.setDraft} propertyCount={props.properties.length} />
-      <HouseEditorActionBar dirty={props.dirty} draft={props.draft} saving={props.saving} invalid={bookingErrors.length > 0} onSave={handleSave} onCancel={handleCancel} onDelete={props.selectedId ? () => void props.deleteProperty() : undefined} />
+      <HouseEditorActionBar dirty={props.dirty || galleryDirty} draft={props.draft} saving={props.saving || savingAll} invalid={bookingErrors.length > 0} onSave={() => void handleSave()} onCancel={handleCancel} onDelete={props.selectedId ? () => void props.deleteProperty() : undefined} />
     </> : isDetailPage ? <div className="rounded-2xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface)] p-8 text-center"><Building2 className="mx-auto text-[var(--admin-text)]" size={28} aria-hidden="true" /><h3 className="mt-3 text-lg font-semibold text-[var(--admin-text)]">House not found</h3><p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-[var(--admin-muted)]">Return to Houses and choose a published or draft house from the list.</p><button type="button" className="admin-button mt-4" onClick={props.onBackToHouses}>Back to houses</button></div> : null}
   </div>;
 }
@@ -101,7 +112,7 @@ export function getBookingRuleErrors(draft: Row, propertyCount: number) {
 
 export function HouseEditorActionBar({ dirty, draft, saving, invalid, onSave, onCancel, onDelete }: { dirty: boolean; draft: Row; saving: boolean; invalid: boolean; onSave: () => void; onCancel: () => void; onDelete?: () => void }) {
   return <div className="sticky bottom-4 z-30 rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3  backdrop-blur sm:p-4">
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-semibold text-[var(--admin-text)]">{dirty ? "Unsaved house changes" : draft.id ? "House details saved" : "New house draft"}</p><StatusBadge label={draft.published ? "Will be published" : "Will stay as draft"} tone={draft.published ? "success" : "neutral"} /></div><p className="mt-1 text-sm text-[var(--admin-muted)]">Save all listing, guest, booking, and pricing changes together.</p>{invalid && <p className="mt-1 text-sm font-semibold text-[var(--admin-danger-text)]">Fix the booking rule messages above before saving.</p>}</div><div className="flex flex-wrap gap-2 sm:justify-end"><button type="button" className="admin-button min-h-11" onClick={onCancel} disabled={saving}>Cancel changes</button>{onDelete && <button type="button" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--admin-border)] px-4 py-2 text-sm font-medium text-[var(--admin-danger-text)] hover:bg-[var(--admin-surface-alt)]" onClick={onDelete} disabled={saving}><Trash2 size={16} /> Delete house</button>}<button type="button" className="admin-button admin-button-primary inline-flex min-h-11 items-center gap-2" onClick={onSave} disabled={saving || invalid}><Save size={16} /> {saving ? "Saving…" : "Save changes"}</button></div></div>
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><p className="text-sm font-semibold text-[var(--admin-text)]">{dirty ? "Unsaved house changes" : draft.id ? "House saved" : "New house draft"}</p><StatusBadge label={draft.published ? "Will be published" : "Will stay as draft"} tone={draft.published ? "success" : "neutral"} /></div><p className="mt-1 text-sm text-[var(--admin-muted)]">Save the gallery, listing, guest, booking, and pricing changes together.</p>{invalid && <p className="mt-1 text-sm font-semibold text-[var(--admin-danger-text)]">Fix the booking rule messages above before saving.</p>}</div><div className="flex flex-wrap gap-2 sm:justify-end"><button type="button" className="admin-button min-h-11" onClick={onCancel} disabled={saving}>Cancel changes</button>{onDelete && <button type="button" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--admin-border)] px-4 py-2 text-sm font-medium text-[var(--admin-danger-text)] hover:bg-[var(--admin-surface-alt)]" onClick={onDelete} disabled={saving}><Trash2 size={16} /> Delete house</button>}<button type="button" className="admin-button admin-button-primary inline-flex min-h-11 items-center gap-2" onClick={onSave} disabled={saving || invalid || !dirty}><Save size={16} /> {saving ? "Saving…" : "Save changes"}</button></div></div>
   </div>;
 }
 
@@ -117,6 +128,4 @@ export function BookingRulesEditor({draft,setDraft,propertyCount}:{draft:Row;set
  const field=(key:string,value:unknown)=>setDraft(r=>({...r,[key]:value}));const errors=getBookingRuleErrors(draft,propertyCount);
  return <section className="admin-card p-5 sm:p-7 grid gap-5"><h2 className="text-xl font-semibold">Availability and booking rules</h2><p className="text-sm text-[var(--admin-muted)]">These rules are checked again when a booking is submitted.</p>{errors.length>0&&<div role="alert" className="admin-notice is-error">{errors.join(" ")}</div>}<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[["Minimum stay (nights)","minimum_stay"],["Maximum stay (nights)","maximum_stay"],["Minimum advance notice (days)","minimum_advance_notice_days"],["Maximum advance booking (days)","maximum_advance_booking_days"],["Minimum corporate stay (nights)","minimum_corporate_stay"],["Minimum corporate houses","minimum_corporate_houses"],["Maximum corporate houses","maximum_corporate_houses"],["Corporate discount (%)","corporate_discount"],["Weekly discount (%)","weekly_discount"],["Monthly discount (%)","monthly_discount"]].map(([label,key])=><NumberField key={key} label={label} value={draft[key]} onChange={v=>field(key,v)}/>)}</div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[["Allow same-day booking","same_day_booking_allowed"],["Allow weekend bookings","weekend_booking_allowed"],["Instant booking","instant_booking_enabled"],["Booking request required","booking_request_required"],["Allow corporate bookings","corporate_booking_allowed"],["Adjacent houses allowed","adjacent_houses_allowed"],["Allow long-term stays","long_term_stays_allowed"],["Corporate approval required","corporate_approval_required"],["Corporate deposit required","corporate_deposit_required"],["Corporate online payment","corporate_online_payment"],["GST invoice available","gst_invoice_available"]].map(([label,key])=><Toggle key={key} label={label} checked={Boolean(draft[key])} onChange={v=>field(key,v)}/>)}</div><CharacterField label="Corporate booking instructions" value={draft.corporate_instructions} onChange={v=>field("corporate_instructions",v)} limit={1000} textarea/></section>;
 }
-
-
 
