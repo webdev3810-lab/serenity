@@ -10235,7 +10235,7 @@ body {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   align-self: center;
   width: min(82%, 92rem);
-  margin: clamp(0.75rem, 2.5vh, 2rem) auto 0;
+  margin: clamp(0.75rem, 2.5vh, 2rem) auto clamp(0.5rem, 1.5vh, 1rem);
   border: 0;
   background: var(--hero-green);
   box-shadow: 0 0.8rem 2rem rgba(0, 44, 31, 0.2);
@@ -10361,7 +10361,7 @@ body {
     align-self: stretch;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
-    margin: 0;
+    margin: 0 0 0.75rem;
     transform: none;
     animation-name: serenity-hero-stats-rise-flow;
   }
