@@ -61,6 +61,15 @@ const LOCATION_MAP_MARKERS = [
     x: 0.66,
     y: 0.43,
   },
+  {
+    className: "location-map-marker--hoopla",
+    detail: "10 Meadow Parade",
+    href: "https://maps.app.goo.gl/Q2D41ydceBNe63UE9",
+    icon: Building2,
+    label: "Hoopla Pakenham",
+    x: 0.36,
+    y: 0.32,
+  },
 ] as const;
 
 export function SerenityLocationMap() {
