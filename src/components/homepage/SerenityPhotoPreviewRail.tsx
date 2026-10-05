@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, type PointerEvent, type SyntheticEvent } from "react";
+import { useRef, type MouseEvent, type PointerEvent } from "react";
 import type { CSSProperties } from "react";
 import type { SerenityEditorialPreviewImage } from "./SerenityEditorialHome";
 
@@ -100,7 +100,7 @@ export default function SerenityPhotoPreviewRail({ photos, duration }: SerenityP
     viewportRef.current?.classList.remove("is-dragging");
   };
 
-  const handleClickCapture = (event: SyntheticEvent<HTMLDivElement>) => {
+  const handleClickCapture = (event: MouseEvent<HTMLDivElement>) => {
     if (!suppressClickRef.current || event.detail === 0) return;
     event.preventDefault();
     event.stopPropagation();
