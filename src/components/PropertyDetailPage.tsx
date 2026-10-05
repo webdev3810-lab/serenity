@@ -3,7 +3,7 @@ import { AmenityIcon } from "@/src/components/AmenityIcon";
 import { PropertyReviews } from "@/src/components/PropertyReviews";
 import { AMENITY_GROUPS,normalizeAmenities } from "@/src/lib/amenities";
 import { aggregateReviews } from "@/src/lib/review-ratings";
-import { normalizeRooms,roomBedLabel,roomTotals } from "@/src/lib/rooms";
+import { normalizeRooms,roomBedLabel,roomPhoto,roomTotals } from "@/src/lib/rooms";
 import { Bath,MapPin,Shield,Users } from "lucide-react";
 
 import { BookingCard,MiniCalendar,RelatedHouses } from "@/src/components/BookingWidgets";
@@ -135,7 +135,13 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
       <main className="property-photo-tour-main">
         <section className="property-photo-tour-browser" aria-labelledby="property-photo-tour-heading">
           <div className="property-photo-tour-browser-heading">
-            <h3 id="property-photo-tour-heading">Photo tour</h3>
+            <div>
+              <p className="property-photo-tour-kicker">Inside the house</p>
+              <h3 id="property-photo-tour-heading">Explore every room.</h3>
+            </div>
+            <p className="property-photo-tour-browser-copy">
+              Browse the home by space, then select any image to see it at full size.
+            </p>
           </div>
           <nav className="property-photo-tour-category-nav" aria-label="Browse rooms and areas">
             {photoCategories.map((category) => (
@@ -148,18 +154,24 @@ function PhotoTour({ property, open, onClose }: { property: Property; open: bool
                 <span className="property-photo-tour-category-nav-thumb" aria-hidden="true">
                   <Image src={category.images[0].src} alt="" fill sizes="(max-width: 640px) 94px, 124px" />
                 </span>
-                <span className="property-photo-tour-category-nav-label">{category.label}</span>
+                <span className="property-photo-tour-category-nav-caption">
+                  <span className="property-photo-tour-category-nav-label">{category.label}</span>
+                  <span className="property-photo-tour-category-nav-count">{String(category.images.length).padStart(2, "0")}</span>
+                </span>
               </button>
             ))}
           </nav>
         </section>
 
-        {photoCategories.map((category) => (
+        {photoCategories.map((category, categoryIndex) => (
           <section key={category.slug} id={`photo-tour-category-${category.slug}`} className="property-photo-tour-category property-photo-tour-room-section" aria-labelledby={`photo-tour-category-title-${category.slug}`}>
             <header className="property-photo-tour-category-heading">
               <div className="property-photo-tour-category-name">
-                <h4 id={`photo-tour-category-title-${category.slug}`}>{category.label}</h4>
-                <span>{category.images.length} {category.images.length === 1 ? "photo" : "photos"}</span>
+                <span className="property-photo-tour-category-index">{String(categoryIndex + 1).padStart(2, "0")}</span>
+                <div>
+                  <h4 id={`photo-tour-category-title-${category.slug}`}>{category.label}</h4>
+                  <span>{category.images.length} {category.images.length === 1 ? "photo" : "photos"}</span>
+                </div>
               </div>
               {category.description ? <p>{category.description}</p> : null}
             </header>
@@ -238,18 +250,18 @@ export function PropertyDetailPage({ property,relatedProperties,today }:{propert
  const practical=[["Kitchen",property.kitchenFacilities],["Laundry",property.laundryFacilities],["Internet",property.wifiInformation],["Workspace",property.workspaceInformation],["Heating and cooling",property.heatingCooling]].filter(([,v])=>v);
  const know=[{title:"House rules",Icon:KeyRound,lines:[property.checkIn?`Check-in: ${property.checkIn}`:"",property.checkout?`Checkout: ${property.checkout}`:"",...property.houseRules,property.petPolicy].filter(Boolean)},{title:"Safety & property",Icon:Shield,lines:[property.safetyInformation].filter(Boolean) as string[]},{title:"Cancellation policy",Icon:CalendarDays,lines:[property.cancellationPolicy].filter(Boolean) as string[]}].filter(k=>k.lines.length);
  useEffect(()=>{let cancelled=false;fetch(`/api/properties/${property.slug}/availability`).then(async response=>{const data=await response.json();if(!response.ok)throw Error(data.error||"Availability unavailable");if(!cancelled){setBlockedDates(Array.isArray(data.blockedDates)?data.blockedDates:property.unavailableDates);setAvailabilityError(data.warning||"");}}).catch(()=>{if(!cancelled)setAvailabilityError("Live availability is temporarily unavailable. Dates will be checked again before booking.");}).finally(()=>{if(!cancelled)setAvailabilityLoading(false);});return()=>{cancelled=true;};},[property.slug,property.unavailableDates]);
- return <><div className="property-stay homepage-theme property-theme"><div className="stay-shell"><Link href="/houses" className="stay-back"><ChevronLeft size={16}/>All houses</Link><header className="stay-heading"><p className="stay-eyebrow">{property.propertyType}</p><h1>{name}</h1><div className="stay-heading-meta">{reviews.count>0&&<a href="#reviews"><Star size={16} fill="currentColor"/>{reviews.average!.toFixed(2)} · {reviews.count} review{reviews.count===1?"":"s"}</a>}<a href="#location"><MapPin size={16}/>{property.location}</a></div></header>
+ return <><div className="property-stay homepage-theme property-theme"><div className="stay-shell"><section className="property-editorial-heading"><Link href="/houses" className="stay-back"><ChevronLeft size={16}/>All houses</Link><header className="stay-heading"><p className="stay-eyebrow">{property.propertyType}</p><h1>{name}</h1><div className="stay-heading-meta">{reviews.count>0&&<a href="#reviews"><Star size={16} fill="currentColor"/>{reviews.average!.toFixed(2)} · {reviews.count} review{reviews.count===1?"":"s"}</a>}<a href="#location"><MapPin size={16}/>{property.location}</a></div></header></section>
  {images.length?<div className="stay-gallery" data-count={Math.min(images.length,5)}>{images.slice(0,5).map((image,i)=><button type="button" key={image.src+i} aria-label={`Open gallery: ${image.alt||`Photo ${i+1}`}`} className={i===0?"stay-gallery-main":""} onClick={()=>setGalleryOpen(true)}><Image src={image.src} alt={image.alt} fill priority={i===0} sizes={i===0?"(max-width:768px) 100vw, 50vw":"(max-width:768px) 50vw, 25vw"} unoptimized={isRemotePreviewImage(image.src)}/></button>)}<button type="button" className="stay-gallery-all" onClick={()=>setGalleryOpen(true)}><Images size={17}/>All {images.length} photos</button></div>:<div className="stay-gallery-empty">Photos will be added soon.</div>}
  <nav className="stay-section-nav" aria-label="Property sections"><a href="#about">The home</a>{rooms.length>0&&<a href="#sleep">Sleeping</a>}{amenities.length>0&&<a href="#amenities">Amenities</a>}<a href="#availability">Availability</a><a href="#reviews">Reviews</a><a href="#location">Location</a>{know.length>0&&<a href="#know">Things to know</a>}</nav>
  <div className="stay-body"><div className="stay-content"><section className="stay-section stay-intro" id="about"><h2>Your own place in {property.location.split(",")[0]}</h2><div className="stay-facts"><span><Users size={19}/>{property.maxGuests} guests</span><span><DoorOpen size={19}/>{totals?.bedrooms??property.bedrooms} bedrooms</span><span><BedDouble size={19}/>{totals?.beds??property.beds} beds</span><span><Bath size={19}/>{property.bathrooms} bathrooms</span></div><p className="stay-lead">{property.shortDescription}</p>{highlights.length>0&&<div className="stay-highlights">{highlights.map(({Icon,title,text})=><article key={title}><Icon size={24} strokeWidth={1.5}/><div><h3>{title}</h3><p>{text}</p></div></article>)}</div>}<div className="stay-description"><h3>About this home</h3><p>{property.fullDescription}</p></div>{practical.length>0&&<details className="stay-practical"><summary>Practical details</summary>{practical.map(([label,value])=><div key={label}><h3>{label}</h3><p>{value}</p></div>)}</details>}</section>
- {rooms.length>0&&<section className="stay-section" id="sleep"><h2>Where you’ll sleep</h2><div className="stay-room-grid">{rooms.map((room,i)=><article key={room.room+i} className="stay-room-card">{room.photo?<div className="stay-room-photo"><Image src={room.photo} alt={room.room} fill sizes="(max-width:768px) 100vw, 25vw" unoptimized/></div>:<BedDouble size={30} strokeWidth={1.3}/>}<h3>{room.room}</h3><p>{roomBedLabel(room)}</p>{room.description&&<p>{room.description}</p>}</article>)}</div></section>}
+ {rooms.length>0&&<section className="stay-section" id="sleep"><h2>Where you’ll sleep</h2><div className="stay-room-grid">{rooms.map((room,i)=>{const photo=roomPhoto(room,images);return <article key={room.room+i} className="stay-room-card">{photo?<div className="stay-room-photo"><Image src={photo} alt={room.room} fill sizes="(max-width:768px) 100vw, 25vw" unoptimized/></div>:<BedDouble size={30} strokeWidth={1.3}/>}<h3>{room.room}</h3><p>{roomBedLabel(room)}</p>{room.description&&<p>{room.description}</p>}</article>})}</div></section>}
  {amenities.length>0&&<section className="stay-section" id="amenities"><h2>What this place offers</h2><div className="stay-amenity-grid">{amenities.slice(0,10).map(a=><div key={a.id + a.label}><AmenityIcon icon={a.icon}/><span>{a.label}</span></div>)}</div><button type="button" className="stay-button" onClick={()=>setAmenitiesOpen(true)}>Show all {amenities.length} amenities</button></section>}
  <section className="stay-section" id="availability"><h2>Choose your dates</h2><p className="stay-helper">Prices are in AUD per night. Your checkout date is not charged.</p><MiniCalendar property={property} today={today} checkIn={booking.checkIn} checkout={booking.checkout} blockedDates={blockedDates} availabilityLoading={availabilityLoading} onCheckInSelect={a=>setBooking({propertySlug:property.slug,checkIn:a,checkout:""})} onSelect={(a,b)=>setBooking({propertySlug:property.slug,checkIn:a,checkout:b})}/>{availabilityError&&<p role="status" className="stay-error">{availabilityError}</p>}{booking.checkIn&&booking.checkout&&validateDateRange(property,booking.checkIn,booking.checkout,today,blockedDates)&&<p role="alert" className="stay-error">{validateDateRange(property,booking.checkIn,booking.checkout,today,blockedDates)}</p>}</section>
  </div><aside className="stay-desktop-booking"><BookingCard property={property} today={today} blockedDates={blockedDates} availabilityLoading={availabilityLoading}/></aside></div>
  <PropertyReviews reviews={property.reviews??[]}/>
  <section className="stay-section" id="location"><h2>Where you’ll be</h2><p>{property.location}</p>{property.nearbyLocations.length>0&&<div className="stay-nearby">{property.nearbyLocations.map(v=><span key={v}><MapPin size={16}/>{v}</span>)}</div>}<div className="stay-location-map"><SerenityLocationMap/></div></section>
  {know.length>0&&<section className="stay-section" id="know"><h2>Things to know</h2><div className="stay-know-grid">{know.map(({title,Icon,lines})=><article key={title}><Icon size={25}/><h3>{title}</h3><p>{lines[0]}</p><button type="button" className="stay-text-button" onClick={()=>setInfo({title,lines})}>Show details<ChevronRight size={16}/></button></article>)}</div></section>}
- {relatedProperties?.some(p=>p.slug!==property.slug)&&<section className="stay-section"><h2>More Serenity homes</h2><RelatedHouses currentSlug={property.slug} properties={relatedProperties}/></section>}
+ {relatedProperties?.some(p=>p.slug!==property.slug)&&<section className="stay-section stay-related-homes"><h2>More Serenity homes</h2><RelatedHouses currentSlug={property.slug} properties={relatedProperties}/></section>}
  </div></div><div className="stay-mobile-reserve property-theme-mobile"><div><strong>{formatAud(price.nights?price.total:property.nightlyPrice)}</strong><span>{price.nights?`${price.nights} nights · total incl. fees & tax`:"Default rate / night · AUD"}</span></div><button type="button" className="stay-reserve-button" onClick={()=>setDrawerOpen(true)}>Check your stay</button></div><Drawer open={drawerOpen} onClose={()=>setDrawerOpen(false)}><BookingCard property={property} today={today} blockedDates={blockedDates} availabilityLoading={availabilityLoading}/></Drawer>
  <PhotoTour property={{...property,images}} open={galleryOpen} onClose={()=>setGalleryOpen(false)}/><Modal title="All amenities" open={amenitiesOpen} onClose={()=>setAmenitiesOpen(false)}><div className="stay-all-amenities">{Object.entries(AMENITY_GROUPS).map(([group,label])=>{const list=amenities.filter(a=>a.group===group);return list.length?<section key={group}><h3>{label}</h3>{list.map(a=><div key={a.id + a.label}><AmenityIcon icon={a.icon}/>{a.label}</div>)}</section>:null;})}</div></Modal><Modal title={info?.title??"Things to know"} open={!!info} onClose={()=>setInfo(null)}><div className="stay-policy">{info?.lines.map((line,i)=><p key={i}>{/^https:\/\/\S+$|^\/(?!\/)\S+$/.test(line)?<a href={line} className="underline">Read the applicable policy</a>:line}</p>)}</div></Modal></>;
 }

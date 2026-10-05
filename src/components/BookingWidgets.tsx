@@ -6,7 +6,7 @@ import type { Property } from "@/src/data/properties";
 import { properties } from "@/src/data/properties";
 import { addDays,calculatePrice,dateToIso,defaultGuests,formatAud,formatDateAu,getNightlyPrice,GuestCounts,nightsBetween,totalStayingGuests,validateDateRange,validateGuestCapacity } from "@/src/lib/booking";
 import { AU_LOCALE,AU_TIME_ZONE,formatAuNumber } from "@/src/lib/localization";
-import { BedDouble,Car,ChevronDown,ChevronLeft,ChevronRight,Dog,MapPin,Minus,Plus,Users } from "lucide-react";
+import { BedDouble,Car,ChevronDown,ChevronLeft,ChevronRight,Dog,LoaderCircle,MapPin,Minus,Plus,Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -271,7 +271,7 @@ export function PriceBreakdownView({ property, checkIn, checkout, guests, corpor
           <span>Nightly rate</span>
           <span className="font-semibold text-stone-900">{formatAud(property.nightlyPrice)}</span>
         </div>
-        <p className="text-sm leading-relaxed text-stone-500">Select check-in and checkout dates to see the full AUD total, fees, GST, and discounts.</p>
+        <p className="text-sm leading-relaxed text-stone-500">Select check-in and checkout dates to see the full AUD total, fees, and GST.</p>
       </div>
     );
   }
@@ -282,8 +282,6 @@ export function PriceBreakdownView({ property, checkIn, checkout, guests, corpor
     ["Cleaning fee", price.cleaningFee],
     ["Pet fee", price.petFee],
     ["Extra guest fee", price.extraGuestFee],
-    [price.discountLabel || "Longer-stay discount", -(price.discount - (price.promotionDiscount ?? 0))],
-    [price.promotionLabel || "Voucher discount", -(price.promotionDiscount ?? 0)],
     ["GST estimate (10%)", price.tax],
   ].filter(([, amount]) => amount !== 0);
 
@@ -416,17 +414,41 @@ export function BookingCard({ property,today,blockedDates=[],availabilityLoading
  return <aside className="stay-booking-card"><div className="stay-booking-price"><strong>{formatAud(price.nights?price.nightlySubtotal/price.nights:property.nightlyPrice)}</strong><span>{price.nights?"average / night":"default / night"}</span><small>AUD · Direct booking</small></div><div className="stay-booking-dates"><button type="button" aria-haspopup="dialog" onClick={()=>setCalendarOpen(true)}><span>Check-in</span><strong>{checkIn?formatDateAu(checkIn):"Add date"}</strong></button><button type="button" aria-haspopup="dialog" onClick={()=>setCalendarOpen(true)}><span>Checkout</span><strong>{checkout?formatDateAu(checkout):"Add date"}</strong></button></div><button type="button" className="stay-guest-trigger" aria-haspopup="dialog" onClick={()=>setGuestsOpen(true)}><span>Guests<strong>{totalStayingGuests(guests)} staying guests{guests.infants?", "+guests.infants+" infants":""}{guests.pets?", "+guests.pets+" pets":""}</strong></span><ChevronDown size={20}/></button>
  <Modal title="Select dates" open={calendarOpen} onClose={()=>setCalendarOpen(false)}><MiniCalendar property={property} today={today} checkIn={checkIn} checkout={checkout} blockedDates={blockedDates} availabilityLoading={availabilityLoading} onCheckInSelect={next=>setBooking({propertySlug:property.slug,checkIn:next,checkout:""})} onSelect={(a,b)=>{setBooking({propertySlug:property.slug,checkIn:a,checkout:b});setCalendarOpen(false);}}/><button type="button" className="stay-button" onClick={()=>setBooking({propertySlug:property.slug,checkIn:"",checkout:""})}>Clear dates</button></Modal>
  <Modal title="Select guests" open={guestsOpen} onClose={()=>setGuestsOpen(false)}><GuestSelector value={guests} onChange={value=>setBooking({propertySlug:property.slug,guests:value})} maxGuests={property.maxGuests} property={property} embedded/><p className="stay-helper">{property.minimumGuests}–{property.maxGuests} staying guests. Infants are excluded from this total (maximum {property.maximumInfants}). {property.petsAllowed?"Up to "+property.maximumPets+" pets allowed.":"Pets are not allowed."}</p>{guestError&&<p role="alert">{guestError}</p>}<button type="button" className="stay-button" onClick={()=>setGuestsOpen(false)}>Done</button></Modal>
- <div className="stay-booking-breakdown"><PriceBreakdownView property={property} checkIn={checkIn} checkout={checkout} guests={guests}/></div>{availabilityLoading&&<p role="status">Checking availability…</p>}{(guestError||(checkIn&&checkout&&dateError))&&<p className="stay-error" role="alert">{guestError||dateError}</p>}<button type="button" className="stay-reserve-button" disabled={!!dateError||!!guestError||availabilityLoading} onClick={reserve}>Continue to booking</button><p className="stay-helper">You can review your stay before payment.</p></aside>;
+ <div className="stay-booking-breakdown"><PriceBreakdownView property={property} checkIn={checkIn} checkout={checkout} guests={guests}/></div>{(guestError||(checkIn&&checkout&&dateError))&&<p className="stay-error" role="alert">{guestError||dateError}</p>}<button type="button" className={`stay-reserve-button${availabilityLoading?" is-loading":""}`} disabled={!!dateError||!!guestError||availabilityLoading} aria-busy={availabilityLoading} onClick={reserve}>{availabilityLoading?<span className="stay-reserve-button__loading" role="status"><LoaderCircle size={18} aria-hidden="true"/>Checking availability…</span>:"Continue to booking"}</button><p className="stay-helper">You can review your stay before payment.</p></aside>;
 }
 
 export function RelatedHouses({ currentSlug, properties: relatedProperties = properties }: { currentSlug: string; properties?: Property[] }) {
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <div className="related-houses-preview">
       {relatedProperties
         .filter((property) => property.slug !== currentSlug)
-        .map((property) => (
-          <PropertyCard key={property.slug} property={property} />
-        ))}
+        .map((property, index) => {
+          const displayName = property.name.replace(/\s+-\s+Whole$/i, "");
+          const houseIndex = properties.findIndex((house) => house.slug === property.slug);
+          const houseNumber = String((houseIndex >= 0 ? houseIndex : index) + 1).padStart(2, "0");
+
+          return (
+            <article className="related-house-card" key={property.slug}>
+              <Link href={`/properties/${property.slug}`} className="related-house-link" aria-label={`Explore ${displayName}`}>
+                <span className="related-house-media">
+                  {property.featuredImage ? (
+                    <Image
+                      src={property.featuredImage}
+                      alt={`${displayName} furnished house in Pakenham`}
+                      fill
+                      sizes="(max-width: 520px) 100vw, (max-width: 760px) 50vw, 50vw"
+                      unoptimized={property.featuredImage.includes(".supabase.co/")}
+                    />
+                  ) : <span className="related-house-fallback">House photos coming soon</span>}
+                </span>
+                <span className="related-house-caption">
+                  <span className="related-house-title">{displayName}</span>
+                  <span className="related-house-number">HOUSE {houseNumber}</span>
+                </span>
+              </Link>
+            </article>
+          );
+        })}
     </div>
   );
 }

@@ -3,10 +3,19 @@
    colour, controls, rules, and spacing. Each page keeps its own composition
    while this layer removes the older one-off brown treatment. */
 .public-site {
+  /* Keep the guest-facing neutral palette separate from the admin theme. */
+  --foreground: #111111;
+  --primary-black: #111111;
+  --soft-black: #111111;
+  --warm-brown: #111111;
+  --espresso: #111111;
+  --deep-brown: #111111;
+  --muted-text: #111111;
+  --text-muted: #111111;
   --public-ink: var(--hero-green-deep);
   --public-green: var(--hero-green);
   --public-yellow: var(--hero-yellow);
-  --public-body: #2d2622;
+  --public-body: #111111;
   --public-muted: #5f6a64;
   --public-line: var(--homepage-line);
   --public-surface: #ffffff;
@@ -54,7 +63,7 @@
 }
 
 .public-page-theme :is(button, input, select, textarea) {
-  border-radius: 0;
+  border-radius: var(--radius-control, 0.75rem);
 }
 
 /* Public-page headings use the same soft green resting layer as the homepage
@@ -389,7 +398,7 @@
 .contact-editorial-page.public-page-theme form button[type="submit"] {
   min-height: 3.25rem;
   border: 1px solid var(--public-yellow);
-  border-radius: 0;
+  border-radius: var(--radius-pill, 9999px);
   background: var(--public-yellow);
   color: var(--public-ink);
   font-family: var(--font-sans);
@@ -586,34 +595,8 @@
   box-shadow: 0 1rem 2.5rem rgba(6, 63, 48, 0.08);
 }
 
-.corporate-stays-page.public-page-theme .field {
-  min-height: 3.25rem;
-  border: 1px solid var(--public-line);
-  border-radius: 0;
-  background: var(--public-surface);
-  color: var(--public-ink);
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-.corporate-stays-page.public-page-theme .field:hover,
-.corporate-stays-page.public-page-theme .field:focus {
-  border-color: var(--public-green);
-}
-
 .corporate-stays-page.public-page-theme input[type="checkbox"] {
   accent-color: var(--public-green);
-}
-
-.corporate-stays-page.public-page-theme label:has(input[type="checkbox"]:checked) {
-  border-color: var(--public-green) !important;
-  box-shadow: 0 0 0 2px rgba(7, 88, 63, 0.18);
-}
-
-.corporate-stays-page.public-page-theme label:has(input[type="checkbox"]:checked) .aspect-\[4\/3\] {
-  outline: 2px solid var(--public-yellow);
-  outline-offset: -2px;
 }
 
 .corporate-stays-page.public-page-theme .corporate-calendar-popover {
@@ -623,7 +606,7 @@
 }
 
 .corporate-stays-page.public-page-theme .calendar-day {
-  border-radius: 0;
+  border-radius: var(--radius-control, 0.75rem);
   color: var(--public-ink);
 }
 
@@ -642,17 +625,6 @@
 .corporate-stays-page.public-page-theme .calendar-day.minimum-stay {
   background: color-mix(in srgb, var(--public-yellow) 35%, white);
   color: var(--public-ink);
-}
-
-.corporate-stays-page.public-page-theme .corporate-location-map-frame {
-  border-color: var(--public-line);
-  background: var(--public-surface);
-}
-
-.corporate-stays-page.public-page-theme .corporate-location-map-shell {
-  width: min(calc(100% - clamp(2rem, 5vw, 6rem)), var(--public-content-max));
-  max-width: none;
-  margin-inline: auto;
 }
 
 .corporate-stays-page.public-page-theme details summary {
@@ -903,14 +875,11 @@
     width: 100%;
   }
 
-  .corporate-stays-page.public-page-theme .corporate-location-map-frame {
-    width: calc(100% - 2rem);
-  }
 }
 
 /* Shared booking calendar -------------------------------------------------
-   The date picker uses the hero's green, yellow, serif-display and square
-   control language while retaining round date states for quick scanning. */
+   The date picker uses the hero's green, yellow, Poppins display, and soft
+   control language while retaining clear date states for quick scanning. */
 .homepage-theme .booking-calendar,
 .homepage-theme .booking-calendar-popover {
   border-color: var(--homepage-line) !important;
@@ -938,7 +907,7 @@
   width: 2.75rem;
   height: 2.75rem;
   border-color: var(--homepage-line);
-  border-radius: 0;
+  border-radius: var(--radius-circle, 50%);
   background: var(--homepage-surface);
   color: var(--homepage-ink);
 }
@@ -1063,14 +1032,14 @@
 
 .homepage-theme .corporate-calendar-popover {
   border-color: var(--homepage-line) !important;
-  border-radius: 0;
+  border-radius: var(--radius-card, 1.125rem);
   background: var(--homepage-surface);
   box-shadow: 0 1rem 2.5rem rgba(6, 63, 48, 0.09);
 }
 
 .homepage-theme .corporate-calendar-popover > .booking-calendar {
   border: 0 !important;
-  border-radius: 0;
+  border-radius: var(--radius-card, 1.125rem);
   background: transparent;
   box-shadow: none;
 }
@@ -1082,7 +1051,7 @@
 
 .homepage-theme .corporate-calendar-popover .booking-calendar-tabs {
   border-color: var(--homepage-line);
-  border-radius: 0;
+  border-radius: var(--radius-control, 0.75rem);
 }
 
 .homepage-theme .corporate-calendar-popover .booking-calendar-tab {
@@ -1158,7 +1127,7 @@
 
 .public-site .promotion-banner button {
   border-color: color-mix(in srgb, var(--public-yellow) 78%, white) !important;
-  border-radius: 0;
+  border-radius: var(--radius-pill, 9999px);
   font-family: var(--font-sans) !important;
   color: #ffffff !important;
 }
@@ -1180,8 +1149,9 @@
 .public-site .pill-nav-header nav a {
   color: var(--public-ink) !important;
   font-family: var(--font-sans);
-  font-weight: 800;
-  letter-spacing: 0.13em;
+  font-weight: 500;
+  letter-spacing: 0.035em;
+  text-transform: none;
 }
 
 .public-site .pill-nav-header nav a:hover,
@@ -1198,8 +1168,9 @@
   background: var(--public-yellow) !important;
   color: var(--public-ink) !important;
   font-family: var(--font-sans);
-  font-weight: 800;
-  letter-spacing: 0.13em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
 }
 
 .public-site .pill-nav-header > div > a:last-child:hover,
@@ -1207,6 +1178,33 @@
   border-color: #ffe36c !important;
   background: #ffe36c !important;
   color: var(--public-ink) !important;
+}
+
+.public-site .pill-nav-header .pill-nav-link,
+.public-site .pill-nav-header .pill-nav-cta {
+  border-radius: 999px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+}
+
+.public-site .pill-nav-header .pill-nav-link {
+  letter-spacing: 0.035em !important;
+}
+
+.public-site .pill-nav-header .pill-nav-link:hover,
+.public-site .pill-nav-header .pill-nav-link:focus-visible {
+  background: color-mix(in srgb, var(--public-green) 8%, transparent);
+  box-shadow: 0 0.35rem 0.9rem rgba(6, 63, 48, 0.08);
+}
+
+.public-site .pill-nav-header .pill-nav-link.is-active {
+  background: color-mix(in srgb, var(--public-green) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--public-green) 16%, transparent);
+}
+
+.public-site .pill-nav-header .pill-nav-cta {
+  letter-spacing: 0.04em !important;
+  box-shadow: 0 0.35rem 0.9rem rgba(183, 147, 0, 0.16);
 }
 
 .public-site .site-footer-editorial {
@@ -1239,7 +1237,7 @@
 }
 
 .public-site .site-footer-action {
-  border-radius: 0;
+  border-radius: var(--radius-pill, 9999px);
   font-family: var(--font-sans);
   font-weight: 800;
   letter-spacing: 0.13em;
@@ -1270,7 +1268,7 @@
   color: var(--public-ink);
 }
 
-.public-site .site-footer-wordmark span {
+.public-site .site-footer-wordmark .brand-wordmark__primary {
   color: color-mix(in srgb, var(--public-green) 14%, transparent);
 }
 
@@ -1332,7 +1330,7 @@
 .public-site .booking-flow-page .card,
 .public-site .public-error-page .card {
   border-color: var(--public-line) !important;
-  border-radius: 0;
+  border-radius: var(--radius-card, 1.125rem);
   background: var(--public-surface) !important;
   box-shadow: 0 0.8rem 2rem rgba(6, 63, 48, 0.07);
   color: var(--public-body);
@@ -1359,7 +1357,7 @@
 
 .public-site .page-frame .discount-summary {
   border-color: var(--public-line);
-  border-radius: 0;
+  border-radius: var(--radius-card, 1.125rem);
   background: var(--public-soft);
 }
 
@@ -1376,7 +1374,7 @@
 .public-site :is(.btn-primary, .btn-dark-primary) {
   min-height: 3.25rem;
   border: 1px solid var(--public-yellow) !important;
-  border-radius: 0 !important;
+  border-radius: var(--radius-pill, 9999px) !important;
   background: var(--public-yellow) !important;
   box-shadow: none !important;
   color: var(--public-ink) !important;
@@ -1405,7 +1403,7 @@
 .public-site :is(.btn-secondary, .btn-outline-dark) {
   min-height: 3.25rem;
   border: 1px solid var(--public-green) !important;
-  border-radius: 0 !important;
+  border-radius: var(--radius-pill, 9999px) !important;
   background: transparent !important;
   box-shadow: none !important;
   color: var(--public-green) !important;
@@ -1427,7 +1425,7 @@
 .public-site .field {
   min-height: 3.25rem;
   border: 1px solid var(--public-line) !important;
-  border-radius: 0 !important;
+  border-radius: var(--radius-control, 0.75rem) !important;
   background: var(--public-surface) !important;
   color: var(--public-ink) !important;
   font-family: var(--font-sans);
@@ -1457,7 +1455,7 @@
 .public-site .booking-progress-step {
   min-width: 0;
   border-color: var(--public-line) !important;
-  border-radius: 0;
+  border-radius: var(--radius-card, 1.125rem);
   background: var(--public-surface) !important;
   color: var(--public-muted) !important;
   font-family: var(--font-sans);
@@ -1557,7 +1555,7 @@
 
 .public-site .serenity-modal {
   border-color: var(--public-line);
-  border-radius: 0;
+  border-radius: var(--radius-panel, 1.375rem);
   background: var(--public-surface);
   color: var(--public-body);
   font-family: var(--font-sans);
@@ -1606,7 +1604,7 @@
 }
 
 /* Guestbook --------------------------------------------------------------
-   Review cards use the same sharp geometry and green/yellow contrast as the
+   Review cards use the same calm geometry and green/yellow contrast as the
    hero, while keeping the alternating editorial card treatment from the
    existing guestbook. */
 .public-site .homepage-reviews-section {
@@ -1668,7 +1666,7 @@
 .public-site .homepage-review-card {
   min-height: 24rem;
   border: 1px solid var(--public-line) !important;
-  border-radius: 0 !important;
+  border-radius: var(--radius-card, 1.125rem) !important;
   background: var(--public-surface) !important;
   color: var(--public-ink) !important;
   box-shadow: 0 1.25rem 2.75rem -2rem rgba(6, 63, 48, 0.42) !important;

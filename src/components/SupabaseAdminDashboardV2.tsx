@@ -5,9 +5,9 @@ import { roomBedLabel,roomTotals } from "@/src/lib/rooms";
 /* The CMS reads flexible Supabase rows, so the boundary is intentionally defensive. */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import AdminPromotions from "@/src/components/AdminPromotions";
 import AdminReservationsManager from "@/src/components/AdminReservationsManager";
 import { AdminThemeToggle,useAdminTheme } from "@/src/components/AdminTheme";
+import { BrandWordmark } from "@/src/components/BrandWordmark";
 import CalendarSyncManager from "@/src/components/CalendarSyncManager";
 import { defaultHomepageFaqs } from "@/src/data/homepageFaqs";
 import { CMS_LIMITS,trimCmsText,validateCmsContent } from "@/src/lib/cmsValidation";
@@ -29,7 +29,6 @@ Menu,
 MessageSquare,
 Settings,
 Star,
-Tag,
 UsersRound,
 X
 } from "lucide-react";
@@ -56,7 +55,7 @@ export function SupabaseAdminDashboardV2({ email, role, initialTab = "overview",
   const { theme } = useAdminTheme();
   const [localTab, setTab] = useState<Tab>(initialTab);
   const routeTab = searchParams.get("tab") as Tab | null;
-  const tab = initialHouseId || initialNewHouse ? localTab : routeTab && ["overview", "homepage", "houses", "reviews", "promotions", "bookings", "calendar", "enquiries", "contacts", "users", "settings"].includes(routeTab) && (routeTab !== "users" || role === "super_admin") ? routeTab : initialTab;
+  const tab = initialHouseId || initialNewHouse ? localTab : routeTab && ["overview", "homepage", "houses", "reviews", "bookings", "calendar", "enquiries", "contacts", "users", "settings"].includes(routeTab) && (routeTab !== "users" || role === "super_admin") ? routeTab : initialTab;
   const [properties, setProperties] = useState<Row[]>([]);
   const [images, setImages] = useState<Row[]>([]);
   const [reviews, setReviews] = useState<Row[]>([]);
@@ -463,7 +462,6 @@ useEffect(() => {
     { id: "homepage", label: "Homepage", description: "Edit landing content", icon: Home },
     { id: "houses", label: "Houses", description: "Content, pricing, photos", icon: Building2 },
     { id: "reviews", label: "Reviews", description: "Guest feedback", icon: Star },
-    { id: "promotions", label: "Promotions", description: "Voucher campaigns", icon: Tag },
     { id: "bookings", label: "Bookings", description: "Reservations and status", icon: CalendarDays },
     { id: "calendar", label: "Calendar", description: "External availability", icon: CalendarRange },
     { id: "enquiries", label: "Enquiries", description: "Corporate requests", icon: MessageSquare },
@@ -484,11 +482,8 @@ useEffect(() => {
       <header className="admin-header">
         <div className="admin-header-inner">
           <div className="admin-header-site-brand" aria-label="Serenity on the Rocks">
-            <span className="admin-header-site-mark" aria-hidden="true">S</span>
-            <span className="admin-header-site-copy">
-              <strong>Serenity on the Rocks</strong>
-              <small>Admin workspace</small>
-            </span>
+            <BrandWordmark variant="admin" />
+            <span className="admin-header-site-context">Admin workspace</span>
           </div>
           <div className="admin-header-brand">
             <button type="button" className="admin-mobile-menu" aria-label="Open admin navigation" aria-controls="admin-sidebar" aria-expanded={mobileDrawerOpen} onClick={() => { setSidebarCollapsed(false); setMobileDrawerOpen(true); }}><Menu size={21} /></button>
@@ -549,7 +544,7 @@ useEffect(() => {
         <section id="admin-content" tabIndex={-1} className="admin-content" aria-busy={loading}>
           {message && <div className="admin-notice is-success" role="status"><CheckCircle2 size={18} />{message}</div>}
           {error && <div className="admin-notice is-error" role="alert"><X size={18} /><span>{error}</span>{loadFailed && <button type="button" className="admin-button" onClick={() => void load()}>Retry</button>}</div>}
-          {loading ? <div className="admin-card admin-loading-state" role="status"><LoaderCircle size={18} className="animate-spin" aria-hidden="true" /> <span>Loading your CMS workspace…</span></div> : loadFailed && !loaded ? <div className="admin-card p-8"><h2>Workspace unavailable</h2><p className="mt-2 text-[var(--admin-muted)]">Your records could not be loaded. Use Retry above to try again.</p></div> : tab === "overview" ? <Overview properties={properties} enquiries={enquiries} bookings={bookings} calendarEvents={calendarEvents} calendarConnections={calendarConnections} onNavigate={handleNavigation} /> : tab === "homepage" ? <HomepageSectionsEditor baseline={savedHomepage} homepage={homepage} setHomepage={setHomepage} published={homepagePublished} saveSection={saveHomepageSection} saving={saving} properties={properties} toggleFeatured={toggleFeaturedProperty} /> : tab === "houses" ? <HouseEditor dirty={houseDirty} properties={properties} draft={draft} setDraft={setDraft} selectedId={selectedId} editProperty={editProperty} newProperty={newProperty} saveProperty={saveProperty} deleteProperty={deleteProperty} saving={saving} images={images} reload={load} notify={notify} onError={setError} initialNewHouse={initialNewHouse} isDetailPage={Boolean(initialHouseId || initialNewHouse)} openHouse={(propertyId: string) => void navigate(() => router.push(`/admin/houses/${propertyId}`))} openNewHouse={() => void navigate(() => router.push("/admin/houses/new"))} onBackToHouses={() => void navigate(() => router.push("/admin?tab=houses"))} /> : tab === "reviews" ? <ReviewManager properties={properties} reviews={reviews} createReview={createReview} updateReview={updateReview} deleteReview={deleteReview} /> : tab === "promotions" ? <AdminPromotions properties={properties as unknown as Array<{ id: string; name: string }>} /> : tab === "bookings" ? <AdminReservationsManager bookings={bookings} enquiries={enquiries} calendarEvents={calendarEvents} properties={properties} reload={load} notify={notify} onError={setError} convertEnquiry={convertEnquiry} updateEnquiryStatus={setEnquiryStatus} openCalendar={() => handleNavigation("calendar")} /> : tab === "calendar" ? <CalendarSyncManager /> : tab === "enquiries" ? <EnquiryManager enquiries={enquiries} updateStatus={setEnquiryStatus} updateNotes={setEnquiryNotes} convert={convertEnquiry} /> : tab === "contacts" ? <ContactManager contacts={contactMessages} unavailable={contactMessagesUnavailable} updateStatus={setContactStatus} updateNotes={setContactNotes} /> : tab === "users" && role === "super_admin" ? <AdminUserManager users={adminUsers} currentUserEmail={email} createUser={createAdminUser} updateUser={updateAdminUser} deleteUser={deleteAdminUser} /> : <SettingsPanel email={email} settings={siteSettings} setSettings={setSiteSettings} save={saveSettings} saving={saving} />}
+          {loading ? <div className="admin-card admin-loading-state" role="status"><LoaderCircle size={18} className="animate-spin" aria-hidden="true" /> <span>Loading your CMS workspace…</span></div> : loadFailed && !loaded ? <div className="admin-card p-8"><h2>Workspace unavailable</h2><p className="mt-2 text-[var(--admin-muted)]">Your records could not be loaded. Use Retry above to try again.</p></div> : tab === "overview" ? <Overview properties={properties} enquiries={enquiries} bookings={bookings} calendarEvents={calendarEvents} calendarConnections={calendarConnections} onNavigate={handleNavigation} /> : tab === "homepage" ? <HomepageSectionsEditor baseline={savedHomepage} homepage={homepage} setHomepage={setHomepage} published={homepagePublished} saveSection={saveHomepageSection} saving={saving} properties={properties} toggleFeatured={toggleFeaturedProperty} /> : tab === "houses" ? <HouseEditor dirty={houseDirty} properties={properties} draft={draft} setDraft={setDraft} selectedId={selectedId} editProperty={editProperty} newProperty={newProperty} saveProperty={saveProperty} deleteProperty={deleteProperty} saving={saving} images={images} reload={load} notify={notify} onError={setError} initialNewHouse={initialNewHouse} isDetailPage={Boolean(initialHouseId || initialNewHouse)} openHouse={(propertyId: string) => void navigate(() => router.push(`/admin/houses/${propertyId}`))} openNewHouse={() => void navigate(() => router.push("/admin/houses/new"))} onBackToHouses={() => void navigate(() => router.push("/admin?tab=houses"))} /> : tab === "reviews" ? <ReviewManager properties={properties} reviews={reviews} createReview={createReview} updateReview={updateReview} deleteReview={deleteReview} /> : tab === "bookings" ? <AdminReservationsManager bookings={bookings} enquiries={enquiries} calendarEvents={calendarEvents} properties={properties} reload={load} notify={notify} onError={setError} convertEnquiry={convertEnquiry} updateEnquiryStatus={setEnquiryStatus} openCalendar={() => handleNavigation("calendar")} /> : tab === "calendar" ? <CalendarSyncManager /> : tab === "enquiries" ? <EnquiryManager enquiries={enquiries} updateStatus={setEnquiryStatus} updateNotes={setEnquiryNotes} convert={convertEnquiry} /> : tab === "contacts" ? <ContactManager contacts={contactMessages} unavailable={contactMessagesUnavailable} updateStatus={setContactStatus} updateNotes={setContactNotes} /> : tab === "users" && role === "super_admin" ? <AdminUserManager users={adminUsers} currentUserEmail={email} createUser={createAdminUser} updateUser={updateAdminUser} deleteUser={deleteAdminUser} /> : <SettingsPanel email={email} settings={siteSettings} setSettings={setSiteSettings} save={saveSettings} saving={saving} />}
         </section>
       </div>
       {mobileDrawerOpen && <AdminDialog label="Admin navigation" className="admin-mobile-navigation" drawer onClose={() => setMobileDrawerOpen(false)}><div><div className="admin-sidebar"><div className="admin-sidebar-top"><strong>Workspace</strong><button type="button" className="admin-sidebar-close" aria-label="Close navigation" onClick={() => setMobileDrawerOpen(false)}><X size={18} /></button></div><AdminNavigation items={navItems} active={tab} collapsed={false} onSelect={handleNavigation} /></div></div></AdminDialog>}

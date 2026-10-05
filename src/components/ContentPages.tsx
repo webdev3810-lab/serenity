@@ -365,19 +365,78 @@ function ContactLocationSection({ contact }: { contact: ContactSettings }) {
 }
 
 export function PolicyPage({ type }: { type: "Terms and Conditions" | "Privacy Policy" | "Cancellation Policy" }) {
+  const policies = [
+    { label: "Terms & conditions", href: "/terms", type: "Terms and Conditions" },
+    { label: "Privacy policy", href: "/privacy", type: "Privacy Policy" },
+    { label: "Cancellation policy", href: "/cancellation-policy", type: "Cancellation Policy" },
+  ] as const;
+  const sections = [
+    "Scope of Service",
+    "Guest Responsibilities & House Rules",
+    "Booking Requests & Stripe Payment",
+    "Changes, Cancellations & Refunds",
+    "Privacy & Data Handling",
+    "Property Access & Security",
+  ];
+
   return (
-    <PageFrame eyebrow="Legal & Policies" title={type} text="Terms governing direct reservations, guest responsibilities, cancellation terms, and privacy protection at Serenity Stays.">
-      <div className="card space-y-6 p-8 bg-white text-[#4A4036] text-xs border border-stone-200">
-        {["Scope of Service", "Guest Responsibilities & House Rules", "Booking Requests & Stripe Payment", "Changes, Cancellations & Refunds", "Privacy & Data Handling", "Property Access & Security"].map((heading) => (
-          <section key={heading} className="space-y-2">
-            <h2 className="text-base font-bold text-stone-900">{heading}</h2>
-            <p className="leading-relaxed text-stone-600">
-              This operational policy applies to all direct bookings for Serenity 7, Serenity 9, and Serenity 11 in Pakenham, Victoria, Australia. Guests must comply with declared guest limits, quiet hours (10:00 PM – 7:00 AM), and pet declaration rules.
-            </p>
-          </section>
-        ))}
-      </div>
-    </PageFrame>
+    <div className="policy-editorial-page">
+      <header className="policy-editorial-masthead">
+        <span>Serenity on the Rocks</span>
+        <span>Stay information / Pakenham, Victoria</span>
+      </header>
+
+      <section className="policy-editorial-hero" aria-labelledby="policy-editorial-title">
+        <div>
+          <span className="policy-editorial-eyebrow">Legal &amp; policies</span>
+          <h1 id="policy-editorial-title">{type}</h1>
+        </div>
+        <p>Terms governing direct reservations, guest responsibilities, cancellation terms, and privacy protection at Serenity Stays.</p>
+      </section>
+
+      <nav className="policy-editorial-nav" aria-label="Serenity policies">
+        <span>Browse the policies</span>
+        <div>
+          {policies.map((policy, index) => (
+            <Link
+              key={policy.href}
+              href={policy.href}
+              aria-current={type === policy.type ? "page" : undefined}
+            >
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              {policy.label}
+              <ArrowUpRight size={19} aria-hidden="true" />
+            </Link>
+          ))}
+        </div>
+      </nav>
+
+      <section className="policy-editorial-content" aria-labelledby="policy-editorial-details">
+        <div className="policy-editorial-content__heading">
+          <span className="policy-editorial-eyebrow">The details</span>
+          <h2 id="policy-editorial-details">Good to know.</h2>
+          <p>Information for guests booking a Serenity home directly.</p>
+        </div>
+        <div className="policy-editorial-sections">
+          {sections.map((heading, index) => (
+            <section key={heading} className="policy-editorial-section">
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <div>
+                <h3>{heading}</h3>
+                <p>
+                  This operational policy applies to all direct bookings for Serenity 7, Serenity 9, and Serenity 11 in Pakenham, Victoria, Australia. Guests must comply with declared guest limits, quiet hours (10:00 PM – 7:00 AM), and pet declaration rules.
+                </p>
+              </div>
+            </section>
+          ))}
+        </div>
+      </section>
+
+      <section className="policy-editorial-contact" aria-label="Policy questions">
+        <p>Need to ask about a stay?</p>
+        <Link href="/contact">Get in touch <ArrowUpRight size={22} aria-hidden="true" /></Link>
+      </section>
+    </div>
   );
 }
 

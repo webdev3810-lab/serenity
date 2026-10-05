@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import ScrollWipeText from "./ScrollWipeText";
 
 const corporateUseCases = [
   {
@@ -20,6 +19,27 @@ const corporateUseCases = [
   },
 ];
 
+function splitHeading(value: string) {
+  const words = value.trim().split(/\s+/).filter(Boolean);
+  if (words.length < 2) return [value.trim(), ""] as const;
+
+  let bestIndex = Math.ceil(words.length / 2);
+  let bestDifference = Number.POSITIVE_INFINITY;
+
+  for (let index = 1; index < words.length; index += 1) {
+    const firstLength = words.slice(0, index).join(" ").length;
+    const secondLength = words.slice(index).join(" ").length;
+    const difference = Math.abs(firstLength - secondLength);
+
+    if (difference < bestDifference) {
+      bestDifference = difference;
+      bestIndex = index;
+    }
+  }
+
+  return [words.slice(0, bestIndex).join(" "), words.slice(bestIndex).join(" ")] as const;
+}
+
 export interface HomepageCorporateSectionProps {
   heading: string;
   description: string;
@@ -35,15 +55,17 @@ export default function HomepageCorporateSection({
   ctaHref,
   className = "",
 }: HomepageCorporateSectionProps) {
+  const [headingPrimary, headingAccent] = splitHeading(heading);
+
   return (
     <section className={`homepage-business-section ${className}`.trim()}>
       <div className="homepage-business-container">
         <div className="homepage-business-intro">
           <div>
-            <p className="homepage-business-eyebrow">Built for business travel</p>
-            <ScrollWipeText as="h2" className="homepage-business-title">
-              {heading}
-            </ScrollWipeText>
+            <h2 className="homepage-business-title" aria-label={heading}>
+              <span className="homepage-business-title-primary">{headingPrimary}</span>
+              {headingAccent ? <span className="homepage-business-title-accent">{headingAccent}</span> : null}
+            </h2>
           </div>
           <div className="homepage-business-copy">
             <p>{description}</p>

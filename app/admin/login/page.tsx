@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/src/lib/supabase/client";
 import { AdminThemeToggle, useAdminTheme } from "@/src/components/AdminTheme";
+import { BrandWordmark } from "@/src/components/BrandWordmark";
 
 type Mode = "login" | "forgot" | "register";
 
@@ -71,7 +72,7 @@ export default function AdminLoginPage() {
     <main className={`admin-auth-shell admin-theme-${theme}`}>
       <div className="admin-auth-header"><span className="admin-eyebrow">Secure access</span><AdminThemeToggle /></div>
       <form onSubmit={submit} className="admin-card mx-auto max-w-md bg-[var(--admin-surface)] p-8 ">
-        <span className="admin-eyebrow">Serenity Stays</span>
+        <BrandWordmark variant="admin" />
         <h1 className="admin-auth-heading mt-2 text-[var(--admin-text)]">{title}</h1>
         <p className="admin-auth-intro mt-3 text-[var(--admin-muted)]">{description}</p>
         {statusError && <p role="alert" className="mt-4 rounded-xl border border-[var(--admin-warning-border)] bg-[var(--admin-warning-bg)] p-3 text-sm font-semibold text-[var(--admin-warning-text)]">{statusError}</p>}

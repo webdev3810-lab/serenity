@@ -39,6 +39,7 @@ import {
   Save,
 } from "lucide-react";
 import { properties } from "@/src/data/properties";
+import { BrandWordmark } from "@/src/components/BrandWordmark";
 import { formatAud, formatDateAu, todayIso } from "@/src/lib/booking";
 import { AU_LOCALE, AU_TIME_ZONE, formatAuNumber } from "@/src/lib/localization";
 import { DEFAULT_CONTACT_SETTINGS_RECORD } from "@/src/lib/siteSettings";
@@ -341,9 +342,7 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
     <div className="min-h-screen flex flex-col items-center justify-center px-4" style={{ background: "#F8F5F1" }}>
       {/* Logo */}
       <div className="mb-8 text-center">
-        <span className="brand-logo brand-logo-dark text-3xl">
-          Serenity<span className="brand-logo-dot">.</span>
-        </span>
+        <BrandWordmark className="text-[#2D2622]" />
         <p className="mt-1 text-sm font-semibold" style={{ color: "#6F6258" }}>Admin Portal</p>
       </div>
 
@@ -1470,9 +1469,7 @@ function AdminDashboardInner({ onLogout }: { onLogout: () => void }) {
       >
         {/* Logo */}
         <div className="flex items-center justify-between px-5 py-5 border-b" style={{ borderColor: "#1E1B18" }}>
-          <span className="brand-logo text-xl">
-            Serenity<span className="brand-logo-dot">.</span>
-          </span>
+          <BrandWordmark variant="admin" className="text-white" />
           <button className="lg:hidden p-1" onClick={() => setSidebarOpen(false)}>
             <X size={16} style={{ color: "#ffffff" }} />
           </button>

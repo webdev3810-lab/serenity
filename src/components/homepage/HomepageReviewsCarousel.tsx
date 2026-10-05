@@ -133,28 +133,28 @@ export default function HomepageReviewsCarousel({ reviews, fullBleed = true }: {
           const featured = index % 3 === 0;
           const quoteLength = review.reviewText.replace(/\s+/g, " ").trim().length;
           const quoteSize = quoteLength > 360
-            ? "text-[0.96rem] leading-[1.45] tracking-[-0.005em]"
+            ? "text-[0.76rem] leading-[1.3] tracking-[-0.005em]"
             : quoteLength > 280
-              ? "text-[1rem] leading-[1.42] tracking-[-0.008em]"
+              ? "text-[0.84rem] leading-[1.3] tracking-[-0.008em]"
               : quoteLength > 200
-                ? "text-[1.05rem] leading-[1.38] tracking-[-0.01em]"
+                ? "text-[0.9rem] leading-[1.28] tracking-[-0.01em]"
                 : quoteLength > 140
-                  ? "text-[1.1rem] leading-[1.34] tracking-[-0.012em]"
+                  ? "text-[0.98rem] leading-[1.25] tracking-[-0.012em]"
                   : quoteLength > 90
-                    ? "text-[1.16rem] leading-[1.28] tracking-[-0.015em]"
-                    : "text-[clamp(1.2rem,1.6vw,1.45rem)] leading-[1.2] tracking-[-0.02em]";
+                    ? "text-[1.12rem] leading-[1.22] tracking-[-0.015em]"
+                    : "text-[clamp(1.3rem,1.8vw,1.7rem)] leading-[1.14] tracking-[-0.025em]";
           return (
-            <div key={review.id} className="homepage-review-item flex w-[84vw] max-w-[30rem] flex-shrink-0 sm:w-[22rem] sm:max-w-[22rem] md:w-[24rem] md:max-w-[24rem]">
-              <article className={`homepage-review-card group relative flex h-auto min-h-[28rem] w-full overflow-hidden border transition-[transform,box-shadow] duration-500 hover:-translate-y-2 sm:min-h-[22rem] md:min-h-[24rem] ${featured ? "is-featured" : ""}`}>
-                <div className="homepage-review-card-inner flex min-w-0 w-full flex-col p-6 sm:p-7">
+            <div key={review.id} className="homepage-review-item flex h-[30rem] w-[84vw] max-w-[30rem] flex-shrink-0 self-start sm:w-[22rem] sm:max-w-[22rem] md:w-[24rem] md:max-w-[24rem]">
+              <article className={`homepage-review-card group relative flex h-full min-h-0 w-full overflow-hidden border transition-[transform,box-shadow] duration-500 hover:-translate-y-2 ${featured ? "is-featured" : ""}`}>
+                <div className="homepage-review-card-inner flex min-w-0 w-full flex-1 flex-col p-6 sm:p-7">
                   <div className="homepage-review-card-top flex min-w-0 items-center justify-between gap-4 border-b pb-5 text-[10px] font-bold uppercase tracking-[0.18em]">
                     <span className="homepage-review-card-index min-w-0">{String(index + 1).padStart(2, "0")} <span className="mx-1">/</span> guest note</span>
                     <time className="homepage-review-date shrink-0">{review.reviewDateLabel ?? review.reviewDate ?? ""}</time>
                   </div>
 
-                  <div className="homepage-review-card-details mt-6 flex min-w-0 items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <div className="homepage-review-stars mb-3 flex gap-0.5" aria-label={review.rating ? `${review.rating} out of 5 stars` : "Guest review"}>
+                  <div className="homepage-review-card-details mt-6 flex min-w-0 items-center justify-between gap-4">
+                    <div className="min-w-0 flex flex-1 flex-wrap items-center gap-3">
+                      <div className="homepage-review-stars flex gap-0.5" aria-label={review.rating ? `${review.rating} out of 5 stars` : "Guest review"}>
                         {Array.from({ length: review.rating ?? 0 }, (_, star) => <Star key={star} size={12} fill="currentColor" strokeWidth={0} aria-hidden="true" />)}
                       </div>
                       <span className="homepage-review-property inline-flex max-w-full break-words px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em]">
@@ -164,11 +164,11 @@ export default function HomepageReviewsCarousel({ reviews, fullBleed = true }: {
                     <Quote size={31} strokeWidth={1.1} className="homepage-review-mark shrink-0" aria-hidden="true" />
                   </div>
 
-                  <h3 className={`homepage-review-quote display-font mt-7 min-w-0 flex-1 break-words ${quoteSize}`}>
+                  <h3 className={`homepage-review-quote display-font mt-6 min-w-0 flex-1 break-words ${quoteSize}`}>
                     &ldquo;{review.reviewText}&rdquo;
                   </h3>
 
-                  <div className="homepage-review-card-footer mt-auto flex items-end justify-between gap-4 border-t pt-7">
+                  <div className="homepage-review-card-footer mt-7 flex items-end justify-between gap-4 border-t pt-5">
                     <div className="min-w-0">
                       <p className="homepage-review-name break-words text-[11px] font-bold uppercase tracking-[0.18em]">{review.reviewerName}</p>
                       <p className="homepage-review-verified mt-1 text-[9px] font-bold uppercase tracking-[0.15em]">Verified guest</p>

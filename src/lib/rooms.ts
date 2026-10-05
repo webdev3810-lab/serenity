@@ -5,6 +5,16 @@ export function normalizeRooms(value: unknown): RoomArrangement[] {
   return Array.isArray(value) ? value.filter(v => v && typeof v === "object").map(v => ({ ...v, room: String(v.room ?? ""), beds: String(v.beds ?? "") })) : [];
 }
 export function roomBedLabel(room: RoomArrangement) { return room.bedTypes?.length ? room.bedTypes.map(b=>`${b.quantity} ${BED_TYPES[b.type]?.toLowerCase() ?? "bed"}${b.quantity === 1 ? "" : "s"}`).join(" · ") : room.beds; }
+export function roomPhoto(room: RoomArrangement, images: { src: string; alt?: string; category?: string; categoryLabel?: string }[]): string | undefined {
+  if (room.photo) return room.photo;
+  const roomName = room.room.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  if (!roomName) return undefined;
+  const matchesRoom = (value: string) => {
+    const label = value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    return label === roomName || label.startsWith(`${roomName} `) || label.includes(` ${roomName} `);
+  };
+  return images.find(image => image.src && [image.category, image.categoryLabel, image.alt].some(value => value && matchesRoom(value)))?.src;
+}
 export function roomTotals(rooms: RoomArrangement[]) {
   if (!rooms.length || rooms.some(r=>!r.bedTypes?.length || !r.kind)) return null;
   return { bedrooms: rooms.filter(r=>r.kind === "bedroom").length, beds: rooms.reduce((n,r)=>n+r.bedTypes!.reduce((s,b)=>s+b.quantity,0),0) };

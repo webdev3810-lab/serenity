@@ -1,0 +1,404 @@
+/* Serenity on the Rocks soft-surface system.
+   Keep the radius scale in one place so new controls inherit the same calm,
+   tactile language as the existing brand components. */
+:root {
+  --radius-control: 0.75rem;
+  --radius-card: 1.125rem;
+  --radius-panel: 1.375rem;
+  --radius-xl: 1.625rem;
+  --radius-pill: 9999px;
+  --radius-circle: 50%;
+  --soft-focus-ring: 0 0 0 3px color-mix(in srgb, var(--hero-yellow, #ffd21a) 32%, transparent);
+}
+
+/* Replace legacy square utility classes without changing component markup or
+   interaction behavior. The element type determines the appropriate shape. */
+.rounded-none {
+  border-radius: var(--radius-card) !important;
+}
+
+.rounded-full {
+  border-radius: var(--radius-pill) !important;
+}
+
+button.rounded-none,
+a.rounded-none,
+label.rounded-none,
+[role="button"].rounded-none {
+  border-radius: var(--radius-pill) !important;
+}
+
+input.rounded-none,
+select.rounded-none,
+textarea.rounded-none {
+  border-radius: var(--radius-control) !important;
+}
+
+/* Shared interactive surfaces. These selectors catch both Tailwind utilities
+   and the older hand-authored component class names. */
+body :is(
+  button,
+  input,
+  select,
+  textarea,
+  [role="button"],
+  [role="combobox"],
+  [role="menuitem"],
+  .btn-primary,
+  .btn-hero-secondary,
+  .btn-secondary,
+  .btn-outline-dark,
+  .btn-dark-primary,
+  .admin-button,
+  .admin-profile-logout,
+  .admin-booking-type-tab,
+  .admin-view-tab,
+  .admin-nav-item,
+  .admin-profile-trigger,
+  .admin-pagination button,
+  .site-footer-action,
+  .site-footer-socials a,
+  .site-footer-nav a
+) {
+  border-radius: var(--radius-control) !important;
+}
+
+body :is(
+  button.btn-primary,
+  button.btn-hero-secondary,
+  button.btn-secondary,
+  button.btn-outline-dark,
+  button.btn-dark-primary,
+  a.btn-primary,
+  a.btn-hero-secondary,
+  a.btn-secondary,
+  a.btn-outline-dark,
+  a.btn-dark-primary,
+  .admin-button,
+  .admin-profile-logout,
+  .site-footer-action
+) {
+  border-radius: var(--radius-pill) !important;
+}
+
+body :is(
+  .admin-icon-button,
+  .admin-sidebar-toggle,
+  .admin-mobile-menu,
+  .admin-sidebar-close,
+  .admin-profile-trigger-avatar,
+  .admin-avatar,
+  .homepage-benefit-icon,
+  .homepage-faq-list summary span:last-child,
+  .location-map-marker-pin,
+  .sm-toggle,
+  .sm-panel-item__icon,
+  .sm-panel-cta__icon,
+  .icon-button,
+  .counter-button,
+  .pill-nav-link__indicator
+) {
+  border-radius: var(--radius-circle) !important;
+}
+
+/* Equal-size rounded-none controls are legacy icon buttons. Keep their
+   meaning and touch targets while restoring a true circular silhouette. */
+body :is(
+  .rounded-none[class*="h-9"][class*="w-9"],
+  .rounded-none[class*="h-10"][class*="w-10"],
+  .rounded-none[class*="h-11"][class*="w-11"],
+  .rounded-none[class*="h-12"][class*="w-12"]
+) {
+  border-radius: var(--radius-circle) !important;
+}
+
+body :is(
+  .rounded-full[class*="h-9"][class*="w-9"],
+  .rounded-full[class*="h-10"][class*="w-10"],
+  .rounded-full[class*="h-11"][class*="w-11"],
+  .rounded-full[class*="h-12"][class*="w-12"]
+) {
+  border-radius: var(--radius-circle) !important;
+}
+
+body :is(
+  .card,
+  .property-card,
+  .properties-result-card,
+  .admin-card,
+  .admin-filter-panel,
+  .admin-notice,
+  .admin-profile-dropdown,
+  .booking-calendar,
+  .booking-calendar-popover,
+  .booking-guests-popover,
+  .search-box,
+  .approximate-map-shell,
+  .serenity-modal,
+  [role="dialog"],
+  [role="menu"],
+  [role="listbox"],
+  [role="dialog"] > div,
+  .toast,
+  [class*="upload"]
+) {
+  border-radius: var(--radius-card) !important;
+}
+
+body :is(
+  img,
+  picture,
+  video,
+  .property-gallery,
+  .property-photo-tour,
+  .gallery-image,
+  .homepage-location-map,
+  .homepage-house-card,
+  .homepage-house-card img,
+  .property-card img,
+  .approximate-map-shell img
+) {
+  border-radius: var(--radius-card) !important;
+}
+
+body :is(
+  .property-badge,
+  .properties-availability-note,
+  .homepage-house-card-badge,
+  .booking-promotion-code-status
+) {
+  border-radius: var(--radius-pill) !important;
+}
+
+body :is(.section, .dark-section-band) {
+  border-radius: var(--radius-panel) !important;
+}
+
+/* Property stays are intentionally scoped out of the legacy public invariant;
+   bring their bespoke gallery, booking, and dialog surfaces onto the same
+   radius scale here. */
+body :is(
+  .property-theme .stay-gallery,
+  .property-theme .stay-gallery > button:not(.stay-gallery-all),
+  .property-theme .stay-room-card,
+  .property-theme .stay-know-grid article,
+  .property-theme .stay-booking-card,
+  .property-theme .stay-location-map,
+  .property-theme .stay-error,
+  .property-theme .stay-rating-track,
+  .property-theme .stay-booking-dates,
+  .property-theme .stay-guest-trigger,
+  .property-theme .serenity-modal,
+  .property-theme .serenity-booking-drawer,
+  .property-photo-tour .property-photo-tour-category-nav-thumb,
+  .property-photo-tour .property-photo-tour-item
+) {
+  border-radius: var(--radius-card) !important;
+}
+
+body :is(
+  .property-theme .stay-gallery-all,
+  .property-theme .stay-button,
+  .property-theme .stay-text-button,
+  .property-theme .stay-reserve-button,
+  .property-theme .serenity-modal-close,
+  .property-theme-mobile .stay-reserve-button
+) {
+  border-radius: var(--radius-pill) !important;
+}
+
+body :is(
+  .property-theme .stay-booking-card .counter-button,
+  .property-theme .stay-booking-card .icon-button,
+  .property-theme .stay-avatar,
+  .property-photo-lightbox .property-photo-lightbox-arrow,
+  .property-photo-tour .property-photo-tour-close,
+  .property-photo-tour .property-photo-lightbox-close
+) {
+  border-radius: var(--radius-circle) !important;
+}
+
+body :is(
+  .property-theme .stay-booking-card .calendar-day,
+  .property-theme .stay-booking-card .calendar-day.selected,
+  .property-theme .stay-booking-card .calendar-day.in-range,
+  .property-theme .stay-booking-card .calendar-day.minimum-stay,
+  .property-theme .stay-section-nav a
+) {
+  border-radius: var(--radius-control) !important;
+}
+
+/* A full-viewport lightbox is an intentional edge-to-edge overlay; its
+   navigation controls remain circular inside the surface. */
+.serenity-modal.property-photo-lightbox {
+  border-radius: 0 !important;
+}
+
+body :is(
+  .gallery-editorial-lightbox,
+  .gallery-lightbox,
+  .gallery-journey-lightbox,
+  [role="dialog"][class*="fixed"][class*="inset-0"]
+) {
+  border-radius: 0 !important;
+}
+
+body :where(
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [role="button"]:focus-visible
+) {
+  outline-offset: 3px;
+}
+
+body :where(
+  .btn-primary:hover,
+  .btn-hero-secondary:hover,
+  .btn-secondary:hover,
+  .btn-outline-dark:hover,
+  .btn-dark-primary:hover,
+  .admin-button:hover,
+  .admin-profile-trigger:hover,
+  .admin-nav-item:hover,
+  .site-footer-action:hover
+) {
+  transform: translateY(-1px);
+}
+
+/* The compact public header keeps the wordmark and controls optically light
+   at every breakpoint while retaining a comfortable 44px touch target. */
+.pill-nav-header > div {
+  height: 4rem !important;
+  gap: 0.5rem;
+  padding-inline: clamp(0.75rem, 2.5vw, 1.5rem) !important;
+}
+
+.pill-nav-brand .brand-wordmark__primary {
+  font-size: clamp(1.3rem, 2vw, 1.6rem) !important;
+  font-weight: 600;
+  letter-spacing: -0.065em;
+}
+
+.pill-nav-brand .brand-wordmark,
+.sm-logo .brand-wordmark {
+  justify-items: center;
+}
+
+.pill-nav-brand .brand-wordmark__secondary {
+  gap: 0.32rem;
+  margin-top: 0.2rem;
+  font-size: 0.46rem !important;
+  justify-content: center;
+  letter-spacing: 0.16em;
+}
+
+.pill-nav-brand .brand-wordmark__rule {
+  width: 0.78rem;
+}
+
+.pill-nav-brand .brand-wordmark__stone {
+  width: 0.2rem;
+  height: 0.2rem;
+}
+
+.pill-nav-header .pill-nav-link {
+  min-height: 2.75rem;
+  padding-inline: 0.48rem;
+  font-size: 0.75rem !important;
+}
+
+.pill-nav-header .pill-nav-cta {
+  min-height: 2.75rem;
+  padding-inline: 0.8rem;
+  font-size: 0.75rem !important;
+}
+
+.staggered-menu-header {
+  height: 4rem !important;
+  padding-inline: clamp(1rem, 4vw, 1.5rem) !important;
+}
+
+.staggered-menu-header .sm-logo .brand-wordmark__primary {
+  font-size: 1.3rem !important;
+}
+
+.staggered-menu-header .sm-logo .brand-wordmark__secondary {
+  gap: 0.3rem;
+  font-size: 0.42rem !important;
+  justify-content: center;
+  letter-spacing: 0.16em;
+}
+
+.sm-scope .staggered-menu-panel {
+  padding-top: 5rem;
+}
+
+.pill-nav-header:not(.is-scrolled) {
+  box-shadow: none !important;
+}
+
+.pill-nav-header.is-scrolled {
+  background: color-mix(in srgb, var(--public-surface, #ffffff) 96%, transparent) !important;
+  border-bottom-color: color-mix(in srgb, var(--hero-green-deep, #063f30) 18%, transparent) !important;
+  box-shadow: 0 0.35rem 1rem rgba(6, 63, 48, 0.08) !important;
+  backdrop-filter: blur(4px);
+}
+
+.sm-scope.nav-scroll-hidden {
+  transform: translateY(-100%);
+}
+
+.sm-scope.nav-scroll-visible {
+  transform: translateY(0);
+}
+
+body:has(.homepage-theme) .pill-nav-header-home.is-scrolled,
+body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home).is-scrolled {
+  box-shadow: 0 0.35rem 1rem rgba(6, 63, 48, 0.08) !important;
+  backdrop-filter: blur(4px);
+}
+
+@media (max-width: 767px) {
+  .pill-nav-header-home > div,
+  .pill-nav-header > div {
+    height: 4rem !important;
+  }
+
+  .pill-nav-header + div:not(.sm-scope) {
+    height: 4rem !important;
+  }
+
+  .staggered-menu-header .sm-toggle {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1100px) {
+  .pill-nav-header .pill-nav-link {
+    padding-inline: 0.45rem;
+  }
+
+  .pill-nav-header .pill-nav-cta {
+    padding-inline: 0.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body :where(
+    .btn-primary:hover,
+    .btn-hero-secondary:hover,
+    .btn-secondary:hover,
+    .btn-outline-dark:hover,
+    .btn-dark-primary:hover,
+    .admin-button:hover,
+    .admin-profile-trigger:hover,
+    .admin-nav-item:hover,
+    .site-footer-action:hover
+  ) {
+    transform: none;
+  }
+}

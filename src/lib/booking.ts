@@ -142,7 +142,8 @@ export const validateGuestCapacity = (property: Property, guests: GuestCounts) =
   return "";
 };
 
-export const calculatePrice = (property: Property, checkIn?: string, checkout?: string, guests: GuestCounts = defaultGuests, corporate = false): PriceBreakdown => {
+export const calculatePrice = (property: Property, checkIn?: string, checkout?: string, guests: GuestCounts = defaultGuests, _corporate = false): PriceBreakdown => {
+  void _corporate;
   const nights = nightsBetween(checkIn, checkout);
   const nightlyRates = checkIn && checkout ? datesInRange(checkIn, checkout).map((date) => {
     const override = property.datePrices?.find((price) => price.date === date && price.active !== false);
@@ -153,9 +154,7 @@ export const calculatePrice = (property: Property, checkIn?: string, checkout?: 
   const petFee = guests.pets > 0 ? property.petFee : 0;
   const extraGuests = Math.max(0, totalStayingGuests(guests) - property.extraGuestThreshold);
   const extraGuestFee = extraGuests * property.extraGuestFee * nights;
-  const longerStayDiscount = nights >= 28 ? property.monthlyDiscount : nights >= 7 ? property.weeklyDiscount : 0;
-  const discountRate = corporate ? Math.max(longerStayDiscount, property.corporateDiscount) : longerStayDiscount;
-  const discount = Math.round((nightlySubtotal * discountRate) / 100);
+  const discount = 0;
   const taxable = nightlySubtotal + property.cleaningFee + petFee + extraGuestFee - discount;
   const tax = Math.round(taxable * 0.1);
   return {
@@ -166,7 +165,7 @@ export const calculatePrice = (property: Property, checkIn?: string, checkout?: 
     petFee,
     extraGuestFee,
     discount,
-    discountLabel: discountRate ? (corporate && property.corporateDiscount >= longerStayDiscount ? `${discountRate}% corporate discount` : `${discountRate}% longer-stay discount`) : "",
+    discountLabel: "",
     nightlyRateSummary: hasDatedRate ? "Nightly accommodation (seasonal rates applied)" : `${formatAud(property.nightlyPrice)} × ${nights} night${nights === 1 ? "" : "s"}`,
     tax,
     total: taxable + tax,

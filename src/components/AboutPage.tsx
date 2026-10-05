@@ -1,77 +1,50 @@
+import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  CheckCircle2,
-} from "lucide-react";
-
-import { GsapFadeIn, GsapStagger } from "@/src/components/GsapAnimations";
-import ScrollWipeText from "@/src/components/homepage/ScrollWipeText";
 import HomepageReviewsSection from "@/src/components/homepage/HomepageReviewsSection";
 import type { Property } from "@/src/data/properties";
 
-const ABOUT_CONTENT = {
-  hero: {
-    index: "01",
-    label: "About Serenity",
-    title: "Your Home Away From Home in the Heart of Pakenham",
-    introduction: "Stay comfortably. Stay conveniently. Feel at home.",
-    detail:
-      "With 8 years of hosting experience, Superhost recognition, and consistently positive guest reviews, we’re committed to making every stay comfortable, reliable, and stress-free.",
+const STATS = [
+  { value: "3", label: "Adjacent homes", detail: "Space to stay independently or together." },
+  { value: "9 min", label: "Walk to Pakenham station", detail: "Transport and everyday essentials close by." },
+  { value: "8+ yrs", label: "Hosting experience", detail: "Local support from enquiry to checkout." },
+] as const;
+
+const PRINCIPLES = [
+  {
+    number: "01",
+    title: "Room to settle in",
+    description: "Furnished private homes with space to cook, work, rest and live at your own pace.",
   },
-  stats: [
-    {
-      value: "8",
-      label: "Years hosting",
-      detail: "Superhost recognition and positive guest reviews.",
-    },
-    {
-      value: "5 min",
-      label: "Walk to Pakenham Station",
-      detail: "Steps away from the bus station.",
-    },
-    {
-      value: "3",
-      label: "Private houses",
-      detail: "Leisure, corporate, insurance, and travel-agent bookings welcome.",
-    },
-  ],
-  idea: {
-    index: "02",
-    title: "A comfortable home, a convenient location, and a host you can count on.",
-    introduction:
-      "Stay comfortably. Stay conveniently. Feel at home.",
-    paragraphs: [
-      "Enjoy modern comfort in a beautifully furnished, peaceful home, conveniently located just a 5-minute walk from Pakenham Train Station and steps away from the bus station.",
-      "Set in a welcoming, family-friendly area, you’ll be close to shopping centres, restaurants, and Pakenham Industrial Park — perfect for both business and leisure.",
-      "When it’s time to explore, you’ll have the perfect base to discover Gumbuya World, the beautiful Gippsland region, and Phillip Island.",
-    ],
+  {
+    number: "02",
+    title: "A convenient base",
+    description: "Close to the station, shopping, restaurants and Pakenham Industrial Park.",
   },
-  principles: {
-    index: "03",
-    title: "Easy to Book. Easy to Communicate With. Easy to Stay.",
-    introduction:
-      "From easy reservations to invoices and regular updates, we’re responsive, flexible, and easy to work with.",
-    items: [
-      {
-        number: "01",
-        title: "Modern comfort",
-        text: "A beautifully furnished, peaceful home gives you room to cook, work, rest, and feel at home.",
-      },
-      {
-        number: "02",
-        title: "A convenient base",
-        text: "Stay close to transport, shopping centres, restaurants, Pakenham Industrial Park, and the places worth exploring across Gippsland.",
-      },
-      {
-        number: "03",
-        title: "Bookings made easy",
-        text: "We have extensive experience with corporate bookings, insurance stays, and travel-agent bookings, keeping the process smooth and hassle-free.",
-      },
-    ],
+  {
+    number: "03",
+    title: "A real point of contact",
+    description: "Responsive help for family visits, relocations, corporate bookings and longer stays.",
   },
-};
+] as const;
+
+function HouseImage({ src, alt, priority = false }: { src: string; alt: string; priority?: boolean }) {
+  if (!src) return <span className="about-story-image-fallback">Serenity on the Rocks</span>;
+
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      priority={priority}
+      sizes={priority ? "(max-width: 760px) 100vw, 58vw" : "(max-width: 760px) 100vw, 33vw"}
+      unoptimized={src.startsWith("http")}
+    />
+  );
+}
 
 export function AboutPage({ properties }: { properties: Property[] }) {
+  const homes = properties.slice(0, 3);
+  const heroHome = properties.find((property) => property.slug === "serenity-7") ?? homes[0];
   const reviews = properties.flatMap((property) =>
     (property.reviews ?? []).map((review) => ({
       id: review.id,
@@ -86,140 +59,112 @@ export function AboutPage({ properties }: { properties: Property[] }) {
   );
 
   return (
-    <main className="about-editorial-page homepage-theme public-page-theme">
-      <section className="about-editorial-hero" aria-label="About Serenity">
-        <div className="about-editorial-shell">
-          <div className="about-editorial-topline">
-            <span className="about-editorial-index" aria-hidden="true">
-              {ABOUT_CONTENT.hero.index}
-            </span>
-            <span>{ABOUT_CONTENT.hero.label}</span>
-            <span className="about-editorial-location">Pakenham · Victoria</span>
-          </div>
+    <div className="about-story-page homepage-theme">
+      <header className="about-story-heading">
+        <h1>About Serenity</h1>
+        <span>Pakenham · Victoria</span>
+      </header>
 
-          <GsapFadeIn className="about-editorial-hero-grid">
-            <div>
-              <ScrollWipeText
-                as="h1"
-                className="about-editorial-hero-title"
-              >
-                {ABOUT_CONTENT.hero.title}
-              </ScrollWipeText>
-            </div>
-
-            <div className="about-editorial-hero-copy">
-              <p className="about-editorial-lead">{ABOUT_CONTENT.hero.introduction}</p>
-              <p className="about-editorial-support">{ABOUT_CONTENT.hero.detail}</p>
-              <div className="about-editorial-actions">
-                <Link className="about-editorial-button about-editorial-button-primary" href="/houses">
-                  Explore the houses <ArrowUpRight size={16} aria-hidden="true" />
-                </Link>
-                <Link className="about-editorial-button about-editorial-button-secondary" href="/contact">
-                  Find us &amp; get in touch <ArrowUpRight size={16} aria-hidden="true" />
-                </Link>
-              </div>
-            </div>
-          </GsapFadeIn>
-
-          <div className="about-editorial-stats" aria-label="Serenity at a glance">
-            {ABOUT_CONTENT.stats.map((stat) => (
-              <div className="about-editorial-stat" key={stat.label}>
-                <p className="about-editorial-stat-value">{stat.value}</p>
-                <p className="about-editorial-stat-label">{stat.label}</p>
-                <p className="about-editorial-stat-detail">{stat.detail}</p>
-              </div>
-            ))}
+      <section className="about-story-hero" aria-labelledby="about-story-hero-title">
+        <div className="about-story-hero__media">
+          <HouseImage
+            src={heroHome?.featuredImage ?? ""}
+            alt={heroHome ? `${heroHome.name.replace(" - Whole", "")} exterior in Pakenham` : ""}
+            priority
+          />
+          <span className="about-story-hero__media-label">Three homes, side by side in Pakenham.</span>
+        </div>
+        <div className="about-story-hero__copy">
+          <p className="about-story-eyebrow">A more personal way to stay</p>
+          <h2 id="about-story-hero-title">Stay comfortably.<br />Feel at home.</h2>
+          <p>Serenity on the Rocks offers private furnished homes for families, work trips, relocations and longer visits. Settle in with the everyday details taken care of and one responsive local contact throughout your stay.</p>
+          <div className="about-story-hero__links">
+            <Link href="/houses">Explore the houses <span aria-hidden="true">↗</span></Link>
+            <Link href="/contact">Get in touch <span aria-hidden="true">↗</span></Link>
           </div>
         </div>
       </section>
 
-      <section className="about-editorial-section" aria-label="The simple idea">
-        <div className="about-editorial-shell">
-          <GsapFadeIn className="about-editorial-section-heading">
-            <p className="about-editorial-section-index" aria-hidden="true">
-              {ABOUT_CONTENT.idea.index}
-            </p>
-            <div>
-              <ScrollWipeText
-                as="h2"
-                className="about-editorial-section-title"
-              >
-                {ABOUT_CONTENT.idea.title}
-              </ScrollWipeText>
-            </div>
-            <p className="about-editorial-section-introduction">{ABOUT_CONTENT.idea.introduction}</p>
-          </GsapFadeIn>
+      <section className="about-story-stats" aria-label="Serenity at a glance">
+        {STATS.map((stat) => (
+          <div className="about-story-stat" key={stat.label}>
+            <strong>{stat.value}</strong>
+            <span>{stat.label}</span>
+            <p>{stat.detail}</p>
+          </div>
+        ))}
+      </section>
 
-          <GsapFadeIn className="about-editorial-prose-grid">
-            {ABOUT_CONTENT.idea.paragraphs.map((paragraph, index) => (
-              <div className="about-editorial-prose-item" key={paragraph}>
-                <span className="about-editorial-prose-index" aria-hidden="true">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <p>{paragraph}</p>
+      <section className="about-story-intro" aria-labelledby="about-story-intro-title">
+        <div className="about-story-section-topline">
+          <span>The simple idea</span>
+          <span>01 / Our approach</span>
+        </div>
+        <div className="about-story-intro__statement">
+          <h2 id="about-story-intro-title">A good place to land.</h2>
+          <p>A comfortable home, a convenient location, and a host you can count on. Stay independently or reserve the houses together.</p>
+        </div>
+        <div className="about-story-intro__details">
+          <p>Each home is furnished for the routines that make a longer visit work: cooking, working, resting and spending time together.</p>
+          <p>Shops, restaurants, transport and Pakenham Industrial Park are close by, with Gippsland and Phillip Island further afield.</p>
+          <p>From the first question to checkout, you have one local contact for the details of your stay.</p>
+        </div>
+      </section>
+
+      <section className="about-story-principles" aria-labelledby="about-story-principles-title">
+        <div className="about-story-principles__heading">
+          <span>02 / What matters</span>
+          <h2 id="about-story-principles-title">The stay, considered.</h2>
+          <p>Practical comforts and attentive hosting make the difference, whether you are here for a few nights or much longer.</p>
+        </div>
+        <div className="about-story-principles__grid">
+          {PRINCIPLES.map((item) => (
+            <article className="about-story-principle" key={item.number}>
+              <span>{item.number}</span>
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
               </div>
-            ))}
-          </GsapFadeIn>
+            </article>
+          ))}
         </div>
       </section>
 
-      <section
-        className="about-editorial-section about-editorial-principles"
-        aria-label="Made for real stays"
-      >
-        <div className="about-editorial-shell">
-          <GsapFadeIn className="about-editorial-section-heading">
-            <p className="about-editorial-section-index" aria-hidden="true">
-              {ABOUT_CONTENT.principles.index}
-            </p>
-            <div>
-              <ScrollWipeText
-                as="h2"
-                className="about-editorial-section-title"
-              >
-                {ABOUT_CONTENT.principles.title}
-              </ScrollWipeText>
-            </div>
-            <p className="about-editorial-section-introduction">
-              {ABOUT_CONTENT.principles.introduction}
-            </p>
-          </GsapFadeIn>
-
-          <GsapStagger className="about-editorial-principle-list" selector=".about-editorial-principle">
-            {ABOUT_CONTENT.principles.items.map(({ number, title, text }) => (
-              <article className="about-editorial-principle" key={title}>
-                <span className="about-editorial-principle-number" aria-hidden="true">
-                  {number}
+      {homes.length > 0 ? (
+        <section className="about-story-homes" aria-labelledby="about-story-homes-title">
+          <div className="about-story-homes__heading">
+            <h2 id="about-story-homes-title">Three homes.<br />One neighbourhood.</h2>
+            <Link href="/houses">View all houses <span aria-hidden="true">↗</span></Link>
+          </div>
+          <div className="about-story-homes__grid">
+            {homes.map((home, index) => (
+              <Link className="about-story-home" href={`/properties/${home.slug}`} key={home.slug}>
+                <span className="about-story-home__media">
+                  <HouseImage src={home.featuredImage} alt={`${home.name.replace(" - Whole", "")} exterior`} />
                 </span>
-                <div className="about-editorial-principle-title">
-                  <h3>{title}</h3>
-                </div>
-                <p>{text}</p>
-                <CheckCircle2
-                  className="about-editorial-principle-mark"
-                  size={19}
-                  strokeWidth={1.5}
-                  aria-hidden="true"
-                />
-              </article>
+                <span className="about-story-home__caption">
+                  <span>{home.name.replace(" - Whole", "")}</span>
+                  <small>House {String(index + 1).padStart(2, "0")}</small>
+                </span>
+              </Link>
             ))}
-          </GsapStagger>
-        </div>
-      </section>
+          </div>
+        </section>
+      ) : null}
 
-      {reviews.length > 0 && (
+      {reviews.length > 0 ? (
         <HomepageReviewsSection
           id="guest-reviews"
+          className="about-story-reviews"
           eyebrow="Guestbook"
           heading="A stay remembered in kind words."
-          description="Read the full collection of five-star notes from guests who stayed in the Serenity houses."
+          description="Notes from guests who stayed in the Serenity homes."
           reviews={reviews}
           maxReviews={reviews.length}
           allReviewsHref="/houses"
-          allReviewsLabel="EXPLORE THE HOUSES"
+          allReviewsLabel="Explore the houses"
         />
-      )}
-
-    </main>
+      ) : null}
+    </div>
   );
 }

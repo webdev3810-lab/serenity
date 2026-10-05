@@ -1,0 +1,403 @@
+/* Serenity on the Rocks homepage hero.
+   The image stays prominent and the copy sits directly in the composition;
+   only the outer frame and interactive controls use rounded treatment. */
+.homepage-theme {
+  --hero-overlay-ink: rgba(0, 0, 0, 0.4);
+  --hero-overlay-soft: rgba(0, 0, 0, 0.14);
+  --hero-rule: rgba(255, 255, 255, 0.42);
+}
+
+.serenity-hero {
+  width: min(calc(100% - clamp(1.5rem, 6vw, 8rem)), 116rem);
+  height: clamp(
+    40rem,
+    calc(100svh - var(--homepage-promo-height) - 4rem - 2rem),
+    56rem
+  );
+  min-height: 40rem;
+  margin: clamp(0.5rem, 1.2vw, 1.25rem) auto 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--hero-green-deep) 24%, transparent);
+  border-radius: 1.25rem !important;
+  box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, 0.12);
+  background: #596260;
+}
+
+/* The previous inset frame and decorative orb competed with the photography. */
+.serenity-hero::before,
+.serenity-hero::after {
+  display: none;
+}
+
+.serenity-hero-media,
+.serenity-hero-image,
+.serenity-hero-smoke,
+.serenity-hero-image-asset {
+  border-radius: 0 !important;
+}
+
+.serenity-hero-image-asset {
+  filter: none !important;
+  object-position: center 52%;
+}
+
+.serenity-hero-smoke {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0) 58%, rgba(0, 0, 0, 0.14) 100%),
+    radial-gradient(ellipse at 50% 38%, var(--hero-overlay-ink) 0%, var(--hero-overlay-soft) 44%, rgba(0, 0, 0, 0) 76%);
+}
+
+.serenity-hero-shell {
+  width: min(calc(100% - clamp(2rem, 6vw, 7rem)), 96rem);
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(1.25rem, 3vh, 2.5rem);
+  padding-block: clamp(4.5rem, 9vh, 6rem) clamp(1rem, 2.5vh, 2rem);
+}
+
+.serenity-hero-copy {
+  width: min(100%, 60rem);
+  padding: 0;
+  border: 0;
+  border-radius: 0 !important;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  text-align: center;
+}
+
+.serenity-hero-eyebrow {
+  margin-bottom: clamp(0.9rem, 1.7vw, 1.3rem);
+  color: rgba(255, 255, 255, 0.84);
+  font-size: clamp(0.62rem, 0.68vw, 0.78rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-align: center;
+}
+
+.serenity-hero-title {
+  display: flex;
+  width: 100%;
+  max-width: min(100%, 60rem);
+  align-items: center;
+  flex-direction: column;
+  gap: clamp(0.15rem, 0.35vw, 0.35rem);
+  line-height: 0.96;
+  text-align: center;
+}
+
+.serenity-hero-title-main {
+  display: block;
+  font-size: clamp(2.7rem, 4.1vw, 5.1rem);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  line-height: 0.96;
+  overflow-wrap: normal;
+  white-space: nowrap;
+  text-shadow: 0 0.16rem 1.2rem rgba(0, 0, 0, 0.22);
+}
+
+.serenity-hero-title-sub {
+  display: block;
+  font-size: clamp(2.35rem, 3.8vw, 4.75rem);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  line-height: 0.96;
+  overflow-wrap: normal;
+  white-space: nowrap;
+  text-shadow: 0 0.16rem 1.2rem rgba(0, 0, 0, 0.18);
+}
+
+.serenity-hero-support {
+  max-width: 42rem;
+  margin: clamp(1.2rem, 2.2vw, 1.8rem) auto 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: clamp(0.95rem, 1.02vw, 1.1rem);
+  line-height: 1.6;
+  text-align: center;
+  text-shadow: 0 0.1rem 0.8rem rgba(0, 0, 0, 0.18);
+}
+
+.homepage-theme .serenity-hero-cta,
+.homepage-theme .serenity-hero-text-link {
+  min-height: 3.15rem;
+  border-radius: var(--radius-pill, 9999px) !important;
+  padding-inline: clamp(1.1rem, 1.75vw, 1.6rem);
+  font-weight: 600;
+  letter-spacing: 0.035em;
+  text-transform: none;
+}
+
+.homepage-theme .serenity-hero-cta {
+  box-shadow: 0 0.65rem 1.25rem rgba(255, 210, 26, 0.14);
+}
+
+.homepage-theme .serenity-hero-text-link {
+  border-color: rgba(255, 255, 255, 0.72);
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.homepage-theme .serenity-hero-cta:hover,
+.homepage-theme .serenity-hero-cta:focus-visible,
+.homepage-theme .serenity-hero-text-link:hover,
+.homepage-theme .serenity-hero-text-link:focus-visible {
+  box-shadow: 0 0.8rem 1.4rem rgba(0, 31, 22, 0.18);
+}
+
+.serenity-hero-actions {
+  justify-content: center;
+}
+
+/* A light editorial divider replaces the previous dark rounded stats bar. */
+.serenity-hero-stats {
+  width: 100% !important;
+  flex-shrink: 0;
+  margin: clamp(1.25rem, 3vh, 2rem) auto 0;
+  overflow: visible;
+  border: 0;
+  border-top: 1px solid var(--hero-rule);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 0 !important;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.serenity-hero-stat {
+  min-height: clamp(4.15rem, 5vw, 5.5rem);
+  padding-inline: clamp(0.7rem, 1.5vw, 1.4rem);
+  border-right-color: rgba(255, 255, 255, 0.28);
+  border-radius: 0 !important;
+}
+
+.serenity-hero-stat:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.serenity-hero-stat strong {
+  font-size: clamp(1.45rem, 2.2vw, 2.8rem);
+  font-weight: 500;
+}
+
+.serenity-hero-stat span {
+  font-size: clamp(0.58rem, 0.62vw, 0.72rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .homepage-theme {
+    --hero-overlay-ink: rgba(0, 0, 0, 0.62);
+    --hero-overlay-soft: rgba(0, 0, 0, 0.16);
+    --hero-rule: rgba(255, 255, 255, 0.46);
+  }
+}
+
+@media (max-width: 767px) {
+  .serenity-hero {
+    width: calc(100% - 1rem);
+    height: auto !important;
+    min-height: 40rem !important;
+    margin-block: 1rem 0;
+    border-radius: 1rem !important;
+  }
+
+  .serenity-hero-shell {
+    width: calc(100% - 1.5rem);
+    height: auto !important;
+    min-height: 40rem !important;
+    gap: 1.5rem;
+    padding-block: 5rem 1.25rem;
+  }
+
+  .serenity-hero-copy {
+    width: 100%;
+  }
+
+  .serenity-hero-title {
+    max-width: 100%;
+  }
+
+  .serenity-hero-title-main {
+    font-size: clamp(1.8rem, 8.2vw, 3rem);
+  }
+
+  .serenity-hero-title-sub {
+    font-size: clamp(1.75rem, 7.8vw, 2.8rem);
+  }
+
+  .serenity-hero-support {
+    max-width: 32rem;
+    font-size: 0.96rem;
+  }
+
+  .serenity-hero-stats {
+    width: 100% !important;
+    margin-top: 1rem;
+  }
+
+  .serenity-hero-stat {
+    min-height: 4.15rem;
+    padding-inline: 0.65rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .serenity-hero-cta:hover,
+  .serenity-hero-cta:focus-visible,
+  .serenity-hero-text-link:hover,
+  .serenity-hero-text-link:focus-visible {
+    transform: none;
+  }
+}
+
+/* Compact business-travel feature section. The section stays contained on
+   wide screens and uses a quieter editorial rhythm instead of tall cards. */
+.homepage-theme .homepage-business-section {
+  width: min(calc(100% - clamp(1.25rem, 5vw, 6rem)), 84rem);
+  margin: clamp(2rem, 4vw, 4rem) auto 0;
+  padding: clamp(2.5rem, 4vw, 4rem) clamp(1.25rem, 3.5vw, 3.5rem) clamp(2.75rem, 4vw, 3.75rem);
+  border: 0;
+  border-radius: 1.15rem;
+  background: color-mix(in srgb, var(--homepage-surface) 97%, var(--homepage-soft));
+}
+
+.homepage-theme .homepage-business-container {
+  width: 100%;
+  max-width: none;
+}
+
+.homepage-theme .homepage-business-intro {
+  grid-template-columns: minmax(0, 1.08fr) minmax(17rem, 0.92fr);
+  gap: clamp(2.25rem, 6vw, 5rem);
+  align-items: start;
+  padding-bottom: clamp(2.75rem, 4.5vw, 3.75rem);
+}
+
+.homepage-theme .homepage-business-eyebrow {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+}
+
+.homepage-theme .homepage-business-title {
+  max-width: 16ch;
+  margin-top: 1rem;
+  font-size: clamp(2.35rem, 4.2vw, 4rem);
+  line-height: 0.98;
+}
+
+.homepage-theme .homepage-business-copy {
+  max-width: 30rem;
+  padding-top: clamp(2rem, 3.5vw, 3.25rem);
+  padding-bottom: 0;
+}
+
+.homepage-theme .homepage-business-copy > p {
+  max-width: 38ch;
+  font-size: clamp(0.96rem, 1.1vw, 1.08rem);
+  line-height: 1.62;
+}
+
+.homepage-theme .homepage-business-link {
+  margin-top: 1.35rem;
+  border-radius: 0 !important;
+  padding-bottom: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.homepage-theme .homepage-business-grid {
+  border-color: color-mix(in srgb, var(--homepage-line) 72%, transparent);
+}
+
+.homepage-theme .homepage-business-card {
+  min-height: 12.25rem;
+  padding: 1.5rem clamp(1rem, 2vw, 1.75rem) 1.65rem;
+  border-right-color: color-mix(in srgb, var(--homepage-line) 72%, transparent);
+}
+
+.homepage-theme .homepage-business-card:first-child {
+  padding-left: 0;
+}
+
+.homepage-theme .homepage-business-card:last-child {
+  padding-right: 0;
+}
+
+.homepage-theme .homepage-business-number {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+}
+
+.homepage-theme .homepage-business-card h3 {
+  margin: 1.35rem 0 0.65rem;
+  font-size: clamp(1.15rem, 1.45vw, 1.35rem);
+  line-height: 1.12;
+}
+
+.homepage-theme .homepage-business-card p {
+  max-width: 30ch;
+  font-size: 0.94rem;
+  line-height: 1.58;
+}
+
+@media (max-width: 1023px) {
+  .homepage-theme .homepage-business-section {
+    width: calc(100% - 2rem);
+    padding: 2.5rem clamp(1.25rem, 4vw, 2.5rem) 3rem;
+  }
+
+  .homepage-theme .homepage-business-intro {
+    gap: 1.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .homepage-theme .homepage-business-copy {
+    max-width: 38rem;
+    padding-top: 0;
+  }
+
+  .homepage-theme .homepage-business-title {
+    max-width: 18ch;
+    font-size: clamp(2.45rem, 7vw, 3.7rem);
+  }
+}
+
+@media (max-width: 640px) {
+  .homepage-theme .homepage-business-section {
+    width: calc(100% - 1rem);
+    margin-top: 1.5rem;
+    padding: 2.1rem 1rem 2.25rem;
+    border-radius: 0.9rem;
+  }
+
+  .homepage-theme .homepage-business-intro {
+    gap: 1.25rem;
+    padding-bottom: 2rem;
+  }
+
+  .homepage-theme .homepage-business-title {
+    max-width: 19ch;
+    font-size: clamp(2.1rem, 9vw, 2.9rem);
+    line-height: 1;
+  }
+
+  .homepage-theme .homepage-business-copy > p {
+    max-width: 42ch;
+    font-size: 0.95rem;
+  }
+
+  .homepage-theme .homepage-business-card,
+  .homepage-theme .homepage-business-card:first-child,
+  .homepage-theme .homepage-business-card:last-child {
+    min-height: 0;
+    padding: 1.25rem 0 1.35rem;
+    border-right: 0;
+  }
+
+  .homepage-theme .homepage-business-card h3 {
+    margin-top: 0.85rem;
+  }
+}

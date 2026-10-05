@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { BrandWordmark } from "@/src/components/BrandWordmark";
 
 export interface StaggeredMenuItem {
   label: string;
@@ -26,8 +26,6 @@ export interface StaggeredMenuProps {
   displaySocials?: boolean;
   displayItemNumbering?: boolean;
   className?: string;
-  logoUrl?: string;
-  logoAlt?: string;
   ctaLabel?: string;
   ctaHref?: string;
   menuButtonColor?: string;
@@ -42,19 +40,17 @@ export interface StaggeredMenuProps {
 
 export default function StaggeredMenu({
   position = "right",
-  colors = ["#5A463A", "#B99D88", "#D8CCC4"],
+  colors = ["#111111", "#075F47", "#FFFFFF"],
   items = [],
   socialItems = [],
   displaySocials = true,
   displayItemNumbering = true,
   className = "",
-  logoUrl = "/LOGO.png",
-  logoAlt = "Serenity Stays",
-  ctaLabel = "BOOK NOW",
+  ctaLabel = "Book now",
   ctaHref = "/houses",
-  menuButtonColor = "#2D2622",
-  openMenuButtonColor = "#2D2622",
-  accentColor = "#B7664E",
+  menuButtonColor = "#111111",
+  openMenuButtonColor = "#111111",
+  accentColor = "#075F47",
   isFixed = false,
   changeMenuColorOnOpen = true,
   closeOnClickAway = true,
@@ -214,29 +210,31 @@ export default function StaggeredMenu({
     <div className={`sm-scope z-[80] ${open ? "pointer-events-auto" : "pointer-events-none"} ${isFixed ? "fixed inset-0 h-screen w-screen overflow-hidden" : "relative h-full w-full"} ${className}`}>
       <div className="staggered-menu-wrapper pointer-events-none relative z-40 h-full w-full" style={cssVars} data-position={position} data-open={open || undefined}>
         <div ref={preLayersRef} className="sm-prelayers pointer-events-none absolute bottom-0 right-0 top-0 z-[5]" aria-hidden="true">
-          {(layerColors.length ? layerColors : ["#5A463A", "#B99D88"]).map((color, index) => (
+          {(layerColors.length ? layerColors : ["#111111", "#075F47"]).map((color, index) => (
             <div key={`${color}-${index}`} className="sm-prelayer absolute bottom-0 right-0 top-0 h-full w-full" style={{ background: color }} />
           ))}
         </div>
 
-        <header className="staggered-menu-header pointer-events-none absolute left-0 top-0 z-20 flex h-[5.75rem] w-full items-center justify-between border-b border-[#D8CCC4] bg-white/[.98] px-4 shadow-[0_0.75rem_2rem_rgba(45,38,34,0.06)] sm:px-8" aria-label="Main navigation header">
-        <Link href="/" className="sm-logo pointer-events-auto flex items-center" aria-label="Serenity on the Rocks home" onClick={closeMenu}>
-            <Image src={logoUrl} alt={logoAlt} width={148} height={112} priority className="block h-14 w-auto object-contain" />
+        <header className="staggered-menu-header pointer-events-none absolute left-0 top-0 z-20 flex h-16 w-full items-center justify-between border-b border-[#D8CCC4] bg-white/[.98] px-4 shadow-[0_0.75rem_2rem_rgba(45,38,34,0.06)] sm:px-6" aria-label="Main navigation header">
+          <Link href="/" className="sm-logo pointer-events-auto flex items-center" aria-label="Serenity on the Rocks home" onClick={closeMenu}>
+            <BrandWordmark />
           </Link>
 
-          <button ref={toggleBtnRef} className="sm-toggle pointer-events-auto inline-flex h-12 w-12 items-center justify-center border border-[#D8CCC4] bg-white p-0 text-[#2D2622] transition-colors hover:bg-[#EAE1DD] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#B99D88]" aria-label={open ? "Close navigation menu" : "Open navigation menu"} aria-expanded={open} aria-controls="staggered-menu-panel" onClick={toggleMenu} type="button">
+          <button ref={toggleBtnRef} className="sm-toggle pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#D8CCC4] bg-white p-0 text-[#2D2622] transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-[#EAE1DD] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#B99D88]" aria-label={open ? "Close navigation menu" : "Open navigation menu"} aria-expanded={open} aria-controls="staggered-menu-panel" onClick={toggleMenu} type="button">
             {open ? <X size={21} strokeWidth={1.8} aria-hidden="true" /> : <Menu size={21} strokeWidth={1.8} aria-hidden="true" />}
           </button>
         </header>
 
-        <aside id="staggered-menu-panel" ref={panelRef} className={`staggered-menu-panel absolute bottom-0 right-0 top-0 z-10 flex flex-col overflow-y-auto bg-[#FCFBF9] px-5 pb-8 pt-[7.25rem] text-[#2D2622] sm:px-8 sm:pt-[8rem] ${open ? "pointer-events-auto" : "pointer-events-none"}`} aria-hidden={!open}>
+        <aside id="staggered-menu-panel" ref={panelRef} className={`staggered-menu-panel absolute bottom-0 right-0 top-0 z-10 flex flex-col overflow-y-auto bg-[#FCFBF9] px-5 pb-8 pt-20 text-[#2D2622] sm:px-6 sm:pt-[5.25rem] ${open ? "pointer-events-auto" : "pointer-events-none"}`} aria-hidden={!open}>
           <div className="sm-panel-inner flex flex-1 flex-col gap-6">
             <ul className="sm-panel-list m-0 flex list-none flex-col border-t border-[#EAE1DD] p-0" role="list" data-numbering={displayItemNumbering || undefined}>
               {items.length ? items.map((item, index) => (
                 <li className="sm-panel-item-wrap group relative overflow-hidden border-b border-[#EAE1DD] leading-none" key={`${item.label}-${index}`}>
-                  <Link href={item.link} aria-label={item.ariaLabel ?? item.label} aria-current={item.isActive ? "page" : undefined} className="sm-panel-item relative flex min-h-[4.35rem] w-full items-center justify-between gap-4 py-3 font-marcellus text-[clamp(2.25rem,10.5vw,3.8rem)] font-normal leading-[0.86] tracking-[-0.045em] text-[#2D2622] no-underline transition-colors duration-150 hover:text-[var(--sm-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--sm-accent)]" onClick={closeMenu}>
+                  <Link href={item.link} aria-label={item.ariaLabel ?? item.label} aria-current={item.isActive ? "page" : undefined} className={`sm-panel-item relative flex min-h-[4.35rem] w-full items-center justify-between gap-4 rounded-2xl px-4 py-4 font-sans text-[clamp(1.9rem,8.5vw,3.6rem)] font-medium leading-[1.02] tracking-[-0.035em] text-[#2D2622] no-underline transition-[background-color,color,box-shadow,transform] duration-200 hover:-translate-y-px hover:text-[var(--sm-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--sm-accent)] ${item.isActive ? "is-active" : ""}`} onClick={closeMenu}>
                     <span className="sm-panel-item-label inline-block">{item.label}</span>
-                    <ArrowUpRight size={20} strokeWidth={1.5} aria-hidden="true" className={`shrink-0 transition-[color,opacity,transform] duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${item.isActive ? "text-[var(--sm-accent)] opacity-100" : "text-[#B99D88] opacity-50 group-hover:opacity-100"}`} />
+                    <span className={`sm-panel-item__icon inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color,color,opacity,transform] duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${item.isActive ? "border-[var(--sm-accent)] bg-[var(--sm-accent)] text-[#2D2622] opacity-100" : "border-[#B99D88]/45 text-[#B99D88] opacity-75 group-hover:border-[var(--sm-accent)] group-hover:bg-[var(--sm-accent)] group-hover:text-[#2D2622] group-hover:opacity-100"}`}>
+                      <ArrowUpRight size={18} strokeWidth={1.6} aria-hidden="true" />
+                    </span>
                   </Link>
                 </li>
               )) : (
@@ -244,14 +242,16 @@ export default function StaggeredMenu({
               )}
             </ul>
 
-            <Link href={ctaHref} onClick={closeMenu} className="sm-panel-cta inline-flex min-h-14 w-full items-center justify-between gap-5 bg-[#2D2622] px-5 text-xs font-bold uppercase tracking-[0.18em] text-white no-underline transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-[#5A463A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--sm-accent)] sm:px-6">
+            <Link href={ctaHref} onClick={closeMenu} className="sm-panel-cta inline-flex min-h-14 w-full items-center justify-between gap-5 rounded-full bg-[#2D2622] px-5 text-[13px] font-medium normal-case tracking-[0.04em] text-white no-underline transition-[background-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:bg-[#5A463A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--sm-accent)] sm:px-6">
               <span>{ctaLabel}</span>
-              <ArrowUpRight size={19} strokeWidth={1.7} aria-hidden="true" />
+              <span className="sm-panel-cta__icon inline-flex h-9 w-9 items-center justify-center rounded-full border border-current/40">
+                <ArrowUpRight size={17} strokeWidth={1.7} aria-hidden="true" />
+              </span>
             </Link>
 
             {displaySocials && socialItems.length > 0 && (
               <div className="sm-socials mt-auto flex flex-col gap-3 border-t border-[#D8CCC4] pt-6" aria-label="Social links">
-                <h2 className="sm-socials-title m-0 text-xs font-bold uppercase tracking-[0.18em] text-[var(--sm-accent)]">Connect</h2>
+                <h2 className="sm-socials-title m-0 text-xs font-medium normal-case tracking-[0.08em] text-[var(--sm-accent)]">Connect</h2>
                 <ul className="sm-socials-list m-0 flex list-none flex-wrap gap-x-5 gap-y-2 p-0" role="list">
                   {socialItems.map((social, index) => <li key={`${social.label}-${index}`}><a href={social.link} target="_blank" rel="noopener noreferrer" className="sm-socials-link text-base text-[#2D2622] no-underline hover:text-[var(--sm-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sm-accent)]">{social.label}</a></li>)}
                 </ul>

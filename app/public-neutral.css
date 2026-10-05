@@ -1,0 +1,297 @@
+/* Guest-facing neutrals only. Admin routes do not render inside .public-site. */
+.public-site {
+  --foreground: #111111;
+  --primary-black: #111111;
+  --soft-black: #111111;
+  --warm-brown: #111111;
+  --espresso: #111111;
+  --deep-brown: #111111;
+  --muted-text: #333333;
+  --text-muted: #333333;
+  --light-brown: #111111;
+  --warm-tan: #111111;
+  --accent-terracotta: #111111;
+  --sand-beige: #ffffff;
+  --light-taupe: #ffffff;
+  --color-stone-950: #111111;
+  --color-stone-900: #111111;
+  --color-stone-800: #111111;
+  --color-stone-700: #222222;
+  --color-stone-600: #333333;
+  --color-stone-500: #555555;
+  --color-stone-400: #777777;
+  --border-warm: #d9d9d4;
+  --border-neutral: #d9d9d4;
+  --homepage-line: #d9d9d4;
+  --public-line: #d9d9d4;
+}
+
+/* Older pages still use literal Tailwind colours alongside shared tokens. */
+.public-site :is(
+  [class*="bg-[#F7F4F1]"],
+  [class*="bg-[#f7f4f1]"],
+  [class*="bg-[#F2F0EA]"],
+  [class*="bg-[#f2f0ea]"],
+  [class*="bg-[#EAE1DD]"],
+  [class*="bg-[#eae1dd]"],
+  [class*="bg-[#FCFBF9]"],
+  [class*="bg-[#FAF5EF]"],
+  [class*="bg-[#FAF8F5]"],
+  [class*="bg-[#F8F5F1]"]
+) {
+  background-color: #ffffff !important;
+}
+
+.public-site :is(
+  [class*="text-[#2D2622]"],
+  [class*="text-[#2d2622]"],
+  [class*="text-[#5A463A]"],
+  [class*="text-[#5a463a]"],
+  [class*="text-[#6F6258]"],
+  [class*="text-[#6f6258]"],
+  [class*="text-[#8B6B55]"],
+  [class*="text-[#8b6b55]"],
+  [class*="text-[#7A4E2D]"],
+  [class*="text-[#7a4e2d]"],
+  [class*="text-[#4A4036]"],
+  [class*="text-[#4a4036]"],
+  [class*="text-[#B88A5A]"],
+  [class*="text-[#b88a5a]"],
+  [class*="text-[#B7664E]"],
+  [class*="text-[#b7664e]"],
+  [class*="text-[#B99D88]"],
+  [class*="text-[#b99d88]"],
+  [class*="text-[#6F5A4D]"],
+  [class*="text-[#6f5a4d]"]
+) {
+  color: #111111 !important;
+}
+
+.public-site :is(
+  [class*="bg-[#2D2622]"],
+  [class*="bg-[#2d2622]"],
+  [class*="bg-[#5A463A]"],
+  [class*="bg-[#5a463a]"],
+  [class*="bg-[#7A4E2D]"],
+  [class*="bg-[#7a4e2d]"],
+  [class*="bg-[#B88A5A]"],
+  [class*="bg-[#b88a5a]"],
+  [class*="bg-[#B7664E]"],
+  [class*="bg-[#b7664e]"],
+  [class*="bg-[#B99D88]"],
+  [class*="bg-[#b99d88]"]
+) {
+  background-color: #111111 !important;
+}
+
+.public-site :is(
+  [class*="border-[#2D2622]"],
+  [class*="border-[#2d2622]"],
+  [class*="border-[#5A463A]"],
+  [class*="border-[#5a463a]"],
+  [class*="border-[#7A4E2D]"],
+  [class*="border-[#7a4e2d]"],
+  [class*="border-[#8B6B55]"],
+  [class*="border-[#8b6b55]"],
+  [class*="border-[#B99D88]"],
+  [class*="border-[#b99d88]"]
+) {
+  border-color: #111111 !important;
+}
+
+.public-site :is(
+  [class*="border-[#D8CCC4]"],
+  [class*="border-[#d8ccc4]"]
+) {
+  border-color: #d9d9d4 !important;
+}
+
+.public-site [class*="accent-[#7A4E2D]"],
+.public-site [class*="accent-[#7a4e2d]"] {
+  accent-color: var(--hero-green, #075f47) !important;
+}
+
+/* Neutralise the last legacy editorial tokens without touching the admin. */
+.public-site :is(
+  .location-editorial,
+  .gallery-clean-experience,
+  .gallery-editorial,
+  .gallery-journey,
+  .about-editorial-page,
+  .property-photo-tour,
+  .property-photo-lightbox
+) {
+  --location-ink: #111111;
+  --location-muted: #333333;
+  --location-accent: #111111;
+  --gallery-clean-ink: #111111;
+  --gallery-clean-muted: #333333;
+  --gallery-clean-accent: #111111;
+  --gallery-ink: #111111;
+  --journey-ink: #111111;
+  --about-ink: #111111;
+  --about-muted: #333333;
+  --about-accent: var(--hero-green, #075f47);
+}
+
+.public-site .property-theme {
+  --property-ink: #111111;
+  --property-body: #111111;
+  --property-muted: #444444;
+}
+
+.public-site .booking-calendar,
+.public-site .property-editorial-heading {
+  color: #111111;
+}
+
+.public-site .property-editorial-heading {
+  border-top-color: #d9d9d4 !important;
+}
+
+.public-site .property-theme .stay-reserve-button:not(:disabled):is(:hover, :focus-visible),
+body:has(.public-site .property-theme) .serenity-booking-drawer .stay-reserve-button:not(:disabled):is(:hover, :focus-visible) {
+  color: #ffffff !important;
+}
+
+.public-site .property-theme :is(.stay-gallery-empty, .property-photo-lightbox, .stay-amenity-grid, .stay-know-grid) {
+  background: #ffffff;
+}
+
+.public-site .homepage-reviews-section {
+  padding-inline: clamp(1.5rem, 4vw, 4rem);
+  background: var(--hero-green, #07583f);
+  color: #ffffff;
+}
+
+.public-site .about-story-page .homepage-reviews-section {
+  background: var(--hero-green, #07583f);
+  color: #ffffff;
+}
+
+.public-site .homepage-reviews-rule {
+  border-color: rgba(255, 255, 255, 0.34);
+}
+
+.public-site .homepage-reviews-intro {
+  border-color: rgba(255, 255, 255, 0.34);
+}
+
+.public-site .homepage-reviews-eyebrow,
+.public-site .homepage-review-heading,
+.public-site .homepage-review-heading .scroll-wipe-text-reveal,
+.public-site .homepage-reviews-description {
+  color: #ffffff !important;
+}
+
+.public-site .homepage-reviews-eyebrow > span:first-child {
+  background: #ffffff;
+}
+
+.public-site .homepage-review-card {
+  position: relative;
+  height: 30rem;
+  min-height: 30rem !important;
+  border-color: rgba(255, 255, 255, 0.65) !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+  box-shadow: 0 1.25rem 2.75rem -1.8rem rgba(0, 0, 0, 0.42) !important;
+}
+
+.public-site .homepage-review-card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.42rem;
+  background: var(--hero-green, #07583f);
+  content: "";
+}
+
+.public-site .homepage-review-card.is-featured {
+  border-color: rgba(255, 255, 255, 0.65) !important;
+  background: #ffffff !important;
+  color: #111111 !important;
+}
+
+.public-site .homepage-review-card-top,
+.public-site .homepage-review-card-footer,
+.public-site .homepage-review-card.is-featured .homepage-review-card-top,
+.public-site .homepage-review-card.is-featured .homepage-review-card-footer {
+  border-color: rgba(17, 17, 17, 0.18);
+}
+
+.public-site .homepage-review-card-inner {
+  height: 100%;
+  min-height: 0;
+  padding-top: clamp(1.8rem, 3vw, 2.15rem);
+}
+
+.public-site .homepage-review-card-index,
+.public-site .homepage-review-date {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+}
+
+.public-site .homepage-review-card :is(.homepage-review-card-index, .homepage-review-date, .homepage-review-quote, .homepage-review-name, .homepage-review-verified, .homepage-review-link),
+.public-site .homepage-review-card.is-featured :is(.homepage-review-card-index, .homepage-review-date, .homepage-review-quote, .homepage-review-name, .homepage-review-verified, .homepage-review-link) {
+  color: #111111 !important;
+}
+
+.public-site .homepage-review-property {
+  padding: 0 0 0 0.8rem !important;
+  border-left: 1px solid rgba(17, 17, 17, 0.3);
+  border-radius: 0 !important;
+  background: transparent;
+  color: #111111 !important;
+  letter-spacing: 0.14em;
+}
+
+.public-site .homepage-review-card.is-featured .homepage-review-property {
+  background: transparent;
+  color: #111111 !important;
+}
+
+.public-site .homepage-review-mark,
+.public-site .homepage-review-stars {
+  color: #ffd21a;
+}
+
+.public-site .homepage-review-card.is-featured .homepage-review-stars {
+  color: #ffd21a;
+}
+
+.public-site .homepage-review-card.is-featured .homepage-review-mark {
+  color: var(--hero-green, #07583f);
+}
+
+.public-site .homepage-review-mark {
+  width: 2.35rem;
+  height: 2.35rem;
+  color: var(--hero-green, #07583f);
+}
+
+.public-site .homepage-review-quote {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.public-site .homepage-review-name {
+  font-size: 0.72rem;
+}
+
+.public-site .homepage-review-link {
+  padding-bottom: 0.18rem;
+  border-bottom: 1px solid #111111;
+}
+
+.public-site .homepage-reviews-all-link {
+  border-color: #ffffff;
+  border-radius: 0 !important;
+  color: #ffffff;
+}
+
+.public-site .homepage-reviews-all-link:hover,
+.public-site .homepage-reviews-all-link:focus-visible {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: var(--hero-green-deep, #063f30);
+}

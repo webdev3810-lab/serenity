@@ -1,0 +1,538 @@
+body:has(.corporate-editorial-page),
+body:has(.corporate-editorial-page) .public-site,
+body:has(.corporate-editorial-page) .public-site > main {
+  background: #11110f;
+}
+
+.corporate-editorial-page {
+  --corp-paper: #ffffff;
+  --corp-ink: #111111;
+  --corp-green: var(--hero-green, #07583f);
+  --corp-cream: #ffffff;
+  --corp-serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
+  display: grid;
+  gap: 2px;
+  padding-bottom: 2px;
+  background: var(--corp-ink);
+  color: var(--corp-ink);
+}
+
+.corporate-editorial-page.corporate-stays-page :is(h1, h2, h3, h4) {
+  font-family: var(--corp-serif);
+  font-weight: 400;
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+}
+
+.corporate-editorial-page .corporate-editorial-serif {
+  font-family: var(--corp-serif);
+}
+
+.corporate-editorial-page :is(.border-stone-100, .border-stone-200, .border-stone-300) {
+  border-color: #dedede;
+}
+
+.corporate-editorial-page .border-stone-900 {
+  border-color: var(--corp-ink);
+}
+
+.corporate-editorial-page :is(a, button, summary):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.corporate-editorial-masthead {
+  display: flex;
+  min-height: clamp(6.3rem, 8vw, 7.8rem);
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 0 clamp(1rem, 2.5vw, 2.5rem) clamp(0.85rem, 1.2vw, 1.2rem);
+  border-radius: 0 0 1.25rem 1.25rem;
+  background: var(--corp-green);
+  color: var(--corp-cream);
+}
+
+.corporate-editorial-masthead h1 {
+  margin: 0;
+  font-size: clamp(3.5rem, 6.5vw, 7rem);
+  letter-spacing: -0.065em;
+  line-height: 0.85;
+  text-transform: uppercase;
+}
+
+.corporate-editorial-masthead > span {
+  flex: none;
+  padding-bottom: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.corporate-editorial-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.38fr) minmax(0, 1fr);
+  gap: 2px;
+  min-height: clamp(35rem, calc(100svh - 11.9rem), 52rem);
+  background: var(--corp-ink);
+}
+
+.corporate-editorial-hero__image,
+.corporate-editorial-hero__copy {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 1.25rem;
+}
+
+.corporate-editorial-hero__image {
+  position: relative;
+  min-height: 35rem;
+  background: #c9c9bf;
+}
+
+.corporate-editorial-hero__image img {
+  object-fit: cover;
+}
+
+.corporate-editorial-hero__image::after {
+  position: absolute;
+  inset: 50% 0 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.56));
+  content: "";
+  pointer-events: none;
+}
+
+.corporate-editorial-hero__image > span {
+  position: absolute;
+  z-index: 1;
+  bottom: clamp(1.5rem, 3vw, 3rem);
+  left: clamp(1.5rem, 3vw, 3rem);
+  color: #fff;
+  font-family: var(--corp-serif);
+  font-size: clamp(1.7rem, 3vw, 3.4rem);
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+}
+
+.corporate-editorial-hero__copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(1.5rem, 3vw, 3rem);
+  padding: clamp(2rem, 4vw, 5rem);
+  background: var(--corp-paper);
+}
+
+.corporate-editorial-eyebrow {
+  font-family: var(--corp-serif);
+  font-size: 1rem;
+}
+
+.corporate-editorial-hero__copy h2 {
+  max-width: 12ch;
+  margin: 0;
+  font-size: clamp(3.2rem, 4.7vw, 6rem);
+  line-height: 0.88;
+}
+
+.corporate-editorial-hero__copy p {
+  max-width: 32rem;
+  margin: 0;
+  font-family: var(--corp-serif);
+  font-size: clamp(1.25rem, 1.6vw, 1.7rem);
+  line-height: 1.3;
+}
+
+.corporate-editorial-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+}
+
+.corporate-editorial-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid currentColor;
+  color: inherit;
+  font-family: var(--corp-serif);
+  font-size: 1.15rem;
+  text-decoration: none;
+}
+
+.corporate-editorial-links a:hover {
+  opacity: 0.65;
+}
+
+/* A single border is a divider, so keep it straight. Rounded corners remain
+   on the page sections and full container surfaces. */
+.corporate-editorial-page :is(.corporate-editorial-links a, .border-t:not(section), .border-b:not(section)) {
+  border-radius: 0 !important;
+}
+
+.corporate-editorial-page > section:not(.corporate-editorial-hero) {
+  border: 0;
+  border-radius: 1.25rem;
+  padding: clamp(3rem, 5vw, 5rem) clamp(1.25rem, 3vw, 3.5rem);
+  scroll-margin-top: 5rem;
+}
+
+.corporate-editorial-page > section:not(.corporate-editorial-hero) > .container {
+  width: 100%;
+  max-width: none;
+  margin-inline: auto;
+  padding: 0;
+}
+
+.corporate-editorial-page > section.corporate-editorial-benefits:not(.corporate-editorial-hero) {
+  background: var(--corp-paper);
+  color: var(--corp-ink);
+  padding: 0;
+}
+
+.corporate-editorial-benefits .corporate-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+  background: var(--corp-ink);
+}
+
+.corporate-editorial-benefits .corporate-benefit-card {
+  min-height: clamp(18rem, 25vw, 28rem);
+  justify-content: end;
+  border: 0;
+  border-radius: 1.25rem;
+  padding: clamp(1.5rem, 2.5vw, 3rem);
+  background: var(--corp-paper);
+  color: var(--corp-ink);
+}
+
+.corporate-editorial-benefits .corporate-benefit-icon {
+  display: none;
+}
+
+.corporate-editorial-benefits .corporate-benefit-card h3 {
+  margin: 0 0 1rem;
+  color: inherit;
+  font-family: var(--corp-serif);
+  font-size: clamp(2.4rem, 3.5vw, 4rem);
+  line-height: 0.9;
+}
+
+.corporate-editorial-benefits .corporate-benefit-card p {
+  margin: 0;
+  color: inherit;
+  font-family: var(--corp-serif);
+  font-size: clamp(1.1rem, 1.4vw, 1.5rem);
+  line-height: 1.2;
+}
+
+.corporate-editorial-page .corporate-editorial-enquiry,
+.corporate-editorial-page .corporate-editorial-booking,
+.corporate-editorial-page .corporate-editorial-faq {
+  background: var(--corp-paper);
+}
+
+.corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking, .corporate-editorial-faq, .corporate-editorial-closing) h2 {
+  max-width: 12ch;
+  margin: 0 0 1.75rem;
+  color: inherit;
+  font-size: clamp(3.5rem, 6vw, 7.5rem);
+  line-height: 0.9;
+}
+
+.corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking, .corporate-editorial-faq) .container > .grid > div:first-child > span:first-child,
+.corporate-editorial-closing .container > div > span:first-child {
+  margin-bottom: 1.25rem;
+  color: inherit;
+  font-family: var(--corp-serif);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking, .corporate-editorial-faq) .container > .grid > div:first-child > p,
+.corporate-editorial-closing .container > div > p {
+  color: inherit;
+  font-family: var(--corp-serif);
+  font-size: clamp(1.2rem, 1.7vw, 1.7rem);
+  line-height: 1.28;
+}
+
+.corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking) .container > .grid > div:last-child > div {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking) form {
+  margin-top: 0;
+}
+
+.corporate-editorial-enquiry li {
+  font-family: var(--corp-serif);
+  font-size: clamp(1.15rem, 1.4vw, 1.45rem);
+  line-height: 1.25;
+}
+
+.corporate-editorial-enquiry li svg {
+  color: var(--corp-green);
+}
+
+.corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking) form label:not(.corporate-house-choice, .corporate-invoice-choice) {
+  color: var(--corp-ink);
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking) .field {
+  min-height: 3.4rem;
+  border: 0 !important;
+  border-bottom: 1px solid #a8b7af !important;
+  border-radius: 0 !important;
+  outline: 0;
+  background: transparent !important;
+  padding: 0.7rem 0 0.85rem;
+  color: var(--corp-ink);
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.5;
+  text-transform: none;
+  box-shadow: none !important;
+}
+
+.corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking) .field:focus,
+.corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking) .field:focus-visible {
+  border-bottom-color: var(--corp-green) !important;
+  box-shadow: 0 1px 0 var(--corp-green) !important;
+}
+
+.corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking) .field::placeholder {
+  color: #777f7b;
+  opacity: 1;
+}
+
+.corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking) textarea.field {
+  min-height: 7.5rem;
+  resize: vertical;
+}
+
+.corporate-editorial-page .corporate-editorial-booking form > div:not(:last-child) {
+  border: 0;
+  border-bottom: 1px solid #d9dfda;
+  border-radius: 0 !important;
+  padding-bottom: clamp(2rem, 3vw, 3rem);
+}
+
+.corporate-editorial-page .corporate-editorial-booking form h4 {
+  border: 0;
+  padding-bottom: 0;
+  font-size: clamp(1.8rem, 2.4vw, 2.6rem);
+  line-height: 1.05;
+}
+
+.corporate-editorial-page .corporate-editorial-booking form .corporate-customer-id {
+  border: 0;
+  border-left: 3px solid var(--corp-green);
+  border-radius: 0 !important;
+  padding: 0.2rem 0 0.2rem 1.15rem;
+  background: #f4f8f5;
+  padding-right: 1rem;
+}
+
+.corporate-editorial-page .corporate-editorial-booking form .corporate-customer-id p {
+  color: #555c58;
+  font-size: 0.78rem;
+}
+
+.corporate-editorial-page .corporate-editorial-booking form button.field {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 4.5rem;
+  border-bottom: 1px solid #a8b7af !important;
+  background: transparent !important;
+  padding: 0.5rem 0;
+  box-shadow: none !important;
+}
+
+.corporate-editorial-page .corporate-editorial-booking form button.field:where(:hover, :focus-visible) {
+  border-bottom-color: var(--corp-green) !important;
+  box-shadow: 0 1px 0 var(--corp-green) !important;
+}
+
+.corporate-editorial-page .corporate-editorial-booking form button.field strong {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.corporate-editorial-page .corporate-house-choice {
+  border: 1px solid #c8d1ca;
+  border-radius: 0 !important;
+  background: #fff;
+  box-shadow: none;
+}
+
+.corporate-editorial-page .corporate-house-choice:not(.is-selected):not([class*="cursor-not-allowed"]):hover {
+  border-color: var(--corp-green);
+}
+
+.corporate-editorial-page .corporate-house-choice.is-selected {
+  border: 2px solid var(--corp-green);
+  box-shadow: none;
+}
+
+.corporate-editorial-page .corporate-house-choice-caption {
+  border-radius: 0 !important;
+}
+
+.corporate-editorial-page .corporate-house-choice-caption > span:first-child {
+  font-family: var(--corp-serif);
+  font-size: clamp(1.35rem, 1.7vw, 1.85rem);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+
+.corporate-editorial-page .corporate-invoice-choice {
+  border: 0;
+  border-top: 1px solid #d9dfda;
+  border-bottom: 1px solid #d9dfda;
+  border-radius: 0 !important;
+  padding: 1rem 0;
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.corporate-editorial-page .corporate-invoice-choice:hover {
+  background: #f4f8f5;
+}
+
+.corporate-editorial-page .corporate-invoice-choice input {
+  accent-color: var(--corp-green);
+}
+
+.corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking) button[type="submit"] {
+  min-height: 3.75rem;
+  border-radius: 0 !important;
+  background: var(--corp-green);
+  color: #fff;
+  box-shadow: none;
+}
+
+.corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking) button[type="submit"]:hover:not(:disabled) {
+  background: #043e2e;
+}
+
+.corporate-editorial-booking form label:has(input[type="checkbox"]:checked) {
+  border-color: var(--corp-green);
+}
+
+.corporate-editorial-page .corporate-editorial-faq details {
+  border-color: rgba(17, 17, 15, 0.28);
+}
+
+.corporate-editorial-page .corporate-editorial-faq details summary {
+  font-family: var(--corp-serif);
+  font-size: clamp(1.35rem, 1.8vw, 1.8rem);
+}
+
+.corporate-editorial-faq details p {
+  font-family: var(--corp-serif);
+  font-size: 1.2rem;
+}
+
+.corporate-editorial-page .corporate-editorial-closing {
+  background: var(--corp-green);
+  color: var(--corp-cream);
+}
+
+.corporate-editorial-page .corporate-editorial-closing h2 {
+  color: #ffffff;
+}
+
+.corporate-editorial-closing .container > div:last-child :is(p, a) {
+  font-family: var(--corp-serif);
+  font-size: clamp(1.2rem, 1.45vw, 1.5rem);
+  line-height: 1.3;
+}
+
+.corporate-editorial-closing :is(h2, p, a) {
+  color: inherit;
+}
+
+.corporate-editorial-page .corporate-editorial-closing .container > div:last-child :is(p, a, svg) {
+  color: var(--corp-cream);
+}
+
+.corporate-editorial-closing a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+  .corporate-editorial-hero {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .corporate-editorial-hero__copy {
+    padding: 2rem;
+  }
+
+  .corporate-editorial-hero__copy h2 {
+    font-size: clamp(2.8rem, 5vw, 4.5rem);
+  }
+}
+
+@media (max-width: 760px) {
+  .corporate-editorial-masthead {
+    min-height: 8rem;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    justify-content: end;
+    gap: 0.8rem;
+    padding: 1.1rem 1.25rem;
+  }
+
+  .corporate-editorial-masthead h1 {
+    font-size: clamp(3.3rem, 10.5vw, 5rem);
+  }
+
+  .corporate-editorial-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .corporate-editorial-hero__image {
+    min-height: 0;
+    height: min(65svh, 36rem);
+  }
+
+  .corporate-editorial-hero__copy {
+    min-height: 28rem;
+    padding: 2rem;
+  }
+
+  .corporate-editorial-hero__copy h2 {
+    font-size: clamp(3.2rem, 10vw, 5.5rem);
+  }
+
+  .corporate-editorial-benefits .corporate-benefits-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .corporate-editorial-benefits .corporate-benefit-card {
+    min-height: 17rem;
+  }
+}

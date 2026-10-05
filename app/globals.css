@@ -25,7 +25,7 @@
   --hero-green-deep: #063f30;
   --hero-yellow: #ffd21a;
   --homepage-line: rgba(6, 63, 48, 0.2);
-  --homepage-promo-height: 3rem;
+  --homepage-promo-height: 0rem;
 
   /* Accent Palette */
   --accent-sage: #71836B;
@@ -99,11 +99,11 @@
   --color-orange-100: var(--warning-bg);
   --color-orange-200: var(--warning-border);
   --color-orange-700: var(--warning-text);
-  /* Brand-safe stacks: premium on Windows/macOS, dependable fallbacks on Vercel. */
-  --font-sans: "Avenir Next", "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
-  --font-marcellus: "Baskerville", "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", serif;
-  --font-display: var(--font-marcellus);
-  --font-serif: var(--font-marcellus);
+  /* Poppins is self-hosted by next/font; Arial is the final system fallback. */
+  --font-sans: var(--font-poppins), Arial, sans-serif;
+  --font-display: var(--font-poppins), Arial, sans-serif;
+  --font-serif: var(--font-poppins), Arial, sans-serif;
+  --font-mono: var(--font-poppins), Arial, sans-serif;
 }
 
 *:where(:not(.admin-theme-context, .admin-theme-context *)) {
@@ -259,7 +259,7 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
 }
 
 .font-marcellus {
-  font-family: var(--font-marcellus);
+  font-family: var(--font-display);
 }
 
 .homepage-review-heading,
@@ -267,29 +267,98 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
   font-weight: 400 !important;
 }
 
-.brand-logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.15rem;
-  color: white;
+.brand-wordmark {
+  --brand-wordmark-accent: var(--light-brown);
+  --brand-wordmark-secondary: currentColor;
+  display: inline-grid;
+  min-width: max-content;
+  justify-items: start;
+  color: inherit;
   font-family: var(--font-display);
-  font-size: 1.9rem;
-  font-weight: 800;
-  letter-spacing: 0;
   line-height: 1;
+  text-decoration: none;
 }
 
-.brand-logo-dot {
-  color: var(--light-brown);
-  font-weight: 900;
+.brand-wordmark__primary {
+  display: block;
+  font-size: 1.85rem;
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  line-height: 0.9;
+  white-space: nowrap;
 }
 
-.brand-logo-dark {
-  color: var(--primary-black);
+.brand-wordmark__secondary {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  margin-top: 0.35rem;
+  padding-left: 0.08rem;
+  color: var(--brand-wordmark-secondary);
+  font-size: 0.46rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.brand-logo-dark .brand-logo-dot {
-  color: var(--warm-brown);
+.brand-wordmark__rule {
+  width: 1.15rem;
+  height: 1px;
+  background: var(--brand-wordmark-accent);
+  opacity: 0.8;
+}
+
+.brand-wordmark__stone {
+  width: 0.26rem;
+  height: 0.26rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--brand-wordmark-accent);
+  transform: rotate(45deg);
+}
+
+.pill-nav-brand,
+.sm-logo {
+  --brand-wordmark-accent: #FFD21A;
+  --brand-wordmark-secondary: #07583F;
+  color: #063F30;
+}
+
+@media (min-width: 1024px) {
+  .pill-nav-brand .brand-wordmark__primary {
+    font-size: 2.2rem;
+  }
+
+  .pill-nav-brand .brand-wordmark__secondary {
+    font-size: 0.5rem;
+  }
+}
+
+.brand-wordmark--admin {
+  --brand-wordmark-accent: var(--admin-accent, var(--light-brown));
+  --brand-wordmark-secondary: var(--admin-muted, currentColor);
+}
+
+.brand-wordmark--admin .brand-wordmark__primary {
+  font-size: 1.05rem;
+  letter-spacing: -0.045em;
+}
+
+.brand-wordmark--admin .brand-wordmark__secondary {
+  gap: 0.28rem;
+  margin-top: 0.26rem;
+  font-size: 0.34rem;
+  letter-spacing: 0.19em;
+}
+
+.brand-wordmark--admin .brand-wordmark__rule {
+  width: 0.6rem;
+}
+
+.brand-wordmark--admin .brand-wordmark__stone {
+  width: 0.2rem;
+  height: 0.2rem;
 }
 
 /* Button System */
@@ -1762,7 +1831,7 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
 .location-editorial-facts h3 {
   margin: auto 0 0;
   color: var(--location-ink);
-  font-family: var(--font-marcellus);
+  font-family: var(--font-display);
   font-size: clamp(1.45rem, 2vw, 2.15rem);
   font-weight: 500;
   letter-spacing: -0.04em;
@@ -3178,7 +3247,7 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
   }
 }
 
-/* Keep the key houses headings on the same Baskerville display system. */
+/* Keep the key houses headings on the shared Poppins display system. */
 .houses-page .houses-results-header h2,
 .houses-page .houses-listing-gallery .display-font,
 .houses-page .houses-listing-title-row h3,
@@ -3488,8 +3557,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 .calendar-day:hover { background-color: var(--soft-blush); }
 .calendar-day.disabled { background-color: #E5E7EB; color: #4B5563; }
 
-.site-footer .text-white,
-.site-footer .brand-logo { color: var(--espresso) !important; }
+.site-footer .text-white { color: var(--espresso) !important; }
 .site-footer .text-stone-300,
 .site-footer .text-stone-400 { color: var(--muted-text) !important; }
 .site-footer [class*="border-stone-800"] { border-color: var(--border-warm) !important; }
@@ -4444,7 +4512,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
   max-width: 100%;
   margin: 1rem 0 0;
   color: #1d1d1b;
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(3rem, 6vw, 8.5rem);
   font-weight: 700;
   letter-spacing: -0.055em;
@@ -4871,7 +4939,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
 .houses-empty-state h2 {
   max-width: 10ch;
   margin: 1.25rem 0 0.75rem;
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(2.5rem, 5vw, 5rem);
   letter-spacing: -0.07em;
   line-height: 0.9;
@@ -4931,7 +4999,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
 
 .houses-closing-section h2 {
   margin-top: 0;
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(3.5rem, 7vw, 8rem);
   font-weight: 300;
   letter-spacing: -0.035em;
@@ -4952,7 +5020,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
 
 .houses-closing-section h2 em {
   color: #d9c4b5;
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-display);
   font-style: italic;
   font-weight: 300;
   letter-spacing: -0.045em;
@@ -5682,7 +5750,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
   max-width: 12ch;
   margin: 0.65rem 0 0;
   color: #2d2622;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(2.4rem, 5vw, 5rem);
   font-weight: 600;
   letter-spacing: -0.05em;
@@ -5750,7 +5818,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
   place-items: center;
   padding: 6%;
   color: #ffffff;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: var(--se-title-size, 4rem);
   font-weight: 700;
   letter-spacing: -0.05em;
@@ -5764,7 +5832,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
 .gallery-house-title-mask {
   max-width: min(80vw, 48rem);
   color: #ffffff;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(2.75rem, 7vw, 6rem);
   font-weight: 600;
   letter-spacing: -0.055em;
@@ -5828,7 +5896,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
 
 .gallery-house-overlay-copy h2 {
   margin: 0;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(2.5rem, 6vw, 6rem);
   font-weight: 600;
   letter-spacing: -0.055em;
@@ -5929,7 +5997,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
   max-width: 12ch;
   margin: 0;
   color: #2d2622;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(3rem, 7vw, 6.4rem);
   font-weight: 600;
   letter-spacing: -0.055em;
@@ -6503,7 +6571,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
   max-width: 10ch;
   margin: 1rem 0 0;
   color: #ffffff;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(4rem, 10vw, 9rem);
   font-weight: 600;
   letter-spacing: -0.07em;
@@ -6616,7 +6684,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
   max-width: 14ch;
   margin: 0.65rem 0 0;
   color: #2d2622;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(2.4rem, 5vw, 5rem);
   font-weight: 600;
   letter-spacing: -0.06em;
@@ -6751,7 +6819,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
 .gallery-property-copy h3 {
   margin: 0;
   color: #2d2622;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 3.75rem);
   font-weight: 600;
   letter-spacing: -0.055em;
@@ -7090,7 +7158,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
   max-width: 14ch;
   margin: 0.7rem 0 0;
   color: #2d2622;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(2.5rem, 5.5vw, 5.5rem);
   font-weight: 600;
   letter-spacing: -0.06em;
@@ -7140,7 +7208,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
 .gallery-house-title-text {
   display: block;
   color: #ffffff;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(3rem, 8vw, 7rem);
   font-weight: 600;
   letter-spacing: -0.065em;
@@ -7155,7 +7223,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
 .gallery-house-overlay-copy h2 {
   margin: 0;
   color: #ffffff;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(2.5rem, 6vw, 5.8rem);
   font-weight: 600;
   letter-spacing: -0.06em;
@@ -7272,7 +7340,7 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
 .gallery-horizontal-progress {
   flex: 0 0 auto;
   color: #5a463a;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 600;
   letter-spacing: -0.03em;
@@ -7605,8 +7673,12 @@ body {
     padding-inline: 0.75rem !important;
   }
 
-  .staggered-menu-header .sm-logo img {
-    height: 3.75rem !important;
+  .staggered-menu-header .sm-logo .brand-wordmark__primary {
+    font-size: 1.45rem;
+  }
+
+  .staggered-menu-header .sm-logo .brand-wordmark__secondary {
+    font-size: 0.38rem;
   }
 
   .pill-nav-header + div:not(.sm-scope) {
@@ -7696,7 +7768,7 @@ body {
   max-width: 16ch;
   margin: 0.65rem 0 0;
   color: #2d2622;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 4.2rem);
   font-weight: 600;
   letter-spacing: -0.055em;
@@ -7786,7 +7858,7 @@ body {
 
 .gallery-reference-wordmark h1 {
   margin: 0;
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(6rem, 19vw, 21rem);
   font-weight: 700;
   letter-spacing: -0.095em;
@@ -7959,7 +8031,7 @@ body {
   max-width: 15ch;
   margin: 0.75rem auto 0;
   color: #2d2622;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(2.4rem, 5vw, 5.2rem);
   font-weight: 600;
   letter-spacing: -0.06em;
@@ -8170,7 +8242,7 @@ body {
 .gallery-hero-collection-heading h2 {
   margin: 0.35rem 0 0;
   color: #2d2622;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(1.5rem, 2.3vw, 2.25rem);
   font-weight: 600;
   letter-spacing: -0.045em;
@@ -9146,45 +9218,6 @@ body {
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
-.homepage-house-collection-card-wipe {
-  position: relative;
-  isolation: isolate;
-}
-
-.homepage-house-collection-card-wipe::after {
-  position: absolute;
-  z-index: 2;
-  inset: 0;
-  content: "";
-  pointer-events: none;
-  background: var(--card-white);
-  transform: translateY(101%);
-}
-
-.homepage-house-collection-card-wipe[data-wipe-state="pending"]::after {
-  transform: translateY(0);
-}
-
-.homepage-house-collection-card-wipe[data-wipe-state="revealed"]::after {
-  animation: homepage-house-card-wipe-up 780ms cubic-bezier(0.22, 1, 0.36, 1) var(--house-card-wipe-delay, 0ms) both;
-}
-
-@keyframes homepage-house-card-wipe-up {
-  from {
-    transform: translateY(0);
-  }
-
-  to {
-    transform: translateY(-101%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .homepage-house-collection-card-wipe::after {
-    display: none;
-  }
-}
-
 .homepage-house-collection-card:hover,
 .homepage-house-collection-card:focus-within {
   border-color: #b99d88;
@@ -10051,7 +10084,7 @@ body {
 
 /* 4. Typography adjustments */
 .giant-hero-wordmark {
-  font-family: var(--font-marcellus), serif;
+  font-family: var(--font-display);
   font-size: clamp(4rem, 16vw, 18rem);
   line-height: 0.8;
   letter-spacing: -0.01em;
@@ -10065,7 +10098,7 @@ body {
 }
 
 .hero-corner-text {
-  font-family: var(--font-serif, Baskerville, "Palatino Linotype", Georgia, serif);
+  font-family: var(--font-serif);
   font-size: clamp(1.25rem, 2.5vw, 2.25rem);
   font-weight: 400;
   color: #FAF8F5;
@@ -10964,9 +10997,9 @@ body {
   border-bottom-color: #2d2622;
 }
 
-/* Sharp editorial system
-   Keep the existing component structure and behavior, but give every surface
-   the same rectangular, high-contrast visual language. */
+/* Soft editorial system
+   Keep the existing component structure and behavior, while giving surfaces
+   a calm, rounded visual language that is refined by rounded-design.css. */
 :root {
   --editorial-ink: #191a19;
   --editorial-paper: #ffffff;
@@ -10981,12 +11014,11 @@ body {
   color: var(--editorial-ink);
 }
 
-/* A single invariant prevents legacy component styles from reintroducing
-   capsules, rounded-none cards, or circular controls in any route or theme. */
+/* A single invariant keeps legacy public surfaces on the shared radius scale. */
 body *:where(:not(.admin-theme-context, .admin-theme-context *, .property-stay, .property-stay *, .serenity-modal, .serenity-modal *, .stay-mobile-reserve, .stay-mobile-reserve *)),
 body *:where(:not(.admin-theme-context, .admin-theme-context *, .property-stay, .property-stay *, .serenity-modal, .serenity-modal *, .stay-mobile-reserve, .stay-mobile-reserve *))::before,
 body *:where(:not(.admin-theme-context, .admin-theme-context *, .property-stay, .property-stay *, .serenity-modal, .serenity-modal *, .stay-mobile-reserve, .stay-mobile-reserve *))::after {
-  border-radius: 0 !important;
+  border-radius: var(--radius-card, 1.125rem) !important;
 }
 
 button:where(:not(.admin-theme-context, .admin-theme-context *, .property-stay, .property-stay *, .serenity-modal, .serenity-modal *, .stay-mobile-reserve, .stay-mobile-reserve *)),
@@ -10994,7 +11026,7 @@ input:where(:not(.admin-theme-context, .admin-theme-context *, .property-stay, .
 select:where(:not(.admin-theme-context, .admin-theme-context *, .property-stay, .property-stay *, .serenity-modal, .serenity-modal *, .stay-mobile-reserve, .stay-mobile-reserve *)),
 textarea:where(:not(.admin-theme-context, .admin-theme-context *, .property-stay, .property-stay *, .serenity-modal, .serenity-modal *, .stay-mobile-reserve, .stay-mobile-reserve *)),
 [role="button"]:where(:not(.admin-theme-context, .admin-theme-context *, .property-stay, .property-stay *, .serenity-modal, .serenity-modal *, .stay-mobile-reserve, .stay-mobile-reserve *)) {
-  border-radius: 0 !important;
+  border-radius: var(--radius-control, 0.75rem) !important;
 }
 
 button:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *)),
@@ -11012,27 +11044,21 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
   box-shadow: none !important;
 }
 
-/* The homepage hero owns the first viewport. Keep its header in the document
-   flow so the complete header + hero composition fits in one screen.
-   The mobile menu wrapper sits between the header and main in the DOM. */
+/* Keep the homepage header in document flow while allowing it to remain
+   visible at the top of the viewport. The mobile menu wrapper sits between
+   the header and main in the DOM. */
 .pill-nav-header-home {
-  position: relative !important;
-  top: auto;
-  right: auto;
-  left: auto;
+  position: sticky !important;
+  top: 0;
   width: 100%;
   z-index: 80;
   border-bottom: 1px solid #e1e5df !important;
-  box-shadow: 0 0.35rem 1.2rem rgba(7, 88, 63, 0.06) !important;
-}
-
-.pill-nav-header-home.-translate-y-full {
-  transform: translateY(0) !important;
+  box-shadow: none !important;
 }
 
 .pill-nav-header-home + div + main .serenity-hero {
-  height: calc(100svh - var(--homepage-promo-height) - clamp(5.75rem, 7.5vw, 7.5rem));
-  min-height: 0;
+  height: clamp(40rem, calc(100svh - var(--homepage-promo-height) - 4rem - 2rem), 56rem);
+  min-height: 40rem;
 }
 
 .pill-nav-header-home + div + main .serenity-hero .serenity-hero-stats {
@@ -11040,13 +11066,15 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 }
 
 .pill-nav-header-home > div {
-  height: clamp(5.75rem, 7.5vw, 7.5rem) !important;
+  height: 4rem !important;
   min-height: 0 !important;
   padding-block: 0 !important;
 }
 
-.pill-nav-header-home .pill-nav-brand img {
-  max-height: 5.7rem;
+.pill-nav-header-home .pill-nav-brand .brand-wordmark {
+  --brand-wordmark-accent: var(--hero-yellow);
+  --brand-wordmark-secondary: var(--hero-green);
+  color: var(--hero-green-deep);
 }
 
 .pill-nav-header-home nav a {
@@ -11077,7 +11105,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
   }
 
   .pill-nav-header-home > div {
-    height: 5.75rem !important;
+  height: 4rem !important;
   }
 }
 
@@ -11087,8 +11115,8 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
   }
 }
 
-/* Keep the full-bleed treatment for desktop, but let tablet use a compact,
-   inset hero whose height follows its content instead of the viewport. */
+/* Keep the contained hero viewport-aware on desktop, while tablet and mobile
+   let the card height follow its content instead of forcing a full viewport. */
 @media (min-width: 768px) and (max-width: 1199px) {
   .pill-nav-header-home + div + main .serenity-hero {
     height: auto;
@@ -11128,11 +11156,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 
 .pill-nav-header a,
 .pill-nav-header button {
-  border-radius: 0 !important;
-}
-
-.pill-nav-header .pill-nav-brand img {
-  border-radius: 0 !important;
+  border-radius: var(--radius-control, 0.75rem) !important;
 }
 
 .btn-primary,
@@ -11141,7 +11165,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 .btn-outline-dark,
 .btn-dark-primary {
   min-height: 2.75rem;
-  border-radius: 0 !important;
+  border-radius: var(--radius-pill, 9999px) !important;
   box-shadow: none !important;
   letter-spacing: 0.08em;
   transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
@@ -11185,7 +11209,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 .booking-guests-trigger,
 .booking-calendar-popover,
 .booking-guests-popover {
-  border-radius: 0 !important;
+  border-radius: var(--radius-control, 0.75rem) !important;
   border-color: var(--editorial-line) !important;
   background: var(--editorial-surface) !important;
   box-shadow: none !important;
@@ -11208,7 +11232,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 [role="dialog"] > div:where(:not(.admin-theme-context, .admin-theme-context *)),
 .toast,
 [class*="upload"]:where(:not(.admin-theme-context, .admin-theme-context *)) {
-  border-radius: 0 !important;
+  border-radius: var(--radius-card, 1.125rem) !important;
   box-shadow: none !important;
 }
 
@@ -11235,20 +11259,20 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 .gallery-image,
 .homepage-location-map,
 .approximate-map-shell img {
-  border-radius: 0 !important;
+  border-radius: var(--radius-card, 1.125rem) !important;
 }
 
 .property-badge,
 .properties-availability-note,
 [class*="badge"]:where(:not(.admin-theme-context, .admin-theme-context *)),
-[class*="pill"]:where(:not(.admin-theme-context, .admin-theme-context *)),
+[class*="pill"]:where(:not(.pill-nav-header, .pill-nav-header *, .admin-theme-context, .admin-theme-context *)),
 [class*="status"]:where(:not(.admin-theme-context, .admin-theme-context *)) {
-  border-radius: 0 !important;
+  border-radius: var(--radius-pill, 9999px) !important;
 }
 
 .section,
 .dark-section-band {
-  border-radius: 0 !important;
+  border-radius: var(--radius-panel, 1.375rem) !important;
 }
 
 .site-footer {
@@ -11257,8 +11281,8 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 }
 
 @media (max-width: 767px) {
-  .pill-nav-header .pill-nav-brand img {
-    max-height: 4.5rem;
+  .pill-nav-header .pill-nav-brand .brand-wordmark__primary {
+    font-size: 1.65rem;
   }
 
   .btn-primary,
@@ -11270,7 +11294,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
   }
 }
 
-/* Homepage FAQ: centered editorial accordion with strong rules and square controls. */
+/* Homepage FAQ: centered editorial accordion with strong rules and soft controls. */
 .homepage-faq-editorial {
   background: var(--editorial-paper);
   color: var(--editorial-ink);
@@ -11503,7 +11527,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 }
 
 .gallery-project-preview-caption strong {
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 4.4rem);
   font-weight: 600;
   letter-spacing: -0.055em;
@@ -11588,14 +11612,14 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 }
 
 .gallery-project-row-name {
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(1.65rem, 3.4vw, 3.65rem);
   letter-spacing: -0.045em;
   line-height: 0.95;
 }
 
 .gallery-project-row-location {
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(1rem, 1.8vw, 1.5rem);
   font-style: italic;
   font-weight: 400;
@@ -11704,7 +11728,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 }
 
 .gallery-house-card-name {
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(1.7rem, 2.8vw, 2.7rem);
   letter-spacing: -0.04em;
   line-height: 0.95;
@@ -11812,7 +11836,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 }
 
 .gallery-selected-house-facts div:last-child { border-right: 0; }
-.gallery-selected-house-facts strong { font-family: var(--font-display, Georgia, serif); font-size: 1.35rem; letter-spacing: -0.03em; }
+.gallery-selected-house-facts strong { font-family: var(--font-display); font-size: 1.35rem; letter-spacing: -0.03em; }
 .gallery-selected-house-facts span { color: var(--gallery-muted); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
 
 .gallery-category-nav {
@@ -12013,7 +12037,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 .gallery-editorial-grid-index { top: 0.8rem; left: 0.8rem; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.14em; }
 .gallery-editorial-grid-open { top: 0.7rem; right: 0.7rem; display: grid; width: 2.1rem; height: 2.1rem; place-items: center; border: 1px solid rgba(255, 255, 255, 0.75); }
 .gallery-editorial-grid-copy { display: grid; gap: 0.3rem; padding: 0.9rem 0.95rem 1.05rem; }
-.gallery-editorial-grid-copy strong { font-family: var(--font-display, Georgia, serif); font-size: 1.1rem; font-weight: 600; letter-spacing: -0.03em; }
+.gallery-editorial-grid-copy strong { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; letter-spacing: -0.03em; }
 .gallery-editorial-grid-copy span { color: var(--gallery-muted); font-size: 0.65rem; font-weight: 800; letter-spacing: 0.13em; text-transform: uppercase; }
 .gallery-editorial-empty { display: grid; min-height: 16rem; place-items: center; align-content: center; gap: 0.7rem; border: 1px dashed #b99d88; color: var(--gallery-muted); text-align: center; }
 .gallery-editorial-empty h2 { margin: 0; color: var(--gallery-ink); font-size: 2rem; }
@@ -12151,7 +12175,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 
 .gallery-cinematic-wordmark p {
   margin: 0;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(5rem, 15.5vw, 16rem);
   font-weight: 500;
   letter-spacing: -0.085em;
@@ -12315,7 +12339,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
   gap: 0.02em;
   width: max-content;
   margin: 0;
-  font-family: var(--font-display, Georgia, serif);
+  font-family: var(--font-display);
   font-size: clamp(4.8rem, 12vw, 13.5rem);
   font-weight: 500;
   letter-spacing: -0.085em;
@@ -12466,7 +12490,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 .gallery-journey-skip a:focus-visible,
 .gallery-journey-skip a.is-active { background: #f5f0eb; color: #2d2622; }
 .gallery-journey-skip a:focus-visible { z-index: 2; outline: 2px solid #f5f0eb; outline-offset: 3px; }
-.gallery-journey-skip a b { font-family: var(--font-display, Georgia, serif); font-size: 1.15rem; font-weight: 500; line-height: 1; }
+.gallery-journey-skip a b { font-family: var(--font-display); font-size: 1.15rem; font-weight: 500; line-height: 1; }
 .gallery-journey-skip a span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .gallery-journey-property { scroll-margin-top: 0; }
 
@@ -12854,7 +12878,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
   .gallery-journey-room-copy { opacity: 1 !important; transform: none !important; }
 }
 
-/* Booking review — sharp editorial treatment shared with the property pages. */
+/* Booking review — calm editorial treatment shared with the property pages. */
 .booking-review-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.7fr) minmax(18rem, 0.75fr);
@@ -13448,26 +13472,47 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 }
 
 .site-footer-wordmark {
+  display: grid;
   width: 100%;
   overflow: hidden;
+  place-items: center;
   border-top: 1px solid var(--footer-line);
   padding: clamp(1.4rem, 3vw, 3rem) 0 clamp(1.25rem, 2.5vw, 2.5rem);
   color: var(--footer-ink);
   line-height: 1;
   text-align: center;
+  text-decoration: none;
   user-select: none;
 }
 
-.site-footer-wordmark span {
-  display: block;
-  width: 100%;
-  font-family: var(--font-display);
+.site-footer-wordmark .brand-wordmark {
+  --brand-wordmark-accent: var(--footer-accent);
+  --brand-wordmark-secondary: var(--footer-muted);
+  justify-items: center;
+  color: color-mix(in srgb, var(--footer-ink) 58%, transparent);
+}
+
+.site-footer-wordmark .brand-wordmark__primary {
   font-size: clamp(5rem, 16.25vw, 22rem);
-  font-weight: 400;
-  letter-spacing: 0.02em;
+  font-weight: 500;
+  letter-spacing: -0.075em;
   line-height: 0.84;
-  white-space: nowrap;
-  color: rgba(33, 28, 25, 0.12);
+}
+
+.site-footer-wordmark .brand-wordmark__secondary {
+  gap: clamp(0.7rem, 1.5vw, 1.35rem);
+  margin-top: clamp(0.75rem, 1.4vw, 1.4rem);
+  font-size: clamp(0.62rem, 1.05vw, 1rem);
+  letter-spacing: 0.32em;
+}
+
+.site-footer-wordmark .brand-wordmark__rule {
+  width: clamp(2rem, 5vw, 6rem);
+}
+
+.site-footer-wordmark .brand-wordmark__stone {
+  width: clamp(0.32rem, 0.6vw, 0.55rem);
+  height: clamp(0.32rem, 0.6vw, 0.55rem);
 }
 
 .site-footer-legal {
@@ -13585,9 +13630,12 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
     padding: 1.5rem 0 1.25rem;
   }
 
-  .site-footer-wordmark span {
+  .site-footer-wordmark .brand-wordmark__primary {
     font-size: 18vw;
-    letter-spacing: -0.055em;
+  }
+
+  .site-footer-wordmark .brand-wordmark__secondary {
+    font-size: clamp(0.55rem, 1.8vw, 0.75rem);
   }
 
   .site-footer-legal .site-footer-shell {
@@ -15157,8 +15205,8 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 }
 
 /* Shared homepage/Houses source-of-truth theme ---------------------------
-   The hero defines the homepage system: Baskerville-style display type,
-   Avenir/Plus Jakarta-style sans text, deep green, booking yellow, square
+   The hero defines the homepage system: Poppins display and body type,
+   deep green, booking yellow, soft rounded
    controls, compact spacing, and natural photography with only a neutral
    contrast overlay where it is needed. Keep these tokens scoped so the
    unrelated public pages can retain their own visual language. */
@@ -15209,7 +15257,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 }
 
 .homepage-theme :is(.serenity-hero-cta, .serenity-hero-text-link, .homepage-business-link, .homepage-house-collection-link, .site-footer-action) {
-  border-radius: 0 !important;
+  border-radius: var(--radius-pill, 9999px) !important;
   font-family: var(--font-sans);
   font-weight: 800;
   letter-spacing: 0.13em;
@@ -15503,21 +15551,23 @@ body:has(.homepage-theme) .promotion-banner button:focus-visible {
 
 body:has(.homepage-theme) .pill-nav-header-home {
   border-bottom-color: var(--homepage-line) !important;
-  box-shadow: 0 0.35rem 1.2rem rgba(6, 63, 48, 0.06) !important;
+  box-shadow: none !important;
   font-family: var(--font-sans);
 }
 
 body:has(.homepage-theme) .pill-nav-header-home nav a {
   font-family: var(--font-sans);
-  font-weight: 800;
-  letter-spacing: 0.13em;
+  font-weight: 500;
+  letter-spacing: 0.035em;
+  text-transform: none;
 }
 
 body:has(.homepage-theme) .pill-nav-header-home > div > a:last-child {
   border-color: var(--hero-yellow) !important;
   font-family: var(--font-sans);
-  font-weight: 800;
-  letter-spacing: 0.13em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
 }
 
 body:has(.homepage-theme) .site-footer-editorial {
@@ -15579,7 +15629,7 @@ body:has(.homepage-theme) .site-footer-action-secondary:focus-visible {
   color: var(--hero-green-deep);
 }
 
-body:has(.homepage-theme) .site-footer-wordmark span {
+body:has(.homepage-theme) .site-footer-wordmark .brand-wordmark__primary {
   color: rgba(7, 88, 63, 0.14);
 }
 
@@ -15681,15 +15731,16 @@ body:has(.homepage-theme) .site-footer-wordmark span {
 
 body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) {
   border-bottom-color: var(--homepage-line) !important;
-  box-shadow: 0 0.35rem 1.2rem rgba(6, 63, 48, 0.06) !important;
+  box-shadow: none !important;
   font-family: var(--font-sans);
 }
 
 body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) nav a {
   color: var(--hero-green-deep) !important;
   font-family: var(--font-sans);
-  font-weight: 800;
-  letter-spacing: 0.13em;
+  font-weight: 500;
+  letter-spacing: 0.035em;
+  text-transform: none;
 }
 
 body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) nav a:hover,
@@ -15702,8 +15753,9 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
   background: var(--hero-yellow) !important;
   color: var(--hero-green-deep) !important;
   font-family: var(--font-sans);
-  font-weight: 800;
-  letter-spacing: 0.13em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
 }
 
 body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:last-child:hover,
@@ -15803,14 +15855,14 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
    controls when a query-driven listing state renders them. */
 .houses-theme :is(.search-panel, .search-panel-luxury) {
   border: 1px solid var(--homepage-line);
-  border-radius: 0 !important;
+  border-radius: var(--radius-card, 1.125rem) !important;
   background: var(--homepage-surface);
   box-shadow: 0 0.8rem 1.8rem rgba(6, 63, 48, 0.07);
 }
 
 .houses-theme .search-box {
   border-color: var(--homepage-line) !important;
-  border-radius: 0 !important;
+  border-radius: var(--radius-control, 0.75rem) !important;
   background: var(--homepage-surface) !important;
   font-family: var(--font-sans);
 }
@@ -15835,7 +15887,7 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 .houses-theme :is(.search-submit, .search-panel-luxury > button[type="submit"]) {
   min-height: 3rem;
   border: 1px solid var(--homepage-accent) !important;
-  border-radius: 0 !important;
+  border-radius: var(--radius-pill, 9999px) !important;
   background: var(--homepage-accent) !important;
   color: var(--homepage-ink) !important;
   font-family: var(--font-sans);
@@ -15854,7 +15906,7 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 /* Property-card compatibility for the existing booking/listing primitives. */
 .houses-theme .property-card {
   border-color: var(--homepage-line);
-  border-radius: 0 !important;
+  border-radius: var(--radius-card, 1.125rem) !important;
   background: var(--homepage-surface);
   box-shadow: 0 0.8rem 1.8rem rgba(6, 63, 48, 0.07);
 }
@@ -15871,7 +15923,7 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 
 .houses-theme .property-badge {
   border-color: var(--homepage-accent);
-  border-radius: 0 !important;
+  border-radius: var(--radius-pill, 9999px) !important;
   background: var(--homepage-accent);
   color: var(--homepage-ink);
   font-family: var(--font-sans);
@@ -15887,13 +15939,13 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 
 .houses-theme .property-stats span {
   border-color: var(--homepage-line);
-  border-radius: 0 !important;
+  border-radius: var(--radius-control, 0.75rem) !important;
   background: var(--homepage-surface);
 }
 
 .houses-theme .properties-availability-note {
   border-color: var(--homepage-line);
-  border-radius: 0 !important;
+  border-radius: var(--radius-card, 1.125rem) !important;
   background: color-mix(in srgb, var(--homepage-dark) 12%, white);
   color: var(--homepage-ink);
   font-family: var(--font-sans);
@@ -15918,7 +15970,7 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 
 .houses-theme :is(.btn-primary, .btn-secondary, .btn-outline-dark, .btn-dark-primary) {
   min-height: 3rem;
-  border-radius: 0 !important;
+  border-radius: var(--radius-pill, 9999px) !important;
   font-family: var(--font-sans);
   font-weight: 800;
   letter-spacing: 0.13em;
@@ -15980,7 +16032,7 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 .houses-theme .houses-comfort-card {
   min-height: clamp(22rem, 31vw, 32rem);
   border: 0;
-  border-radius: 0 !important;
+  border-radius: var(--radius-panel, 1.375rem) !important;
   background: var(--homepage-dark);
   color: #ffffff;
 }
@@ -16039,7 +16091,7 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 
 .houses-theme .houses-empty-state {
   border-color: var(--homepage-line);
-  border-radius: 0 !important;
+  border-radius: var(--radius-card, 1.125rem) !important;
   background: var(--homepage-surface);
 }
 
@@ -16156,9 +16208,10 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 .staggered-menu-panel .sm-panel-item {
   border-color: rgba(255, 255, 255, 0.24) !important;
   color: #ffffff !important;
-  font-family: var(--font-display) !important;
-  font-weight: 600 !important;
-  letter-spacing: -0.06em !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.035em !important;
+  text-transform: none !important;
 }
 
 .staggered-menu-panel .sm-panel-item:hover,
@@ -16171,15 +16224,93 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
   background: var(--hero-yellow) !important;
   color: var(--hero-green-deep) !important;
   font-family: var(--font-sans) !important;
-  font-size: 0.72rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.13em !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.04em !important;
   line-height: 1.2 !important;
-  text-transform: uppercase;
+  text-transform: none !important;
 }
 
 .staggered-menu-panel .sm-panel-cta:hover,
 .staggered-menu-panel .sm-panel-cta:focus-visible {
   background: #ffe36c !important;
   color: var(--hero-green-deep) !important;
+}
+
+/* Public navigation refinement: soft controls and readable Poppins labels. */
+.pill-nav-header .pill-nav-link,
+.pill-nav-header .pill-nav-cta,
+.pill-nav-header .pill-nav-link__indicator {
+  border-radius: 999px !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+}
+
+.pill-nav-header .pill-nav-link__indicator {
+  width: 0.3rem;
+  height: 0.3rem;
+  background: var(--hero-yellow, #ffd21a);
+}
+
+.pill-nav-header .pill-nav-link {
+  letter-spacing: 0.035em !important;
+}
+
+.pill-nav-header .pill-nav-link:hover,
+.pill-nav-header .pill-nav-link:focus-visible {
+  background: rgba(7, 88, 63, 0.07);
+  box-shadow: 0 0.35rem 0.9rem rgba(6, 63, 48, 0.08);
+}
+
+.pill-nav-header .pill-nav-link.is-active {
+  background: rgba(7, 88, 63, 0.09);
+  box-shadow: inset 0 0 0 1px rgba(7, 88, 63, 0.1);
+}
+
+.pill-nav-header .pill-nav-cta {
+  letter-spacing: 0.04em !important;
+  box-shadow: 0 0.35rem 0.9rem rgba(183, 147, 0, 0.16);
+}
+
+.pill-nav-header .pill-nav-cta:hover,
+.pill-nav-header .pill-nav-cta:focus-visible {
+  box-shadow: 0 0.5rem 1rem rgba(183, 147, 0, 0.22);
+}
+
+.staggered-menu-header .sm-toggle,
+.staggered-menu-panel .sm-panel-item,
+.staggered-menu-panel .sm-panel-cta,
+.staggered-menu-panel .sm-panel-item__icon,
+.staggered-menu-panel .sm-panel-cta__icon {
+  border-radius: 999px !important;
+}
+
+.staggered-menu-panel .sm-panel-item {
+  font-family: var(--font-sans) !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+}
+
+.staggered-menu-panel .sm-panel-item.is-active {
+  background: rgba(255, 210, 26, 0.13);
+  box-shadow: inset 0 0 0 1px rgba(255, 210, 26, 0.2);
+}
+
+.staggered-menu-panel .sm-panel-item__icon {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.staggered-menu-panel .sm-panel-item.is-active .sm-panel-item__icon {
+  border-color: var(--sm-accent);
+  background: var(--sm-accent);
+  color: #2d2622;
+}
+
+.staggered-menu-panel .sm-panel-cta {
+  font-family: var(--font-sans) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: none !important;
 }

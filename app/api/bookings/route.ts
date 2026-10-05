@@ -4,7 +4,6 @@ import { calculatePrice, datesInRange, defaultGuests, reservationCode, todayIso,
 import { getPublicPropertyBySlug, isLocalContentPreview } from "@/src/lib/supabase/content";
 import { isSupabaseConfigured } from "@/src/lib/supabase/config";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
-import { applyPromotionToPrice, getPromotionEligibilityError, normalizePromotionCode, normalizePromotionRow, type PromotionRecord } from "@/src/lib/promotions";
 
 const getRequestOrigin = (request: Request) => {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
@@ -27,7 +26,6 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { propertySlug, checkIn, checkout, guests: rawGuests, guestDetails, corporateDetails, notes } = body;
-    const promotionCode = normalizePromotionCode(body.promotionCode);
     const email = String(guestDetails?.email ?? "").trim();
     if (!propertySlug || !checkIn || !checkout || !email) {
       return NextResponse.json({ error: "Property, dates, and guest email are required." }, { status: 400 });
@@ -96,30 +94,7 @@ export async function POST(request: Request) {
     const basePrice = calculatePrice(property, checkIn, checkout, guests, corporate);
     if (!basePrice.nights || basePrice.total <= 0) return NextResponse.json({ error: "Invalid booking dates or price." }, { status: 400 });
 
-    let promotion: PromotionRecord | null = null;
-    let price = basePrice;
-    if (promotionCode) {
-      const { data: promotionRow, error: promotionError } = await supabase
-        .from("promotions")
-        .select("*")
-        .ilike("code", promotionCode)
-        .maybeSingle();
-      if (promotionError) {
-        console.error("Promotion lookup failed", promotionError);
-        return NextResponse.json({ error: "Voucher codes are temporarily unavailable. Please try again shortly." }, { status: 503 });
-      }
-      if (!promotionRow) return NextResponse.json({ error: "That voucher code is not recognised." }, { status: 400 });
-      promotion = normalizePromotionRow(promotionRow as Record<string, unknown>);
-      const promotionErrorMessage = getPromotionEligibilityError(promotion, {
-        propertyId: String(propertyRow.id),
-        nights: basePrice.nights,
-        bookingAmount: basePrice.total,
-        corporate,
-        existingDiscount: basePrice.discount,
-      });
-      if (promotionErrorMessage) return NextResponse.json({ error: promotionErrorMessage }, { status: 400 });
-      price = applyPromotionToPrice(basePrice, promotion);
-    }
+    const price = basePrice;
 
     const reference = reservationCode(propertySlug);
     const { data: booking, error } = await supabase.from("bookings").insert({
@@ -136,9 +111,9 @@ export async function POST(request: Request) {
       price_breakdown: price,
       total: price.total,
       currency: "AUD",
-      promotion_id: promotion?.id ?? null,
-      promotion_code: promotion?.code ?? null,
-      promotion_discount: price.promotionDiscount ?? 0,
+      promotion_id: null,
+      promotion_code: null,
+      promotion_discount: 0,
       payment_status: "pending",
       booking_status: corporate ? "corporate" : "pending_payment",
       booking_type: corporate ? "corporate" : "standard",
@@ -149,27 +124,6 @@ export async function POST(request: Request) {
     if (error) {
       if (error.code === "23P01") return NextResponse.json({ error: "Those dates are no longer available." }, { status: 409 });
       throw error;
-    }
-
-    let promotionRedemptionId: string | null = null;
-    if (promotion) {
-      const { data: redemptionId, error: redemptionError } = await supabase.rpc("reserve_promotion_redemption", {
-        p_promotion_id: promotion.id,
-        p_booking_id: booking.id,
-        p_code: promotion.code,
-        p_discount_amount: price.promotionDiscount ?? 0,
-      });
-      if (redemptionError || !redemptionId) {
-        await supabase.from("bookings").update({ booking_status: "cancelled" }).eq("id", booking.id);
-        return NextResponse.json({ error: redemptionError?.message?.includes("sold out") ? "That voucher has just reached its redemption limit." : "That voucher is no longer available. Please try again." }, { status: 409 });
-      }
-      promotionRedemptionId = String(redemptionId);
-      const { error: redemptionLinkError } = await supabase.from("bookings").update({ promotion_redemption_id: promotionRedemptionId }).eq("id", booking.id);
-      if (redemptionLinkError) {
-        await supabase.rpc("release_promotion_redemption", { p_booking_id: booking.id });
-        await supabase.from("bookings").update({ booking_status: "cancelled" }).eq("id", booking.id);
-        throw redemptionLinkError;
-      }
     }
 
     const stripe = new Stripe(stripeSecretKey);
@@ -204,12 +158,6 @@ export async function POST(request: Request) {
       availabilityChecked: "serenity,airbnb,vrbo,stayz,admin",
       availabilityCheckedAt: new Date().toISOString(),
     };
-    if (promotion) {
-      metadata.promotionId = promotion.id;
-      metadata.promotionCode = promotion.code;
-      metadata.promotionDiscount = String(price.promotionDiscount ?? 0);
-      if (promotionRedemptionId) metadata.promotionRedemptionId = promotionRedemptionId;
-    }
     let session: Stripe.Checkout.Session;
 
     try {
@@ -226,7 +174,7 @@ export async function POST(request: Request) {
             currency: "aud",
             product_data: {
               name: `${property.name} direct booking`,
-              description: `${price.nights} night stay from ${checkIn} to ${checkout}. Includes cleaning, GST, and applicable discounts${promotion ? `, including ${promotion.code}` : ""}.`,
+              description: `${price.nights} night stay from ${checkIn} to ${checkout}. Includes cleaning and GST.`,
             },
             unit_amount: Math.round(price.total * 100),
           },
@@ -239,13 +187,11 @@ export async function POST(request: Request) {
         },
       });
     } catch (stripeError) {
-      if (promotionRedemptionId) await supabase.rpc("release_promotion_redemption", { p_booking_id: booking.id });
       await supabase.from("bookings").update({ booking_status: "cancelled" }).eq("id", booking.id);
       throw stripeError;
     }
 
     if (!session.url) {
-      if (promotionRedemptionId) await supabase.rpc("release_promotion_redemption", { p_booking_id: booking.id });
       await supabase.from("bookings").update({ booking_status: "cancelled" }).eq("id", booking.id);
       throw new Error("Stripe did not return a checkout URL.");
     }
@@ -256,7 +202,6 @@ export async function POST(request: Request) {
       .eq("id", booking.id);
     if (sessionUpdateError) {
       await stripe.checkout.sessions.expire(session.id).catch(() => undefined);
-      if (promotionRedemptionId) await supabase.rpc("release_promotion_redemption", { p_booking_id: booking.id });
       await supabase.from("bookings").update({ booking_status: "cancelled" }).eq("id", booking.id);
       throw sessionUpdateError;
     }

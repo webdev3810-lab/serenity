@@ -1,0 +1,381 @@
+body:has(.houses-editorial-page) .promotion-banner {
+  display: none;
+}
+
+body:has(.houses-editorial-page),
+body:has(.houses-editorial-page) .public-site,
+body:has(.houses-editorial-page) .public-site > main {
+  background: #11110f;
+}
+
+.houses-editorial-page {
+  --houses-heading-height: clamp(6.3rem, 8vw, 7.8rem);
+  --houses-paper: #ffffff;
+  --houses-ink: #111111;
+  --houses-serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
+  background: #11110f;
+  color: var(--houses-ink);
+}
+
+.houses-editorial-page a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+.houses-editorial-empty a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-bottom: 1px solid currentColor;
+  border-radius: 0 !important;
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.houses-editorial-heading {
+  display: flex;
+  height: var(--houses-heading-height);
+  align-items: center;
+  padding: 0 clamp(1rem, 2.5vw, 2.5rem);
+  border-radius: 0 0 1.25rem 1.25rem;
+  background: var(--hero-green, #07583f);
+  color: #fff7ef;
+}
+
+.houses-editorial-heading h1 {
+  margin: 0;
+  font-family: var(--houses-serif);
+  font-size: clamp(3.5rem, 6.5vw, 7rem);
+  font-weight: 400;
+  letter-spacing: -0.065em;
+  line-height: 0.85;
+  text-transform: uppercase;
+}
+
+.houses-editorial-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
+  gap: 2px;
+  padding: 2px 0 2px;
+  background: #11110f;
+}
+
+.houses-editorial-list__card {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: var(--houses-paper);
+}
+
+.houses-editorial-list__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.houses-editorial-list__media {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 0.86;
+  max-height: max(17rem, calc(100svh - 4.1rem - var(--houses-heading-height) - 5.75rem));
+  overflow: hidden;
+  background: #d6d5ce;
+}
+
+.houses-editorial-list__media img {
+  object-fit: cover;
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.houses-editorial-list__link:hover img,
+.houses-editorial-list__link:focus-visible img {
+  transform: scale(1.025);
+}
+
+.houses-editorial-list__link:focus-visible {
+  outline: 3px solid var(--houses-ink);
+  outline-offset: -4px;
+}
+
+.houses-editorial-list__fallback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.houses-editorial-list__caption {
+  display: flex;
+  min-height: 5.25rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem clamp(1rem, 1.4vw, 1.75rem);
+}
+
+.houses-editorial-list__title {
+  font-family: var(--houses-serif);
+  font-size: clamp(1.8rem, 3vw, 3.25rem);
+  font-weight: 400;
+  letter-spacing: -0.055em;
+  line-height: 0.95;
+}
+
+.houses-editorial-list__number {
+  flex: none;
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-size: clamp(0.62rem, 0.8vw, 0.8rem);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.houses-editorial-empty {
+  grid-column: 1 / -1;
+  padding: clamp(5rem, 9vw, 9rem) 1.5rem;
+  background: var(--houses-paper);
+  color: var(--houses-ink);
+}
+
+.houses-editorial-empty h2 {
+  max-width: 12ch;
+  margin: 0;
+  font-family: var(--houses-serif);
+  font-size: clamp(3rem, 6vw, 6rem);
+  font-weight: 400;
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+}
+
+.houses-editorial-empty p {
+  max-width: 32rem;
+  font-family: var(--houses-serif);
+  font-size: 1.4rem;
+  line-height: 1.35;
+}
+
+.houses-editorial-empty a {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.houses-editorial-comfort {
+  padding: clamp(2.5rem, 4vw, 4.5rem) clamp(1rem, 2vw, 2rem) clamp(1.25rem, 2vw, 2rem);
+  border-radius: 1.25rem 1.25rem 0 0;
+  background: var(--houses-paper);
+  color: var(--houses-ink);
+}
+
+.houses-editorial-comfort__heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(15rem, 0.4fr);
+  align-items: end;
+  gap: 3rem;
+}
+
+.houses-editorial-comfort__heading h2,
+.houses-editorial-comfort__heading p {
+  margin: 0;
+  font-family: var(--houses-serif);
+  font-weight: 400;
+}
+
+.houses-editorial-comfort__heading h2 {
+  font-size: clamp(4rem, 8vw, 9rem);
+  letter-spacing: -0.07em;
+  line-height: 0.85;
+}
+
+.houses-editorial-comfort__heading p {
+  max-width: 19rem;
+  font-size: clamp(1.3rem, 2.2vw, 2.5rem);
+  line-height: 1.1;
+}
+
+.houses-editorial-comfort__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2px;
+  padding-bottom: 1rem;
+  background: #11110f;
+}
+
+.houses-editorial-comfort__card {
+  position: relative;
+  min-width: 0;
+  min-height: clamp(24rem, 31vw, 34rem);
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 1.25rem;
+  background: var(--hero-green, #07583f);
+  color: #fff7ef;
+}
+
+.houses-editorial-comfort__card--soft {
+  background: var(--hero-yellow, #ffd21a);
+  color: var(--houses-ink);
+}
+
+.houses-editorial-comfort__card-copy {
+  position: relative;
+  z-index: 1;
+  padding: clamp(1.5rem, 2.8vw, 2.5rem);
+}
+
+.houses-editorial-comfort__card h3 {
+  max-width: 15ch;
+  margin: 0;
+  font-family: var(--houses-serif);
+  font-size: clamp(1.55rem, 2.2vw, 2.45rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.06;
+}
+
+.houses-editorial-comfort__card p {
+  max-width: 26ch;
+  margin: 0.9rem 0 0;
+  font-size: clamp(0.82rem, 1vw, 1rem);
+  line-height: 1.55;
+  opacity: 0.78;
+}
+
+.houses-editorial-comfort__graphic {
+  position: absolute;
+  z-index: 0;
+  color: currentColor;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.houses-editorial-comfort__graphic--radial {
+  bottom: -4rem;
+  left: -4rem;
+  width: 20rem;
+  height: 20rem;
+}
+
+.houses-editorial-comfort__graphic--vertical {
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 12rem;
+}
+
+.houses-editorial-comfort__graphic--horizontal {
+  right: -2.5rem;
+  bottom: 2.5rem;
+  width: 18rem;
+  height: 12rem;
+}
+
+.houses-editorial-comfort__number {
+  position: absolute;
+  z-index: 1;
+  bottom: clamp(1.5rem, 2.8vw, 2.5rem);
+  left: clamp(1.5rem, 2.8vw, 2.5rem);
+  font-family: var(--houses-serif);
+  font-size: clamp(2rem, 3vw, 3.2rem);
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+@media (max-width: 1023px) {
+  .houses-editorial-comfort__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+@media (max-width: 760px) {
+  .houses-editorial-heading {
+    height: auto;
+    padding: 1rem 1rem 0.9rem;
+  }
+
+  .houses-editorial-heading h1 {
+    font-size: clamp(2.75rem, 11.6vw, 4.75rem);
+  }
+
+  .houses-editorial-comfort {
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+
+  .houses-editorial-comfort__heading {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .houses-editorial-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .houses-editorial-list__media {
+    max-height: none;
+  }
+
+  .houses-editorial-list__caption {
+    min-height: 5.5rem;
+    padding: 0.9rem;
+  }
+
+  .houses-editorial-list__title {
+    font-size: clamp(1.35rem, 5vw, 2rem);
+  }
+
+  .houses-editorial-list__number {
+    font-size: 0.6rem;
+  }
+
+  .houses-editorial-comfort__heading h2 {
+    font-size: clamp(3.8rem, 16vw, 6rem);
+  }
+
+  .houses-editorial-comfort__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .houses-editorial-comfort__card {
+    min-height: 22rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .houses-editorial-list {
+    grid-template-columns: 1fr;
+  }
+
+  .houses-editorial-list__media {
+    aspect-ratio: 0.95;
+  }
+
+  .houses-editorial-list__caption {
+    min-height: 5.5rem;
+    padding: 0.8rem 1.1rem;
+  }
+
+  .houses-editorial-list__title {
+    font-size: clamp(2rem, 10vw, 2.8rem);
+  }
+
+  .houses-editorial-list__number {
+    font-size: 0.68rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .houses-editorial-list__media img {
+    transition: none;
+  }
+}

@@ -13,7 +13,6 @@ import { hasUnavailableConflict, validateGuestCapacity } from "@/src/lib/booking
 import type { Property } from "@/src/data/properties";
 import { isApprovedHomepageMediaSource } from "@/src/lib/homepageMedia";
 import ScrollWipeText from "@/src/components/homepage/ScrollWipeText";
-import ScrollWipeCard from "@/src/components/homepage/ScrollWipeCard";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -241,13 +240,13 @@ function PropertiesSearchContent({ properties }: { properties: Property[] }) {
                 <>
                   <ScrollWipeText as="p" className="houses-reference-eyebrow">Serenity houses</ScrollWipeText>
                   <div className="homepage-house-collection-grid">
-                  {results.map((property, index) => {
+                  {results.map((property) => {
                     const name = displayName(property.name);
                     const image = isApprovedHomepageMediaSource(property.featuredImage) ? property.featuredImage : "";
                     const tagline = propertyTaglines[property.slug] || property.shortDescription;
 
                     return (
-                      <ScrollWipeCard key={property.id || property.slug} delayMs={index * 110}>
+                      <article key={property.id || property.slug} className="homepage-house-collection-card">
                         <Link href={`/properties/${property.slug}`} className="homepage-house-collection-media" aria-label={`View ${name}`}>
                           {image ? (
                             <Image
@@ -276,7 +275,7 @@ function PropertiesSearchContent({ properties }: { properties: Property[] }) {
                             <ArrowUpRight size={17} aria-hidden="true" />
                           </Link>
                         </div>
-                      </ScrollWipeCard>
+                      </article>
                     );
                   })}
                   </div>

@@ -82,6 +82,11 @@ export default function HomepageHeroGallery({
             <div
               key={`${image.src}-${index}`}
               className={`serenity-hero-image ${isActive ? "is-active" : ""}`}
+              style={{
+                backgroundImage: `url("${isVideo ? image.poster || "" : image.src}")`,
+                backgroundPosition: "center",
+                backgroundSize: "cover",
+              }}
             >
               {isVideo ? (
                 isActive ? (
@@ -130,6 +135,11 @@ export default function HomepageHeroGallery({
       <div className="serenity-hero-smoke" aria-hidden="true" />
 
       <div className="serenity-hero-shell">
+        <div className="serenity-hero-brand-lockup" aria-label="Serenity on the Rocks">
+          <span className="serenity-hero-brand-primary">Serenity</span>
+          <span className="serenity-hero-brand-secondary">on the rocks</span>
+        </div>
+
         <div className="serenity-hero-copy">
           <p className="serenity-hero-eyebrow">CORPORATE ACCOMMODATION · SOUTH-EAST MELBOURNE</p>
           <h1 id="homepage-hero-title" className="serenity-hero-title">

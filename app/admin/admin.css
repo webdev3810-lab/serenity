@@ -3,7 +3,7 @@
 
   background: var(--admin-bg);
   color: var(--admin-text);
-  font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
   font-size: 1rem;
   line-height: 1.5;
   letter-spacing: normal;
@@ -25,10 +25,8 @@
 .admin-header { height: 76px; position: sticky; top: 0; z-index: 30; border-bottom: 1px solid var(--admin-border); background: var(--admin-surface); }
 .admin-header-inner { height: 100%; display: flex; align-items: center; gap: 1.5rem; padding: 0 1.5rem; }
 .admin-header-site-brand { display: flex; align-items: center; gap: .75rem; width: 225px; flex-shrink: 0; }
-.admin-header-site-mark { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--admin-border-strong); border-radius: 12px; font: 600 24px Georgia,serif; }
-.admin-header-site-copy { display: grid; }
-.admin-header-site-copy strong { font-size: 14px; font-weight: 600; }
-.admin-header-site-copy small { font-size: 12px; color: var(--admin-muted); }
+.admin-header-site-brand .brand-wordmark { color: var(--admin-text); }
+.admin-header-site-context { padding-left: .75rem; border-left: 1px solid var(--admin-border); color: var(--admin-muted); font-size: 11px; line-height: 1.3; }
 .admin-header-context { display: flex; align-items: center; gap: .75rem; min-width: 0; }
 .admin-header-brand-name { font-size: 14px; color: var(--admin-muted); }
 .admin-header h1 { font-size: 15px; }
@@ -177,6 +175,7 @@
 .admin-auth-shell { min-height: 100dvh; padding: 28px 24px 72px; display: flex; flex-direction: column; }
 .admin-auth-header { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 1200px; margin: 0 auto 60px; }
 .admin-auth-shell form { width: 100%; max-width: 460px; padding: 36px; margin: auto; }
+.admin-auth-shell form > .brand-wordmark { margin-bottom: .5rem; color: var(--admin-text); }
 .admin-auth-shell h1 { font-size: 28px; letter-spacing: -.035em; }
 .admin-auth-shell .admin-auth-intro { font-size: 15px; line-height: 1.6; }
 .admin-auth-shell .eyebrow { font-family: inherit; text-transform: none; font-size: 14px; letter-spacing: normal; color: var(--admin-muted); }
@@ -207,9 +206,8 @@
   .admin-content { padding: 24px 20px; }
 }
 @media (max-width: 640px) {
-  .admin-header-site-copy strong { font-size: 12px; }
-  .admin-header-site-copy small,.admin-profile-trigger-chevron { display: none; }
-  .admin-header-site-mark { width: 30px; height: 32px; }
+  .admin-header-site-context,.admin-profile-trigger-chevron { display: none; }
+  .admin-header-site-brand .brand-wordmark__primary { font-size: .95rem; }
   .admin-header-inner { padding: 0 12px; gap: 8px; }
   .admin-header-actions { gap: 6px; }
   .admin-profile-trigger { padding: 0; }
@@ -345,11 +343,12 @@
     padding-inline: 10px;
   }
 
-  .admin-header-site-copy strong {
-    max-inline-size: 12ch;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .admin-header-site-brand .brand-wordmark__primary {
+    font-size: .88rem;
+  }
+
+  .admin-header-site-brand .brand-wordmark__secondary {
+    font-size: .3rem;
   }
 
   .admin-content {

@@ -7,52 +7,12 @@ import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, CreditCard, Loader2, Printer, ShieldCheck, Lock } from "lucide-react";
 import type { Property } from "@/src/data/properties";
 import { useBooking } from "@/src/context/BookingContext";
-import { calculatePrice, formatAud, formatDateAu, nightsBetween, reservationCode, type PriceBreakdown } from "@/src/lib/booking";
+import { calculatePrice, formatAud, formatDateAu, nightsBetween, reservationCode } from "@/src/lib/booking";
 import { FormInput, TextArea } from "@/src/components/UI";
 import { PriceBreakdownView } from "@/src/components/BookingWidgets";
 import ScrollWipeText from "@/src/components/homepage/ScrollWipeText";
 
 const steps = ["Review stay", "Guest details", "Stripe payment", "Confirmation"];
-
-type PromotionPreview = { code: string; discount: number; price: PriceBreakdown };
-
-async function requestPromotionPreview(property: Property, booking: { checkIn?: string; checkout?: string; guests: { adults: number; children: number; infants: number; pets: number }; guestDetails?: Record<string, string | boolean> }, code: string) {
-  const response = await fetch("/api/promotions/validate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      propertySlug: property.slug,
-      checkIn: booking.checkIn,
-      checkout: booking.checkout,
-      guests: booking.guests,
-      corporate: booking.guestDetails?.corporate === true,
-      code,
-    }),
-  });
-  const result = await response.json();
-  if (!response.ok || !result.valid) throw new Error(result.error || "That voucher code could not be applied.");
-  return { code: String(result.code), discount: Number(result.discount ?? 0), price: result.price as PriceBreakdown } satisfies PromotionPreview;
-}
-
-function VoucherForm({ value, onChange, onApply, onClear, error, busy, applied }: { value: string; onChange: (value: string) => void; onApply: () => void; onClear: () => void; error: string; busy: boolean; applied: boolean }) {
-  return (
-    <div className="booking-promotion-code">
-      <div className="booking-promotion-code-copy">
-        <p className="booking-promotion-code-label">Promotion code <span>Optional</span></p>
-        <p id="promotion-code-help">If you have a code, enter it here before continuing.</p>
-      </div>
-      <div className="booking-promotion-code-controls">
-        <label className="booking-promotion-code-field">
-          <span className="sr-only">Optional promotion code</span>
-          <input className="field font-mono uppercase tracking-[0.08em]" value={value} onChange={(event) => onChange(event.target.value.toUpperCase())} placeholder="Enter code (optional)" maxLength={40} aria-describedby={error ? "promotion-code-help voucher-error" : "promotion-code-help"} />
-        </label>
-        {applied ? <button type="button" className="btn-outline-dark" onClick={onClear}>Remove code</button> : <button type="button" className="btn-secondary" onClick={onApply} disabled={busy || !value.trim()}>{busy ? "Checking…" : "Apply code"}</button>}
-      </div>
-      {applied && !error && <p className="booking-promotion-code-status is-success" role="status">Code applied. Your final total has been updated.</p>}
-      {error && <p id="voucher-error" className="booking-promotion-code-status is-error" role="alert">{error}</p>}
-    </div>
-  );
-}
 
 export function BookingProgress({ active }: { active: number }) {
   return (
@@ -94,35 +54,8 @@ function useCurrentProperty() {
 export function ReviewBookingPage() {
   const { booking } = useBooking();
   const property = useCurrentProperty();
-  const { setBooking } = useBooking();
-  const [voucherCode, setVoucherCode] = useState(booking.promotionCode ?? "");
-  const [voucherError, setVoucherError] = useState("");
-  const [voucherBusy, setVoucherBusy] = useState(false);
-  const [promotionPreview, setPromotionPreview] = useState<PromotionPreview | null>(null);
   if (!property || !booking.checkIn || !booking.checkout) return <MissingBooking />;
   const nights = nightsBetween(booking.checkIn, booking.checkout);
-
-  const applyVoucher = async () => {
-    setVoucherError("");
-    setVoucherBusy(true);
-    try {
-      const preview = await requestPromotionPreview(property, booking, voucherCode.trim());
-      setPromotionPreview(preview);
-      setBooking({ promotionCode: preview.code });
-    } catch (error) {
-      setPromotionPreview(null);
-      setVoucherError(error instanceof Error ? error.message : "That voucher code could not be applied.");
-    } finally {
-      setVoucherBusy(false);
-    }
-  };
-
-  const clearVoucher = () => {
-    setVoucherCode("");
-    setPromotionPreview(null);
-    setVoucherError("");
-    setBooking({ promotionCode: "" });
-  };
 
   return (
     <BookingFrame active={0}>
@@ -163,8 +96,6 @@ export function ReviewBookingPage() {
             <span>No customer account registration required. Your stay dates are held temporarily during checkout. Exact address instructions are sent upon confirmation.</span>
           </div>
 
-          <VoucherForm value={voucherCode} onChange={setVoucherCode} onApply={() => void applyVoucher()} onClear={clearVoucher} error={voucherError} busy={voucherBusy} applied={Boolean(promotionPreview)} />
-
           <div className="booking-review-actions">
             <Link className="btn-outline-dark" href={`/properties/${property.slug}`}>
               Edit Dates or Guests
@@ -178,7 +109,7 @@ export function ReviewBookingPage() {
         <aside className="booking-review-price">
           <span className="booking-review-kicker">Your total</span>
           <h2>Price summary <small>AUD</small></h2>
-          <PriceBreakdownView property={property} checkIn={booking.checkIn} checkout={booking.checkout} guests={booking.guests} corporate={booking.guestDetails?.corporate === true} price={promotionPreview?.price} />
+          <PriceBreakdownView property={property} checkIn={booking.checkIn} checkout={booking.checkout} guests={booking.guests} corporate={booking.guestDetails?.corporate === true} />
         </aside>
       </div>
     </BookingFrame>
@@ -270,10 +201,6 @@ export function PaymentPage() {
   const property = useCurrentProperty();
   const [error, setError] = useState("");
   const [processing, setProcessing] = useState(false);
-  const [voucherCode, setVoucherCode] = useState(booking.promotionCode ?? "");
-  const [voucherError, setVoucherError] = useState("");
-  const [voucherBusy, setVoucherBusy] = useState(false);
-  const [promotionPreview, setPromotionPreview] = useState<PromotionPreview | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -290,46 +217,9 @@ export function PaymentPage() {
     return () => window.clearTimeout(messageTimer);
   }, []);
 
-  /* Voucher state is synchronized with the server validation response. */
-  /* eslint-disable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
-  useEffect(() => {
-    if (!property || !booking.checkIn || !booking.checkout || !booking.promotionCode) return;
-    let cancelled = false;
-    setVoucherBusy(true);
-    void requestPromotionPreview(property, booking, booking.promotionCode)
-      .then((preview) => { if (!cancelled) { setVoucherCode(preview.code); setPromotionPreview(preview); setVoucherError(""); } })
-      .catch((previewError: unknown) => { if (!cancelled) { setPromotionPreview(null); setVoucherError(previewError instanceof Error ? previewError.message : "That voucher is no longer available."); } })
-      .finally(() => { if (!cancelled) setVoucherBusy(false); });
-    return () => { cancelled = true; };
-  }, [booking.checkIn, booking.checkout, booking.promotionCode, booking.guests, booking.guestDetails, property]);
-  /* eslint-enable react-hooks/set-state-in-effect, react-hooks/exhaustive-deps */
-
   if (!property || !booking.checkIn || !booking.checkout || !booking.guestDetails) return <MissingBooking />;
 
-  const applyPaymentVoucher = async () => {
-    if (!property) return;
-    setVoucherError("");
-    setVoucherBusy(true);
-    try {
-      const preview = await requestPromotionPreview(property, booking, voucherCode.trim());
-      setPromotionPreview(preview);
-      setBooking({ promotionCode: preview.code });
-    } catch (previewError) {
-      setPromotionPreview(null);
-      setVoucherError(previewError instanceof Error ? previewError.message : "That voucher code could not be applied.");
-    } finally {
-      setVoucherBusy(false);
-    }
-  };
-
-  const clearPaymentVoucher = () => {
-    setVoucherCode("");
-    setPromotionPreview(null);
-    setVoucherError("");
-    setBooking({ promotionCode: "" });
-  };
-
-  const price = promotionPreview?.price ?? calculatePrice(property, booking.checkIn, booking.checkout, booking.guests, booking.guestDetails?.corporate === true);
+  const price = calculatePrice(property, booking.checkIn, booking.checkout, booking.guests, booking.guestDetails?.corporate === true);
 
   const pay = async () => {
     setError("");
@@ -338,7 +228,7 @@ export function PaymentPage() {
       const response = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ propertySlug: property.slug, checkIn: booking.checkIn, checkout: booking.checkout, guests: booking.guests, guestDetails: booking.guestDetails, corporateDetails: booking.guestDetails, notes: booking.guestDetails?.requests, promotionCode: booking.promotionCode }),
+        body: JSON.stringify({ propertySlug: property.slug, checkIn: booking.checkIn, checkout: booking.checkout, guests: booking.guests, guestDetails: booking.guestDetails, corporateDetails: booking.guestDetails, notes: booking.guestDetails?.requests }),
       });
       const result = await response.json();
       if (!response.ok || !result.checkoutUrl) throw new Error(result.error || "Could not start secure checkout.");
@@ -374,11 +264,9 @@ export function PaymentPage() {
             </ol>
           </div>
 
-          <VoucherForm value={voucherCode} onChange={setVoucherCode} onApply={() => void applyPaymentVoucher()} onClear={clearPaymentVoucher} error={voucherError} busy={voucherBusy} applied={Boolean(promotionPreview)} />
-
           {error && <p className="text-sm font-semibold text-red-700 bg-red-50 p-3 rounded-none border border-red-200" role="alert">{error}</p>}
 
-          <button type="button" className="btn-primary w-full justify-center text-base" onClick={pay} disabled={processing || voucherBusy || Boolean(booking.promotionCode && !promotionPreview)}>
+          <button type="button" className="btn-primary w-full justify-center text-base" onClick={pay} disabled={processing}>
             {processing ? <Loader2 className="animate-spin" size={18} /> : <CreditCard size={18} />} Continue to Stripe · {formatAud(price.total)} AUD
           </button>
         </section>
@@ -391,7 +279,7 @@ export function PaymentPage() {
             <p>Guest: {booking.guestDetails?.firstName} {booking.guestDetails?.lastName}</p>
           </div>
           <div className="pt-2">
-            <PriceBreakdownView property={property} checkIn={booking.checkIn} checkout={booking.checkout} guests={booking.guests} corporate={booking.guestDetails?.corporate === true} price={promotionPreview?.price} />
+            <PriceBreakdownView property={property} checkIn={booking.checkIn} checkout={booking.checkout} guests={booking.guests} corporate={booking.guestDetails?.corporate === true} />
           </div>
         </aside>
       </div>
