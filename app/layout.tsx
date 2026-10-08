@@ -17,6 +17,7 @@ import "./corporate-editorial.css";
 import "./contact-story.css";
 import "./public-neutral.css";
 import "./policy-editorial.css";
+import "./public-spacing.css";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700", "800", "900"],

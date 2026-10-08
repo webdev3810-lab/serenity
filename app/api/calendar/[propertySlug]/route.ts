@@ -1,5 +1,5 @@
 import { hashCalendarToken } from "@/src/lib/calendar/security";
-import { buildIcsCalendar, groupCalendarDates } from "@/src/lib/calendar/ical";
+import { buildIcsCalendar, groupCalendarDates, ICS_UPLOAD_PREFIX } from "@/src/lib/calendar/ical";
 import { ACTIVE_BOOKING_STATUSES } from "@/src/lib/calendar/conflicts";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 import { todayIso } from "@/src/lib/booking";
@@ -21,7 +21,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
   const startDate = todayIso();
   const [{ data: bookings, error: bookingError }, { data: importedEvents, error: eventError }] = await Promise.all([
     supabase.from("bookings").select("id, check_in, checkout").eq("property_id", property.id).in("booking_status", [...ACTIVE_BOOKING_STATUSES]).gte("checkout", startDate),
-    supabase.from("calendar_events").select("id, source_platform, start_date, end_date, summary").eq("property_id", property.id).eq("status", "active").eq("is_blocking", true).gte("end_date", startDate),
+    supabase.from("calendar_events").select("id, external_event_id, source_platform, start_date, end_date, summary").eq("property_id", property.id).eq("status", "active").eq("is_blocking", true).gte("end_date", startDate),
   ]);
   if (bookingError || eventError) return NextResponse.json({ error: "Calendar unavailable." }, { status: 500 });
 
@@ -31,7 +31,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
     ...groupCalendarDates(unavailableDates).map((range) => ({ uid: `unavailable:${property.id}:${range.startDate}@serenitystays.com.au`, startDate: range.startDate, endDate: range.endDate, summary: "Unavailable" })),
     ...(bookings ?? []).map((booking) => ({ uid: `booking:${booking.id}@serenitystays.com.au`, startDate: booking.check_in, endDate: booking.checkout, summary: "Reserved" })),
     ...(importedEvents ?? [])
-      .filter((event) => event.source_platform !== excludedSource)
+      .filter((event) => event.source_platform !== excludedSource && !event.external_event_id.startsWith(ICS_UPLOAD_PREFIX))
       .map((event) => ({ uid: `external:${event.id}@serenitystays.com.au`, startDate: event.start_date, endDate: event.end_date, summary: event.summary || "Unavailable" })),
   ];
 

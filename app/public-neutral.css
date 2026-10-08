@@ -1,5 +1,8 @@
 /* Guest-facing neutrals only. Admin routes do not render inside .public-site. */
 .public-site {
+  --success-bg: #e8eef2;
+  --success-border: #b9cbd7;
+  --success-text: #002844;
   --foreground: #111111;
   --primary-black: #111111;
   --soft-black: #111111;
@@ -108,7 +111,7 @@
 
 .public-site [class*="accent-[#7A4E2D]"],
 .public-site [class*="accent-[#7a4e2d]"] {
-  accent-color: var(--hero-green, #075f47) !important;
+  accent-color: var(--hero-green, #002844) !important;
 }
 
 /* Neutralise the last legacy editorial tokens without touching the admin. */
@@ -131,7 +134,7 @@
   --journey-ink: #111111;
   --about-ink: #111111;
   --about-muted: #333333;
-  --about-accent: var(--hero-green, #075f47);
+  --about-accent: var(--hero-green, #002844);
 }
 
 .public-site .property-theme {
@@ -160,12 +163,12 @@ body:has(.public-site .property-theme) .serenity-booking-drawer .stay-reserve-bu
 
 .public-site .homepage-reviews-section {
   padding-inline: clamp(1.5rem, 4vw, 4rem);
-  background: var(--hero-green, #07583f);
+  background: var(--hero-green, #002844);
   color: #ffffff;
 }
 
 .public-site .about-story-page .homepage-reviews-section {
-  background: var(--hero-green, #07583f);
+  background: var(--hero-green, #002844);
   color: #ffffff;
 }
 
@@ -202,7 +205,7 @@ body:has(.public-site .property-theme) .serenity-booking-drawer .stay-reserve-bu
   position: absolute;
   inset: 0 0 auto;
   height: 0.42rem;
-  background: var(--hero-green, #07583f);
+  background: var(--hero-green, #002844);
   content: "";
 }
 
@@ -252,21 +255,21 @@ body:has(.public-site .property-theme) .serenity-booking-drawer .stay-reserve-bu
 
 .public-site .homepage-review-mark,
 .public-site .homepage-review-stars {
-  color: #ffd21a;
+  color: var(--hero-yellow);
 }
 
 .public-site .homepage-review-card.is-featured .homepage-review-stars {
-  color: #ffd21a;
+  color: var(--hero-yellow);
 }
 
 .public-site .homepage-review-card.is-featured .homepage-review-mark {
-  color: var(--hero-green, #07583f);
+  color: var(--hero-green, #002844);
 }
 
 .public-site .homepage-review-mark {
   width: 2.35rem;
   height: 2.35rem;
-  color: var(--hero-green, #07583f);
+  color: var(--hero-green, #002844);
 }
 
 .public-site .homepage-review-quote {
@@ -293,5 +296,5 @@ body:has(.public-site .property-theme) .serenity-booking-drawer .stay-reserve-bu
 .public-site .homepage-reviews-all-link:focus-visible {
   border-color: #ffffff;
   background: #ffffff;
-  color: var(--hero-green-deep, #063f30);
+  color: var(--hero-green-deep, #001e35);
 }

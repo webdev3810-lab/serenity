@@ -8,7 +8,7 @@
   --radius-xl: 1.625rem;
   --radius-pill: 9999px;
   --radius-circle: 50%;
-  --soft-focus-ring: 0 0 0 3px color-mix(in srgb, var(--hero-yellow, #ffd21a) 32%, transparent);
+  --soft-focus-ring: 0 0 0 3px color-mix(in srgb, var(--hero-yellow, #E5CA8B) 32%, transparent);
 }
 
 /* Replace legacy square utility classes without changing component markup or
@@ -342,8 +342,8 @@ body :where(
 
 .pill-nav-header.is-scrolled {
   background: color-mix(in srgb, var(--public-surface, #ffffff) 96%, transparent) !important;
-  border-bottom-color: color-mix(in srgb, var(--hero-green-deep, #063f30) 18%, transparent) !important;
-  box-shadow: 0 0.35rem 1rem rgba(6, 63, 48, 0.08) !important;
+  border-bottom-color: color-mix(in srgb, var(--hero-green-deep, #001e35) 18%, transparent) !important;
+  box-shadow: 0 0.35rem 1rem rgba(0, 30, 53, 0.08) !important;
   backdrop-filter: blur(4px);
 }
 
@@ -357,7 +357,7 @@ body :where(
 
 body:has(.homepage-theme) .pill-nav-header-home.is-scrolled,
 body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home).is-scrolled {
-  box-shadow: 0 0.35rem 1rem rgba(6, 63, 48, 0.08) !important;
+  box-shadow: 0 0.35rem 1rem rgba(0, 30, 53, 0.08) !important;
   backdrop-filter: blur(4px);
 }
 

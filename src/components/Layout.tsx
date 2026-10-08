@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
 import { BookingProvider } from "@/src/context/BookingContext";
 import { ContactSettingsProvider } from "@/src/context/ContactSettingsContext";
 import type { ContactSettings } from "@/src/lib/siteSettings";
@@ -35,6 +37,24 @@ export function AppShell({ children, contactSettings }: { children: React.ReactN
 
 function Header({ pathname }: { pathname: string | null }) {
   const [hidden, setHidden] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentHash, setCurrentHash] = useState("");
+  const links = [
+    { label: "Home", href: "/" },
+    { label: "Our Homes", href: "/houses" },
+    { label: "How It Works", href: "/how-it-works" },
+    { label: "Corporate", href: "/corporate-stays" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
+  ];
+  const partnerBookingHref = "/corporate-stays#corporate-booking";
+
+  useEffect(() => {
+    const updateHash = () => setCurrentHash(window.location.hash);
+    updateHash();
+    window.addEventListener("hashchange", updateHash);
+    return () => window.removeEventListener("hashchange", updateHash);
+  }, [pathname]);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -45,6 +65,7 @@ function Header({ pathname }: { pathname: string | null }) {
         setHidden(false);
       } else if (currentScrollY > lastScrollY + 8) {
         setHidden(true);
+        setMobileMenuOpen(false);
       } else if (currentScrollY < lastScrollY - 8) {
         setHidden(false);
       }
@@ -55,24 +76,66 @@ function Header({ pathname }: { pathname: string | null }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const isCurrent = (href: string) => pathname === href;
+  const isCurrent = (href: string) => {
+    const [targetPathValue, targetHash] = href.split("#");
+    const targetPath = targetPathValue || "/";
+    const currentPath = pathname || "/";
+    if (targetHash) return currentPath === targetPath && currentHash === `#${targetHash}`;
+    if (targetPath === "/") return currentPath === "/" && !currentHash;
+    if (targetPath === "/houses" && currentPath.startsWith("/properties/")) return true;
+    return currentPath === targetPath || currentPath.startsWith(`${targetPath}/`);
+  };
 
   return (
-    <header className={`serenity-editorial-nav serenity-editorial-nav--site${hidden ? " is-hidden" : ""}`} aria-label="Main navigation">
-      <nav className="serenity-editorial-nav__left" aria-label="Primary navigation">
-        <Link href="/houses" aria-current={isCurrent("/houses") ? "page" : undefined}>Houses</Link>
-        <Link href="/about" aria-current={isCurrent("/about") ? "page" : undefined}>About</Link>
-        <Link href="/corporate-stays" aria-current={isCurrent("/corporate-stays") ? "page" : undefined}>Corporate stays</Link>
-      </nav>
-
-      <Link href="/" className="serenity-editorial-nav__mark" aria-label="Serenity on the Rocks home">
-        S
+    <header className={`serenity-editorial-nav serenity-editorial-nav--site${hidden ? " is-hidden" : ""}`}>
+      <Link href="/" className="serenity-editorial-nav__mark" aria-label="Serenity on the Rocks home" onClick={() => setMobileMenuOpen(false)}>
+        <Image src="/LOGO.png" alt="" width={1248} height={642} sizes="(max-width: 640px) 56px, 76px" loading="eager" />
+        <span className="serenity-editorial-nav__wordmark" aria-hidden="true">
+          <span className="serenity-editorial-nav__wordmark-name">SERENITY</span>
+          <span className="serenity-editorial-nav__wordmark-descriptor">
+            <span />
+            CORPORATE STAYS
+            <span />
+          </span>
+        </span>
       </Link>
 
-      <nav className="serenity-editorial-nav__right" aria-label="Booking navigation">
-        <Link href="/contact" aria-current={isCurrent("/contact") ? "page" : undefined}>Contact</Link>
-        <Link href="/houses">Book a stay</Link>
+      <nav id="serenity-primary-navigation" className="serenity-editorial-nav__links" aria-label="Primary navigation" data-open={mobileMenuOpen || undefined}>
+        {links.map(({ label, href }) => {
+          const active = isCurrent(href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              aria-current={active ? (href.includes("#") ? "location" : "page") : undefined}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {label}
+            </Link>
+          );
+        })}
       </nav>
+
+      <div className="serenity-editorial-nav__actions">
+        <Link
+          href={partnerBookingHref}
+          className="serenity-editorial-nav__partner"
+          aria-current={isCurrent(partnerBookingHref) ? "location" : undefined}
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          Partner Booking
+        </Link>
+        <button
+          type="button"
+          className="serenity-editorial-nav__toggle"
+          aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="serenity-primary-navigation"
+          onClick={() => setMobileMenuOpen((open) => !open)}
+        >
+          {mobileMenuOpen ? <X size={19} aria-hidden="true" /> : <Menu size={19} aria-hidden="true" />}
+        </button>
+      </div>
     </header>
   );
 }

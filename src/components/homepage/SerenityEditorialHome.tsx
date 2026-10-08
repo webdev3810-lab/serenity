@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { CalendarCheck2, CalendarDays, ContactRound, House } from "lucide-react";
 import SerenityHouseTitleRail from "./SerenityHouseTitleRail";
 import SerenityHeroImage from "./SerenityHeroImage";
 import SerenityPhotoPreviewRail from "./SerenityPhotoPreviewRail";
@@ -88,34 +89,42 @@ export default function SerenityEditorialHome({
     <div className="serenity-editorial-home">
       <section className="serenity-editorial-hero" aria-labelledby="serenity-editorial-title">
         <SerenityHeroImage key={heroImage} src={heroImage} alt={heroAlt} />
-        <div className="serenity-editorial-hero__shade" aria-hidden="true" />
         <div className="serenity-editorial-hero__content">
+          <p className="serenity-editorial-hero__eyebrow">Serenity on the Rocks · Pakenham</p>
           <h1 id="serenity-editorial-title">
-            <span>Serenity</span>
-            <span> on the rocks</span>
+            <span>Whole-Home Stays.</span>
+            <span>Simple Direct</span>
+            <span>Booking.</span>
           </h1>
+          <p className="serenity-editorial-hero__description">
+            Fully furnished private homes for relocations, home renovations, business travel and partner-booked stays.
+          </p>
+          <div className="serenity-editorial-hero__actions">
+            <Link href="/houses">Check Availability</Link>
+            <Link href="/corporate-stays#corporate-booking">Partner Booking</Link>
+          </div>
         </div>
-        <div className="serenity-editorial-hero__stats" aria-label="Serenity on the Rocks facts">
-          <Link href="/houses">
-            <strong>3</strong>
-            <span className="serenity-editorial-hero__stat-label">Adjacent homes</span>
-            <span className="serenity-editorial-hero__stat-arrow" aria-hidden="true">↗</span>
-          </Link>
-          <Link href="/contact#location">
-            <strong>9 min</strong>
-            <span className="serenity-editorial-hero__stat-label">Walk to Pakenham station</span>
-            <span className="serenity-editorial-hero__stat-arrow" aria-hidden="true">↗</span>
-          </Link>
-          <Link href="/about">
-            <strong>8+ yrs</strong>
-            <span className="serenity-editorial-hero__stat-label">Hosting experience</span>
-            <span className="serenity-editorial-hero__stat-arrow" aria-hidden="true">↗</span>
-          </Link>
-          <Link href="/contact#contact-form">
-            <strong>1 contact</strong>
-            <span className="serenity-editorial-hero__stat-label">Enquiry to checkout</span>
-            <span className="serenity-editorial-hero__stat-arrow" aria-hidden="true">↗</span>
-          </Link>
+        <div className="serenity-editorial-hero__stats" aria-label="Stay benefits">
+          <div className="serenity-editorial-hero__stat">
+            <span className="serenity-editorial-hero__stat-icon" aria-hidden="true"><House size={22} strokeWidth={1.8} /></span>
+            <strong>Move-in ready</strong>
+            <span className="serenity-editorial-hero__stat-label">Furnished homes with the everyday essentials in place.</span>
+          </div>
+          <div className="serenity-editorial-hero__stat">
+            <span className="serenity-editorial-hero__stat-icon" aria-hidden="true"><CalendarDays size={22} strokeWidth={1.8} /></span>
+            <strong>Flexible stays</strong>
+            <span className="serenity-editorial-hero__stat-label">Stay a few weeks or settle in for longer.</span>
+          </div>
+          <div className="serenity-editorial-hero__stat">
+            <span className="serenity-editorial-hero__stat-icon" aria-hidden="true"><CalendarCheck2 size={22} strokeWidth={1.8} /></span>
+            <strong>Book direct</strong>
+            <span className="serenity-editorial-hero__stat-label">Check available dates and arrange your stay with us.</span>
+          </div>
+          <div className="serenity-editorial-hero__stat">
+            <span className="serenity-editorial-hero__stat-icon" aria-hidden="true"><ContactRound size={22} strokeWidth={1.8} /></span>
+            <strong>Personal support</strong>
+            <span className="serenity-editorial-hero__stat-label">One responsive team, from enquiry to checkout.</span>
+          </div>
         </div>
       </section>
 

@@ -8,7 +8,8 @@ export async function GET(request: Request) {
   if (authorization !== `Bearer ${cronSecret}`) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   try {
     const results = await syncCalendarConnections();
-    return NextResponse.json({ results });
+    const failed = results.filter((result) => result.status === "error");
+    return NextResponse.json({ results }, { status: failed.length ? 500 : 200 });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Calendar sync failed." }, { status: 500 });
   }

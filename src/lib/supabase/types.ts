@@ -3,6 +3,25 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      corporate_partners: {
+        Row: {
+          id: string;
+          partner_id: string;
+          company_name: string;
+          contact_name: string;
+          email: string;
+          phone: string;
+          abn: string;
+          purchase_order: string;
+          invoice_requested: boolean;
+          active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["corporate_partners"]["Row"]> & Pick<Database["public"]["Tables"]["corporate_partners"]["Row"], "company_name" | "contact_name" | "email" | "phone">;
+        Update: Partial<Database["public"]["Tables"]["corporate_partners"]["Row"]>;
+        Relationships: [];
+      };
       properties: {
         Row: {
           id: string;

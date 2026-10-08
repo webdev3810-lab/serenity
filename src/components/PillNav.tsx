@@ -102,7 +102,7 @@ export default function PillNav({
 
   return (
     <>
-      <header className={`pill-nav-header hidden sticky top-0 z-[80] transform-gpu border-b border-[#D7E2DA] bg-white text-[#063F30] md:block ${reducedMotion ? "transition-none" : "transition-[transform,background-color,border-color,box-shadow] duration-200 ease-out"} ${navHidden ? "-translate-y-full" : "translate-y-0"} ${isScrolled ? "is-scrolled" : ""} ${className}`}>
+      <header className={`pill-nav-header hidden sticky top-0 z-[80] transform-gpu border-b border-[#CBD6DE] bg-white text-[#001e35] md:block ${reducedMotion ? "transition-none" : "transition-[transform,background-color,border-color,box-shadow] duration-200 ease-out"} ${navHidden ? "-translate-y-full" : "translate-y-0"} ${isScrolled ? "is-scrolled" : ""} ${className}`}>
         <div className="mx-auto flex h-16 w-full max-w-[100rem] items-center gap-2 px-3 sm:px-5 lg:px-6">
           <Link href="/" aria-label="Serenity on the Rocks home" className="pill-nav-brand relative z-10 flex shrink-0 items-center">
             <BrandWordmark />
@@ -118,17 +118,17 @@ export default function PillNav({
                     href={item.href}
                     aria-label={item.ariaLabel ?? item.label}
                     aria-current={active ? "page" : undefined}
-                    className={`pill-nav-link relative inline-flex min-h-10 items-center justify-center rounded-full px-2 py-2 text-[12px] font-medium normal-case tracking-[0.035em] text-[#063F30] no-underline transition-[background-color,color,box-shadow,transform] hover:-translate-y-px hover:text-[#07583F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#07583F] lg:px-2.5 lg:text-[13px] ${active ? "is-active text-[#07583F]" : ""}`}
+                    className={`pill-nav-link relative inline-flex min-h-10 items-center justify-center rounded-full px-2 py-2 text-[12px] font-medium normal-case tracking-[0.035em] text-[#001e35] no-underline transition-[background-color,color,box-shadow,transform] hover:-translate-y-px hover:text-[#002844] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#002844] lg:px-2.5 lg:text-[13px] ${active ? "is-active text-[#002844]" : ""}`}
                   >
                     {item.label}
-                    <span aria-hidden="true" className={`pill-nav-link__indicator absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#FFD21A] transition-opacity ${active ? "opacity-100" : "opacity-0"}`} />
+                    <span aria-hidden="true" className={`pill-nav-link__indicator absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[#E5CA8B] transition-opacity ${active ? "opacity-100" : "opacity-0"}`} />
                   </Link>
                 );
               })}
             </div>
           </nav>
 
-          <Link href={ctaHref} className="pill-nav-cta ml-auto hidden min-h-10 shrink-0 items-center justify-center rounded-full border border-[#FFD21A] bg-[#FFD21A] px-3.5 text-[12px] font-medium normal-case tracking-[0.04em] text-[#063F30] transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-[#FFE36C] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#07583F] md:inline-flex lg:px-4">
+          <Link href={ctaHref} className="pill-nav-cta ml-auto hidden min-h-10 shrink-0 items-center justify-center rounded-full border border-[#E5CA8B] bg-[#E5CA8B] px-3.5 text-[12px] font-medium normal-case tracking-[0.04em] text-[#001e35] transition-[background-color,box-shadow,transform] hover:-translate-y-px hover:bg-[#F1DEB1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#002844] md:inline-flex lg:px-4">
             {ctaLabel}
           </Link>
         </div>
@@ -140,13 +140,13 @@ export default function PillNav({
           items={mobileItems}
           displaySocials={false}
           displayItemNumbering={false}
-          colors={["#063F30", "#07583F", "#FFD21A"]}
+          colors={["#001e35", "#002844", "#E5CA8B"]}
           ctaLabel={ctaLabel}
           ctaHref={ctaHref}
-          menuButtonColor="#063F30"
-          openMenuButtonColor="#063F30"
+          menuButtonColor="#001e35"
+          openMenuButtonColor="#001e35"
           changeMenuColorOnOpen={false}
-          accentColor="#FFD21A"
+          accentColor="#E5CA8B"
           isFixed
           className={`${reducedMotion ? "transition-none" : "transition-transform duration-300 ease-out"} ${navHidden ? "nav-scroll-hidden" : "nav-scroll-visible"}`}
         />

@@ -7,6 +7,7 @@ import { useMemo, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Bath, BedDouble, BedSingle, CarFront, UsersRound, WashingMachine, Wifi, type LucideIcon } from "lucide-react";
 import type { Property } from "@/src/data/properties";
 import type { GuestCounts } from "@/src/lib/booking";
 import { hasUnavailableConflict, validateGuestCapacity } from "@/src/lib/booking";
@@ -84,6 +85,30 @@ function approvedImage(property: Property) {
   return property.images.find((image) => isApprovedHomepageMediaSource(image.src))?.src ?? "";
 }
 
+function houseDetails(property: Property): { label: string; Icon: LucideIcon }[] {
+  const details: { label: string; Icon: LucideIcon }[] = [
+    { label: `Sleeps up to ${property.maxGuests}`, Icon: UsersRound },
+    { label: `${property.bedrooms} ${property.bedrooms === 1 ? "bedroom" : "bedrooms"}`, Icon: BedDouble },
+    { label: `${property.bathrooms} ${property.bathrooms === 1 ? "bathroom" : "bathrooms"}`, Icon: Bath },
+    { label: `${property.beds} ${property.beds === 1 ? "bed" : "beds"}`, Icon: BedSingle },
+  ];
+
+  const parking = property.parkingType?.trim();
+  if (parking) {
+    const label = /free parking on premises/i.test(parking) && /free street parking/i.test(parking)
+      ? "Free on-site & street parking"
+      : /^free parking on premises$/i.test(parking) ? "Free on-site parking" : parking;
+    details.push({ label, Icon: CarFront });
+  }
+  if (property.amenities.some((amenity) => /wi[\s-]?fi|wireless internet/i.test(amenity))) {
+    details.push({ label: "Wi-Fi", Icon: Wifi });
+  } else if (property.amenities.some((amenity) => /laundry|washer|washing machine/i.test(amenity))) {
+    details.push({ label: "Laundry", Icon: WashingMachine });
+  }
+
+  return details;
+}
+
 function parseNonNegativeInteger(value: string | null) {
   if (value === null || value === "") return null;
   const parsed = Number(value);
@@ -141,18 +166,22 @@ export function HousesEditorialPage({ properties }: { properties: Property[] }) 
   return (
     <div className="houses-editorial-page">
       <header className="houses-editorial-heading">
-        <h1 id="houses-editorial-title">Our houses</h1>
+        <div>
+          <h1 id="houses-editorial-title">Our houses</h1>
+          <p>Quality, fully furnished homes in Pakenham.</p>
+        </div>
+        <p className="houses-editorial-heading__aside">Spacious. Comfortable. Move-in ready.<br />A private place to stay for family, work, or a change of scene.</p>
       </header>
       <section className="houses-editorial-list" id="houses-list" aria-labelledby="houses-editorial-title">
         {results.length ? results.map((property) => {
           const name = property.name.replace(" - Whole", "");
           const image = approvedImage(property);
           const href = `/properties/${property.slug}`;
-          const houseNumber = String(properties.findIndex((item) => item.slug === property.slug) + 1).padStart(2, "0");
+          const details = houseDetails(property);
 
           return (
             <article className="houses-editorial-list__card" key={property.id || property.slug}>
-              <Link href={href} className="houses-editorial-list__link" aria-label={`Explore ${name}`}>
+              <Link href={href} className="houses-editorial-list__link">
                 <span className="houses-editorial-list__media">
                   {image ? (
                     <Image
@@ -165,10 +194,17 @@ export function HousesEditorialPage({ properties }: { properties: Property[] }) 
                     />
                   ) : <span className="houses-editorial-list__fallback">House photos coming soon</span>}
                 </span>
-                <span className="houses-editorial-list__caption">
-                  <span className="houses-editorial-list__title">{name}</span>
-                  <span className="houses-editorial-list__number">HOUSE {houseNumber}</span>
-                </span>
+                <div className="houses-editorial-list__content">
+                  <div className="houses-editorial-list__caption">
+                    <span className="houses-editorial-list__title">{name}</span>
+                  </div>
+                  <ul className="houses-editorial-list__details" aria-label={`${name} at a glance`}>
+                    {details.map(({ label, Icon }) => (
+                      <li key={label}><Icon size={17} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span></li>
+                    ))}
+                  </ul>
+                  <span className="houses-editorial-list__cta">Explore house <span aria-hidden="true">↗</span></span>
+                </div>
               </Link>
             </article>
           );

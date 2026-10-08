@@ -323,7 +323,7 @@ body:has(.property-theme) .public-site > main {
 
 .property-theme-mobile .stay-reserve-button:hover,
 .property-theme-mobile .stay-reserve-button:focus-visible {
-  background: #ffe36c;
+  background: var(--hero-yellow-hover);
   color: var(--property-ink);
 }
 
@@ -445,7 +445,7 @@ body:has(.property-theme) .public-site > main {
 }
 
 .property-theme .stay-gallery > button:not(.stay-gallery-all) {
-  background: #eef2ef;
+  background: #edf2f6;
 }
 
 .property-theme .stay-gallery img,
@@ -475,7 +475,7 @@ body:has(.property-theme) .public-site > main {
 .property-theme .stay-gallery-all:hover,
 .property-theme .stay-gallery-all:focus-visible {
   border-color: var(--property-ink);
-  background: #ffe36c;
+  background: var(--hero-yellow-hover);
 }
 
 .property-theme .stay-gallery-empty {
@@ -679,7 +679,7 @@ body:has(.property-theme) .public-site > main {
   border-radius: 0;
   background: var(--homepage-surface);
   color: var(--property-body);
-  box-shadow: 0 1rem 2.5rem rgba(6, 63, 48, 0.1);
+  box-shadow: 0 1rem 2.5rem rgba(0, 30, 53, 0.1);
 }
 
 .property-theme .stay-booking-price strong,
@@ -760,13 +760,13 @@ body:has(.property-theme) .public-site > main {
 
 .property-theme .stay-reserve-button:not(:disabled):hover,
 .property-theme .stay-reserve-button:not(:disabled):focus-visible {
-  background: #ffe36c;
+  background: var(--hero-yellow-hover);
   color: var(--property-ink);
 }
 
 .property-theme .stay-reserve-button:disabled {
   border-color: var(--property-line);
-  background: #e5ebe7;
+  background: #e3ebf0;
   color: var(--property-muted);
 }
 
@@ -931,7 +931,7 @@ body:has(.property-theme) .public-site > main {
 }
 
 .serenity-modal::backdrop {
-  background: rgba(6, 63, 48, 0.62);
+  background: rgba(0, 30, 53, 0.62);
 }
 
 .serenity-modal-heading {
@@ -1172,7 +1172,7 @@ body:has(.property-theme) .serenity-booking-drawer .stay-booking-card {
   aspect-ratio: auto;
   margin-bottom: 0.45rem;
   border: 1px solid var(--homepage-line);
-  background: #eef2ef;
+  background: #edf2f6;
 }
 
 .property-photo-tour .property-photo-tour-category-nav-thumb img,
@@ -1256,7 +1256,7 @@ body:has(.property-theme) .serenity-booking-drawer .stay-booking-card {
   min-height: clamp(8rem, 12vw, 12rem);
   border: 0;
   border-radius: 0;
-  background: #eef2ef;
+  background: #edf2f6;
 }
 
 .property-photo-tour .property-photo-tour-item:hover img,
@@ -1265,7 +1265,7 @@ body:has(.property-theme) .serenity-booking-drawer .stay-booking-card {
 }
 
 .serenity-modal.property-photo-lightbox {
-  background: #f4f8f5 !important;
+  background: #f3f7fa !important;
   color: var(--hero-green-deep);
 }
 
@@ -1855,8 +1855,8 @@ body:has(.property-theme) .public-site > main,
 }
 
 body:has(.property-theme) .serenity-editorial-footer {
-  background: #11110f;
-  color: #ffffff;
+  background: #ffffff;
+  color: var(--hero-green-deep, #001e35);
   border-radius: 0 0 1.5rem 1.5rem !important;
 }
 
@@ -1890,10 +1890,10 @@ body:has(.property-theme) .public-site > main,
   background: #ffffff;
 }
 
-/* Keep the footer's rounded bottom corners over black, not the page white. */
+/* Keep the property detail page and footer on the same white canvas. */
 body:has(.property-theme),
 body:has(.property-theme) .public-site {
-  background: #11110f;
+  background: #ffffff;
 }
 
 .property-theme .stay-body,
@@ -1930,8 +1930,16 @@ body:has(.property-theme) .public-site {
 }
 
 .property-theme #sleep {
-  background: var(--property-green);
-  color: #ffffff;
+  background: #ffffff;
+  color: var(--property-body);
+}
+
+.property-theme #sleep h2 {
+  color: var(--property-ink);
+}
+
+.property-theme #sleep .stay-room-grid {
+  background: #ffffff;
 }
 
 .property-theme #location h2,
@@ -1981,7 +1989,7 @@ body:has(.property-theme) .public-site {
 
 .property-theme .stay-booking-card .stay-reserve-button:not(:disabled):hover,
 .property-theme .stay-booking-card .stay-reserve-button:not(:disabled):focus-visible {
-  background: #095842;
+  background: #002844;
 }
 
 .property-theme #amenities .stay-amenity-grid,
@@ -2074,7 +2082,7 @@ body:has(.property-theme) .public-site {
 /* Match the edge-to-edge house previews used on the houses page. */
 .property-theme .stay-related-homes {
   padding-inline: 0;
-  padding-bottom: 0;
+  padding-bottom: clamp(2.5rem, 4vw, 3.5rem);
 }
 
 .property-theme {
@@ -2082,28 +2090,40 @@ body:has(.property-theme) .public-site {
 }
 
 .property-theme .stay-related-homes > h2 {
-  padding-inline: clamp(1rem, 4vw, 5rem);
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  font-size: clamp(2.5rem, 5vw, 5.75rem);
+  line-height: 0.95;
+  padding-inline: clamp(1rem, 2.5vw, 2rem);
 }
 
 .property-theme .related-houses-preview {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-content: start;
-  gap: 2px;
-  padding: 2px 0;
-  background: #11110f;
+  gap: clamp(1rem, 1.5vw, 1.5rem);
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  padding: 0 clamp(1rem, 2.5vw, 2rem) clamp(1rem, 2vw, 1.75rem);
+  background: #ffffff;
 }
 
 .property-theme .related-house-card {
   min-width: 0;
+  margin-bottom: clamp(0.75rem, 1.25vw, 1rem);
   overflow: hidden;
-  border-radius: 1.25rem;
+  border-radius: 1.35rem;
   background: #ffffff;
+  box-shadow: 0 1rem 2.5rem rgba(0, 30, 53, 0.09);
 }
 
 .property-theme .related-house-link {
-  display: block;
-  color: inherit;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  color: var(--property-ink);
   text-decoration: none;
 }
 
@@ -2116,10 +2136,9 @@ body:has(.property-theme) .public-site {
   position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 0.86;
-  max-height: 90svh;
+  aspect-ratio: 1.78;
   overflow: hidden;
-  background: #d6d5ce;
+  background: #edf2f6;
 }
 
 .property-theme .related-house-media img {
@@ -2145,74 +2164,109 @@ body:has(.property-theme) .public-site {
 
 .property-theme .related-house-caption {
   display: flex;
-  min-height: 5.25rem;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.75rem clamp(1rem, 1.4vw, 1.75rem);
+  flex: 1;
+  flex-direction: column;
+  padding: clamp(1.15rem, 2vw, 1.75rem) clamp(1rem, 2vw, 1.75rem) 1.2rem;
 }
 
 .property-theme .related-house-title {
   font-family: var(--property-serif);
-  font-size: clamp(1.8rem, 3vw, 3.25rem);
+  font-size: clamp(1.9rem, 2.7vw, 3rem);
   font-weight: 400;
   letter-spacing: -0.055em;
-  line-height: 0.95;
+  line-height: 1;
 }
 
-.property-theme .related-house-number {
-  flex: none;
-  font-family: var(--font-sans);
-  font-size: clamp(0.62rem, 0.8vw, 0.8rem);
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
+.property-theme .related-house-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem clamp(0.8rem, 1.5vw, 1.5rem);
+  margin: clamp(1.25rem, 2vw, 1.65rem) 0 1.5rem;
+}
+
+.property-theme .related-house-fact {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.65rem;
+  color: var(--hero-green-deep, #001e35);
+  font-size: clamp(0.86rem, 1.05vw, 1rem);
+  line-height: 1.4;
+}
+
+.property-theme .related-house-fact > svg {
+  flex: 0 0 auto;
+  color: #aa8750;
+}
+
+.property-theme .related-house-explore {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: auto;
+  padding-top: 1.05rem;
+  border-top: 1px solid var(--homepage-line);
+  color: var(--hero-green-deep, #001e35);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.property-theme .related-house-link:hover .related-house-explore > svg,
+.property-theme .related-house-link:focus-visible .related-house-explore > svg {
+  transform: translate(2px, -2px);
+}
+
+.property-theme .related-house-explore > svg {
+  flex: 0 0 auto;
+  transition: transform 180ms ease;
 }
 
 @media (max-width: 760px) {
-  .property-theme .related-house-media {
-    max-height: none;
+  .property-theme .related-houses-preview {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 44rem;
+    margin-inline: auto;
   }
 
   .property-theme .related-house-caption {
-    min-height: 5.5rem;
-    padding: 0.9rem;
+    padding: 1.25rem;
+  }
+
+  .property-theme .stay-related-homes > h2 {
+    font-size: clamp(2.35rem, 8vw, 3.5rem);
   }
 
   .property-theme .related-house-title {
-    font-size: clamp(1.35rem, 5vw, 2rem);
-  }
-
-  .property-theme .related-house-number {
-    font-size: 0.6rem;
+    font-size: clamp(1.8rem, 7vw, 2.3rem);
   }
 }
 
 @media (max-width: 520px) {
-  .property-theme .related-houses-preview {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .property-theme .related-house-media {
-    aspect-ratio: 0.95;
-  }
-
   .property-theme .related-house-caption {
-    min-height: 5.5rem;
-    padding: 0.8rem 1.1rem;
+    padding: 1.1rem;
   }
 
   .property-theme .related-house-title {
-    font-size: clamp(2rem, 10vw, 2.8rem);
+    font-size: clamp(1.8rem, 9vw, 2.4rem);
   }
 
-  .property-theme .related-house-number {
-    font-size: 0.68rem;
+  .property-theme .related-house-facts {
+    gap: 0.85rem 0.7rem;
+    margin-block: 1.1rem 1.25rem;
+  }
+
+  .property-theme .related-house-fact {
+    font-size: 0.9rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .property-theme .related-house-media img {
+  .property-theme .related-house-media img,
+  .property-theme .related-house-explore > svg {
     transition: none;
   }
 }
@@ -2260,7 +2314,7 @@ body:has(.property-theme) .public-site {
 /* Photo tour: editorial room index ------------------------------------- */
 .serenity-modal.property-photo-tour {
   --tour-black: #11110f;
-  --tour-green: #075f47;
+  --tour-green: #002844;
   --tour-white: #ffffff;
   --tour-line: #11110f;
   --tour-serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
@@ -2762,7 +2816,7 @@ body:has(.property-theme) .serenity-booking-drawer .stay-booking-price {
   gap: 0.65rem;
   margin: 0;
   padding: 1.5rem 1.5rem 1.4rem;
-  background: #075f47;
+  background: #002844;
   color: #ffffff;
 }
 
@@ -2849,7 +2903,7 @@ body:has(.property-theme) .serenity-booking-drawer .stay-guest-trigger {
 .property-theme .stay-booking-card .stay-guest-trigger > span,
 body:has(.property-theme) .serenity-booking-drawer .stay-booking-dates span,
 body:has(.property-theme) .serenity-booking-drawer .stay-guest-trigger > span {
-  color: #075f47;
+  color: #002844;
   font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -2903,8 +2957,8 @@ body:has(.property-theme) .serenity-booking-drawer .stay-reserve-button:disabled
 
 .property-theme .stay-booking-card .stay-reserve-button.is-loading,
 body:has(.property-theme) .serenity-booking-drawer .stay-reserve-button.is-loading {
-  border-color: #075f47;
-  background: #075f47;
+  border-color: #002844;
+  background: #002844;
   color: #ffffff;
   opacity: 1;
 }
@@ -2960,7 +3014,7 @@ body:has(.property-theme) .serenity-modal .booking-calendar-header {
   min-height: 5rem;
   margin: 0 !important;
   padding: 1rem clamp(1rem, 2vw, 1.75rem);
-  background: #075f47;
+  background: #002844;
   color: #ffffff;
 }
 
@@ -3039,7 +3093,7 @@ body:has(.property-theme) .serenity-modal .calendar-day {
 
 .property-theme #availability .calendar-day-price,
 body:has(.property-theme) .serenity-modal .calendar-day-price {
-  color: #075f47;
+  color: #002844;
   font-size: 0.58rem;
   font-weight: 600;
   opacity: 0.8;
@@ -3049,7 +3103,7 @@ body:has(.property-theme) .serenity-modal .calendar-day-price {
 .property-theme #availability .calendar-day:not(:disabled):focus-visible,
 body:has(.property-theme) .serenity-modal .calendar-day:not(:disabled):hover,
 body:has(.property-theme) .serenity-modal .calendar-day:not(:disabled):focus-visible {
-  border-color: #075f47;
+  border-color: #002844;
   background: #f0f6f3;
   color: #11110f;
   box-shadow: none;
@@ -3060,8 +3114,8 @@ body:has(.property-theme) .serenity-modal .calendar-day:not(:disabled):focus-vis
 .property-theme #availability .calendar-day.selected:is(:hover, :focus-visible),
 body:has(.property-theme) .serenity-modal .calendar-day.selected,
 body:has(.property-theme) .serenity-modal .calendar-day.selected:is(:hover, :focus-visible) {
-  border-color: #075f47;
-  background: #075f47;
+  border-color: #002844;
+  background: #002844;
   color: #ffffff;
 }
 

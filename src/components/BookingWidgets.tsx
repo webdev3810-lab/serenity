@@ -6,7 +6,7 @@ import type { Property } from "@/src/data/properties";
 import { properties } from "@/src/data/properties";
 import { addDays,calculatePrice,dateToIso,defaultGuests,formatAud,formatDateAu,getNightlyPrice,GuestCounts,nightsBetween,totalStayingGuests,validateDateRange,validateGuestCapacity } from "@/src/lib/booking";
 import { AU_LOCALE,AU_TIME_ZONE,formatAuNumber } from "@/src/lib/localization";
-import { BedDouble,Car,ChevronDown,ChevronLeft,ChevronRight,Dog,LoaderCircle,MapPin,Minus,Plus,Users } from "lucide-react";
+import { ArrowUpRight,Bath,BedDouble,Car,ChevronDown,ChevronLeft,ChevronRight,Dog,LoaderCircle,MapPin,Minus,Plus,Users,Wifi } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -422,10 +422,22 @@ export function RelatedHouses({ currentSlug, properties: relatedProperties = pro
     <div className="related-houses-preview">
       {relatedProperties
         .filter((property) => property.slug !== currentSlug)
-        .map((property, index) => {
+        .map((property) => {
           const displayName = property.name.replace(/\s+-\s+Whole$/i, "");
-          const houseIndex = properties.findIndex((house) => house.slug === property.slug);
-          const houseNumber = String((houseIndex >= 0 ? houseIndex : index) + 1).padStart(2, "0");
+          const amenities = property.amenities ?? [];
+          const rawParking = property.parkingType?.trim() || amenities.find((amenity) => /parking/i.test(amenity)) || "";
+          const parking = /on[- ]premises/i.test(rawParking) && /street/i.test(rawParking)
+            ? `${/free/i.test(rawParking) ? "Free " : ""}on-site & street parking`
+            : rawParking.replace(/parking on premises/gi, "on-site parking");
+          const hasWifi = Boolean(property.wifiInformation?.trim()) || amenities.some((amenity) => /wi[- ]?fi|internet/i.test(amenity));
+          const facts = [
+            { Icon: Users, label: `Sleeps up to ${property.maxGuests}` },
+            { Icon: BedDouble, label: `${property.bedrooms} ${property.bedrooms === 1 ? "bedroom" : "bedrooms"}` },
+            { Icon: Bath, label: `${property.bathrooms} ${property.bathrooms === 1 ? "bathroom" : "bathrooms"}` },
+            { Icon: BedDouble, label: `${property.beds} ${property.beds === 1 ? "bed" : "beds"}` },
+            ...(parking ? [{ Icon: Car, label: parking }] : []),
+            ...(hasWifi ? [{ Icon: Wifi, label: "Wi-Fi" }] : []),
+          ];
 
           return (
             <article className="related-house-card" key={property.slug}>
@@ -443,7 +455,18 @@ export function RelatedHouses({ currentSlug, properties: relatedProperties = pro
                 </span>
                 <span className="related-house-caption">
                   <span className="related-house-title">{displayName}</span>
-                  <span className="related-house-number">HOUSE {houseNumber}</span>
+                  <span className="related-house-facts" aria-label={`${displayName} details`}>
+                    {facts.map(({ Icon, label }) => (
+                      <span className="related-house-fact" key={label}>
+                        <Icon size={18} strokeWidth={1.7} aria-hidden="true" />
+                        <span>{label}</span>
+                      </span>
+                    ))}
+                  </span>
+                  <span className="related-house-explore">
+                    <span>Explore house</span>
+                    <ArrowUpRight size={20} strokeWidth={1.5} aria-hidden="true" />
+                  </span>
                 </span>
               </Link>
             </article>

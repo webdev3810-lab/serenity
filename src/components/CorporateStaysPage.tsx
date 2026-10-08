@@ -7,14 +7,12 @@ import {
   ArrowUpRight,
   CalendarCheck,
   Car,
+  Check,
   CheckCircle2,
   ChevronDown,
-  Home,
   Mail,
   Phone,
-  Receipt,
   ShieldCheck,
-  Users,
 } from "lucide-react";
 import { MiniCalendar } from "@/src/components/BookingWidgets";
 import { FormInput, TextArea } from "@/src/components/UI";
@@ -26,6 +24,16 @@ import { canBookCorporateDirectly } from "@/src/lib/reservationRules";
 
 type AvailabilityState = "checking" | "available" | "unavailable" | "error";
 
+const CORPORATE_STAY_FEATURES = [
+  { title: "Whole-home privacy", description: "More personal space than traditional hotel accommodation." },
+  { title: "Work-ready internet", description: "Reliable Wi-Fi for everyday business use." },
+  { title: "Kitchen & laundry", description: "Everyday facilities that make stays of several weeks or months easier." },
+  { title: "Flexible arrangements", description: "Stay extensions can be requested, subject to availability." },
+  { title: "Direct partner bookings", description: "Returning clients can use an ID issued by Serenity in the booking form below." },
+  { title: "Corporate invoicing", description: "GST tax invoices and purchase order details can be requested." },
+  { title: "One point of contact", description: "One Serenity contact throughout the booking and stay." },
+] as const;
+
 export function CorporateStaysPage({ today, properties }: { today: string; properties: Property[] }) {
   const contact = useContactSettings() ?? DEFAULT_CONTACT_SETTINGS;
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -34,6 +42,10 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
   const [submittedReference, setSubmittedReference] = useState("");
   const [availability, setAvailability] = useState<Record<string, AvailabilityState>>({});
   const [submissionKey, setSubmissionKey] = useState("");
+  const [partnerCompany, setPartnerCompany] = useState("");
+  const [partnerLookupError, setPartnerLookupError] = useState("");
+  const [partnerChecking, setPartnerChecking] = useState(false);
+  const partnerLookupVersion = useRef(0);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarResetKey, setCalendarResetKey] = useState(0);
   const corporateDatePickerRef = useRef<HTMLDivElement>(null);
@@ -51,18 +63,11 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
   });
   const [formData, setFormData] = useState({
     customerId: "",
-    companyName: "",
-    contactName: "",
-    email: "",
-    phone: "",
     arrival: "",
     departure: "",
     guests: "4",
     housesNeeded: "1",
     propertySlugs: [properties[0]?.slug ?? "serenity-7"],
-    abn: "",
-    purchaseOrder: "",
-    invoiceRequested: false,
     purpose: "Contractor project crew",
     notes: "",
   });
@@ -77,6 +82,24 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
   const allSelectedAvailable = availabilityReady && selectedProperties.every((property) => availability[property.slug] === "available");
   const directBookingEnabled = canBookCorporateDirectly(selectedProperties);
   const calendarProperty = selectedProperties[0] ?? properties[0];
+
+  const verifyPartner = async () => {
+    const version = ++partnerLookupVersion.current;
+    setPartnerLookupError("");
+    setPartnerCompany("");
+    if (!formData.customerId.trim()) return;
+    setPartnerChecking(true);
+    try {
+      const response = await fetch("/api/corporate-partners/lookup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ partnerId: formData.customerId }), cache: "no-store" });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not verify this Partner ID.");
+      if (version === partnerLookupVersion.current) setPartnerCompany(String(result.companyName));
+    } catch (error) {
+      if (version === partnerLookupVersion.current) setPartnerLookupError(error instanceof Error ? error.message : "Could not verify this Partner ID.");
+    } finally {
+      if (version === partnerLookupVersion.current) setPartnerChecking(false);
+    }
+  };
 
   useEffect(() => {
     if (!calendarOpen) return;
@@ -141,7 +164,11 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
   const submitCorporateBooking = async () => {
     setFormError("");
     if (!formData.customerId.trim()) {
-      setFormError("Enter the corporate customer ID issued by Serenity.");
+      setFormError("Enter the Partner ID issued by Serenity.");
+      return;
+    }
+    if (!partnerCompany) {
+      setFormError("Verify your Partner ID before booking.");
       return;
     }
     if (!formData.arrival || !formData.departure || formData.departure <= formData.arrival) {
@@ -268,23 +295,21 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
         </div>
       </section>
 
-      <section className="corporate-benefits-section corporate-editorial-benefits bg-white py-16 sm:py-24 border-b border-stone-200" aria-label="Why teams choose Serenity">
-        <div className="corporate-benefits-shell container max-w-[92rem] px-5 sm:px-8 lg:px-12">
-          <div className="corporate-benefits-grid grid gap-10 sm:grid-cols-3">
-              {[
-                [Home, "Private homes", "Whole-house privacy, living areas, furnished kitchens, and enclosed yards for space to decompress."],
-                [Users, "Keep teams close", "Book adjacent houses so everyone stays nearby without sharing one crowded space."],
-                [Receipt, "Company-ready", "Direct pricing, tax invoices, ABN billing, and purchase order support for easy administration."],
-              ].map(([Icon, title, description]) => (
-                <article key={title as string} className="corporate-benefit-card flex flex-col">
-                  <div className="corporate-benefit-icon mb-5 inline-flex h-12 w-12 items-center justify-center bg-white rounded-none border border-stone-200">
-                    <Icon size={20} className="text-[var(--hero-green)]" />
-                  </div>
-                  <h3 className="text-xl text-stone-900 mb-3">{title as string}</h3>
-                  <p className="text-sm leading-relaxed text-stone-600">{description as string}</p>
-                </article>
-              ))}
+      <section className="corporate-stay-features" aria-labelledby="corporate-stay-features-title">
+        <div className="corporate-stay-features__grid">
+          <div className="corporate-stay-features__intro">
+            <span>Made for the longer stay</span>
+            <h2 id="corporate-stay-features-title">Designed for work. Ready for living.</h2>
           </div>
+          {CORPORATE_STAY_FEATURES.map((feature, index) => (
+            <article className="corporate-stay-features__item" key={feature.title}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <div>
+                <h3>{feature.title}</h3>
+                <p>{feature.description}</p>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -333,11 +358,28 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
 
       <section id="corporate-booking" className="corporate-editorial-booking bg-white py-20 sm:py-28 border-y border-neutral-200">
         <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
+          <div className="corporate-partner-direct">
+            <div className="corporate-partner-direct__intro">
+              <div>
+                <span className="corporate-partner-direct__eyebrow">Partner direct booking</span>
+                <h2>Already have a Partner ID?</h2>
+                <p>Enter the ID issued by Serenity to book directly for your organisation. Choose your houses and dates, then complete the corporate booking form below.</p>
+                <p className="corporate-partner-direct__note">Account-specific rates and invoicing arrangements are confirmed by Serenity separately.</p>
+              </div>
+              <button type="button" onClick={() => document.getElementById("corp-customer-id")?.focus()}>Enter Partner ID <ArrowUpRight size={19} aria-hidden="true" /></button>
+            </div>
+            <ol className="corporate-partner-direct__steps" aria-label="Corporate booking steps">
+              <li><span>01</span> Enter Partner ID</li>
+              <li><span>02</span> Choose dates</li>
+              <li><span>03</span> Select property</li>
+              <li><span>04</span> Confirm booking</li>
+            </ol>
+          </div>
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-16 items-start">
             <div className="lg:col-span-4 lg:sticky lg:top-32">
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black block mb-4">Existing Customers</span>
-              <h2>Book with your customer ID.</h2>
-              <p className="text-base text-stone-600 leading-relaxed mb-6 max-w-md">Use this booking form to secure your stay dates instantly if Serenity has already issued your company a corporate customer ID.</p>
+              <h2>Book with your Partner ID.</h2>
+              <p className="text-base text-stone-600 leading-relaxed mb-6 max-w-md">For organisations already issued an ID by Serenity. Check live availability, select your houses and complete the booking details here.</p>
             </div>
             
             <div className="lg:col-span-8">
@@ -346,23 +388,20 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                   <div className="flex min-h-[30rem] flex-col items-center justify-center text-center">
                     <div className="flex h-14 w-14 items-center justify-center rounded-none bg-[var(--hero-green)] text-white"><CheckCircle2 size={27} /></div>
                   <h3 className="mt-5 text-2xl font-semibold tracking-[-0.04em]">Corporate stay reserved.</h3>
-                  <p className="mt-3 max-w-md text-sm leading-6 text-black">Thank you, {formData.companyName || "your team"}. The selected houses are now held together in the shared Serenity calendar.</p>
+                  <p className="mt-3 max-w-md text-sm leading-6 text-black">Thank you, {partnerCompany || "your team"}. The selected houses are now held together in the shared Serenity calendar.</p>
                   {submittedReference && <p className="mt-4 border-y border-neutral-300 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-black">Reference {submittedReference}</p>}
                   <button type="button" className="mt-7 border border-black px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] hover:bg-black hover:text-white" onClick={() => { setFormSubmitted(false); setSubmissionKey(""); setSubmittedReference(""); }}>Book another stay</button>
                 </div>
               ) : (
                 <form onSubmit={handleBookingSubmit} className="mt-8 space-y-8">
                   <div className="space-y-5">
-                    <h4 className="text-xl text-stone-900 border-b border-stone-200 pb-3">1. Company Details</h4>
+                    <h4 className="text-xl text-stone-900 border-b border-stone-200 pb-3">1. Partner ID</h4>
                     <div className="corporate-customer-id">
-                      <FormInput id="corp-customer-id" label="Corporate customer ID *" required maxLength={80} value={formData.customerId} onChange={(event) => setFormData({ ...formData, customerId: event.target.value.toUpperCase() })} placeholder="Enter the ID issued by Serenity" />
-                      <p className="mt-2 text-xs leading-5 text-stone-600">This ID is required for existing corporate customers and is stored with the reservation.</p>
-                    </div>
-                    <div className="grid gap-5 sm:grid-cols-2">
-                      <FormInput id="corp-company-name" label="Company name *" required value={formData.companyName} onChange={(event) => setFormData({ ...formData, companyName: event.target.value })} placeholder="e.g. Cardinia Infrastructure Group" />
-                      <FormInput id="corp-contact-name" label="Contact name *" required value={formData.contactName} onChange={(event) => setFormData({ ...formData, contactName: event.target.value })} placeholder="Full name" />
-                      <FormInput id="corp-email" label="Business email *" type="email" required value={formData.email} onChange={(event) => setFormData({ ...formData, email: event.target.value })} placeholder="corporate@company.com.au" />
-                      <FormInput id="corp-phone" label="Phone number *" type="tel" required value={formData.phone} onChange={(event) => setFormData({ ...formData, phone: event.target.value })} placeholder="+61 400 000 000" />
+                      <FormInput id="corp-customer-id" label="Partner ID *" required maxLength={24} value={formData.customerId} onChange={(event) => { partnerLookupVersion.current += 1; setPartnerChecking(false); setFormData({ ...formData, customerId: event.target.value.toUpperCase() }); setPartnerCompany(""); setPartnerLookupError(""); }} onBlur={() => void verifyPartner()} placeholder="SER-XXXXXXXXXXXX" />
+                      <p className="mt-2 text-xs leading-5 text-stone-600">Your company and billing details are saved by Serenity. You only need your Partner ID here.</p>
+                      {partnerChecking && <p className="mt-2 text-sm text-stone-600" role="status">Checking Partner ID…</p>}
+                      {partnerCompany && <p className="mt-2 text-sm font-semibold text-[#002844]" role="status">Connected to {partnerCompany}</p>}
+                      {partnerLookupError && <p className="mt-2 text-sm text-red-700" role="alert">{partnerLookupError}</p>}
                     </div>
                   </div>
 
@@ -456,19 +495,18 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                         const unavailable = selectedDates.length > 0 && state === "unavailable";
                         const disabled = !checked && unavailable;
                         return (
-                          <label key={property.slug} className={`corporate-house-choice relative flex flex-col overflow-hidden border transition-all ${disabled ? "cursor-not-allowed opacity-60" : checked ? "is-selected cursor-pointer" : "cursor-pointer"}`}>
+                          <label key={property.slug} className={`corporate-house-choice relative flex flex-col overflow-hidden transition-all ${disabled ? "cursor-not-allowed opacity-60" : checked ? "is-selected cursor-pointer" : "cursor-pointer"}`}>
                             <div className="relative aspect-[4/3] w-full bg-stone-200">
                               {property.featuredImage && <Image src={property.featuredImage} alt={property.name} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" />}
-                              <div className="absolute top-3 left-3 bg-white p-1">
-                                <input type="checkbox" checked={checked} disabled={disabled} onChange={(event) => updateHouseSelection(property.slug, event.target.checked)} className="h-4 w-4 accent-[var(--hero-green)] block" />
-                              </div>
+                              <input type="checkbox" checked={checked} disabled={disabled} onChange={(event) => updateHouseSelection(property.slug, event.target.checked)} className="sr-only" aria-label={`Select ${property.name.replace(" - Whole", "")}`} />
+                              <span className="corporate-house-choice__check" aria-hidden="true">{checked && <Check size={20} strokeWidth={3} />}</span>
                             </div>
                             <div className="corporate-house-choice-caption p-4 bg-white flex flex-col flex-1">
-                              <span className="font-bold text-sm text-stone-900">{property.name.replace(" - Whole", "")}</span>
+                              <span className="corporate-house-choice__title-row"><span className="font-bold text-sm text-stone-900">{property.name.replace(" - Whole", "")}</span>{checked && <span className="corporate-house-choice__selected">Selected</span>}</span>
                               <span className="text-xs text-neutral-600 mt-1">Beside other houses</span>
                               {selectedDates.length > 0 && (
                                 <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between">
-                                  <span className={`text-[10px] uppercase tracking-[0.15em] font-bold ${state === "available" ? "text-emerald-700" : state === "unavailable" ? "text-red-700" : "text-neutral-600"}`}>{state === "available" ? "Available" : state === "unavailable" ? "Unavailable" : state === "error" ? "Retry" : "Checking..."}</span>
+                                  <span className={`text-[10px] uppercase tracking-[0.15em] font-bold ${state === "available" ? "text-[#002844]" : state === "unavailable" ? "text-red-700" : "text-neutral-600"}`}>{state === "available" ? "Available" : state === "unavailable" ? "Unavailable" : state === "error" ? "Retry" : "Checking..."}</span>
                                 </div>
                               )}
                             </div>
@@ -476,7 +514,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                         );
                       })}
                     </div>
-                    {selectedDates.length > 0 && <div className={`mt-4 p-4 text-sm font-medium ${allSelectedAvailable ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : availabilityReady ? "bg-red-50 text-red-800 border border-red-200" : "bg-stone-50 text-stone-600 border border-stone-200"}`} aria-live="polite">{allSelectedAvailable ? "All selected houses are available in the shared Serenity calendar." : availabilityReady ? "At least one selected house is unavailable. Choose another house or date range." : "Checking bookings, manual blocks, and connected calendars…"}</div>}
+                    {selectedDates.length > 0 && <div className={`mt-4 p-4 text-sm font-medium ${allSelectedAvailable ? "bg-[#e8eef2] text-[#002844] border border-[#b9cbd7]" : availabilityReady ? "bg-red-50 text-red-800 border border-red-200" : "bg-stone-50 text-stone-600 border border-stone-200"}`} aria-live="polite">{allSelectedAvailable ? "All selected houses are available in the shared Serenity calendar." : availabilityReady ? "At least one selected house is unavailable. Choose another house or date range." : "Checking bookings, manual blocks, and connected calendars…"}</div>}
                     
                     {corporateNights > 0 && selectedProperties.length > 0 && (
                       <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border border-stone-300 bg-white p-6 shadow-sm">
@@ -490,21 +528,13 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                   </div>
 
                   <div className="space-y-5 pt-4">
-                    <h4 className="text-xl text-stone-900 border-b border-stone-200 pb-3">4. Billing & Requirements</h4>
-                    <div className="grid gap-5 sm:grid-cols-2">
-                      <FormInput id="corp-abn" label="ABN (optional)" value={formData.abn} onChange={(event) => setFormData({ ...formData, abn: event.target.value })} placeholder="12 345 678 901" />
-                      <FormInput id="corp-po" label="Purchase order (optional)" value={formData.purchaseOrder} onChange={(event) => setFormData({ ...formData, purchaseOrder: event.target.value })} placeholder="PO or cost centre" />
-                    </div>
-                    <label className="corporate-invoice-choice flex items-start gap-3 border border-stone-200 bg-white p-5 text-sm font-medium cursor-pointer transition-colors">
-                      <input type="checkbox" checked={formData.invoiceRequested} onChange={(event) => setFormData({ ...formData, invoiceRequested: event.target.checked })} className="mt-0.5 h-4 w-4 accent-stone-900" />
-                      <span>Request a GST tax invoice with ABN and purchase order details.</span>
-                    </label>
+                    <h4 className="text-xl text-stone-900 border-b border-stone-200 pb-3">4. Anything else?</h4>
                     <TextArea id="corp-notes" label="Notes or requirements" value={formData.notes} onChange={(event) => setFormData({ ...formData, notes: event.target.value })} placeholder="Tell us about roster flexibility, parking, billing, or anything else your team needs..." rows={4} />
                   </div>
 
                   <div className="pt-4 border-t border-stone-200">
                     {formError && <p className="mb-5 border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-800" role="alert" aria-live="polite">{formError}</p>}
-                    <button type="submit" className="inline-flex w-full items-center justify-center gap-2 bg-[var(--hero-green)] text-white px-6 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] rounded-none transition-colors disabled:cursor-not-allowed disabled:opacity-60" disabled={formSubmitting || !allSelectedAvailable || !directBookingEnabled}>
+                    <button type="submit" className="inline-flex w-full items-center justify-center gap-2 bg-[var(--hero-green)] text-white px-6 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] rounded-none transition-colors disabled:cursor-not-allowed disabled:opacity-60" disabled={formSubmitting || partnerChecking || !partnerCompany || !allSelectedAvailable || !directBookingEnabled}>
                       {formSubmitting ? "Reserving…" : directBookingEnabled ? "Book corporate stay" : "Enquiry required"}<ArrowUpRight size={15} />
                     </button>
                     {!directBookingEnabled && selectedProperties.length > 0 && <p className="mt-4 text-xs leading-relaxed text-stone-600">The selected house rules require review before confirmation. Use the separate corporate enquiry form above and the Serenity team can help.</p>}

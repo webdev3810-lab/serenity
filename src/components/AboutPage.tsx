@@ -43,8 +43,7 @@ function HouseImage({ src, alt, priority = false }: { src: string; alt: string; 
 }
 
 export function AboutPage({ properties }: { properties: Property[] }) {
-  const homes = properties.slice(0, 3);
-  const heroHome = properties.find((property) => property.slug === "serenity-7") ?? homes[0];
+  const heroHome = properties.find((property) => property.slug === "serenity-7") ?? properties[0];
   const reviews = properties.flatMap((property) =>
     (property.reviews ?? []).map((review) => ({
       id: review.id,
@@ -129,28 +128,6 @@ export function AboutPage({ properties }: { properties: Property[] }) {
           ))}
         </div>
       </section>
-
-      {homes.length > 0 ? (
-        <section className="about-story-homes" aria-labelledby="about-story-homes-title">
-          <div className="about-story-homes__heading">
-            <h2 id="about-story-homes-title">Three homes.<br />One neighbourhood.</h2>
-            <Link href="/houses">View all houses <span aria-hidden="true">↗</span></Link>
-          </div>
-          <div className="about-story-homes__grid">
-            {homes.map((home, index) => (
-              <Link className="about-story-home" href={`/properties/${home.slug}`} key={home.slug}>
-                <span className="about-story-home__media">
-                  <HouseImage src={home.featuredImage} alt={`${home.name.replace(" - Whole", "")} exterior`} />
-                </span>
-                <span className="about-story-home__caption">
-                  <span>{home.name.replace(" - Whole", "")}</span>
-                  <small>House {String(index + 1).padStart(2, "0")}</small>
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      ) : null}
 
       {reviews.length > 0 ? (
         <HomepageReviewsSection

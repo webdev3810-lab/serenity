@@ -42,28 +42,32 @@ export async function POST(request: Request) {
       : [];
     const checkIn = String(body.checkIn ?? body.arrival ?? "");
     const checkout = String(body.checkout ?? body.departure ?? "");
-    const companyName = String(body.companyName ?? "").trim();
     const customerId = String(body.customerId ?? "").trim().toUpperCase();
-    const contactName = String(body.contactName ?? "").trim();
-    const email = String(body.email ?? "").trim().toLowerCase();
-    const phone = String(body.phone ?? "").trim();
     const notes = String(body.notes ?? "").trim();
     const guests = asGuestCounts(body.guests);
     const idempotencyKey = String(request.headers.get("Idempotency-Key") ?? body.idempotencyKey ?? "").trim();
 
-    if (!customerId || !propertySlugs.length || propertySlugs.length > 3 || !checkIn || !checkout || !companyName || !contactName || !email || !phone) {
-      return NextResponse.json({ error: "Enter your corporate customer ID, choose at least one house and dates, and complete the company contact details." }, { status: 400 });
+    if (!/^SER-(?:[A-F0-9]{12}|[A-F0-9]{20})$/.test(customerId) || !propertySlugs.length || propertySlugs.length > 3 || !checkIn || !checkout) {
+      return NextResponse.json({ error: "Enter a valid Partner ID, then choose your houses and dates." }, { status: 400 });
     }
-    if (!/^\S+@\S+\.\S+$/.test(email)) return NextResponse.json({ error: "Enter a valid business email address." }, { status: 400 });
-    if (idempotencyKey.length > 128 || customerId.length > 80 || notes.length > 1000 || companyName.length > 160 || contactName.length > 120 || email.length > 150 || phone.length > 30) {
+    if (idempotencyKey.length > 128 || notes.length > 1000) {
       return NextResponse.json({ error: "Please shorten one or more reservation fields." }, { status: 400 });
     }
 
     if (isLocalContentPreview || !isSupabaseConfigured || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return NextResponse.json({ configured: false, preview: true, booking: { reference: corporateReference() } });
+      return NextResponse.json({ error: "Partner bookings require the live database connection." }, { status: 503 });
     }
 
     const supabase = createSupabaseAdminClient();
+    const { data: partner, error: partnerError } = await supabase.from("corporate_partners")
+      .select("id, company_name, contact_name, email, phone, abn, purchase_order, invoice_requested")
+      .eq("partner_id", customerId).eq("active", true).maybeSingle();
+    if (partnerError) throw partnerError;
+    if (!partner) return NextResponse.json({ error: "Partner ID not found or inactive. Check the ID issued by Serenity." }, { status: 403 });
+    const companyName = partner.company_name;
+    const contactName = partner.contact_name;
+    const email = partner.email;
+    const phone = partner.phone;
     const { data: propertyRows, error: propertyError } = await supabase
       .from("properties")
       .select("id, slug, corporate_booking_allowed, minimum_corporate_stay, minimum_corporate_houses, maximum_corporate_houses, adjacent_houses_allowed, instant_booking_enabled, booking_request_required, corporate_approval_required, unavailable_dates")
@@ -117,13 +121,13 @@ export async function POST(request: Request) {
         pets: guests.pets,
         guest_details: { companyName, contactName, firstName: contactName, email, phone, corporate: true },
         corporate_details: {
-          ...(body.corporateDetails && typeof body.corporateDetails === "object" ? body.corporateDetails : {}),
           corporate: true,
           customerId,
+          partnerAccountId: partner.id,
           groupReference,
-          abn: String(body.abn ?? ""),
-          purchaseOrder: String(body.purchaseOrder ?? ""),
-          invoiceRequested: body.invoiceRequested === true,
+          abn: partner.abn,
+          purchaseOrder: partner.purchase_order,
+          invoiceRequested: partner.invoice_requested,
         },
         price_breakdown: price,
         total: price.total,

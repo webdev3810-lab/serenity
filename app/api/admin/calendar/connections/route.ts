@@ -4,7 +4,7 @@ import { getAdminUser } from "@/src/lib/supabase/auth";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 import { ACTIVE_BOOKING_STATUSES, calendarRangesOverlap } from "@/src/lib/calendar/conflicts";
 import { CALENDAR_PLATFORM_LABELS, CALENDAR_PLATFORMS, type CalendarPlatform } from "@/src/lib/calendar/types";
-import { testCalendarFeed } from "@/src/lib/calendar/sync";
+import { syncCalendarConnections, testCalendarFeed } from "@/src/lib/calendar/sync";
 
 const TARGET_PROPERTY_SLUGS = ["serenity-7", "serenity-9", "serenity-11"];
 
@@ -23,7 +23,7 @@ export async function GET() {
 
   const propertyIds = (properties ?? []).map((property) => property.id);
   const [{ data: events, error: eventError }, { data: bookings, error: bookingError }] = propertyIds.length ? await Promise.all([
-    fetchAllAdminRows(() => supabase.from("calendar_events").select("id, property_id, connection_id, source_platform, start_date, end_date, status, is_blocking, summary, block_reason, internal_note").in("property_id", propertyIds).order("id")),
+    fetchAllAdminRows(() => supabase.from("calendar_events").select("id, property_id, connection_id, external_event_id, source_platform, start_date, end_date, status, is_blocking, summary, block_reason, internal_note").in("property_id", propertyIds).order("id")),
     fetchAllAdminRows(() => supabase.from("bookings").select("id, property_id, check_in, checkout").in("property_id", propertyIds).in("booking_status", [...ACTIVE_BOOKING_STATUSES]).order("id")),
   ]) : [{ data: [], error: null }, { data: [], error: null }];
   if (eventError || bookingError) return NextResponse.json({ error: eventError?.message ?? bookingError?.message ?? "Could not load calendar conflicts." }, { status: 500 });
@@ -46,14 +46,17 @@ export async function GET() {
           hasExportToken: connection.connection_type === "export" && connection.is_enabled,
         })),
       directBlocks: blockingEvents
-        .filter((event) => event.property_id === property.id && event.source_platform === "direct" && !event.connection_id)
+        .filter((event) => event.property_id === property.id && event.source_platform === "direct" && !event.connection_id && !event.external_event_id.startsWith("ical-upload:"))
         .map((event) => ({ id: event.id, startDate: event.start_date, endDate: event.end_date, summary: event.summary, blockReason: event.block_reason, internalNote: event.internal_note })),
+      uploadedCalendar: {
+        eventCount: currentEvents.filter((event) => event.property_id === property.id && event.external_event_id.startsWith("ical-upload:") && event.is_blocking).length,
+      },
       calendarItems: [
         ...currentEvents.filter((event) => event.property_id === property.id).map((event) => ({
           id: event.id,
           startDate: event.start_date,
           endDate: event.end_date,
-          source: event.source_platform,
+          source: event.external_event_id.startsWith("ical-upload:") ? "uploaded" : event.source_platform,
           label: event.summary || "Unavailable",
         })),
         ...(bookings ?? []).filter((booking) => booking.property_id === property.id).map((booking) => ({
@@ -97,7 +100,13 @@ export async function POST(request: Request) {
       sync_status: "pending",
     }, { onConflict: "property_id,platform,connection_type" }).select("id, property_id, platform, connection_type, external_calendar_url, is_enabled, last_synced_at, last_attempt_at, last_success_at, last_error, last_imported_event_count, sync_frequency_minutes, sync_status").single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ connection: data, test: feedTest });
+    let sync: { status: "error" | "success" | "conflict"; message: string };
+    try {
+      [sync] = await syncCalendarConnections({ propertyId, platform });
+    } catch (syncError) {
+      sync = { status: "error", message: syncError instanceof Error ? syncError.message : "The first calendar sync failed." };
+    }
+    return NextResponse.json({ connection: data, test: feedTest, sync });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Could not save calendar connection." }, { status: 500 });
   }

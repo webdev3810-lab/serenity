@@ -64,7 +64,7 @@ export default function SerenityHouseTitleRail({ houses }: SerenityHouseTitleRai
 
   const activeHouse = houses[activeIndex];
   const houseFacts = activeHouse ? [
-    `${activeHouse.maxGuests} ${activeHouse.maxGuests === 1 ? "guest" : "guests"}`,
+    `Sleeps up to ${activeHouse.maxGuests}`,
     `${activeHouse.bedrooms} ${activeHouse.bedrooms === 1 ? "bedroom" : "bedrooms"}`,
     `${activeHouse.beds} ${activeHouse.beds === 1 ? "bed" : "beds"}`,
     `${activeHouse.bathrooms} ${activeHouse.bathrooms === 1 ? "bathroom" : "bathrooms"}`,
@@ -80,7 +80,7 @@ export default function SerenityHouseTitleRail({ houses }: SerenityHouseTitleRai
           <ul aria-label={`${activeHouse.name} details`}>
             {houseFacts.map((fact) => <li key={fact}>{fact}</li>)}
           </ul>
-          <Link href={`/properties/${activeHouse.slug}`}>Explore house <span aria-hidden="true">→</span></Link>
+          <Link href={`/properties/${activeHouse.slug}`}>Explore {activeHouse.name} <span aria-hidden="true">→</span></Link>
         </div>
       )}
     </div>

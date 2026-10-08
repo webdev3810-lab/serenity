@@ -9,7 +9,10 @@ export function isIcsCalendarText(value: string) {
 
 function toDateValue(value: string) {
   const match = value.trim().match(DATE_PATTERN);
-  return match ? `${match[1]}-${match[2]}-${match[3]}` : null;
+  if (!match) return null;
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  return date.getUTCFullYear() === Number(match[1]) && date.getUTCMonth() + 1 === Number(match[2]) && date.getUTCDate() === Number(match[3])
+    ? `${match[1]}-${match[2]}-${match[3]}` : null;
 }
 
 export function addCalendarDays(value: string, days: number) {
@@ -107,6 +110,8 @@ export function parseIcsCalendar(input: string): ParsedCalendarEvent[] {
   finishEvent();
   return events;
 }
+
+export const ICS_UPLOAD_PREFIX = "ical-upload:";
 
 export type IcsExportEvent = {
   uid: string;

@@ -122,9 +122,16 @@ export default function SerenityPhotoPreviewRail({ photos, duration }: SerenityP
     );
 
     return duplicate ? (
-      <div className="serenity-editorial-photo-preview__card" key={`loop-${photo.slug}-${photo.src}`}>
+      <Link
+        className="serenity-editorial-photo-preview__card"
+        href={`/properties/${photo.slug}`}
+        key={`loop-${photo.slug}-${photo.src}`}
+        tabIndex={-1}
+        aria-hidden="true"
+        draggable={false}
+      >
         {media}
-      </div>
+      </Link>
     ) : (
       <Link
         className="serenity-editorial-photo-preview__card"

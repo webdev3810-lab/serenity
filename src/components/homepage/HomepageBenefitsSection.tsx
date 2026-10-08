@@ -61,7 +61,7 @@ export default function HomepageBenefitsSection({
         <GsapStagger className="grid gap-3 sm:grid-cols-2" selector=".benefit-card">
           {benefits.map(({ icon: Icon, title, description: benefitDescription }) => (
             <article key={title} className="benefit-card rounded-none border border-stone-200 bg-white p-5 shadow-sm">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-none bg-[#F1F1F1] text-[#71836B]">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-none bg-[#F1F1F1] text-[#526D80]">
                 <Icon size={19} aria-hidden="true" />
               </span>
               <h3 className="mt-4 text-lg font-bold leading-tight text-stone-900">{title}</h3>

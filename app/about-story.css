@@ -7,7 +7,7 @@ body:has(.about-story-page) .public-site > main {
 .about-story-page {
   --about-paper: #ffffff;
   --about-ink: #111111;
-  --about-green: var(--hero-green, #07583f);
+  --about-green: var(--hero-green, #002844);
   --about-cream: #fff7ef;
   --about-serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
   display: grid;
@@ -35,7 +35,7 @@ body:has(.about-story-page) .public-site > main {
   padding: 0 clamp(1rem, 2.5vw, 2.5rem) clamp(0.85rem, 1.2vw, 1.2rem);
   border-radius: 0 0 1.25rem 1.25rem;
   background: var(--about-green);
-  color: var(--about-cream);
+  color: #fff;
 }
 
 .about-story-heading h1 {

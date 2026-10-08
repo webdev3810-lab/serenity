@@ -370,14 +370,51 @@ export function PolicyPage({ type }: { type: "Terms and Conditions" | "Privacy P
     { label: "Privacy policy", href: "/privacy", type: "Privacy Policy" },
     { label: "Cancellation policy", href: "/cancellation-policy", type: "Cancellation Policy" },
   ] as const;
-  const sections = [
-    "Scope of Service",
-    "Guest Responsibilities & House Rules",
-    "Booking Requests & Stripe Payment",
-    "Changes, Cancellations & Refunds",
-    "Privacy & Data Handling",
-    "Property Access & Security",
-  ];
+  const content: Record<typeof type, {
+    title: string;
+    eyebrow: string;
+    intro: string;
+    items: { heading: string; text: string }[];
+  }> = {
+    "Terms and Conditions": {
+      title: "Terms & Conditions",
+      eyebrow: "Important information for your stay.",
+      intro: "A few straightforward guidelines to help your stay go smoothly.",
+      items: [
+        { heading: "Reservations", text: "All reservations are subject to confirmation and acceptance." },
+        { heading: "Accurate booking details", text: "The lead guest must ensure all booking details are accurate." },
+        { heading: "Registered guests", text: "Only registered guests may stay at the property unless approved in advance." },
+        { heading: "House rules", text: "Guests are expected to comply with house rules and local regulations." },
+        { heading: "Booking compliance", text: "Serenity Corporate Stays reserves the right to refuse or cancel bookings that do not comply with property policies." },
+        { heading: "Check-in and check-out", text: "Check-in and check-out times must be observed unless arranged in advance." },
+      ],
+    },
+    "Privacy Policy": {
+      title: "Privacy Policy",
+      eyebrow: "Your privacy matters.",
+      intro: "A clear explanation of what guest information we collect and how it is handled.",
+      items: [
+        { heading: "How information is used", text: "Guest information is collected only for reservation management, guest communication, payment processing, and legal obligations." },
+        { heading: "Confidential handling", text: "Personal information is handled with care and kept confidential." },
+        { heading: "Your information stays yours", text: "Information is not sold to third parties." },
+        { heading: "Limited sharing", text: "Details may only be shared with trusted service providers where necessary to complete the booking or comply with legal requirements." },
+        { heading: "Questions about your data", text: "Guests may request clarification regarding how their information is used." },
+      ],
+    },
+    "Cancellation Policy": {
+      title: "Cancellation Policy",
+      eyebrow: "Flexible, fair and transparent.",
+      intro: "How to request a change or cancellation, and what to expect.",
+      items: [
+        { heading: "Request changes early", text: "Cancellation and amendment requests should be submitted as early as possible." },
+        { heading: "Refund eligibility", text: "Refunds, if applicable, depend on the booking terms, notice period, and booking channel." },
+        { heading: "Late cancellations and no-shows", text: "Late cancellations, no-shows, or shortened stays may incur charges." },
+        { heading: "Corporate and partner bookings", text: "Approved corporate or partner bookings may be subject to separately agreed terms." },
+        { heading: "How refunds are returned", text: "Any applicable refund is returned to the original payment method." },
+      ],
+    },
+  };
+  const policy = content[type];
 
   return (
     <div className="policy-editorial-page">
@@ -388,10 +425,10 @@ export function PolicyPage({ type }: { type: "Terms and Conditions" | "Privacy P
 
       <section className="policy-editorial-hero" aria-labelledby="policy-editorial-title">
         <div>
-          <span className="policy-editorial-eyebrow">Legal &amp; policies</span>
-          <h1 id="policy-editorial-title">{type}</h1>
+          <span className="policy-editorial-eyebrow">{policy.eyebrow}</span>
+          <h1 id="policy-editorial-title">{policy.title}</h1>
         </div>
-        <p>Terms governing direct reservations, guest responsibilities, cancellation terms, and privacy protection at Serenity Stays.</p>
+        <p>{policy.intro}</p>
       </section>
 
       <nav className="policy-editorial-nav" aria-label="Serenity policies">
@@ -413,19 +450,17 @@ export function PolicyPage({ type }: { type: "Terms and Conditions" | "Privacy P
 
       <section className="policy-editorial-content" aria-labelledby="policy-editorial-details">
         <div className="policy-editorial-content__heading">
-          <span className="policy-editorial-eyebrow">The details</span>
-          <h2 id="policy-editorial-details">Good to know.</h2>
-          <p>Information for guests booking a Serenity home directly.</p>
+          <span className="policy-editorial-eyebrow">Policy overview</span>
+          <h2 id="policy-editorial-details">At a glance.</h2>
+          <p>Key information for a clear, comfortable stay.</p>
         </div>
         <div className="policy-editorial-sections">
-          {sections.map((heading, index) => (
-            <section key={heading} className="policy-editorial-section">
+          {policy.items.map((item, index) => (
+            <section key={item.heading} className="policy-editorial-section">
               <span>{String(index + 1).padStart(2, "0")}</span>
               <div>
-                <h3>{heading}</h3>
-                <p>
-                  This operational policy applies to all direct bookings for Serenity 7, Serenity 9, and Serenity 11 in Pakenham, Victoria, Australia. Guests must comply with declared guest limits, quiet hours (10:00 PM – 7:00 AM), and pet declaration rules.
-                </p>
+                <h3>{item.heading}</h3>
+                <p>{item.text}</p>
               </div>
             </section>
           ))}

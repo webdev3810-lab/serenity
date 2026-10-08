@@ -1,0 +1,27 @@
+name: Sync external calendars
+
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CALENDAR_SYNC_URL: ${{ secrets.CALENDAR_SYNC_URL }}
+      CALENDAR_CRON_SECRET: ${{ secrets.CALENDAR_CRON_SECRET }}
+    steps:
+      - name: Refresh imported iCal feeds
+        shell: bash
+        run: |
+          if [[ -z "$CALENDAR_SYNC_URL" || -z "$CALENDAR_CRON_SECRET" ]]; then
+            echo "Set CALENDAR_SYNC_URL and CALENDAR_CRON_SECRET repository secrets before enabling calendar sync."
+            exit 1
+          fi
+          curl --fail-with-body --silent --show-error --max-time 240 \
+            --header "Authorization: Bearer ${CALENDAR_CRON_SECRET}" \
+            "$CALENDAR_SYNC_URL"

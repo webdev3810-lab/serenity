@@ -7,7 +7,7 @@ body:has(.contact-story-page) .public-site > main {
 .contact-story-page {
   --contact-paper: #ffffff;
   --contact-ink: #111111;
-  --contact-green: var(--hero-green, #07583f);
+  --contact-green: var(--hero-green, #002844);
   --contact-cream: #fff7ef;
   --contact-serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
   display: grid;
@@ -312,7 +312,7 @@ body:has(.contact-story-page) .public-site > main {
 
 .contact-story-form :is(input, select, textarea):focus {
   border-color: var(--contact-green);
-  outline: 2px solid rgba(7, 88, 63, 0.15);
+  outline: 2px solid rgba(0, 40, 68, 0.15);
 }
 
 .contact-story-form textarea {
@@ -337,7 +337,7 @@ body:has(.contact-story-page) .public-site > main {
 }
 
 .contact-story-form button:hover:not(:disabled) {
-  background: #043e2e;
+  background: #001e35;
 }
 
 .contact-story-form button:disabled {
@@ -354,7 +354,7 @@ body:has(.contact-story-page) .public-site > main {
 
 .contact-story-form__success {
   background: #e6f2e9;
-  color: #07583f;
+  color: #002844;
 }
 
 .contact-story-form__error {

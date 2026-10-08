@@ -1,0 +1,327 @@
+.page {
+  --navy: #002844;
+  --gold: #e5ca8b;
+  --canvas: #ffffff;
+  --serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
+  overflow: hidden;
+  background: var(--canvas);
+  color: var(--navy);
+}
+
+.hero {
+  padding: clamp(2rem, 4vw, 4rem) clamp(1.25rem, 3.5vw, 4rem) clamp(4rem, 7vw, 7rem);
+  border-radius: 0 0 1.75rem 1.75rem;
+  background: var(--navy);
+  color: #fff;
+}
+
+.heroTopline {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+  font-size: 0.69rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.55fr);
+  align-items: end;
+  gap: clamp(2rem, 6vw, 7rem);
+  padding-top: clamp(5rem, 11vw, 11rem);
+}
+
+.eyebrow,
+.sectionLabel {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.hero .eyebrow,
+.closingCopy .eyebrow {
+  color: #ffffff;
+}
+
+.hero h1 {
+  max-width: 10ch;
+  margin: 1.25rem 0 0;
+  font-family: var(--serif);
+  font-size: clamp(4.5rem, 9vw, 10rem);
+  font-weight: 400;
+  letter-spacing: -0.07em;
+  line-height: 0.86;
+}
+
+.hero h1 span {
+  color: #ffffff;
+}
+
+.heroIntro p {
+  max-width: 27rem;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(1.35rem, 1.8vw, 2rem);
+  line-height: 1.35;
+}
+
+.heroLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  margin-top: 2.25rem;
+}
+
+.heroLinks a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 0.25rem;
+  color: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Keep decorative rules straight; only the larger surfaces stay rounded. */
+.heroTopline,
+.heroLinks a,
+.steps,
+.step {
+  border-radius: 0 !important;
+}
+
+.process {
+  margin-block: clamp(0.75rem, 1.2vw, 1.25rem);
+  padding: clamp(4rem, 7vw, 7rem) clamp(1.25rem, 3.5vw, 4rem);
+  border-radius: 1.25rem;
+  background: #ffffff;
+  box-shadow: 0 0.75rem 2.25rem rgba(0, 40, 68, 0.09);
+}
+
+.sectionIntro {
+  display: grid;
+  grid-template-columns: minmax(10rem, 0.6fr) minmax(0, 1.4fr);
+  gap: 2rem;
+  align-items: start;
+  padding-bottom: clamp(3rem, 5vw, 5rem);
+}
+
+.sectionLabel {
+  padding-top: 0.5rem;
+}
+
+.sectionIntro h2 {
+  max-width: 16ch;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(3rem, 5.4vw, 6rem);
+  font-weight: 400;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+}
+
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgba(0, 40, 68, 0.25);
+}
+
+.step {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, 0.25fr) minmax(0, 1fr) minmax(16rem, 0.85fr);
+  gap: clamp(1rem, 3vw, 3rem);
+  align-items: center;
+  padding: clamp(1.5rem, 2.8vw, 2.5rem) 0;
+  border-bottom: 1px solid rgba(0, 40, 68, 0.25);
+}
+
+.stepNumber {
+  color: #9a804c;
+  font-family: var(--serif);
+  font-size: clamp(2rem, 3.2vw, 3.5rem);
+  line-height: 1;
+}
+
+.stepHeading {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.8rem, 2vw, 1.5rem);
+}
+
+.stepIcon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 3.25rem;
+  height: 3.25rem;
+  place-items: center;
+  border: 1px solid rgba(0, 40, 68, 0.22);
+  border-radius: 50%;
+  background: #fff;
+}
+
+.step h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(1.55rem, 2.2vw, 2.5rem);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+}
+
+.step > p {
+  max-width: 28rem;
+  margin: 0;
+  color: #425663;
+  font-size: clamp(0.93rem, 1vw, 1.08rem);
+  line-height: 1.6;
+}
+
+.closing {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-height: clamp(29rem, 46vw, 42rem);
+  margin: 0 0 clamp(3rem, 5vw, 5rem);
+  overflow: hidden;
+  border-radius: 1.5rem;
+  background: var(--navy);
+  color: #fff;
+}
+
+.closingMedia {
+  position: relative;
+  min-height: 28rem;
+  background: #d7d3c8;
+}
+
+.closingMedia img {
+  object-fit: cover;
+}
+
+.closingMedia > span {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  color: var(--navy);
+  font-family: var(--serif);
+  font-size: 2rem;
+}
+
+.closingCopy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(2rem, 5vw, 6rem);
+}
+
+.closingCopy h2 {
+  margin: 1.2rem 0 1.5rem;
+  font-family: var(--serif);
+  font-size: clamp(3.2rem, 5vw, 6rem);
+  font-weight: 400;
+  letter-spacing: -0.06em;
+  line-height: 0.98;
+}
+
+.closingCopy > p:not(.eyebrow) {
+  max-width: 26rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.closingCopy a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  min-height: 3.25rem;
+  margin-top: 2rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--navy);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.page a:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+
+.closingCopy a:hover {
+  background: var(--gold);
+}
+
+@media (max-width: 800px) {
+  .heroGrid,
+  .sectionIntro,
+  .closing {
+    grid-template-columns: 1fr;
+  }
+
+  .heroGrid {
+    gap: 2.5rem;
+    padding-top: 5rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(4rem, 13vw, 7rem);
+  }
+
+  .sectionIntro {
+    gap: 1rem;
+  }
+
+  .step {
+    grid-template-columns: 3.2rem minmax(0, 1fr);
+    gap: 0.75rem 1rem;
+  }
+
+  .stepHeading {
+    gap: 0.75rem;
+  }
+
+  .step > p {
+    grid-column: 2;
+  }
+
+  .closingMedia {
+    min-height: clamp(16rem, 55vw, 27rem);
+  }
+
+  .closingCopy {
+    padding: clamp(2rem, 6vw, 4rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTopline span:last-child {
+    display: none;
+  }
+
+  .stepIcon {
+    width: 2.7rem;
+    height: 2.7rem;
+  }
+
+  .stepIcon svg {
+    width: 1.25rem;
+  }
+
+  .step h3 {
+    font-size: 1.55rem;
+  }
+}

@@ -19,7 +19,7 @@
   --public-muted: #5f6a64;
   --public-line: var(--homepage-line);
   --public-surface: #ffffff;
-  --public-soft: #f4f8f5;
+  --public-soft: #f3f7fa;
   --public-error: #8a3325;
   --public-content-max: 112rem;
   min-width: 0;
@@ -178,8 +178,8 @@
 
 .about-editorial-page.public-page-theme .about-editorial-button-primary:hover,
 .about-editorial-page.public-page-theme .about-editorial-button-primary:focus-visible {
-  border-color: #ffe36c;
-  background: #ffe36c;
+  border-color: var(--hero-yellow-hover);
+  background: var(--hero-yellow-hover);
   color: var(--public-ink);
 }
 
@@ -385,8 +385,8 @@
 
 .contact-editorial-page.public-page-theme .location-editorial-button-primary:hover,
 .contact-editorial-page.public-page-theme .location-editorial-button-primary:focus-visible {
-  border-color: #ffe36c;
-  background: #ffe36c;
+  border-color: var(--hero-yellow-hover);
+  background: var(--hero-yellow-hover);
   color: var(--public-ink);
 }
 
@@ -410,8 +410,8 @@
 
 .contact-editorial-page.public-page-theme form button[type="submit"]:hover,
 .contact-editorial-page.public-page-theme form button[type="submit"]:focus-visible {
-  border-color: #ffe36c;
-  background: #ffe36c;
+  border-color: var(--hero-yellow-hover);
+  background: var(--hero-yellow-hover);
 }
 
 .contact-editorial-page.public-page-theme form [role="status"] {
@@ -502,8 +502,8 @@
 
 .corporate-stays-page.public-page-theme [class*="bg-[#2D2622]"]:hover,
 .corporate-stays-page.public-page-theme [class*="bg-[#2D2622]"]:focus-visible {
-  border-color: #ffe36c !important;
-  background: #ffe36c !important;
+  border-color: var(--hero-yellow-hover) !important;
+  background: var(--hero-yellow-hover) !important;
 }
 
 .corporate-stays-page.public-page-theme [class*="bg-[#2D2622]"] svg {
@@ -533,8 +533,8 @@
 
 .corporate-stays-page.public-page-theme > section:first-child a[href="#corporate-question"]:hover,
 .corporate-stays-page.public-page-theme > section:first-child a[href="#corporate-question"]:focus-visible {
-  border-color: #ffe36c;
-  background: #ffe36c;
+  border-color: var(--hero-yellow-hover);
+  background: var(--hero-yellow-hover);
 }
 
 .corporate-stays-page.public-page-theme > section:first-child [class*="font-marcellus"] {
@@ -575,7 +575,7 @@
 }
 
 .corporate-stays-page.public-page-theme [class*="shadow"] {
-  box-shadow: 0 1rem 2.5rem rgba(6, 63, 48, 0.08);
+  box-shadow: 0 1rem 2.5rem rgba(0, 30, 53, 0.08);
 }
 
 .corporate-stays-page.public-page-theme #corporate-question,
@@ -592,7 +592,7 @@
 .corporate-stays-page.public-page-theme #corporate-booking > .container > .grid > div:last-child > div {
   border-color: var(--public-line);
   background: var(--public-surface);
-  box-shadow: 0 1rem 2.5rem rgba(6, 63, 48, 0.08);
+  box-shadow: 0 1rem 2.5rem rgba(0, 30, 53, 0.08);
 }
 
 .corporate-stays-page.public-page-theme input[type="checkbox"] {
@@ -602,7 +602,7 @@
 .corporate-stays-page.public-page-theme .corporate-calendar-popover {
   border-color: var(--public-line);
   background: var(--public-surface);
-  box-shadow: 0 1rem 2.5rem rgba(6, 63, 48, 0.12);
+  box-shadow: 0 1rem 2.5rem rgba(0, 30, 53, 0.12);
 }
 
 .corporate-stays-page.public-page-theme .calendar-day {
@@ -886,7 +886,7 @@
   background: var(--homepage-surface);
   color: var(--homepage-body);
   font-family: var(--font-sans);
-  box-shadow: 0 1rem 2.5rem rgba(6, 63, 48, 0.09);
+  box-shadow: 0 1rem 2.5rem rgba(0, 30, 53, 0.09);
 }
 
 .homepage-theme .booking-calendar-header {
@@ -988,14 +988,14 @@
 
 .homepage-theme .booking-calendar .calendar-day.disabled {
   cursor: not-allowed;
-  background: #e5ebe7;
+  background: #e3ebf0;
   color: #66756e;
   text-decoration: line-through;
 }
 
 .homepage-theme .booking-calendar .calendar-day.disabled:hover,
 .homepage-theme .booking-calendar .calendar-day.disabled:focus-visible {
-  background: #e5ebe7;
+  background: #e3ebf0;
   color: #66756e;
   box-shadow: none;
   transform: none;
@@ -1034,7 +1034,7 @@
   border-color: var(--homepage-line) !important;
   border-radius: var(--radius-card, 1.125rem);
   background: var(--homepage-surface);
-  box-shadow: 0 1rem 2.5rem rgba(6, 63, 48, 0.09);
+  box-shadow: 0 1rem 2.5rem rgba(0, 30, 53, 0.09);
 }
 
 .homepage-theme .corporate-calendar-popover > .booking-calendar {
@@ -1175,8 +1175,8 @@
 
 .public-site .pill-nav-header > div > a:last-child:hover,
 .public-site .pill-nav-header > div > a:last-child:focus-visible {
-  border-color: #ffe36c !important;
-  background: #ffe36c !important;
+  border-color: var(--hero-yellow-hover) !important;
+  background: var(--hero-yellow-hover) !important;
   color: var(--public-ink) !important;
 }
 
@@ -1194,7 +1194,7 @@
 .public-site .pill-nav-header .pill-nav-link:hover,
 .public-site .pill-nav-header .pill-nav-link:focus-visible {
   background: color-mix(in srgb, var(--public-green) 8%, transparent);
-  box-shadow: 0 0.35rem 0.9rem rgba(6, 63, 48, 0.08);
+  box-shadow: 0 0.35rem 0.9rem rgba(0, 30, 53, 0.08);
 }
 
 .public-site .pill-nav-header .pill-nav-link.is-active {
@@ -1332,7 +1332,7 @@
   border-color: var(--public-line) !important;
   border-radius: var(--radius-card, 1.125rem);
   background: var(--public-surface) !important;
-  box-shadow: 0 0.8rem 2rem rgba(6, 63, 48, 0.07);
+  box-shadow: 0 0.8rem 2rem rgba(0, 30, 53, 0.07);
   color: var(--public-body);
 }
 
@@ -1387,15 +1387,15 @@
 
 .public-site :is(.btn-primary, .btn-dark-primary):hover,
 .public-site :is(.btn-primary, .btn-dark-primary):focus-visible {
-  border-color: #ffe36c !important;
-  background: #ffe36c !important;
+  border-color: var(--hero-yellow-hover) !important;
+  background: var(--hero-yellow-hover) !important;
   color: var(--public-ink) !important;
   transform: translateY(-1px);
 }
 
 .public-site :is(.btn-primary, .btn-dark-primary):disabled {
   border-color: var(--public-line) !important;
-  background: #e5ebe7 !important;
+  background: #e3ebf0 !important;
   color: var(--public-muted) !important;
   transform: none;
 }
@@ -1522,8 +1522,8 @@
 }
 
 .public-site .booking-promotion-code-status.is-success {
-  background: #e6efe9;
-  color: #2f5d4b;
+  background: #e8eef2;
+  color: #002844;
 }
 
 .public-site .booking-promotion-code-status.is-error {
@@ -1562,7 +1562,7 @@
 }
 
 .public-site .serenity-modal::backdrop {
-  background: rgba(6, 63, 48, 0.62);
+  background: rgba(0, 30, 53, 0.62);
 }
 
 .public-site .serenity-modal-heading {
@@ -1669,12 +1669,12 @@
   border-radius: var(--radius-card, 1.125rem) !important;
   background: var(--public-surface) !important;
   color: var(--public-ink) !important;
-  box-shadow: 0 1.25rem 2.75rem -2rem rgba(6, 63, 48, 0.42) !important;
+  box-shadow: 0 1.25rem 2.75rem -2rem rgba(0, 30, 53, 0.42) !important;
 }
 
 .public-site .homepage-review-card:hover {
   border-color: var(--public-green) !important;
-  box-shadow: 0 1.5rem 3rem -2rem rgba(6, 63, 48, 0.58) !important;
+  box-shadow: 0 1.5rem 3rem -2rem rgba(0, 30, 53, 0.58) !important;
 }
 
 .public-site .homepage-review-card.is-featured {

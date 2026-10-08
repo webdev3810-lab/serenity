@@ -20,15 +20,17 @@
   --border-neutral: #D8CCC4;
   --text-muted: #6F6258;
 
-  /* Homepage hero palette: eucalyptus green with a warm booking yellow. */
-  --hero-green: #07583f;
-  --hero-green-deep: #063f30;
-  --hero-yellow: #ffd21a;
-  --homepage-line: rgba(6, 63, 48, 0.2);
+  /* Shared public-site navy palette with a soft light-gold accent. */
+  --hero-green: #002844;
+  --hero-green-deep: #001e35;
+  --homepage-green: var(--hero-green);
+  --hero-yellow: #E5CA8B;
+  --hero-yellow-hover: #F1DEB1;
+  --homepage-line: rgba(0, 30, 53, 0.2);
   --homepage-promo-height: 0rem;
 
   /* Accent Palette */
-  --accent-sage: #71836B;
+  --accent-sage: #526d80;
   --accent-terracotta: #B7664E;
   --accent-terracotta-hover: #9C523C;
   --accent-ochre: #B98A43;
@@ -36,9 +38,9 @@
   --error-bg: #F5E8E6;
   --error-border: #D8AAA3;
   --error-text: #7A302A;
-  --success-bg: #E6EFE9;
-  --success-border: #B8D0C0;
-  --success-text: #2F5D4B;
+  --success-bg: #e8eef2;
+  --success-border: #b9cbd7;
+  --success-text: #002844;
   --warning-bg: #F4ECDF;
   --warning-border: #D8C29C;
   --warning-text: #72511F;
@@ -320,9 +322,9 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
 
 .pill-nav-brand,
 .sm-logo {
-  --brand-wordmark-accent: #FFD21A;
-  --brand-wordmark-secondary: #07583F;
-  color: #063F30;
+  --brand-wordmark-accent: var(--hero-yellow);
+  --brand-wordmark-secondary: #002844;
+  color: #001e35;
 }
 
 @media (min-width: 1024px) {
@@ -1399,6 +1401,10 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
   aspect-ratio: auto;
 }
 
+.location-map-mobile-hint {
+  display: none;
+}
+
 .location-map-zoom-controls {
   position: absolute;
   z-index: 12;
@@ -1419,7 +1425,7 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
   place-items: center;
   border: 0;
   background: transparent;
-  color: var(--hero-green-deep, #043d30);
+  color: var(--hero-green-deep, #001e35);
   cursor: pointer;
   transition: background-color 160ms ease, color 160ms ease;
 }
@@ -1429,13 +1435,13 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
 }
 
 .location-map-zoom-controls button:hover {
-  background: var(--hero-yellow, #ffd21c);
+  background: var(--hero-yellow-hover, #F1DEB1);
 }
 
 .location-map-zoom-controls button:focus-visible {
   position: relative;
   z-index: 1;
-  outline: 2px solid var(--hero-green-deep, #043d30);
+  outline: 2px solid var(--hero-green-deep, #001e35);
   outline-offset: -3px;
 }
 
@@ -1557,12 +1563,22 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
   text-shadow: 0 0.1rem 0.22rem rgba(55, 42, 34, 0.78);
 }
 
-.location-map-marker--home {
-  left: 55%;
-  top: 51%;
+.location-map-marker--home-number {
   color: inherit;
   pointer-events: auto;
   text-decoration: none;
+}
+
+.location-map-marker--home-number .location-map-marker-pin {
+  width: 1.8rem;
+  height: 1.8rem;
+  flex-basis: 1.8rem;
+  border-color: #fff;
+  background: #f2c75c;
+  color: #002844;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .location-map-marker--station {
@@ -1608,7 +1624,7 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
 }
 
 .location-map-marker--park .location-map-marker-pin {
-  background: #28a65b;
+  background: #002844;
 }
 
 .location-map-marker--bigw {
@@ -1623,21 +1639,69 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
   background: #398fd2;
 }
 
-.location-map-marker--mummas {
-  left: 66%;
-  top: 43%;
-  color: inherit;
-  pointer-events: auto;
+.location-map-marker--compact {
+  gap: 0.35rem;
+  max-width: 12rem;
+  padding: 0.18rem 0.6rem 0.18rem 0.18rem;
+  border: 1px solid rgba(0, 40, 68, 0.12);
+  border-radius: 0.95rem;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 0.3rem 1rem rgba(0, 30, 53, 0.18);
+  color: #002844;
   text-decoration: none;
 }
 
-.location-map-marker--mummas .location-map-marker-pin {
-  background: #ed7620;
+.location-map-marker--compact::before {
+  display: none;
 }
 
-.location-map-marker--mummas .location-map-marker-copy {
-  position: relative;
-  text-align: left;
+.location-map-marker--compact .location-map-marker-pin {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-basis: 1.75rem;
+  background: var(--location-map-pin-color, #002844);
+}
+
+.location-map-marker--compact .location-map-marker-copy strong,
+.location-map-marker--compact .location-map-marker-copy small {
+  color: #002844;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+  white-space: normal;
+}
+
+.location-map-marker--compact .location-map-marker-copy strong {
+  font-size: 0.72rem;
+  line-height: 1.12;
+}
+
+.location-map-marker--compact .location-map-marker-copy small {
+  color: #536270;
+  font-size: 0.61rem;
+  line-height: 1.1;
+}
+
+.location-map-marker--align-right {
+  flex-direction: row-reverse;
+  padding: 0.18rem 0.18rem 0.18rem 0.6rem;
+  text-align: right;
+}
+
+.location-map-marker--fitness { --location-map-pin-color: #8c3344; }
+.location-map-marker--nature { --location-map-pin-color: #31725c; }
+.location-map-marker--shopping { --location-map-pin-color: #bd8f42; }
+.location-map-marker--services { --location-map-pin-color: #536476; }
+.location-map-marker--dining { --location-map-pin-color: #b56437; }
+.location-map-marker--stay { --location-map-pin-color: #72608d; }
+
+.openseadragon-overlay-wrapper:has(.location-map-marker:hover),
+.openseadragon-overlay-wrapper:focus-within {
+  z-index: 20;
+}
+
+.location-map-marker--compact[href]:focus-visible {
+  outline: 2px solid #002844;
+  outline-offset: 2px;
 }
 
 .location-map-osd-marker {
@@ -1655,10 +1719,26 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
   transform: none;
 }
 
+.location-map-osd-marker .location-map-marker--home-number {
+  transform: translate(-50%, -50%);
+}
+
+.location-map-osd-marker .location-map-marker--align-right {
+  transform: translateX(-100%);
+}
+
+.location-map-osd-marker .location-map-marker--above {
+  transform: translateY(-100%);
+}
+
+.location-map-osd-marker .location-map-marker--align-right.location-map-marker--above {
+  transform: translate(-100%, -100%);
+}
+
 .location-map-place-label {
   padding: 0.24rem 0.42rem;
   background: rgba(255, 253, 249, 0.74);
-  color: #3f6545;
+  color: #002844;
   font-size: clamp(0.62rem, 0.78vw, 0.78rem);
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -1683,6 +1763,23 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
 }
 
 @media (max-width: 767px) {
+  .location-map-mobile-hint {
+    position: absolute;
+    z-index: 12;
+    top: 0.7rem;
+    left: 0.7rem;
+    display: block;
+    padding: 0.35rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0.25rem 0.8rem rgba(0, 30, 53, 0.12);
+    color: #002844;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    pointer-events: none;
+  }
+
   .location-map-marker {
     gap: 0.25rem;
     max-width: 39vw;
@@ -1721,8 +1818,32 @@ a:where(:not(.admin-theme-context, .admin-theme-context *)) {
 
   .location-map-marker--marketplace .location-map-marker-copy small,
   .location-map-marker--park .location-map-marker-copy small,
-  .location-map-marker--bigw .location-map-marker-copy small,
-  .location-map-marker--mummas .location-map-marker-copy small {
+  .location-map-marker--bigw .location-map-marker-copy small {
+    display: none;
+  }
+
+  .location-map-marker--compact {
+    gap: 0.2rem;
+    max-width: min(8rem, 42vw);
+    padding: 0.12rem 0.35rem 0.12rem 0.12rem;
+    border-radius: 0.7rem;
+  }
+
+  .location-map-marker--compact.location-map-marker--align-right {
+    padding: 0.12rem 0.12rem 0.12rem 0.35rem;
+  }
+
+  .location-map-marker--compact .location-map-marker-pin {
+    width: 1.35rem;
+    height: 1.35rem;
+    flex-basis: 1.35rem;
+  }
+
+  .location-map-marker--compact .location-map-marker-copy strong {
+    font-size: 0.6rem;
+  }
+
+  .location-map-marker--compact .location-map-marker-copy small {
     display: none;
   }
 
@@ -4922,8 +5043,8 @@ h4:where(:not(.admin-theme-context, .admin-theme-context *)),
   width: fit-content;
   margin: 0.65rem 0.75rem 0;
   border-radius: 0;
-  background: #e6efe9;
-  color: #2f5d4b;
+  background: #e8eef2;
+  color: #002844;
   padding: 0.35rem 0.7rem;
   font-size: 0.68rem;
   font-weight: 800;
@@ -11093,7 +11214,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 
 .pill-nav-header-home > div > a:last-child:hover,
 .pill-nav-header-home > div > a:last-child:focus-visible {
-  background: #ffe36c !important;
+  background: var(--hero-yellow-hover) !important;
   color: var(--hero-green-deep) !important;
 }
 
@@ -15059,7 +15180,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 .property-editorial-review-stars {
   display: inline-flex;
   gap: 0.2rem;
-  color: #e0ad38;
+  color: var(--hero-yellow);
 }
 
 .property-editorial-review-summary p {
@@ -15214,7 +15335,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
   --homepage-ink: var(--hero-green-deep);
   --homepage-body: #2d2622;
   --homepage-muted: #5f6a64;
-  --homepage-line: rgba(6, 63, 48, 0.2);
+  --homepage-line: rgba(0, 30, 53, 0.2);
   --homepage-surface: #ffffff;
   --homepage-dark: var(--hero-green);
   --homepage-dark-deep: var(--hero-green-deep);
@@ -15267,7 +15388,7 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 /* Keep the reveal animation, but make both its resting and revealed colors
    part of the same green-and-yellow system. */
 .homepage-theme .scroll-wipe-text {
-  color: rgba(6, 63, 48, 0.24) !important;
+  color: rgba(0, 30, 53, 0.24) !important;
 }
 
 .homepage-theme .scroll-wipe-text-reveal {
@@ -15355,13 +15476,13 @@ textarea:focus-visible:where(:not(.admin-theme-context, .admin-theme-context *))
 .homepage-theme .homepage-house-collection-card {
   border-color: var(--homepage-line);
   background: var(--homepage-surface);
-  box-shadow: 0 0.8rem 1.8rem rgba(6, 63, 48, 0.07);
+  box-shadow: 0 0.8rem 1.8rem rgba(0, 30, 53, 0.07);
 }
 
 .homepage-theme .homepage-house-collection-card:hover,
 .homepage-theme .homepage-house-collection-card:focus-within {
   border-color: var(--homepage-dark);
-  box-shadow: 0 1rem 2rem rgba(6, 63, 48, 0.12);
+  box-shadow: 0 1rem 2rem rgba(0, 30, 53, 0.12);
 }
 
 .homepage-theme .homepage-house-collection-body h3 {
@@ -15537,7 +15658,7 @@ body:has(.homepage-theme) .promotion-banner {
 }
 
 body:has(.homepage-theme) .promotion-banner button {
-  border-color: rgba(255, 210, 26, 0.78) !important;
+  border-color: rgba(229, 202, 139, 0.78) !important;
   font-family: var(--font-sans) !important;
   color: #ffffff !important;
 }
@@ -15630,7 +15751,7 @@ body:has(.homepage-theme) .site-footer-action-secondary:focus-visible {
 }
 
 body:has(.homepage-theme) .site-footer-wordmark .brand-wordmark__primary {
-  color: rgba(7, 88, 63, 0.14);
+  color: rgba(0, 40, 68, 0.14);
 }
 
 @media (max-width: 1023px) {
@@ -15760,7 +15881,7 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 
 body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:last-child:hover,
 body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:last-child:focus-visible {
-  background: #ffe36c !important;
+  background: var(--hero-yellow-hover) !important;
   color: var(--hero-green-deep) !important;
 }
 
@@ -15796,18 +15917,18 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 .houses-theme .homepage-house-collection-card {
   border-color: var(--homepage-line);
   background: var(--homepage-surface);
-  box-shadow: 0 0.8rem 1.8rem rgba(6, 63, 48, 0.07);
+  box-shadow: 0 0.8rem 1.8rem rgba(0, 30, 53, 0.07);
 }
 
 .houses-theme .homepage-house-collection-card:hover,
 .houses-theme .homepage-house-collection-card:focus-within {
   border-color: var(--homepage-dark);
-  box-shadow: 0 1rem 2rem rgba(6, 63, 48, 0.12);
+  box-shadow: 0 1rem 2rem rgba(0, 30, 53, 0.12);
 }
 
 .houses-theme .homepage-house-collection-media {
   aspect-ratio: 1.22;
-  background: #eef2ef;
+  background: #edf2f6;
 }
 
 .houses-theme .homepage-house-collection-image {
@@ -15857,7 +15978,7 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
   border: 1px solid var(--homepage-line);
   border-radius: var(--radius-card, 1.125rem) !important;
   background: var(--homepage-surface);
-  box-shadow: 0 0.8rem 1.8rem rgba(6, 63, 48, 0.07);
+  box-shadow: 0 0.8rem 1.8rem rgba(0, 30, 53, 0.07);
 }
 
 .houses-theme .search-box {
@@ -15898,8 +16019,8 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 
 .houses-theme :is(.search-submit, .search-panel-luxury > button[type="submit"]):hover,
 .houses-theme :is(.search-submit, .search-panel-luxury > button[type="submit"]):focus-visible {
-  border-color: #ffe36c !important;
-  background: #ffe36c !important;
+  border-color: var(--hero-yellow-hover) !important;
+  background: var(--hero-yellow-hover) !important;
   color: var(--homepage-ink) !important;
 }
 
@@ -15908,12 +16029,12 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
   border-color: var(--homepage-line);
   border-radius: var(--radius-card, 1.125rem) !important;
   background: var(--homepage-surface);
-  box-shadow: 0 0.8rem 1.8rem rgba(6, 63, 48, 0.07);
+  box-shadow: 0 0.8rem 1.8rem rgba(0, 30, 53, 0.07);
 }
 
 .houses-theme .property-card:hover {
   border-color: var(--homepage-dark);
-  box-shadow: 0 1rem 2rem rgba(6, 63, 48, 0.12);
+  box-shadow: 0 1rem 2rem rgba(0, 30, 53, 0.12);
 }
 
 .houses-theme .property-card img,
@@ -15986,8 +16107,8 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 
 .houses-theme :is(.btn-primary, .btn-dark-primary):hover,
 .houses-theme :is(.btn-primary, .btn-dark-primary):focus-visible {
-  border-color: #ffe36c !important;
-  background: #ffe36c !important;
+  border-color: var(--hero-yellow-hover) !important;
+  background: var(--hero-yellow-hover) !important;
   color: var(--homepage-ink) !important;
 }
 
@@ -16191,7 +16312,7 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 .staggered-menu-header {
   border-bottom-color: var(--homepage-line) !important;
   background: rgba(255, 255, 255, 0.98) !important;
-  box-shadow: 0 0.35rem 1.2rem rgba(6, 63, 48, 0.06) !important;
+  box-shadow: 0 0.35rem 1.2rem rgba(0, 30, 53, 0.06) !important;
 }
 
 .staggered-menu-header .sm-toggle {
@@ -16233,7 +16354,7 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 
 .staggered-menu-panel .sm-panel-cta:hover,
 .staggered-menu-panel .sm-panel-cta:focus-visible {
-  background: #ffe36c !important;
+  background: var(--hero-yellow-hover) !important;
   color: var(--hero-green-deep) !important;
 }
 
@@ -16250,7 +16371,7 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 .pill-nav-header .pill-nav-link__indicator {
   width: 0.3rem;
   height: 0.3rem;
-  background: var(--hero-yellow, #ffd21a);
+  background: var(--hero-yellow, #E5CA8B);
 }
 
 .pill-nav-header .pill-nav-link {
@@ -16259,13 +16380,13 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 
 .pill-nav-header .pill-nav-link:hover,
 .pill-nav-header .pill-nav-link:focus-visible {
-  background: rgba(7, 88, 63, 0.07);
-  box-shadow: 0 0.35rem 0.9rem rgba(6, 63, 48, 0.08);
+  background: rgba(0, 40, 68, 0.07);
+  box-shadow: 0 0.35rem 0.9rem rgba(0, 30, 53, 0.08);
 }
 
 .pill-nav-header .pill-nav-link.is-active {
-  background: rgba(7, 88, 63, 0.09);
-  box-shadow: inset 0 0 0 1px rgba(7, 88, 63, 0.1);
+  background: rgba(0, 40, 68, 0.09);
+  box-shadow: inset 0 0 0 1px rgba(0, 40, 68, 0.1);
 }
 
 .pill-nav-header .pill-nav-cta {
@@ -16293,8 +16414,8 @@ body:has(.houses-theme) .pill-nav-header:not(.pill-nav-header-home) > div > a:la
 }
 
 .staggered-menu-panel .sm-panel-item.is-active {
-  background: rgba(255, 210, 26, 0.13);
-  box-shadow: inset 0 0 0 1px rgba(255, 210, 26, 0.2);
+  background: rgba(229, 202, 139, 0.13);
+  box-shadow: inset 0 0 0 1px rgba(229, 202, 139, 0.2);
 }
 
 .staggered-menu-panel .sm-panel-item__icon {

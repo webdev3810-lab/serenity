@@ -2,7 +2,7 @@
 
 Serenity uses private iCal feeds to exchange blocked dates with Airbnb, Vrbo, and Stayz for Serenity 7, Serenity 9, and Serenity 11. It does not scrape marketplace pages and it does not need marketplace passwords.
 
-iCal is not instant. Serenity checks enabled import feeds every 15 minutes, Airbnb currently documents an automatic import refresh of about three hours, and Vrbo currently documents a roughly 30-minute sync. Always leave the final server-side availability check enabled.
+iCal is not instant. When the GitHub Actions scheduler below is configured, Serenity requests enabled import feeds roughly every 15 minutes. Airbnb documents an automatic import refresh of about three hours. Always leave the final server-side availability check enabled.
 
 ## Apply the additive Supabase migrations
 
@@ -26,8 +26,9 @@ The service-role key is used only by server routes. Never expose `SUPABASE_SERVI
 2. Select Serenity 7, 9, or 11 in the guided setup.
 3. Generate and copy that house's secure Serenity calendar URL.
 4. Paste the provider-safe Serenity URL into Airbnb.
-5. Copy Airbnb's private export URL and paste it into the matching Airbnb card in Serenity.
-6. Select **Test connection**, then **Save connection**, then **Sync now**.
+5. Copy Airbnb's private export URL and paste it into the matching Airbnb card in Serenity (for example, the Serenity 11 card for the Serenity 11 listing).
+6. Select **Test connection**, then **Save connection**. Saving now runs the first import immediately.
+   If you previously uploaded a one-time `.ics` file for this house, use **Clear old file dates** after the live feed is connected so its old dates no longer block availability.
 7. Repeat for Vrbo and Stayz.
 8. Test one externally blocked night in Serenity's public calendar.
 9. Create a temporary direct booking and confirm it appears in the secure Serenity `.ics` feed.
@@ -44,7 +45,7 @@ Use Airbnb's official guide: <https://www.airbnb.com/help/article/99>
 4. Import the provider-safe Serenity `.ics` URL shown in the Airbnb card.
 5. Copy Airbnb's export calendar link. It should be a private calendar URL ending in `.ics`.
 6. Paste it into the same property's Airbnb import field in Serenity.
-7. Test, save, and sync.
+7. Test and save; the first import runs immediately.
 
 ## Vrbo / Stayz setup
 
@@ -56,7 +57,7 @@ Use Vrbo's official guide: <https://help.vrbo.com/articles/How-do-I-import-my-iC
 4. Import the provider-safe Serenity `.ics` URL.
 5. Export the Vrbo/Stayz reservation calendar and copy its private URL.
 6. Paste it into the same property's Vrbo or Stayz import field in Serenity.
-7. Test, save, and sync.
+7. Test and save; the first import runs immediately.
 
 If a provider gives a `webcal://` link, Serenity safely normalizes it to HTTPS. Vrbo's own interface may require you to change `webcal://` to `https://` before importing.
 
@@ -106,7 +107,9 @@ Provider-safe URLs append `source=airbnb`, `source=vrbo`, or `source=stayz`, whi
 
 ## Scheduler
 
-`vercel.json` calls `/api/cron/calendar-sync` every 15 minutes. Configure one long random `CRON_SECRET` in Vercel. The endpoint requires `Authorization: Bearer <CRON_SECRET>` and returns `401` without it.
+The workflow in `.github/workflows/calendar-sync.yml` calls `/api/cron/calendar-sync` roughly every 15 minutes. In Vercel, set a long random `CRON_SECRET` environment variable. In the GitHub repository's **Settings → Secrets and variables → Actions**, set `CALENDAR_CRON_SECRET` to the same value and `CALENDAR_SYNC_URL` to the production endpoint, for example `https://your-domain.example/api/cron/calendar-sync`. Deploy the site and push the workflow to the default branch, then run **Actions → Sync external calendars → Run workflow** once and verify a successful response. Do not commit either secret.
+
+GitHub's schedule is best-effort; runs can be delayed or dropped, and public repositories may have scheduled workflows disabled after 60 days without activity. The admin **Sync now** button remains available. Vercel Pro can alternatively use a 15-minute Vercel Cron Job; Vercel Hobby only allows daily Cron Jobs. Do not configure both 15-minute schedulers at once.
 
 If the app is not hosted on Vercel, call the same protected endpoint from a trusted scheduler. This repository does not currently deploy a Supabase Edge Function or Supabase Cron job.
 

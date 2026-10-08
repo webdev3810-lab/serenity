@@ -40,7 +40,7 @@ export interface StaggeredMenuProps {
 
 export default function StaggeredMenu({
   position = "right",
-  colors = ["#111111", "#075F47", "#FFFFFF"],
+  colors = ["#111111", "#002844", "#FFFFFF"],
   items = [],
   socialItems = [],
   displaySocials = true,
@@ -50,7 +50,7 @@ export default function StaggeredMenu({
   ctaHref = "/houses",
   menuButtonColor = "#111111",
   openMenuButtonColor = "#111111",
-  accentColor = "#075F47",
+  accentColor = "#002844",
   isFixed = false,
   changeMenuColorOnOpen = true,
   closeOnClickAway = true,
@@ -210,7 +210,7 @@ export default function StaggeredMenu({
     <div className={`sm-scope z-[80] ${open ? "pointer-events-auto" : "pointer-events-none"} ${isFixed ? "fixed inset-0 h-screen w-screen overflow-hidden" : "relative h-full w-full"} ${className}`}>
       <div className="staggered-menu-wrapper pointer-events-none relative z-40 h-full w-full" style={cssVars} data-position={position} data-open={open || undefined}>
         <div ref={preLayersRef} className="sm-prelayers pointer-events-none absolute bottom-0 right-0 top-0 z-[5]" aria-hidden="true">
-          {(layerColors.length ? layerColors : ["#111111", "#075F47"]).map((color, index) => (
+          {(layerColors.length ? layerColors : ["#111111", "#002844"]).map((color, index) => (
             <div key={`${color}-${index}`} className="sm-prelayer absolute bottom-0 right-0 top-0 h-full w-full" style={{ background: color }} />
           ))}
         </div>

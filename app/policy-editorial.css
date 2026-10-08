@@ -5,7 +5,7 @@ body:has(.policy-editorial-page) .public-site > main {
 }
 
 .policy-editorial-page {
-  --policy-green: var(--hero-green, #07583f);
+  --policy-green: var(--hero-green, #002844);
   --policy-ink: #111111;
   --policy-serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
   display: grid;
