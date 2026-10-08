@@ -107,11 +107,15 @@ Provider-safe URLs append `source=airbnb`, `source=vrbo`, or `source=stayz`, whi
 
 ## Scheduler
 
-The workflow in `.github/workflows/calendar-sync.yml` calls `/api/cron/calendar-sync` roughly every 15 minutes. In Vercel, set a long random `CRON_SECRET` environment variable. In the GitHub repository's **Settings → Secrets and variables → Actions**, set `CALENDAR_CRON_SECRET` to the same value and `CALENDAR_SYNC_URL` to the production endpoint, for example `https://your-domain.example/api/cron/calendar-sync`. Deploy the site and push the workflow to the default branch, then run **Actions → Sync external calendars → Run workflow** once and verify a successful response. Do not commit either secret.
+Supabase Cron calls `/api/cron/calendar-sync` every 15 minutes, on the quarter hour. Migration `0022_supabase_calendar_cron.sql` installs `pg_cron` and `pg_net` and creates the job **inactive** so a fresh deployment cannot call an unprotected or unconfigured endpoint.
 
-GitHub's schedule is best-effort; runs can be delayed or dropped, and public repositories may have scheduled workflows disabled after 60 days without activity. The admin **Sync now** button remains available. Vercel Pro can alternatively use a 15-minute Vercel Cron Job; Vercel Hobby only allows daily Cron Jobs. Do not configure both 15-minute schedulers at once.
+1. In Vercel project **Settings → Environment Variables**, add a long random `CRON_SECRET` (at least 32 characters) for Production and redeploy the production site. Never use a public `NEXT_PUBLIC_` variable for this secret.
+2. In Supabase **Vault**, add the **same value** under the name `calendar_sync_cron_secret`. Do not put its value in a migration, SQL snippet, repository secret, or chat message.
+3. Confirm the protected endpoint returns 401 without the secret and 200 with the secret. A 500 response means the calendar import itself failed and should be investigated before activation.
+4. Activate the Supabase job in **Integrations → Cron → Jobs**, or run `select cron.alter_job(job_id := (select jobid from cron.job where jobname = 'serenity-calendar-sync'), active := true);` in the Supabase SQL Editor.
+5. Check the job's run history and each connection's `last_synced_at` in admin after the next quarter hour. Supabase `pg_net` queues HTTP requests asynchronously, so a successful Cron SQL run alone does not prove the HTTP endpoint succeeded; inspect `net._http_response` or the admin sync status if dates do not update.
 
-If the app is not hosted on Vercel, call the same protected endpoint from a trusted scheduler. This repository does not currently deploy a Supabase Edge Function or Supabase Cron job.
+The GitHub Actions workflow remains available for **manual** emergency runs only. To use it, set `CALENDAR_CRON_SECRET` and `CALENDAR_SYNC_URL` in GitHub Actions secrets, then choose **Sync external calendars → Run workflow**. Do not enable its schedule alongside Supabase Cron. The admin **Sync now** button also remains available.
 
 ## Troubleshooting
 
