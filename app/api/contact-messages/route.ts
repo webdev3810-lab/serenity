@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isSupabaseConfigured } from "@/src/lib/supabase/config";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
+import { notifyContactMessage } from "@/src/lib/transactionalEmail";
 
 const messageReference = () => `MSG-${new Date().getUTCFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 
@@ -56,6 +57,11 @@ export async function POST(request: Request) {
       throw error;
     }
 
+    try {
+      await notifyContactMessage({ id: data.id, reference: data.reference, name: `${firstName} ${lastName}`, email, phone, projectType, preferredHouse, message });
+    } catch (notificationError) {
+      console.error("Contact notification failed", notificationError);
+    }
     return NextResponse.json({ configured: true, contactMessage: data }, { status: 201 });
   } catch (error) {
     console.error("Contact message persistence failed", error);

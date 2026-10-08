@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isSupabaseConfigured } from "@/src/lib/supabase/config";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 import { datesInRange } from "@/src/lib/booking";
+import { notifyCorporateEnquiry } from "@/src/lib/transactionalEmail";
 
 const enquiryReference = () => `ENQ-${new Date().getUTCFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 
@@ -87,6 +88,11 @@ export async function POST(request: Request) {
         if (existing) return NextResponse.json({ configured: true, enquiry: existing });
       }
       throw error;
+    }
+    try {
+      await notifyCorporateEnquiry({ id: data.id, reference: data.reference, company: companyName, contact: contactName, email, phone, arrival, departure, houses: propertySlugs, notes });
+    } catch (notificationError) {
+      console.error("Corporate enquiry notification failed", notificationError);
     }
     return NextResponse.json({ configured: true, enquiry: data });
   } catch (error) {

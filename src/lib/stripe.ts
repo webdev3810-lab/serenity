@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
+import { sendBookingConfirmation } from "@/src/lib/transactionalEmail";
 
 export const hasStripeServerConfig = Boolean(process.env.STRIPE_SECRET_KEY);
 
@@ -55,10 +56,24 @@ export async function markBookingPaid(session: Stripe.Checkout.Session) {
       })
       .eq("id", bookingId)
       .eq("reference", reference)
+      .neq("payment_status", "paid")
       .select("id, reference, payment_status, booking_status, stripe_payment_intent_id, promotion_redemption_id")
-      .single();
+      .maybeSingle();
     if (error) throw error;
-    booking = updatedBooking;
+    if (updatedBooking) {
+      booking = updatedBooking;
+      try {
+        await sendBookingConfirmation(bookingId);
+      } catch (emailError) {
+        console.error("Booking confirmation email failed", emailError);
+      }
+    } else {
+      const { data: paidBooking, error: paidBookingError } = await supabase.from("bookings")
+        .select("id, reference, payment_status, booking_status, stripe_payment_intent_id, promotion_redemption_id")
+        .eq("id", bookingId).eq("reference", reference).single();
+      if (paidBookingError) throw paidBookingError;
+      booking = paidBooking;
+    }
   }
 
   const redemptionId = getMetadata(session).promotionRedemptionId ?? booking.promotion_redemption_id;
@@ -82,8 +97,14 @@ export async function markBookingPaidFromPaymentIntent(paymentIntent: Stripe.Pay
   if (readError) throw readError;
   if (!existing) throw new Error("Booking linked to Stripe payment intent was not found.");
   if (existing.payment_status === "paid") return existing;
-  const { data, error } = await supabase.from("bookings").update({ payment_status: "paid", booking_status: "confirmed", stripe_payment_intent_id: paymentIntent.id }).eq("id", bookingId).eq("reference", reference).select("id, payment_status, booking_status").single();
+  const { data, error } = await supabase.from("bookings").update({ payment_status: "paid", booking_status: "confirmed", stripe_payment_intent_id: paymentIntent.id }).eq("id", bookingId).eq("reference", reference).neq("payment_status", "paid").select("id, payment_status, booking_status").maybeSingle();
   if (error) throw error;
+  if (!data) return existing;
+  try {
+    await sendBookingConfirmation(bookingId);
+  } catch (emailError) {
+    console.error("Booking confirmation email failed", emailError);
+  }
   return data;
 }
 
