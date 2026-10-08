@@ -3,14 +3,16 @@
 import { useEffect, useRef } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import {
+  ArrowUpRight,
   Building2,
+  ChevronLeft,
+  ChevronRight,
   Dumbbell,
   Fuel,
   Hotel,
   Landmark,
   MapPin,
   Minus,
-  Navigation,
   Pill,
   Plus,
   ShoppingBag,
@@ -24,44 +26,23 @@ const MAP_IMAGE_SIZE = { width: 1791, height: 878 };
 const SERENITY_ADDRESS = "7 Tremont St, Pakenham VIC 3810, Australia";
 const mapsSearch = (place: string) =>
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place}, Pakenham VIC 3810, Australia`)}`;
-const mapsDirections = (destination: string) =>
-  `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(SERENITY_ADDRESS)}&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+const mapsDirections = (destination: string, travelMode: "driving" | "walking" = "driving") =>
+  `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(SERENITY_ADDRESS)}&destination=${encodeURIComponent(destination)}&travelmode=${travelMode}`;
 
 const LOCATION_MAP_MARKERS = [
   {
-    className: "location-map-marker--home-number",
-    detail: "7 Tremont St",
+    className: "location-map-marker--home-featured",
+    detail: "Serenity 7 · 9 · 11",
     href: mapsSearch("7 Tremont St"),
     icon: MapPin,
-    label: "Serenity 7",
-    number: 7,
-    x: 0.54,
-    y: 0.51,
-  },
-  {
-    className: "location-map-marker--home-number",
-    detail: "9 Tremont St",
-    href: mapsSearch("9 Tremont St"),
-    icon: MapPin,
-    label: "Serenity 9",
-    number: 9,
-    x: 0.565,
-    y: 0.51,
-  },
-  {
-    className: "location-map-marker--home-number",
-    detail: "11 Tremont St",
-    href: mapsSearch("11 Tremont St"),
-    icon: MapPin,
-    label: "Serenity 11",
-    number: 11,
-    x: 0.59,
-    y: 0.51,
+    label: "Serenity homes",
+    x: 0.515,
+    y: 0.505,
   },
   {
     className: "location-map-marker--station",
-    detail: "Approx. 9 min walk",
-    href: "https://www.google.com/maps/search/?api=1&query=Railway%20Ave%20%26%20Henry%20Rd%2C%20Pakenham%20VIC%203810%2C%20Australia",
+    detail: "Approx. 10 min walk",
+    href: mapsDirections("Pakenham Station, Railway Ave, Pakenham VIC, Australia", "walking"),
     icon: TrainFront,
     label: "Pakenham Station",
     x: 0.29,
@@ -82,7 +63,7 @@ const LOCATION_MAP_MARKERS = [
     href: "https://maps.app.goo.gl/hkb8K1WL4RtGurnXA",
     icon: Trees,
     label: "Ascot Park",
-    x: 0.43,
+    x: 0.4,
     y: 0.46,
   },
   {
@@ -104,12 +85,12 @@ const LOCATION_MAP_MARKERS = [
     y: 0.32,
   },
   {
-    className: "location-map-marker--compact location-map-marker--direction",
-    detail: "Approx. 25 min drive",
+    className: "location-map-marker--compact location-map-marker--drive-direction",
+    detail: "Approx. 13 min drive",
     href: mapsDirections("Gumbuya World, Tynong North VIC, Australia"),
-    icon: Navigation,
+    icon: ChevronRight,
     label: "Gumbuya World",
-    x: 0.08,
+    x: 0.96,
     y: 0.17,
   },
   {
@@ -122,18 +103,18 @@ const LOCATION_MAP_MARKERS = [
     y: 0.2,
   },
   {
-    className: "location-map-marker--compact location-map-marker--direction",
+    className: "location-map-marker--compact location-map-marker--drive-direction",
     detail: "Via Monash Freeway · approx. 50 min",
     href: mapsDirections("Melbourne VIC, Australia"),
-    icon: Navigation,
+    icon: ChevronLeft,
     label: "Melbourne CBD",
-    x: 0.84,
+    x: 0.04,
     y: 0.16,
   },
   {
     className: "location-map-marker--compact location-map-marker--nature",
-    detail: "Approx. 8 min drive",
-    href: mapsSearch("Pakenham Golf Course"),
+    detail: "Approx. 4 min drive",
+    href: mapsDirections("Pakenham Golf Course, 62 Cameron Way, Pakenham VIC, Australia"),
     icon: Trees,
     label: "Pakenham Golf Course",
     x: 0.91,
@@ -159,10 +140,10 @@ const LOCATION_MAP_MARKERS = [
   },
   {
     className: "location-map-marker--compact location-map-marker--shopping",
-    detail: "Approx. 5 min drive",
-    href: mapsSearch("Bunnings Pakenham"),
+    detail: "Approx. 2 min drive",
+    href: mapsDirections("Bunnings East Pakenham, 56/58 Bald Hill Rd, Pakenham VIC, Australia"),
     icon: ShoppingBag,
-    label: "Bunnings Pakenham",
+    label: "Bunnings East Pakenham",
     x: 0.84,
     y: 0.82,
   },
@@ -204,21 +185,21 @@ const LOCATION_MAP_MARKERS = [
   },
   {
     className: "location-map-marker--compact location-map-marker--stay",
-    detail: "Approx. 3 min drive",
-    href: mapsSearch("Mercure Pakenham Hotel"),
+    detail: "Approx. 1 min drive",
+    href: mapsDirections("Mercure Pakenham, 77 Racecourse Rd, Pakenham VIC, Australia"),
     icon: Hotel,
     label: "Mercure Pakenham",
     x: 0.57,
     y: 0.94,
   },
   {
-    className: "location-map-marker--compact location-map-marker--direction",
-    detail: "Approx. 45 min drive",
+    className: "location-map-marker--compact location-map-marker--drive-direction",
+    detail: "Approx. 1 hr drive",
     href: mapsDirections("Phillip Island VIC, Australia"),
-    icon: Navigation,
+    icon: ChevronLeft,
     label: "Phillip Island",
-    x: 0.84,
-    y: 0.94,
+    x: 0.04,
+    y: 0.66,
   },
 ] as const;
 
@@ -298,14 +279,13 @@ export function SerenityLocationMap() {
               onClick={(event) => event.stopPropagation()}
             >
               <span className="location-map-marker-pin" aria-hidden="true">
-                {"number" in marker ? marker.number : <Icon size={17} strokeWidth={2.1} />}
+                <Icon size={17} strokeWidth={2.1} />
               </span>
-              {!("number" in marker) && (
-                <span className="location-map-marker-copy">
-                  <strong>{marker.label}</strong>
-                  <small>{marker.detail}</small>
-                </span>
-              )}
+              <span className="location-map-marker-copy">
+                <strong>{marker.label}</strong>
+                <small>{marker.detail}</small>
+                {marker.className === "location-map-marker--home-featured" && <ArrowUpRight className="location-map-home-link-arrow" size={17} strokeWidth={2} aria-hidden="true" />}
+              </span>
             </a>,
           );
           markerRoots.push(root);
@@ -320,18 +300,14 @@ export function SerenityLocationMap() {
           );
         });
 
-        const serenityHomes = LOCATION_MAP_MARKERS.filter(
-          (marker) => marker.className === "location-map-marker--home-number",
+        const homeMarker = LOCATION_MAP_MARKERS.find(
+          (marker) => marker.className === "location-map-marker--home-featured",
         );
 
-        if (serenityHomes.length && window.matchMedia("(max-width: 767px)").matches) {
-          const homeCenter = serenityHomes.reduce(
-            (center, marker) => ({ x: center.x + marker.x / serenityHomes.length, y: center.y + marker.y / serenityHomes.length }),
-            { x: 0, y: 0 },
-          );
+        if (homeMarker && window.matchMedia("(max-width: 767px)").matches) {
           const housePoint = viewer.viewport.imageToViewportCoordinates(
-            homeCenter.x * MAP_IMAGE_SIZE.width,
-            homeCenter.y * MAP_IMAGE_SIZE.height,
+            homeMarker.x * MAP_IMAGE_SIZE.width,
+            homeMarker.y * MAP_IMAGE_SIZE.height,
           );
 
           viewer.viewport.zoomBy(2.15, viewer.viewport.getCenter(), true);

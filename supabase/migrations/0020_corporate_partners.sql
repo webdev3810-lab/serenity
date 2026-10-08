@@ -1,6 +1,6 @@
 create table if not exists public.corporate_partners (
   id uuid primary key default gen_random_uuid(),
-  partner_id text not null unique default ('SER-' || upper(encode(gen_random_bytes(6), 'hex'))),
+  partner_id text not null unique default ('SER-' || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 12))),
   company_name text not null check (char_length(company_name) between 1 and 160),
   contact_name text not null check (char_length(contact_name) between 1 and 120),
   email text not null check (char_length(email) between 3 and 150),

@@ -165,7 +165,7 @@ body:has(.contact-story-page) .public-site > main {
   border-radius: 0 !important;
 }
 
-.contact-story-page a:hover {
+.contact-story-page a:hover:not(.location-map-marker) {
   opacity: 0.7;
 }
 
