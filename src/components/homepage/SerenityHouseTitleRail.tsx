@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type SerenityHouseTitleRailProps = {
@@ -80,7 +81,7 @@ export default function SerenityHouseTitleRail({ houses }: SerenityHouseTitleRai
           <ul aria-label={`${activeHouse.name} details`}>
             {houseFacts.map((fact) => <li key={fact}>{fact}</li>)}
           </ul>
-          <Link href={`/properties/${activeHouse.slug}`}>Explore {activeHouse.name} <span aria-hidden="true">→</span></Link>
+          <Link href={`/properties/${activeHouse.slug}`}>Explore {activeHouse.name} <ArrowRight size={16} aria-hidden="true" /></Link>
         </div>
       )}
     </div>

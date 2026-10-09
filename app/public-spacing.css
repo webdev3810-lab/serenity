@@ -130,14 +130,14 @@ body:has(.corporate-editorial-page) .public-site > main,
   gap: 0.25rem;
   border-radius: 999px;
   padding: 0.55rem 0.8rem;
-  background: rgba(241, 238, 231, 0.96);
+  background: #ffffff;
   color: var(--hero-green-deep, #001e35);
   font-size: 0.68rem;
   letter-spacing: 0.04em;
-  opacity: 0;
+  opacity: 1;
   text-shadow: none;
-  transform: translateY(0.5rem);
-  transition: opacity 220ms ease, transform 220ms ease;
+  box-shadow: 0 0.3rem 1rem rgba(0, 30, 53, 0.25);
+  transition: background-color 220ms ease, transform 220ms ease;
   white-space: nowrap;
 }
 
@@ -159,7 +159,6 @@ body:has(.corporate-editorial-page) .public-site > main,
   .policy-editorial-nav,
   .policy-editorial-contact,
   .serenity-editorial-services,
-  .serenity-editorial-photo-preview,
   .property-theme .property-editorial-heading
 ) {
   color: #ffffff !important;
@@ -183,7 +182,6 @@ body:has(.corporate-editorial-page) .public-site > main,
   .policy-editorial-nav,
   .policy-editorial-contact,
   .serenity-editorial-services,
-  .serenity-editorial-photo-preview,
   .property-theme .property-editorial-heading
 ) :is(h1, h2, h3, h4, p, span, small, strong, li, a) {
   color: #ffffff !important;
@@ -198,14 +196,13 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .serenity-editorial-photo-preview__card:is(:hover, :focus-visible) .serenity-editorial-photo-preview__caption small {
-  opacity: 1;
-  transform: translateY(0);
+  background: var(--hero-yellow, #E5CA8B);
+  transform: translateY(-2px);
 }
 
 @media (hover: none) {
   .public-site .serenity-editorial-photo-preview__caption small {
     font-size: 0.6rem;
-    opacity: 1;
     transform: none;
   }
 }

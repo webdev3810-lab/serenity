@@ -3,10 +3,11 @@
 /* The CMS reads flexible Supabase rows, so the boundary is intentionally defensive. */
 
 import { CMS_LIMITS } from "@/src/lib/cmsValidation";
-import { Eye, Save } from "lucide-react";
+import { Eye, Plus, Save, Trash2 } from "lucide-react";
+import { MAX_NOTIFICATION_RECIPIENTS } from "@/src/lib/notificationRecipients";
 
 import { CharacterField, PageHeader, Toggle } from "./AdminFields";
-export function SettingsPanel({ email, settings, setSettings, save, saving }: { email: string; settings: Record<string, string>; setSettings: (value: Record<string, string>) => void; save: () => Promise<void>; saving: boolean }) {
+export function SettingsPanel({ email, settings, setSettings, notificationEmails, setNotificationEmails, save, saving }: { email: string; settings: Record<string, string>; setSettings: (value: Record<string, string>) => void; notificationEmails: string[]; setNotificationEmails: (value: string[]) => void; save: () => Promise<void>; saving: boolean }) {
   const update = (key: string, value: string) => setSettings({ ...settings, [key]: value });
   const addressVisible = settings.public_address_visible !== "false";
 
@@ -50,13 +51,21 @@ export function SettingsPanel({ email, settings, setSettings, save, saving }: { 
           <div className="grid gap-4 sm:grid-cols-2"><CharacterField label="Booking enquiry email *" value={settings.booking_enquiry_email} onChange={(value) => update("booking_enquiry_email", value)} limit={CMS_LIMITS.booking_enquiry_email} type="email" /><CharacterField label="Corporate enquiry email *" value={settings.corporate_enquiry_email} onChange={(value) => update("corporate_enquiry_email", value)} limit={CMS_LIMITS.corporate_enquiry_email} type="email" /></div>
         </section>
 
+        <section className="grid gap-4 border-b border-[var(--admin-border)] pb-6">
+          <div><h3 className="text-lg font-semibold">Email notifications</h3><p className="mt-1 text-sm text-[var(--admin-muted)]">These private addresses receive new contact messages, corporate enquiries, and paid-booking alerts. Add up to {MAX_NOTIFICATION_RECIPIENTS} addresses. Guests do not see this list.</p></div>
+          <div className="grid gap-3">
+            {notificationEmails.map((address, index) => <div key={index} className="flex items-end gap-2"><label className="grid flex-1 gap-1.5 text-sm font-semibold" htmlFor={`notification-email-${index}`}><span>Recipient {index + 1}</span><input id={`notification-email-${index}`} className="admin-field" type="email" maxLength={120} value={address} onChange={(event) => setNotificationEmails(notificationEmails.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} placeholder="name@example.com" /></label><button type="button" className="admin-button min-h-11 px-3" aria-label={`Remove recipient ${index + 1}`} onClick={() => setNotificationEmails(notificationEmails.filter((_, itemIndex) => itemIndex !== index))}><Trash2 size={16} /></button></div>)}
+            {notificationEmails.length < MAX_NOTIFICATION_RECIPIENTS && <button type="button" className="admin-button w-fit min-h-11 gap-2" onClick={() => setNotificationEmails([...notificationEmails, ""])}><Plus size={16} /> Add email</button>}
+            {notificationEmails.length === 0 && <p className="text-sm text-[var(--admin-muted)]">No recipients selected. Saving this will turn off internal email notifications.</p>}
+          </div>
+        </section>
+
         <section className="grid gap-4 border-b border-[var(--admin-border)] pb-6"><div><h3 className="text-lg font-semibold">Australian defaults</h3><p className="mt-1 text-sm text-[var(--admin-muted)]">These existing settings remain available for the promotion and local formatting.</p></div><div className="grid gap-4 sm:grid-cols-3"><CharacterField label="Locale" value={settings.locale} onChange={(value) => update("locale", value)} limit={CMS_LIMITS.navigation_label} /><CharacterField label="Timezone" value={settings.timezone} onChange={(value) => update("timezone", value)} limit={CMS_LIMITS.nearby_location} /><CharacterField label="Currency" value={settings.currency} onChange={(value) => update("currency", value)} limit={CMS_LIMITS.navigation_label} /></div></section>
 
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--admin-border)] pt-5"><p className="text-sm text-[var(--admin-muted)]">Signed in as <strong>{email}</strong><br /><span className="text-sm">Contact values are stored in the existing public site settings record.</span></p><button className="admin-button admin-button-primary inline-flex min-h-11 items-center gap-2" disabled={saving}><Save size={16} /> {saving ? "Saving…" : "Save settings"}</button></div>
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--admin-border)] pt-5"><p className="text-sm text-[var(--admin-muted)]">Signed in as <strong>{email}</strong><br /><span className="text-sm">Notification recipients are stored separately from public site settings.</span></p><button className="admin-button admin-button-primary inline-flex min-h-11 items-center gap-2" disabled={saving}><Save size={16} /> {saving ? "Saving…" : "Save settings"}</button></div>
       </div>
 
       <aside className="admin-card admin-guest-preview h-fit bg-[#EAE1DD] p-5 sm:p-6"><div className="flex items-center gap-2 text-sm font-extrabold"><Eye size={17} className="text-[#8B6B55]" /> Public contact preview</div><div className="mt-4 bg-white p-5"><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#8B6B55]">{settings.business_name || "Business name"}</p><h3 className="mt-3 break-words text-2xl font-extrabold text-[#2D2622]">{settings.contact_page_heading || "Contact page heading"}</h3><p className="mt-3 break-words text-sm leading-relaxed text-stone-600">{settings.contact_page_description || "Contact page description"}</p><div className="mt-5 space-y-2 border-t border-[#EAE1DD] pt-4 text-sm text-stone-700"><p className="break-words"><strong>Email:</strong> {settings.contact_email || "—"}</p><p><strong>Phone:</strong> {settings.phone_number || "—"}</p>{addressVisible && <p className="break-words"><strong>Location:</strong> {settings.public_address || "—"}</p>}<p className="break-words"><strong>Hours:</strong> {settings.business_hours || "—"}</p></div><div className="mt-5 flex flex-wrap gap-2 text-xs font-bold">{settings.whatsapp_number && <span className="rounded-none bg-[#E6EFE9] px-3 py-1.5 text-[#2F5D4B]">WhatsApp</span>}{settings.facebook_url && <span className="rounded-none bg-[#F7F4F1] px-3 py-1.5">Facebook</span>}{settings.instagram_url && <span className="rounded-none bg-[#F7F4F1] px-3 py-1.5">Instagram</span>}{settings.linkedin_url && <span className="rounded-none bg-[#F7F4F1] px-3 py-1.5">LinkedIn</span>}</div></div></aside>
     </form>
   </>;
 }
-

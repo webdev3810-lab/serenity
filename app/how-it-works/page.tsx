@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, CircleCheck, House, KeyRound, Monitor } from "lucide-react";
+import { ArrowUpRight, CalendarDays, CircleCheck, House, KeyRound, Monitor } from "lucide-react";
 import { pageMetadata } from "@/src/lib/seo";
 import { getPublicProperties } from "@/src/lib/supabase/content";
 import styles from "./how-it-works.module.css";
@@ -59,8 +59,8 @@ export default async function HowItWorksPage() {
           <div className={styles.heroIntro}>
             <p>Whether you’re a partner using your Partner ID or a guest making a general enquiry, booking a Serenity home is quick and easy.</p>
             <div className={styles.heroLinks}>
-              <Link href="/houses">Explore our homes <span aria-hidden="true">↗</span></Link>
-              <Link href="/corporate-stays#corporate-booking">Partner booking <span aria-hidden="true">↗</span></Link>
+              <Link href="/houses">Explore our homes <ArrowUpRight size={17} aria-hidden="true" /></Link>
+              <Link href="/corporate-stays#corporate-booking">Partner booking <ArrowUpRight size={17} aria-hidden="true" /></Link>
             </div>
           </div>
         </div>
@@ -93,7 +93,7 @@ export default async function HowItWorksPage() {
           <p className={styles.eyebrow}>The stay starts here</p>
           <h2 id="how-it-works-closing-title">Move in.<br />Settle in.<br />Feel at home.</h2>
           <p>Quality furnished homes, ready when you are. Flexible stays for work, family, or life’s transitions.</p>
-          <Link href="/houses">Check availability <span aria-hidden="true">↗</span></Link>
+          <Link href="/houses">Check availability <ArrowUpRight size={17} aria-hidden="true" /></Link>
         </div>
       </section>
     </div>

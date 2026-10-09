@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import HomepageReviewsSection from "@/src/components/homepage/HomepageReviewsSection";
 import type { Property } from "@/src/data/properties";
 
@@ -78,8 +79,8 @@ export function AboutPage({ properties }: { properties: Property[] }) {
           <h2 id="about-story-hero-title">Stay comfortably.<br />Feel at home.</h2>
           <p>Serenity on the Rocks offers private furnished homes for families, work trips, relocations and longer visits. Settle in with the everyday details taken care of and one responsive local contact throughout your stay.</p>
           <div className="about-story-hero__links">
-            <Link href="/houses">Explore the houses <span aria-hidden="true">↗</span></Link>
-            <Link href="/contact">Get in touch <span aria-hidden="true">↗</span></Link>
+            <Link href="/houses">Explore the houses <ArrowUpRight size={17} aria-hidden="true" /></Link>
+            <Link href="/contact">Get in touch <ArrowUpRight size={17} aria-hidden="true" /></Link>
           </div>
         </div>
       </section>

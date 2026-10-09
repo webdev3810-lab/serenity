@@ -845,7 +845,9 @@ body:has(.serenity-editorial-home) .public-site > main {
 }
 
 .serenity-editorial-title-rail__details > a {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   color: inherit;
   font-family: var(--font-poppins), Arial, sans-serif;
   font-size: clamp(0.9rem, 1vw, 1rem);
@@ -899,6 +901,13 @@ body:has(.serenity-editorial-home) .public-site > main {
   letter-spacing: 0.03em;
   text-decoration: none;
   text-transform: uppercase;
+}
+
+.serenity-editorial-intro__topline a,
+.serenity-editorial-faq__contact a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .serenity-editorial-intro__statement {

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { useRef, type MouseEvent, type PointerEvent } from "react";
 import type { CSSProperties } from "react";
 import type { SerenityEditorialPreviewImage } from "./SerenityEditorialHome";
@@ -116,7 +117,7 @@ export default function SerenityPhotoPreviewRail({ photos, duration }: SerenityP
         <Photo src={photo.src} alt={duplicate ? "" : photo.alt} sizes={imageSizes} />
         <span className="serenity-editorial-photo-preview__caption">
           <strong>{photo.houseName}</strong>
-          <small>View house <span aria-hidden="true">↗</span></small>
+          <small>View house <ArrowUpRight size={16} strokeWidth={2} aria-hidden="true" /></small>
         </span>
       </div>
     );

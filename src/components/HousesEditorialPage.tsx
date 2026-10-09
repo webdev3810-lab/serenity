@@ -7,7 +7,7 @@ import { useMemo, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Bath, BedDouble, BedSingle, CarFront, UsersRound, WashingMachine, Wifi, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, Bath, BedDouble, BedSingle, CarFront, UsersRound, WashingMachine, Wifi, type LucideIcon } from "lucide-react";
 import type { Property } from "@/src/data/properties";
 import type { GuestCounts } from "@/src/lib/booking";
 import { hasUnavailableConflict, validateGuestCapacity } from "@/src/lib/booking";
@@ -203,7 +203,7 @@ export function HousesEditorialPage({ properties }: { properties: Property[] }) 
                       <li key={label}><Icon size={17} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span></li>
                     ))}
                   </ul>
-                  <span className="houses-editorial-list__cta">Explore house <span aria-hidden="true">↗</span></span>
+                  <span className="houses-editorial-list__cta">Explore house <ArrowUpRight size={17} aria-hidden="true" /></span>
                 </div>
               </Link>
             </article>
@@ -212,7 +212,7 @@ export function HousesEditorialPage({ properties }: { properties: Property[] }) 
           <div className="houses-editorial-empty">
             <h2>No houses available for those dates.</h2>
             <p>Try different dates or guest numbers to see the full collection.</p>
-            <Link href="/houses">View all houses <span aria-hidden="true">↗</span></Link>
+            <Link href="/houses">View all houses <ArrowUpRight size={17} aria-hidden="true" /></Link>
           </div>
         )}
       </section>

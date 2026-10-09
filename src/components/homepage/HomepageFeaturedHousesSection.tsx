@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type { Property } from "@/src/data/properties";
 import { isApprovedHomepageMediaSource } from "@/src/lib/homepageMedia";
@@ -58,7 +59,7 @@ function HouseCopy({ property, index, overlay = false }: HouseCopyProps) {
         tabIndex={overlay && index !== 0 ? -1 : 0}
         aria-label={`View ${name}`}
       >
-        View home <span aria-hidden="true">↗</span>
+        View home <ArrowUpRight size={16} aria-hidden="true" />
       </Link>
     </div>
   );

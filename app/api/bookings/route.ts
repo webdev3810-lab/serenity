@@ -22,6 +22,9 @@ export async function POST(request: Request) {
       { status: 503 },
     );
   }
+  if (stripeSecretKey.startsWith("sk_live_") && !process.env.STRIPE_WEBHOOK_SECRET?.startsWith("whsec_")) {
+    return NextResponse.json({ error: "Online payment is temporarily unavailable. Please contact Serenity to book." }, { status: 503 });
+  }
 
   try {
     const body = await request.json();
@@ -163,6 +166,7 @@ export async function POST(request: Request) {
     try {
       session = await stripe.checkout.sessions.create({
         mode: "payment",
+        client_reference_id: String(booking.id),
         // Keep every Serenity checkout in the property's AUD price instead of
         // allowing Stripe Adaptive Pricing to offer a converted local currency.
         adaptive_pricing: { enabled: false },
@@ -185,7 +189,7 @@ export async function POST(request: Request) {
           metadata,
           description: `Serenity reservation ${reference}`,
         },
-      });
+      }, { idempotencyKey: `serenity-booking-${booking.id}` });
     } catch (stripeError) {
       await supabase.from("bookings").update({ booking_status: "cancelled" }).eq("id", booking.id);
       throw stripeError;

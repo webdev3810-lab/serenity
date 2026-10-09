@@ -3,6 +3,33 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      stripe_payment_events: {
+        Row: {
+          id: string;
+          stripe_event_id: string;
+          event_type: string;
+          processing_status: "processing" | "processed" | "failed" | "ignored";
+          booking_id: string | null;
+          booking_reference: string | null;
+          stripe_checkout_session_id: string | null;
+          stripe_payment_intent_id: string | null;
+          amount_cents: number | null;
+          currency: string | null;
+          outcome: "pending" | "succeeded" | "declined" | "expired" | "refunded" | "partially_refunded" | "informational";
+          failure_code: string | null;
+          failure_message: string | null;
+          last_error: string | null;
+          livemode: boolean;
+          event_created_at: string;
+          attempts: number;
+          processed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["stripe_payment_events"]["Row"]> & Pick<Database["public"]["Tables"]["stripe_payment_events"]["Row"], "stripe_event_id" | "event_type" | "livemode" | "event_created_at">;
+        Update: Partial<Database["public"]["Tables"]["stripe_payment_events"]["Row"]>;
+        Relationships: [];
+      };
       corporate_partners: {
         Row: {
           id: string;
@@ -391,6 +418,24 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      claim_stripe_payment_event: {
+        Args: {
+          p_stripe_event_id: string;
+          p_event_type: string;
+          p_booking_id: string | null;
+          p_booking_reference: string | null;
+          p_stripe_checkout_session_id: string | null;
+          p_stripe_payment_intent_id: string | null;
+          p_amount_cents: number | null;
+          p_currency: string | null;
+          p_outcome: string;
+          p_failure_code: string | null;
+          p_failure_message: string | null;
+          p_livemode: boolean;
+          p_event_created_at: string;
+        };
+        Returns: boolean;
+      };
       claim_first_admin: { Args: { p_user_id: string; p_email: string }; Returns: boolean };
       reserve_promotion_redemption: { Args: { p_promotion_id: string; p_booking_id: string; p_code: string; p_discount_amount: number }; Returns: string };
       confirm_promotion_redemption: { Args: { p_redemption_id: string; p_booking_id: string; p_session_id: string }; Returns: undefined };

@@ -10,7 +10,9 @@
     "test:calendar": "node --experimental-strip-types --test scripts/calendar-ical.test.mts",
     "test:property": "node --test scripts/property-experience.test.cjs",
     "test:promotions": "node --experimental-strip-types --test scripts/promotions.test.mts",
-    "test:reservations": "node --experimental-strip-types --test scripts/reservations.test.mts"
+    "test:reservations": "node --experimental-strip-types --test scripts/reservations.test.mts",
+    "test:notifications": "node --experimental-strip-types --test scripts/notification-recipients.test.mts",
+    "test:stripe": "node --experimental-strip-types --test scripts/stripe-monitoring.test.mts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

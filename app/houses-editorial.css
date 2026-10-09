@@ -188,13 +188,12 @@ body:has(.houses-editorial-page) .public-site > main {
   text-transform: uppercase;
 }
 
-.houses-editorial-list__cta span {
-  font-size: 1.1rem;
+.houses-editorial-list__cta svg {
   transition: transform 200ms ease;
 }
 
-.houses-editorial-list__link:hover .houses-editorial-list__cta span,
-.houses-editorial-list__link:focus-visible .houses-editorial-list__cta span {
+.houses-editorial-list__link:hover .houses-editorial-list__cta svg,
+.houses-editorial-list__link:focus-visible .houses-editorial-list__cta svg {
   transform: translate(0.2rem, -0.2rem);
 }
 

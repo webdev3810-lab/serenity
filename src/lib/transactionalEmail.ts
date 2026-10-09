@@ -1,4 +1,5 @@
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
+import { normalizeNotificationRecipients } from "@/src/lib/notificationRecipients";
 
 type EmailMessage = {
   to: string;
@@ -10,6 +11,17 @@ type EmailMessage = {
 
 const sender = () => process.env.RESEND_FROM_EMAIL?.trim();
 const notificationsInbox = () => process.env.RESEND_NOTIFY_EMAIL?.trim();
+
+async function notificationRecipients(): Promise<string[]> {
+  const fallback = notificationsInbox();
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase.from("site_settings").select("value").eq("key", "notification_recipients").maybeSingle();
+  if (error) throw error;
+  if (!data) return fallback ? [fallback] : [];
+  const value = data.value && typeof data.value === "object" && !Array.isArray(data.value)
+    ? (data.value as Record<string, unknown>).emails : undefined;
+  return normalizeNotificationRecipients(value);
+}
 
 async function sendEmail(message: EmailMessage) {
   const apiKey = process.env.RESEND_API_KEY;
@@ -38,6 +50,18 @@ async function sendEmail(message: EmailMessage) {
   }
 }
 
+async function sendAdminNotification(message: Omit<EmailMessage, "to">) {
+  if (!process.env.RESEND_API_KEY || !sender()) return;
+  const recipients = await notificationRecipients();
+  const results = await Promise.allSettled(recipients.map((to) => sendEmail({
+    ...message,
+    to,
+    idempotencyKey: `${message.idempotencyKey}/${to}`,
+  })));
+  const failures = results.filter((result) => result.status === "rejected");
+  if (failures.length) throw new Error(`${failures.length} notification email(s) could not be sent.`);
+}
+
 export async function notifyContactMessage(input: {
   id: string;
   reference: string;
@@ -48,10 +72,7 @@ export async function notifyContactMessage(input: {
   preferredHouse: string;
   message: string;
 }) {
-  const to = notificationsInbox();
-  if (!to) return;
-  await sendEmail({
-    to,
+  await sendAdminNotification({
     replyTo: input.email,
     subject: `New Serenity contact message · ${input.reference}`,
     idempotencyKey: `contact-message/${input.id}`,
@@ -80,10 +101,7 @@ export async function notifyCorporateEnquiry(input: {
   houses: string[];
   notes: string;
 }) {
-  const to = notificationsInbox();
-  if (!to) return;
-  await sendEmail({
-    to,
+  await sendAdminNotification({
     replyTo: input.email,
     subject: `New Serenity corporate enquiry · ${input.reference}`,
     idempotencyKey: `corporate-enquiry/${input.id}`,
@@ -101,7 +119,7 @@ export async function notifyCorporateEnquiry(input: {
   });
 }
 
-export async function sendBookingConfirmation(bookingId: string) {
+export async function sendBookingEmails(bookingId: string) {
   if (!process.env.RESEND_API_KEY || !sender()) return;
   const supabase = createSupabaseAdminClient();
   const { data: booking, error } = await supabase.from("bookings")
@@ -116,7 +134,7 @@ export async function sendBookingConfirmation(bookingId: string) {
     .select("name").eq("id", booking.property_id).single();
   if (propertyError) throw propertyError;
   const amount = new Intl.NumberFormat("en-AU", { style: "currency", currency: booking.currency || "AUD" }).format(Number(booking.total));
-  await sendEmail({
+  const confirmation = sendEmail({
     to: email,
     replyTo: notificationsInbox(),
     subject: `Your Serenity booking is confirmed · ${booking.reference}`,
@@ -137,4 +155,21 @@ export async function sendBookingConfirmation(bookingId: string) {
       "Serenity Stays",
     ].join("\n"),
   });
+  const notification = sendAdminNotification({
+    replyTo: email,
+    subject: `New paid Serenity booking · ${booking.reference}`,
+    idempotencyKey: `paid-booking/${booking.id}`,
+    text: [
+      `Paid booking ${booking.reference}`,
+      `Guest: ${String(guest.firstName ?? "")} ${String(guest.lastName ?? "")}`.trim(),
+      `Email: ${email}`,
+      `Home: ${property.name}`,
+      `Check-in: ${booking.check_in}`,
+      `Checkout: ${booking.checkout}`,
+      `Total paid: ${amount}`,
+    ].join("\n"),
+  });
+  const results = await Promise.allSettled([confirmation, notification]);
+  const failures = results.filter((result) => result.status === "rejected");
+  if (failures.length) throw new Error(`${failures.length} booking email send(s) failed.`);
 }

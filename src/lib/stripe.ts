@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
-import { sendBookingConfirmation } from "@/src/lib/transactionalEmail";
+import { sendBookingEmails } from "@/src/lib/transactionalEmail";
+import { assertAudCheckout } from "@/src/lib/stripeMonitoring";
 
 export const hasStripeServerConfig = Boolean(process.env.STRIPE_SECRET_KEY);
 
@@ -31,6 +32,7 @@ const getMetadata = (session: Stripe.Checkout.Session): CheckoutBookingMetadata 
 export async function markBookingPaid(session: Stripe.Checkout.Session) {
   const { bookingId, reference } = getMetadata(session);
   if (!bookingId || !reference) throw new Error("Stripe session is missing booking metadata.");
+  if (session.payment_status !== "paid") throw new Error("Stripe checkout has not been paid.");
 
   const paymentIntentId = typeof session.payment_intent === "string"
     ? session.payment_intent
@@ -38,12 +40,13 @@ export async function markBookingPaid(session: Stripe.Checkout.Session) {
   const supabase = createSupabaseAdminClient();
   const { data: existing, error: readError } = await supabase
     .from("bookings")
-    .select("id, reference, payment_status, booking_status, stripe_payment_intent_id, promotion_redemption_id")
+    .select("id, reference, payment_status, booking_status, stripe_payment_intent_id, stripe_checkout_session_id, currency, total, promotion_redemption_id")
     .eq("id", bookingId)
     .eq("reference", reference)
     .maybeSingle();
   if (readError) throw readError;
   if (!existing) throw new Error("Booking linked to Stripe session was not found.");
+  assertAudCheckout(session, existing);
 
   let booking = existing;
   if (existing.payment_status !== "paid") {
@@ -57,19 +60,19 @@ export async function markBookingPaid(session: Stripe.Checkout.Session) {
       .eq("id", bookingId)
       .eq("reference", reference)
       .neq("payment_status", "paid")
-      .select("id, reference, payment_status, booking_status, stripe_payment_intent_id, promotion_redemption_id")
+      .select("id, reference, payment_status, booking_status, stripe_payment_intent_id, stripe_checkout_session_id, currency, total, promotion_redemption_id")
       .maybeSingle();
     if (error) throw error;
     if (updatedBooking) {
       booking = updatedBooking;
       try {
-        await sendBookingConfirmation(bookingId);
+        await sendBookingEmails(bookingId);
       } catch (emailError) {
         console.error("Booking confirmation email failed", emailError);
       }
     } else {
       const { data: paidBooking, error: paidBookingError } = await supabase.from("bookings")
-        .select("id, reference, payment_status, booking_status, stripe_payment_intent_id, promotion_redemption_id")
+        .select("id, reference, payment_status, booking_status, stripe_payment_intent_id, stripe_checkout_session_id, currency, total, promotion_redemption_id")
         .eq("id", bookingId).eq("reference", reference).single();
       if (paidBookingError) throw paidBookingError;
       booking = paidBooking;
@@ -93,15 +96,18 @@ export async function markBookingPaidFromPaymentIntent(paymentIntent: Stripe.Pay
   const reference = paymentIntent.metadata?.reference;
   if (!bookingId || !reference) throw new Error("Stripe payment intent is missing booking metadata.");
   const supabase = createSupabaseAdminClient();
-  const { data: existing, error: readError } = await supabase.from("bookings").select("id, payment_status, booking_status").eq("id", bookingId).eq("reference", reference).maybeSingle();
+  const { data: existing, error: readError } = await supabase.from("bookings").select("id, payment_status, booking_status, currency, total, stripe_checkout_session_id").eq("id", bookingId).eq("reference", reference).maybeSingle();
   if (readError) throw readError;
   if (!existing) throw new Error("Booking linked to Stripe payment intent was not found.");
+  if (!existing.stripe_checkout_session_id || existing.currency.toUpperCase() !== "AUD" || paymentIntent.currency.toUpperCase() !== "AUD" || paymentIntent.amount !== Math.round(Number(existing.total) * 100)) throw new Error("Stripe payment intent does not match this AUD booking.");
+  const session = await getStripeClient().checkout.sessions.retrieve(existing.stripe_checkout_session_id);
+  if (session.payment_intent !== paymentIntent.id || session.payment_status !== "paid") throw new Error("Stripe payment intent does not match the paid checkout session.");
   if (existing.payment_status === "paid") return existing;
   const { data, error } = await supabase.from("bookings").update({ payment_status: "paid", booking_status: "confirmed", stripe_payment_intent_id: paymentIntent.id }).eq("id", bookingId).eq("reference", reference).neq("payment_status", "paid").select("id, payment_status, booking_status").maybeSingle();
   if (error) throw error;
   if (!data) return existing;
   try {
-    await sendBookingConfirmation(bookingId);
+    await sendBookingEmails(bookingId);
   } catch (emailError) {
     console.error("Booking confirmation email failed", emailError);
   }

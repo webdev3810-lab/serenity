@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarCheck2, CalendarDays, ContactRound, House } from "lucide-react";
+import { ArrowUpRight, CalendarCheck2, CalendarDays, ContactRound, House } from "lucide-react";
 import SerenityHouseTitleRail from "./SerenityHouseTitleRail";
 import SerenityHeroImage from "./SerenityHeroImage";
 import SerenityPhotoPreviewRail from "./SerenityPhotoPreviewRail";
@@ -142,7 +142,7 @@ export default function SerenityEditorialHome({
       <section className="serenity-editorial-intro" aria-labelledby="serenity-editorial-intro-title">
         <div className="serenity-editorial-intro__topline">
           <ScrollWipeText as="h2" id="serenity-editorial-intro-title">The tailored stay</ScrollWipeText>
-          <Link href="/houses">View all houses <span aria-hidden="true">↗</span></Link>
+          <Link href="/houses">View all houses <ArrowUpRight size={17} aria-hidden="true" /></Link>
         </div>
         <div className="serenity-editorial-intro__statement">
           <ScrollWipeText as="p">Three private homes, considered down to the everyday details.</ScrollWipeText>
@@ -218,7 +218,7 @@ export default function SerenityEditorialHome({
         </div>
         <div className="serenity-editorial-faq__contact">
           <p>Have another question?</p>
-          <Link href="/contact">Talk to our team <span aria-hidden="true">↗</span></Link>
+          <Link href="/contact">Talk to our team <ArrowUpRight size={17} aria-hidden="true" /></Link>
         </div>
       </section>
 

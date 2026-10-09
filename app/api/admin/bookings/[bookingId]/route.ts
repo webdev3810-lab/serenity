@@ -18,9 +18,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ bo
     if (internalNotes.length > 4000 || cancellationReason.length > 500) return NextResponse.json({ error: "Please shorten the internal note or cancellation reason." }, { status: 400 });
 
     const supabase = createSupabaseAdminClient();
-    const { data: existing, error: readError } = await supabase.from("bookings").select("id, booking_status, payment_status, internal_notes, promotion_redemption_id").eq("id", bookingId).maybeSingle();
+    const { data: existing, error: readError } = await supabase.from("bookings").select("id, booking_status, payment_status, stripe_checkout_session_id, internal_notes, promotion_redemption_id").eq("id", bookingId).maybeSingle();
     if (readError) throw readError;
     if (!existing) return NextResponse.json({ error: "Booking not found." }, { status: 404 });
+    if (existing.stripe_checkout_session_id && body.paymentStatus && body.paymentStatus !== existing.payment_status) {
+      return NextResponse.json({ error: "Stripe payment status is managed by verified payment events. Use Stripe for refunds or check the Payments tab." }, { status: 409 });
+    }
     const auditChanges = [
       body.bookingStatus && body.bookingStatus !== existing.booking_status ? `booking ${existing.booking_status} → ${body.bookingStatus}` : "",
       body.paymentStatus && body.paymentStatus !== existing.payment_status ? `payment ${existing.payment_status} → ${body.paymentStatus}` : "",
