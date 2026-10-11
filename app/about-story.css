@@ -483,16 +483,16 @@ body:has(.about-story-page) .public-site > main {
 
 @media (max-width: 760px) {
   .about-story-heading {
-    min-height: 8rem;
+    min-height: 6rem;
     flex-direction: column-reverse;
     align-items: flex-start;
     justify-content: end;
-    gap: 0.8rem;
-    padding: 1.1rem 1.25rem;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
   }
 
   .about-story-heading h1 {
-    font-size: clamp(3.3rem, 10.5vw, 5rem);
+    font-size: clamp(2rem, 7vw, 3rem);
   }
 
   .about-story-heading > span {
@@ -506,16 +506,38 @@ body:has(.about-story-page) .public-site > main {
 
   .about-story-hero__media {
     min-height: 0;
-    height: min(65svh, 36rem);
+    height: clamp(14rem, 56vw, 22rem);
+  }
+
+  .about-story-hero__media-label {
+    bottom: 1.25rem;
+    left: 1.25rem;
+    font-size: clamp(1.35rem, 5vw, 2rem);
   }
 
   .about-story-hero__copy {
-    min-height: 29rem;
-    padding: clamp(2rem, 6vw, 3rem);
+    min-height: 0;
+    gap: 1.1rem;
+    padding: 1.6rem 1.25rem 1.8rem;
   }
 
   .about-story-hero__copy h2 {
-    font-size: clamp(3.5rem, 10vw, 5.5rem);
+    max-width: none;
+    font-size: clamp(1.95rem, 7.5vw, 3.2rem);
+    line-height: 0.96;
+  }
+
+  .about-story-hero__copy > p:not(.about-story-eyebrow) {
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+
+  .about-story-hero__links {
+    gap: 0.7rem 1.25rem;
+  }
+
+  .about-story-hero__links a {
+    font-size: 1rem;
   }
 
   .about-story-stats,
@@ -530,19 +552,55 @@ body:has(.about-story-page) .public-site > main {
   }
 
   .about-story-stat {
-    padding: 2rem;
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    column-gap: 1rem;
+    align-content: center;
+    padding: 1.15rem 1.25rem;
   }
 
   .about-story-stat strong {
-    font-size: 4.5rem;
+    grid-row: 1 / 3;
+    align-self: center;
+    font-size: 2.75rem;
+  }
+
+  .about-story-stat > span {
+    margin-top: 0;
+    font-size: 0.7rem;
+  }
+
+  .about-story-stat p {
+    margin-top: 0.3rem;
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+
+  .about-story-intro,
+  .about-story-principles__heading {
+    padding: 1.6rem 1.25rem;
+  }
+
+  .about-story-eyebrow,
+  .about-story-section-topline,
+  .about-story-principles__heading > span {
+    font-size: 0.9rem;
   }
 
   .about-story-intro__statement {
-    padding: 4rem 0;
+    gap: 1rem;
+    padding: 2.5rem 0;
   }
 
   .about-story-intro__statement h2 {
-    font-size: clamp(3.4rem, 10vw, 5.5rem);
+    font-size: clamp(2.6rem, 8vw, 3.7rem);
+    line-height: 0.98;
+  }
+
+  .about-story-intro__statement p,
+  .about-story-intro__details p {
+    font-size: 1.1rem;
+    line-height: 1.4;
   }
 
   .about-story-intro__details {
@@ -551,7 +609,7 @@ body:has(.about-story-page) .public-site > main {
 
   .about-story-intro__details p,
   .about-story-intro__details p:first-child {
-    padding: 1.3rem 0;
+    padding: 1rem 0;
   }
 
   .about-story-intro__details p + p {
@@ -565,11 +623,34 @@ body:has(.about-story-page) .public-site > main {
 
   .about-story-principles__heading h2,
   .about-story-homes__heading h2 {
-    font-size: clamp(3.4rem, 10vw, 5.5rem);
+    font-size: clamp(2.6rem, 8vw, 3.7rem);
+    line-height: 0.98;
+  }
+
+  .about-story-principles__heading p {
+    font-size: 1.1rem;
+    line-height: 1.35;
   }
 
   .about-story-principle {
-    min-height: 24rem;
+    min-height: 0;
+    gap: 1.25rem;
+    padding: 1.5rem 1.25rem;
+  }
+
+  .about-story-principle h3 {
+    font-size: 2.1rem;
+  }
+
+  .about-story-principle p {
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+    line-height: 1.35;
+  }
+
+  .public-site .about-story-page .homepage-reviews-description {
+    font-size: 1.1rem;
+    line-height: 1.4;
   }
 
   .about-story-homes__heading {
