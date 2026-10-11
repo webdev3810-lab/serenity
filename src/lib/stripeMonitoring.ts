@@ -41,3 +41,9 @@ export function assertAudCheckout(session: Stripe.Checkout.Session, booking: { i
   if (booking.currency.toUpperCase() !== "AUD" || session.currency?.toUpperCase() !== "AUD") throw new Error("Stripe checkout currency must be AUD.");
   if (session.amount_total !== Math.round(Number(booking.total) * 100)) throw new Error("Stripe checkout amount does not match the booking total.");
 }
+
+export function bookingConfirmationState(booking: { payment_status: string; booking_status: string }): "pending" | "confirmed" {
+  if (booking.payment_status === "pending" && booking.booking_status === "pending_payment") return "pending";
+  if (booking.payment_status === "paid" && ["confirmed", "checked_in", "checked_out"].includes(booking.booking_status)) return "confirmed";
+  throw new Error("This booking is no longer eligible for payment confirmation.");
+}

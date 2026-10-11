@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       const session = await stripe.checkout.sessions.retrieve(booking.stripe_checkout_session_id);
       if (session.status === "open") await stripe.checkout.sessions.expire(session.id);
     }
-    await markBookingCancelled(reference);
+    await markBookingCancelled(reference, false);
     return NextResponse.json({ cancelled: true });
   } catch (error) {
     console.error("Stripe checkout cancellation failed", error);

@@ -29,6 +29,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { propertySlug, checkIn, checkout, guests: rawGuests, guestDetails, corporateDetails, notes } = body;
+    if (corporateDetails?.corporate === true || guestDetails?.corporate === true) {
+      return NextResponse.json({ error: "Corporate bookings require a verified Partner ID. Please use the corporate stays booking form." }, { status: 403 });
+    }
     const email = String(guestDetails?.email ?? "").trim();
     if (!propertySlug || !checkIn || !checkout || !email) {
       return NextResponse.json({ error: "Property, dates, and guest email are required." }, { status: 400 });
@@ -86,15 +89,10 @@ export async function POST(request: Request) {
     if (calendarError) throw calendarError;
     const bookedDates = (overlappingBookings ?? []).flatMap((booking) => datesInRange(booking.check_in, booking.checkout));
     const importedBlockedDates = (calendarEvents ?? []).flatMap((event) => datesInRange(event.start_date, event.end_date));
-    const corporate = corporateDetails?.corporate === true;
-    const dateError = validateDateRange(property, checkIn, checkout, todayIso(), [...bookedDates, ...importedBlockedDates], corporate);
+    const dateError = validateDateRange(property, checkIn, checkout, todayIso(), [...bookedDates, ...importedBlockedDates], false);
     const guestError = validateGuestCapacity(property, guests);
     if (dateError || guestError) return NextResponse.json({ error: dateError || guestError }, { status: 400 });
-    if (corporate && property.minimumCorporateHouses > 1) {
-      return NextResponse.json({ error: `This house requires at least ${property.minimumCorporateHouses} houses for a corporate booking. Please submit a corporate enquiry.` }, { status: 400 });
-    }
-
-    const basePrice = calculatePrice(property, checkIn, checkout, guests, corporate);
+    const basePrice = calculatePrice(property, checkIn, checkout, guests, false);
     if (!basePrice.nights || basePrice.total <= 0) return NextResponse.json({ error: "Invalid booking dates or price." }, { status: 400 });
 
     const price = basePrice;
@@ -110,7 +108,7 @@ export async function POST(request: Request) {
       infants: guests.infants,
       pets: guests.pets,
       guest_details: guestDetails,
-      corporate_details: corporateDetails ?? {},
+      corporate_details: {},
       price_breakdown: price,
       total: price.total,
       currency: "AUD",
@@ -118,8 +116,8 @@ export async function POST(request: Request) {
       promotion_code: null,
       promotion_discount: 0,
       payment_status: "pending",
-      booking_status: corporate ? "corporate" : "pending_payment",
-      booking_type: corporate ? "corporate" : "standard",
+      booking_status: "pending_payment",
+      booking_type: "standard",
       booking_source: "website",
       notes: notes ?? guestDetails.requests ?? "",
     }).select("id, reference").single();
@@ -147,7 +145,7 @@ export async function POST(request: Request) {
       currency: "AUD",
       guestEmail: email.slice(0, 150),
       guestName: (guestName || "Guest").slice(0, 120),
-      corporate: corporate ? "true" : "false",
+      corporate: "false",
       companyName: companyName.slice(0, 160),
       nights: String(price.nights),
       nightlyRates: nightlyRateMetadata,

@@ -4,6 +4,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/src/lib/supabase/types";
 
 export const ACTIVE_BOOKING_STATUSES = ["pending_payment", "confirmed", "corporate", "checked_in"] as const;
+// Pending checkouts only hold dates locally; publish a calendar reservation after confirmation.
+export const PUBLISHED_BOOKING_STATUSES = ["confirmed", "corporate", "checked_in"] as const;
 
 export function calendarRangesOverlap(startDate: string, endDate: string, otherStart: string, otherEnd: string) {
   return startDate < otherEnd && endDate > otherStart;

@@ -29,6 +29,7 @@ export default function SerenityHouseTitleRail({ houses }: SerenityHouseTitleRai
     };
 
     const requestUpdate = () => {
+      if (window.matchMedia("(max-width: 760px)").matches) return;
       if (!frame) frame = window.requestAnimationFrame(update);
 
       window.clearTimeout(snapTimer);

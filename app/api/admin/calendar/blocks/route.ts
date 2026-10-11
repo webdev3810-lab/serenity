@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminUser } from "@/src/lib/supabase/auth";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
-import { ACTIVE_BOOKING_STATUSES } from "@/src/lib/calendar/conflicts";
+import { ACTIVE_BOOKING_STATUSES, findBlockingCalendarEvents } from "@/src/lib/calendar/conflicts";
 
 const BLOCK_REASONS = ["maintenance", "owner_use", "cleaning", "preparation", "renovation", "private_booking", "other"] as const;
 const BLOCK_LABELS: Record<(typeof BLOCK_REASONS)[number], string> = {
@@ -44,6 +44,10 @@ export async function POST(request: Request) {
     if (conflictError) return NextResponse.json({ error: conflictError.message }, { status: 500 });
     if (conflictingBookings?.length) {
       return NextResponse.json({ error: "These dates overlap an existing Serenity booking. The booking was not changed.", conflicts: conflictingBookings }, { status: 409 });
+    }
+    const conflictingEvents = await findBlockingCalendarEvents(supabase, propertyId, startDate, endDate);
+    if (conflictingEvents.length) {
+      return NextResponse.json({ error: "These dates overlap an existing calendar block or imported calendar event.", conflicts: conflictingEvents }, { status: 409 });
     }
     const blockId = crypto.randomUUID();
     const { data, error } = await supabase.from("calendar_events").insert({

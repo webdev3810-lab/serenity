@@ -4,7 +4,7 @@ import { normalizeRooms, type RoomArrangement } from "@/src/lib/rooms";
 /* The CMS reads flexible Supabase rows, so the boundary is intentionally defensive. */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { defaultHomepageFaqs } from "@/src/data/homepageFaqs";
+import { defaultEditorialHomepageContent, type EditorialHomepageContent } from "@/src/lib/homepageEditorialContent";
 import { AU_LOCALE,AU_TIME_ZONE } from "@/src/lib/localization";
 import { DEFAULT_CONTACT_SETTINGS_RECORD } from "@/src/lib/siteSettings";
 import {
@@ -15,45 +15,14 @@ BarChart3
 
 export type Row = Record<string, any>;
 export type AdminRole = "admin" | "editor" | "super_admin";
-export type AdminTab = "overview" | "homepage" | "houses" | "reviews" | "bookings" | "payments" | "calendar" | "partners" | "enquiries" | "contacts" | "users" | "settings";
+export type AdminTab = "overview" | "homepage" | "houses" | "reviews" | "bookings" | "payments" | "receipts" | "calendar" | "partners" | "enquiries" | "contacts" | "users" | "settings";
 export type Tab = AdminTab;
-export type HomepageSectionKey = "hero" | "search" | "featured" | "benefits" | "corporate" | "location" | "faqs" | "cta";
+export type HomepageSectionKey = "hero" | "houses" | "intro" | "services" | "faqs" | "social";
 export type AdminNavItem = { id: Tab; label: string; description: string; icon: typeof BarChart3 };
-export type Benefit = { title: string; description: string };
 export type HomepageFaq = { question: string; answer: string };
 export type BedArrangement = RoomArrangement;
-export type HomepageDraft = {
-  hero_heading: string;
-  hero_subtitle: string;
-  hero_image_caption: string;
-  hero_cta_label: string;
-  hero_cta_href: string;
-  featured_heading: string;
-  featured_description: string;
-  section_heading: string;
-  section_description: string;
-  benefits_heading: string;
-  benefits_description: string;
-  discount_heading: string;
-  discount_description: string;
-  corporate_heading: string;
-  corporate_description: string;
-  corporate_cta_label: string;
-  corporate_cta_href: string;
-  location_heading: string;
-  location_description: string;
-  benefits: Benefit[];
-  faq_heading: string;
-  faq_description: string;
-  faqs: HomepageFaq[];
-  final_cta_heading: string;
-  final_cta_description: string;
-  final_cta_primary_label: string;
-  final_cta_primary_href: string;
-  final_cta_secondary_label: string;
-  final_cta_secondary_href: string;
-};
-export type AdminUser = { user_id: string; email: string; role: AdminRole; active: boolean; created_at: string };
+export type HomepageDraft = EditorialHomepageContent;
+export type AdminUser = { user_id: string; email: string; username?: string; role: AdminRole; active: boolean; created_at: string };
 
 export const emptyProperty = (): Row => ({
   name: "",
@@ -128,35 +97,10 @@ export const emptyProperty = (): Row => ({
 });
 
 export const emptyHomepage = (): HomepageDraft => ({
-  hero_heading: "",
-  hero_subtitle: "",
-  hero_image_caption: "",
-  hero_cta_label: "Browse Houses",
-  hero_cta_href: "/houses",
-  featured_heading: "Featured Serenity Houses",
-  featured_description: "Explore our turn-key furnished private houses in Pakenham, Victoria.",
-  section_heading: "",
-  section_description: "",
-  benefits_heading: "Everything included for your stay",
-  benefits_description: "Turn-key whole-house accommodation equipped for immediate comfort.",
-  discount_heading: "",
-  discount_description: "",
-  corporate_heading: "",
-  corporate_description: "",
-  corporate_cta_label: "Explore Corporate Stays",
-  corporate_cta_href: "/corporate-stays",
-  location_heading: "Pakenham Victoria Accommodation Area",
-  location_description: "Explore the local area and plan your stay with confidence.",
-  benefits: [],
-  faq_heading: "Good to know before arrival.",
-  faq_description: "Clear answers for families, business travellers, contractors, and longer-stay guests.",
-  faqs: defaultHomepageFaqs.map((faq) => ({ ...faq })),
-  final_cta_heading: "Find a comfortable house for your next stay.",
-  final_cta_description: "Choose your dates, compare the three Serenity houses, and book direct in Australian Dollars.",
-  final_cta_primary_label: "Search availability",
-  final_cta_primary_href: "/houses",
-  final_cta_secondary_label: "Contact Serenity",
-  final_cta_secondary_href: "/contact",
+  ...defaultEditorialHomepageContent,
+  editorial_highlights: defaultEditorialHomepageContent.editorial_highlights.map((item) => ({ ...item })),
+  editorial_services: defaultEditorialHomepageContent.editorial_services.map((item) => ({ ...item })),
+  faqs: defaultEditorialHomepageContent.faqs.map((faq) => ({ ...faq })),
 });
 
 export const emptySettings = () => ({

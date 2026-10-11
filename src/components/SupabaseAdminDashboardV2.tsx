@@ -7,10 +7,12 @@ import { roomBedLabel,roomTotals } from "@/src/lib/rooms";
 
 import AdminReservationsManager from "@/src/components/AdminReservationsManager";
 import { AdminPayments } from "@/src/components/admin/AdminPayments";
+import { AdminReceipts } from "@/src/components/admin/AdminReceipts";
 import { AdminThemeToggle,useAdminTheme } from "@/src/components/AdminTheme";
 import { BrandWordmark } from "@/src/components/BrandWordmark";
 import CalendarSyncManager from "@/src/components/CalendarSyncManager";
-import { defaultHomepageFaqs } from "@/src/data/homepageFaqs";
+import { AdminAvailabilityCalendar } from "@/src/components/admin/AdminAvailabilityCalendar";
+import { normalizeEditorialHomepageContent } from "@/src/lib/homepageEditorialContent";
 import { CMS_LIMITS,trimCmsText,validateCmsContent } from "@/src/lib/cmsValidation";
 import { validateNotificationRecipients } from "@/src/lib/notificationRecipients";
 import { createSupabaseBrowserClient } from "@/src/lib/supabase/client";
@@ -30,8 +32,8 @@ Mail,
 Menu,
 MessageSquare,
 CreditCard,
+ReceiptText,
 Settings,
-Star,
 UsersRound,
 X
 } from "lucide-react";
@@ -44,8 +46,8 @@ import { fetchAllAdminRows } from "@/src/lib/admin-pagination";
 import { Overview } from "@/src/components/admin/AdminOverview";
 import { HomepageSectionsEditor } from "./admin/AdminHomepageEditor";
 import { HouseEditor } from "./admin/AdminHouseEditor";
-import { AdminUserManager,ContactManager,EnquiryManager,ReviewManager } from "./admin/AdminInboxSections";
-import { AdminNavItem,AdminRole,AdminUser,asBeds,asDatePrices,asList,emptyHomepage,emptyProperty,emptySettings,formatMelbourneCompactDateTime,formatMelbourneDateTime,HomepageDraft,HomepageFaq,HomepageSectionKey,normalizeAdminSettings,normalizeProperty,Row,Tab } from "./admin/AdminModels";
+import { AdminUserManager,ContactManager,EnquiryManager } from "./admin/AdminInboxSections";
+import { AdminNavItem,AdminRole,AdminUser,asBeds,asDatePrices,asList,emptyHomepage,emptyProperty,emptySettings,formatMelbourneCompactDateTime,formatMelbourneDateTime,HomepageDraft,HomepageSectionKey,normalizeAdminSettings,normalizeProperty,Row,Tab } from "./admin/AdminModels";
 import { AdminNavigation,SidebarProfile } from "./admin/AdminNavigation";
 import { AdminCorporatePartners } from "./admin/AdminCorporatePartners";
 import { SettingsPanel } from "./admin/AdminSettings";
@@ -59,7 +61,8 @@ export function SupabaseAdminDashboardV2({ email, role, initialTab = "overview",
   const { theme } = useAdminTheme();
   const [localTab, setTab] = useState<Tab>(initialTab);
   const routeTab = searchParams.get("tab") as Tab | null;
-  const tab = initialHouseId || initialNewHouse ? localTab : routeTab && ["overview", "homepage", "houses", "reviews", "bookings", "payments", "calendar", "partners", "enquiries", "contacts", "users", "settings"].includes(routeTab) && (routeTab !== "users" || role === "super_admin") ? routeTab : initialTab;
+  const tab = initialHouseId || initialNewHouse ? localTab : routeTab && ["overview", "homepage", "houses", "bookings", "payments", "receipts", "calendar", "partners", "enquiries", "contacts", "users", "settings"].includes(routeTab) && (routeTab !== "users" || role === "super_admin") ? routeTab : initialTab;
+  const calendarView = searchParams.get("view") === "settings" ? "settings" : "calendar";
   const [properties, setProperties] = useState<Row[]>([]);
   const [images, setImages] = useState<Row[]>([]);
   const [reviews, setReviews] = useState<Row[]>([]);
@@ -175,21 +178,6 @@ useEffect(() => {
     setContactMessages((contactMessageResult.data ?? []) as Row[]);
     setContactMessagesUnavailable(Boolean(contactMessageResult.error));
     const content = (homepageResult.data?.content ?? {}) as Row;
-    const firstSection = Array.isArray(content.sections) && content.sections[0] && typeof content.sections[0] === "object" ? content.sections[0] : {};
-    const homepageBenefits = Array.isArray(content.benefits)
-      ? content.benefits
-        .filter((item: unknown) => item && typeof item === "object")
-        .map((item: any) => ({ title: String(item.title ?? ""), description: String(item.description ?? item.text ?? "") }))
-      : Array.isArray(content.sections)
-        ? content.sections
-          .filter((item: unknown) => item && typeof item === "object")
-          .map((item: any) => ({ title: String(item.title ?? ""), description: String(item.description ?? item.text ?? "") }))
-        : [];
-    const homepageFaqs: HomepageFaq[] = Array.isArray(content.faqs)
-      ? content.faqs
-        .filter((item: unknown) => item && typeof item === "object")
-        .map((item: any) => ({ question: String(item.question ?? ""), answer: String(item.answer ?? "") }))
-      : defaultHomepageFaqs.map((faq) => ({ ...faq }));
     if (initialLoad) {
     const notificationResponse = await fetch("/api/admin/notification-recipients", { cache: "no-store" });
     const notificationData = await notificationResponse.json();
@@ -197,21 +185,7 @@ useEffect(() => {
     const loadedEmails = Array.isArray(notificationData.emails) ? notificationData.emails as string[] : [];
     setNotificationEmails(loadedEmails); setSavedNotificationEmails(loadedEmails);
     setHomepageSource(content);
-    const loadedHomepage: HomepageDraft = {
-      hero_heading: String(content.hero_heading ?? ""), hero_subtitle: String(content.hero_subtitle ?? ""), hero_image_caption: String(content.hero_image_caption ?? ""), hero_cta_label: String(content.hero_cta_label ?? "Browse Houses"), hero_cta_href: String(content.hero_cta_href ?? "/houses"),
-      featured_heading: String(content.featured_heading ?? "Featured Serenity Houses"), featured_description: String(content.featured_description ?? "Explore our turn-key furnished private houses in Pakenham, Victoria."),
-      section_heading: String(content.section_heading ?? firstSection.heading ?? ""), section_description: String(content.section_description ?? firstSection.description ?? ""),
-      benefits_heading: String(content.benefits_heading ?? "Everything included for your stay"), benefits_description: String(content.benefits_description ?? "Turn-key whole-house accommodation equipped for immediate comfort."),
-      discount_heading: String(content.discount_heading ?? ""), discount_description: String(content.discount_description ?? ""),
-      corporate_heading: String(content.corporate_heading ?? ""), corporate_description: String(content.corporate_description ?? ""),
-      corporate_cta_label: String(content.corporate_cta_label ?? "Explore Corporate Stays"), corporate_cta_href: String(content.corporate_cta_href ?? "/corporate-stays"),
-      location_heading: String(content.location_heading ?? "Pakenham Victoria Accommodation Area"), location_description: String(content.location_description ?? "Explore the local area and plan your stay with confidence."),
-      benefits: homepageBenefits,
-      faq_heading: String(content.faq_heading ?? "Good to know before arrival."), faq_description: String(content.faq_description ?? "Clear answers for families, business travellers, contractors, and longer-stay guests."), faqs: homepageFaqs,
-      final_cta_heading: String(content.final_cta_heading ?? "Find a comfortable house for your next stay."), final_cta_description: String(content.final_cta_description ?? "Choose your dates, compare the three Serenity houses, and book direct in Australian Dollars."),
-      final_cta_primary_label: String(content.final_cta_primary_label ?? "Search availability"), final_cta_primary_href: String(content.final_cta_primary_href ?? "/houses"),
-      final_cta_secondary_label: String(content.final_cta_secondary_label ?? "Contact Serenity"), final_cta_secondary_href: String(content.final_cta_secondary_href ?? "/contact"),
-    };
+    const loadedHomepage: HomepageDraft = normalizeEditorialHomepageContent(content);
     setHomepage(loadedHomepage); setSavedHomepage(loadedHomepage);
     setHomepagePublished(Boolean(homepageResult.data?.published));
     const loadedSettings = normalizeAdminSettings(settingsResult.data?.value);
@@ -310,22 +284,22 @@ useEffect(() => {
   const saveHomepageSection = async (section: HomepageSectionKey, published: boolean) => {
     setSaving(true);
     const sectionFields: Record<HomepageSectionKey, string[]> = {
-      hero: ["hero_heading", "hero_subtitle", "hero_cta_label", "hero_cta_href", "hero_image_caption"],
-      search: [],
-      featured: ["featured_heading", "featured_description"],
-      benefits: ["benefits_heading", "benefits_description", "benefits"],
-      corporate: ["corporate_heading", "corporate_description", "corporate_cta_label", "corporate_cta_href"],
-      location: ["location_heading", "location_description"],
-      faqs: ["faq_heading", "faq_description", "faqs"],
-      cta: ["final_cta_heading", "final_cta_description", "final_cta_primary_label", "final_cta_primary_href", "final_cta_secondary_label", "final_cta_secondary_href"],
+      hero: ["editorial_hero_eyebrow", "editorial_hero_heading", "editorial_hero_description", "editorial_hero_primary_label", "editorial_hero_secondary_label", "editorial_highlights"],
+      houses: [],
+      intro: ["editorial_intro_heading", "editorial_intro_link_label", "editorial_intro_statement_one", "editorial_intro_statement_two"],
+      services: ["editorial_services_heading", "editorial_services_description", "editorial_services"],
+      faqs: ["editorial_faq_eyebrow", "faq_heading", "faq_description", "faqs", "editorial_faq_contact_prompt", "editorial_faq_contact_label"],
+      social: ["editorial_social_heading", "editorial_social_houses_label", "editorial_social_story_label", "editorial_social_contact_label"],
     };
     const content: Row = { ...homepageSource };
     for (const key of ["intro_eyebrow", "intro_heading", "intro_lead", "intro_body", "intro_cta_label", "intro_cta_href", "intro_art_label", "intro_art_heading", "intro_art_card", "intro_image_1", "intro_image_1_path", "intro_image_2", "intro_image_2_path"]) {
       delete content[key];
     }
     for (const key of sectionFields[section]) {
-      content[key] = key === "benefits"
-        ? homepage.benefits.map((benefit) => ({ title: benefit.title.trim(), description: benefit.description.trim() }))
+      content[key] = key === "editorial_highlights"
+        ? homepage.editorial_highlights.map((item) => ({ icon: item.icon, title: item.title.trim(), description: item.description.trim() }))
+        : key === "editorial_services"
+          ? homepage.editorial_services.map((item) => ({ title: item.title.trim(), description: item.description.trim() }))
         : key === "faqs"
           ? homepage.faqs.map((faq) => ({ question: faq.question.trim(), answer: faq.answer.trim() }))
         : String(homepage[key as keyof HomepageDraft] ?? "").trim();
@@ -454,11 +428,11 @@ useEffect(() => {
     } catch (convertError) { setError(convertError instanceof Error ? convertError.message : "Could not convert enquiry."); }
   };
 
-  const createAdminUser = async (newEmail: string, newRole: AdminRole) => {
-    const response = await fetch("/api/admin/users", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: newEmail, role: newRole }) });
+  const createAdminUser = async (details: { email: string; username: string; password: string; role: AdminRole }) => {
+    const response = await fetch("/api/admin/users", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(details) });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Could not invite admin user.");
-    notify("Invitation sent."); await load();
+    if (!response.ok) throw new Error(data.error || "Could not create admin user.");
+    notify("Admin account created and confirmed. No invitation was sent."); await load();
   };
 
   const updateAdminUser = async (userId: string, changes: { role?: AdminRole; active?: boolean }) => {
@@ -479,10 +453,10 @@ useEffect(() => {
     { id: "overview", label: "Overview", description: "At a glance", icon: BarChart3 },
     { id: "homepage", label: "Homepage", description: "Edit landing content", icon: Home },
     { id: "houses", label: "Houses", description: "Content, pricing, photos", icon: Building2 },
-    { id: "reviews", label: "Reviews", description: "Guest feedback", icon: Star },
     { id: "bookings", label: "Bookings", description: "Reservations and status", icon: CalendarDays },
     { id: "payments", label: "Payments", description: "Stripe transactions and webhooks", icon: CreditCard },
-    { id: "calendar", label: "Calendar", description: "External availability", icon: CalendarRange },
+    { id: "receipts", label: "Receipts", description: "Paid booking proof", icon: ReceiptText },
+    { id: "calendar", label: "Calendar", description: "Availability and rates", icon: CalendarRange },
     { id: "partners", label: "Partners", description: "Corporate IDs and details", icon: Building2 },
     { id: "enquiries", label: "Enquiries", description: "Corporate requests", icon: MessageSquare },
     { id: "contacts", label: "Contacts", description: "Customer messages", icon: Mail },
@@ -491,11 +465,14 @@ useEffect(() => {
   ];
 
   const activeNavItem = navItems.find((item) => item.id === tab) ?? navItems[0];
-  const handleNavigation = (id: Tab) => { if (id === tab && !initialHouseId && !initialNewHouse) { setMobileDrawerOpen(false); return; } void navigate(() => {
+  const handleNavigation = (id: Tab) => { if (id === tab && !(id === "calendar" && calendarView === "settings") && !initialHouseId && !initialNewHouse) { setMobileDrawerOpen(false); return; } void navigate(() => {
+    if (id === "calendar" || id === "bookings") void load();
     setMobileDrawerOpen(false); setHomepage(savedHomepage); setSiteSettings(savedSettings); setNotificationEmails(savedNotificationEmails);
     router.push(id === "overview" ? "/admin" : `/admin?tab=${id}`, { scroll: false });
   }); };
   const logout = () => navigate(() => { void supabase.auth.signOut().then(() => router.replace("/admin/login")); });
+
+  const houseEditor = <HouseEditor dirty={houseDirty} properties={properties} draft={draft} setDraft={setDraft} selectedId={selectedId} editProperty={editProperty} newProperty={newProperty} saveProperty={saveProperty} deleteProperty={deleteProperty} saving={saving} images={images} reviews={reviews} createReview={createReview} updateReview={updateReview} deleteReview={deleteReview} reload={load} notify={notify} onError={setError} initialNewHouse={initialNewHouse} isDetailPage={Boolean(initialHouseId || initialNewHouse)} openHouse={(propertyId: string) => void navigate(() => router.push(`/admin/houses/${propertyId}`))} openNewHouse={() => void navigate(() => router.push("/admin/houses/new"))} onBackToHouses={() => void navigate(() => router.push("/admin?tab=houses"))} />;
 
   return (
     <main className="admin-shell"><a className="admin-skip-link" href="#admin-content">Skip to content</a>
@@ -559,12 +536,25 @@ useEffect(() => {
             <SidebarProfile email={email} role={role} collapsed={sidebarCollapsed} />
             <AdminNavigation items={navItems} active={tab} collapsed={sidebarCollapsed} onSelect={handleNavigation} />
           </aside>
-          <button type="button" className="admin-sidebar-toggle" aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={() => setSidebarCollapsed((current) => !current)}>{sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}</button>
+          <button type="button" className="admin-sidebar-toggle" aria-controls="admin-sidebar" aria-expanded={!sidebarCollapsed} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} onClick={() => setSidebarCollapsed((current) => !current)}>{sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}</button>
         </div>
         <section id="admin-content" tabIndex={-1} className="admin-content" aria-busy={loading}>
           {message && <div className="admin-notice is-success" role="status"><CheckCircle2 size={18} />{message}</div>}
           {error && <div className="admin-notice is-error" role="alert"><X size={18} /><span>{error}</span>{loadFailed && <button type="button" className="admin-button" onClick={() => void load()}>Retry</button>}</div>}
-          {loading ? <div className="admin-card admin-loading-state" role="status"><LoaderCircle size={18} className="animate-spin" aria-hidden="true" /> <span>Loading your CMS workspace…</span></div> : loadFailed && !loaded ? <div className="admin-card p-8"><h2>Workspace unavailable</h2><p className="mt-2 text-[var(--admin-muted)]">Your records could not be loaded. Use Retry above to try again.</p></div> : tab === "overview" ? <Overview properties={properties} enquiries={enquiries} bookings={bookings} calendarEvents={calendarEvents} calendarConnections={calendarConnections} onNavigate={handleNavigation} /> : tab === "homepage" ? <HomepageSectionsEditor baseline={savedHomepage} homepage={homepage} setHomepage={setHomepage} published={homepagePublished} saveSection={saveHomepageSection} saving={saving} properties={properties} toggleFeatured={toggleFeaturedProperty} /> : tab === "houses" ? <HouseEditor dirty={houseDirty} properties={properties} draft={draft} setDraft={setDraft} selectedId={selectedId} editProperty={editProperty} newProperty={newProperty} saveProperty={saveProperty} deleteProperty={deleteProperty} saving={saving} images={images} reload={load} notify={notify} onError={setError} initialNewHouse={initialNewHouse} isDetailPage={Boolean(initialHouseId || initialNewHouse)} openHouse={(propertyId: string) => void navigate(() => router.push(`/admin/houses/${propertyId}`))} openNewHouse={() => void navigate(() => router.push("/admin/houses/new"))} onBackToHouses={() => void navigate(() => router.push("/admin?tab=houses"))} /> : tab === "reviews" ? <ReviewManager properties={properties} reviews={reviews} createReview={createReview} updateReview={updateReview} deleteReview={deleteReview} /> : tab === "bookings" ? <AdminReservationsManager bookings={bookings} enquiries={enquiries} calendarEvents={calendarEvents} properties={properties} reload={load} notify={notify} onError={setError} convertEnquiry={convertEnquiry} updateEnquiryStatus={setEnquiryStatus} openCalendar={() => handleNavigation("calendar")} /> : tab === "payments" ? <AdminPayments /> : tab === "calendar" ? <CalendarSyncManager /> : tab === "partners" ? <AdminCorporatePartners canEdit={role !== "editor"} /> : tab === "enquiries" ? <EnquiryManager enquiries={enquiries} updateStatus={setEnquiryStatus} updateNotes={setEnquiryNotes} convert={convertEnquiry} /> : tab === "contacts" ? <ContactManager contacts={contactMessages} unavailable={contactMessagesUnavailable} updateStatus={setContactStatus} updateNotes={setContactNotes} /> : tab === "users" && role === "super_admin" ? <AdminUserManager users={adminUsers} currentUserEmail={email} createUser={createAdminUser} updateUser={updateAdminUser} deleteUser={deleteAdminUser} /> : <SettingsPanel email={email} settings={siteSettings} setSettings={setSiteSettings} notificationEmails={notificationEmails} setNotificationEmails={setNotificationEmails} save={saveSettings} saving={saving} />}
+          {loading ? <div className="admin-card admin-loading-state" role="status"><LoaderCircle size={18} className="animate-spin" aria-hidden="true" /> <span>Loading your CMS workspace…</span></div>
+            : loadFailed && !loaded ? <div className="admin-card p-8"><h2>Workspace unavailable</h2><p className="mt-2 text-[var(--admin-muted)]">Your records could not be loaded. Use Retry above to try again.</p></div>
+            : tab === "overview" ? <Overview properties={properties} enquiries={enquiries} bookings={bookings} calendarEvents={calendarEvents} calendarConnections={calendarConnections} onNavigate={handleNavigation} />
+            : tab === "homepage" ? <HomepageSectionsEditor baseline={savedHomepage} homepage={homepage} setHomepage={setHomepage} published={homepagePublished} saveSection={saveHomepageSection} saving={saving} properties={properties} toggleFeatured={toggleFeaturedProperty} />
+            : tab === "houses" ? houseEditor
+            : tab === "bookings" ? <AdminReservationsManager bookings={bookings} enquiries={enquiries} calendarEvents={calendarEvents} calendarConnections={calendarConnections} properties={properties} />
+            : tab === "payments" ? <AdminPayments />
+            : tab === "receipts" ? <AdminReceipts />
+            : tab === "calendar" ? <div className="space-y-5"><div className="admin-view-tabs" role="group" aria-label="Calendar views"><button type="button" className={`admin-view-tab ${calendarView === "calendar" ? "is-active" : ""}`} aria-pressed={calendarView === "calendar"} onClick={() => void navigate(() => { void load(); router.push("/admin?tab=calendar", { scroll: false }); })}>Availability calendar</button><button type="button" className={`admin-view-tab ${calendarView === "settings" ? "is-active" : ""}`} aria-pressed={calendarView === "settings"} onClick={() => void navigate(() => router.push("/admin?tab=calendar&view=settings", { scroll: false }))}>Calendar sync settings</button></div>{calendarView === "settings" ? <CalendarSyncManager /> : <AdminAvailabilityCalendar properties={properties} bookings={bookings} calendarEvents={calendarEvents} reload={load} startBlockSelection={searchParams.get("action") === "block"} />}</div>
+            : tab === "partners" ? <AdminCorporatePartners canEdit={role !== "editor"} />
+            : tab === "enquiries" ? <EnquiryManager enquiries={enquiries} updateStatus={setEnquiryStatus} convert={convertEnquiry} updateNotes={setEnquiryNotes} />
+            : tab === "contacts" ? <ContactManager contacts={contactMessages} unavailable={contactMessagesUnavailable} updateStatus={setContactStatus} updateNotes={setContactNotes} />
+            : tab === "users" && role === "super_admin" ? <AdminUserManager users={adminUsers} currentUserEmail={email} createUser={createAdminUser} updateUser={updateAdminUser} deleteUser={deleteAdminUser} />
+            : <SettingsPanel email={email} settings={siteSettings} setSettings={setSiteSettings} notificationEmails={notificationEmails} setNotificationEmails={setNotificationEmails} save={saveSettings} saving={saving} />}
         </section>
       </div>
       {mobileDrawerOpen && <AdminDialog label="Admin navigation" className="admin-mobile-navigation" drawer onClose={() => setMobileDrawerOpen(false)}><div><div className="admin-sidebar"><div className="admin-sidebar-top"><strong>Workspace</strong><button type="button" className="admin-sidebar-close" aria-label="Close navigation" onClick={() => setMobileDrawerOpen(false)}><X size={18} /></button></div><AdminNavigation items={navItems} active={tab} collapsed={false} onSelect={handleNavigation} /></div></div></AdminDialog>}

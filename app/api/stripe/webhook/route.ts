@@ -1,32 +1,38 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
-import { getStripeClient, markBookingCancelled, markBookingFailed, markBookingPaid, markBookingPaidFromPaymentIntent, markBookingRefunded } from "@/src/lib/stripe";
+import { getStripeClient, markBookingCancelled, markBookingFailed, markBookingPaid, markBookingPaidFromPaymentIntent, markBookingRefunded, markCorporateGroupPaid, markCorporateGroupClosed } from "@/src/lib/stripe";
 import { describeStripeEvent } from "@/src/lib/stripeMonitoring";
 
 async function processStripeEvent(event: Stripe.Event) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      if (session.payment_status === "paid") await markBookingPaid(session);
+      if (session.payment_status === "paid") {
+        if (session.metadata?.groupReference) await markCorporateGroupPaid(session);
+        else await markBookingPaid(session);
+      }
       break;
     }
     case "checkout.session.async_payment_succeeded":
-      await markBookingPaid(event.data.object as Stripe.Checkout.Session);
+      if ((event.data.object as Stripe.Checkout.Session).metadata?.groupReference) await markCorporateGroupPaid(event.data.object as Stripe.Checkout.Session);
+      else await markBookingPaid(event.data.object as Stripe.Checkout.Session);
       break;
     case "payment_intent.succeeded":
-      await markBookingPaidFromPaymentIntent(event.data.object as Stripe.PaymentIntent);
+      if (!(event.data.object as Stripe.PaymentIntent).metadata?.groupReference) await markBookingPaidFromPaymentIntent(event.data.object as Stripe.PaymentIntent);
       break;
     case "checkout.session.expired": {
       const session = event.data.object as Stripe.Checkout.Session;
       const reference = session.metadata?.reference;
-      if (reference) await markBookingCancelled(reference);
+      if (session.metadata?.groupReference) await markCorporateGroupClosed(session.metadata.groupReference);
+      else if (reference) await markBookingCancelled(reference);
       break;
     }
     case "checkout.session.async_payment_failed": {
       const session = event.data.object as Stripe.Checkout.Session;
       const reference = session.metadata?.reference;
-      if (reference) await markBookingFailed(reference);
+      if (session.metadata?.groupReference) await markCorporateGroupClosed(session.metadata.groupReference, true);
+      else if (reference) await markBookingFailed(reference);
       break;
     }
     // A declined attempt is not the end of Checkout: the guest can retry.
@@ -74,7 +80,7 @@ export async function POST(request: Request) {
       const query = supabase.from("bookings").select("id, reference");
       const { data, error } = await (details.paymentIntentId
         ? query.eq("stripe_payment_intent_id", details.paymentIntentId)
-        : query.eq("stripe_checkout_session_id", details.sessionId!)).maybeSingle();
+        : query.eq("stripe_checkout_session_id", details.sessionId!)).limit(1).maybeSingle();
       if (error) throw error;
       bookingId = data?.id ?? null;
       reference = data?.reference ?? reference;

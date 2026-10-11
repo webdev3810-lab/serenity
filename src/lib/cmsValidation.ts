@@ -1,5 +1,6 @@
 import { validateRooms } from "@/src/lib/rooms";
 import { isCalendarDate } from "@/src/lib/date-pricing";
+import { isEditorialHighlightIcon } from "@/src/lib/homepageEditorialContent";
 export const CMS_LIMITS = {
   hero_heading: 70,
   hero_subtitle: 180,
@@ -183,33 +184,41 @@ export function validatePropertyContent(payload: CmsPayload) {
 
 export function validateHomepageContent(payload: CmsPayload) {
   const errors: string[] = [];
-  addTextError(errors, "Hero heading", payload.hero_heading, CMS_LIMITS.hero_heading);
-  addTextError(errors, "Hero subtitle", payload.hero_subtitle, CMS_LIMITS.hero_subtitle);
-  addTextError(errors, "Hero image caption", payload.hero_image_caption, CMS_LIMITS.hero_image_caption);
-  addTextError(errors, "Button label", payload.hero_cta_label, CMS_LIMITS.button_label);
-  addTextError(errors, "Hero button link", payload.hero_cta_href, CMS_LIMITS.hero_cta_href);
-  addHrefError(errors, "Hero button link", payload.hero_cta_href);
-  addTextError(errors, "Featured heading", payload.featured_heading, CMS_LIMITS.section_heading);
-  addTextError(errors, "Featured description", payload.featured_description, CMS_LIMITS.section_description);
-  addTextError(errors, "Section heading", payload.section_heading, CMS_LIMITS.section_heading);
-  addTextError(errors, "Section description", payload.section_description, CMS_LIMITS.section_description);
-  addTextError(errors, "Benefits heading", payload.benefits_heading, CMS_LIMITS.section_heading);
-  addTextError(errors, "Benefits description", payload.benefits_description, CMS_LIMITS.section_description);
-  addTextError(errors, "Discount heading", payload.discount_heading, CMS_LIMITS.discount_heading);
-  addTextError(errors, "Discount description", payload.discount_description, CMS_LIMITS.discount_description);
-  addTextError(errors, "Corporate heading", payload.corporate_heading, CMS_LIMITS.section_heading);
-  addTextError(errors, "Corporate description", payload.corporate_description, CMS_LIMITS.section_description);
-  addTextError(errors, "Corporate button label", payload.corporate_cta_label, CMS_LIMITS.button_label);
-  addTextError(errors, "Location heading", payload.location_heading, CMS_LIMITS.section_heading);
-  addTextError(errors, "Location description", payload.location_description, CMS_LIMITS.section_description);
-  addListErrors(errors, "Benefit title", Array.isArray(payload.benefits) ? payload.benefits.map((item) => (item as CmsPayload)?.title) : [], CMS_LIMITS.benefit_title);
-  addListErrors(errors, "Benefit description", Array.isArray(payload.benefits) ? payload.benefits.map((item) => (item as CmsPayload)?.description) : [], CMS_LIMITS.benefit_description);
+  const fields: Array<[string, string, number]> = [
+    ["Small hero heading", "editorial_hero_eyebrow", CMS_LIMITS.section_heading],
+    ["Hero headline", "editorial_hero_heading", CMS_LIMITS.hero_heading],
+    ["Hero description", "editorial_hero_description", CMS_LIMITS.hero_subtitle],
+    ["Houses button", "editorial_hero_primary_label", CMS_LIMITS.button_label],
+    ["Partner button", "editorial_hero_secondary_label", CMS_LIMITS.button_label],
+    ["Intro heading", "editorial_intro_heading", CMS_LIMITS.section_heading],
+    ["Intro link", "editorial_intro_link_label", CMS_LIMITS.button_label],
+    ["First intro statement", "editorial_intro_statement_one", CMS_LIMITS.section_description],
+    ["Second intro statement", "editorial_intro_statement_two", CMS_LIMITS.section_description],
+    ["Services heading", "editorial_services_heading", CMS_LIMITS.section_heading],
+    ["Services description", "editorial_services_description", CMS_LIMITS.section_description],
+    ["FAQ small heading", "editorial_faq_eyebrow", CMS_LIMITS.section_heading],
+    ["FAQ contact prompt", "editorial_faq_contact_prompt", CMS_LIMITS.section_heading],
+    ["FAQ contact link", "editorial_faq_contact_label", CMS_LIMITS.button_label],
+    ["Final heading", "editorial_social_heading", CMS_LIMITS.section_heading],
+    ["Houses link", "editorial_social_houses_label", CMS_LIMITS.button_label],
+    ["About link", "editorial_social_story_label", CMS_LIMITS.button_label],
+    ["Contact link", "editorial_social_contact_label", CMS_LIMITS.button_label],
+  ];
+  for (const [label, key, limit] of fields) addTextError(errors, label, payload[key], limit);
+  for (const [label, key] of [["Stay highlight", "editorial_highlights"], ["Stay service", "editorial_services"]] as const) {
+    const cards = payload[key];
+    if (cards === undefined) continue;
+    const expected = key === "editorial_highlights" ? 4 : 3;
+    if (!Array.isArray(cards) || cards.length !== expected) { errors.push(`${label} must have ${expected} cards.`); continue; }
+    addListErrors(errors, `${label} title`, cards.map((item) => (item as CmsPayload)?.title), CMS_LIMITS.benefit_title);
+    addListErrors(errors, `${label} description`, cards.map((item) => (item as CmsPayload)?.description), CMS_LIMITS.benefit_description);
+    if (key === "editorial_highlights") cards.forEach((item, index) => {
+      const icon = item && typeof item === "object" ? (item as CmsPayload).icon : undefined;
+      if (icon !== undefined && !isEditorialHighlightIcon(icon)) errors.push(`Stay highlight ${index + 1} has an invalid icon.`);
+    });
+  }
   addTextError(errors, "FAQ heading", payload.faq_heading, CMS_LIMITS.section_heading);
   addTextError(errors, "FAQ description", payload.faq_description, CMS_LIMITS.section_description);
-  addTextError(errors, "Final CTA heading", payload.final_cta_heading, CMS_LIMITS.section_heading);
-  addTextError(errors, "Final CTA description", payload.final_cta_description, CMS_LIMITS.section_description);
-  addTextError(errors, "Final CTA primary label", payload.final_cta_primary_label, CMS_LIMITS.button_label);
-  addTextError(errors, "Final CTA secondary label", payload.final_cta_secondary_label, CMS_LIMITS.button_label);
   addListErrors(errors, "FAQ question", Array.isArray(payload.faqs) ? payload.faqs.map((item) => (item as CmsPayload)?.question) : [], CMS_LIMITS.faq_question);
   addListErrors(errors, "FAQ answer", Array.isArray(payload.faqs) ? payload.faqs.map((item) => (item as CmsPayload)?.answer) : [], CMS_LIMITS.faq_answer);
   return errors;

@@ -34,12 +34,10 @@ const CORPORATE_STAY_FEATURES = [
   { title: "One point of contact", description: "One Serenity contact throughout the booking and stay." },
 ] as const;
 
-export function CorporateStaysPage({ today, properties }: { today: string; properties: Property[] }) {
+export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { today: string; properties: Property[]; heroImage?: string; heroAlt?: string }) {
   const contact = useContactSettings() ?? DEFAULT_CONTACT_SETTINGS;
-  const [formSubmitted, setFormSubmitted] = useState(false);
   const [formError, setFormError] = useState("");
   const [formSubmitting, setFormSubmitting] = useState(false);
-  const [submittedReference, setSubmittedReference] = useState("");
   const [availability, setAvailability] = useState<Record<string, AvailabilityState>>({});
   const [submissionKey, setSubmissionKey] = useState("");
   const [partnerCompany, setPartnerCompany] = useState("");
@@ -73,7 +71,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
   });
 
   const selectedProperties = properties.filter((property) => formData.propertySlugs.includes(property.slug));
-  const corporateGuestCount = Number(formData.guests.split("-")[0]) || 1;
+  const corporateGuestCount = Number(formData.guests) || 1;
   const guestsPerHouse = { ...defaultGuests, adults: Math.max(1, Math.ceil(corporateGuestCount / Math.max(1, selectedProperties.length))) };
   const estimatedCorporateTotal = selectedProperties.reduce((total, property) => total + calculatePrice(property, formData.arrival, formData.departure, guestsPerHouse, true).total, 0);
   const corporateNights = nightsBetween(formData.arrival, formData.departure);
@@ -164,7 +162,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
   const submitCorporateBooking = async () => {
     setFormError("");
     if (!formData.customerId.trim()) {
-      setFormError("Enter the Partner ID issued by Serenity.");
+      setFormError("Enter your Partner ID before booking.");
       return;
     }
     if (!partnerCompany) {
@@ -177,6 +175,10 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
     }
     if (formData.propertySlugs.length !== Number(formData.housesNeeded)) {
       setFormError(`Please select exactly ${formData.housesNeeded} house${formData.housesNeeded === "1" ? "" : "s"} for this enquiry.`);
+      return;
+    }
+    if (corporateGuestCount < formData.propertySlugs.length) {
+      setFormError("Select at least one guest for each house.");
       return;
     }
     if (!availabilityReady) {
@@ -203,14 +205,14 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
           ...formData,
           checkIn: formData.arrival,
           checkout: formData.departure,
-          guests: guestsPerHouse,
+          guestCount: corporateGuestCount,
           idempotencyKey: key,
         }),
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Could not reserve the corporate stay.");
-      setSubmittedReference(String(result.booking?.reference ?? ""));
-      setFormSubmitted(true);
+      if (!response.ok) throw new Error(result.error || "Could not start secure checkout.");
+      if (typeof result.checkoutUrl !== "string" || !result.checkoutUrl.startsWith("https://checkout.stripe.com/")) throw new Error("Secure checkout is unavailable. Please try again.");
+      window.location.assign(result.checkoutUrl);
     } catch (error) {
       setFormError(error instanceof Error ? error.message : "Could not reserve the corporate stay.");
     } finally {
@@ -281,7 +283,16 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
 
       <section className="corporate-editorial-hero" aria-labelledby="corporate-hero-title">
         <div className="corporate-editorial-hero__image">
-          {featuredHome?.featuredImage ? <Image src={featuredHome.featuredImage} alt="Serenity house in Pakenham" fill priority sizes="(max-width: 760px) 100vw, 58vw" unoptimized={featuredHome.featuredImage.startsWith("http")} /> : null}
+          {(heroImage || featuredHome?.featuredImage) ? (
+            <Image
+              src={heroImage || featuredHome.featuredImage}
+              alt={heroImage ? heroAlt || "Serenity furnished homes in Pakenham" : "Serenity house in Pakenham"}
+              fill
+              priority
+              sizes="(max-width: 760px) 100vw, 58vw"
+              unoptimized={(heroImage || featuredHome.featuredImage).startsWith("http")}
+            />
+          ) : null}
           <span>Three private homes.<br />One point of contact.</span>
         </div>
         <div className="corporate-editorial-hero__copy">
@@ -290,7 +301,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
           <p>Furnished whole-home stays for project teams, contractors and relocating employees, managed locally from first enquiry to checkout.</p>
           <div className="corporate-editorial-links">
             <Link href="#corporate-question">Ask about a stay <ArrowUpRight size={17} aria-hidden="true" /></Link>
-            <Link href="#corporate-booking">Existing customer booking <ArrowUpRight size={17} aria-hidden="true" /></Link>
+            <Link href="#corporate-booking">Book a corporate stay <ArrowUpRight size={17} aria-hidden="true" /></Link>
           </div>
         </div>
       </section>
@@ -361,44 +372,35 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
           <div className="corporate-partner-direct">
             <div className="corporate-partner-direct__intro">
               <div>
-                <span className="corporate-partner-direct__eyebrow">Partner direct booking</span>
-                <h2>Already have a Partner ID?</h2>
-                <p>Enter the ID issued by Serenity to book directly for your organisation. Choose your houses and dates, then complete the corporate booking form below.</p>
-                <p className="corporate-partner-direct__note">Account-specific rates and invoicing arrangements are confirmed by Serenity separately.</p>
+                <span className="corporate-partner-direct__eyebrow">Partner booking</span>
+                <h2>Book for your team.</h2>
+                <p>Enter your Partner ID, choose your houses and dates, then pay securely to confirm your stay.</p>
+                <p className="corporate-partner-direct__note">Online corporate booking is available only to registered partners. Dates are confirmed after payment succeeds.</p>
               </div>
-              <button type="button" onClick={() => document.getElementById("corp-customer-id")?.focus()}>Enter Partner ID <ArrowUpRight size={19} aria-hidden="true" /></button>
+              <button type="button" onClick={() => document.getElementById("corp-customer-id")?.focus()}>Start booking <ArrowUpRight size={19} aria-hidden="true" /></button>
             </div>
             <ol className="corporate-partner-direct__steps" aria-label="Corporate booking steps">
-              <li><span>01</span> Enter Partner ID</li>
+              <li><span>01</span> Verify Partner ID</li>
               <li><span>02</span> Choose dates</li>
               <li><span>03</span> Select property</li>
-              <li><span>04</span> Confirm booking</li>
+              <li><span>04</span> Secure payment</li>
             </ol>
           </div>
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-16 items-start">
             <div className="lg:col-span-4 lg:sticky lg:top-32">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black block mb-4">Existing Customers</span>
-              <h2>Book with your Partner ID.</h2>
-              <p className="text-base text-stone-600 leading-relaxed mb-6 max-w-md">For organisations already issued an ID by Serenity. Check live availability, select your houses and complete the booking details here.</p>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black block mb-4">Partner booking</span>
+              <h2>Plan your corporate stay.</h2>
+              <p className="text-base text-stone-600 leading-relaxed mb-6 max-w-md">Have a Partner ID? Verify it here to check availability, select your houses, and pay securely. If you do not have an ID, send a corporate enquiry above.</p>
             </div>
             
             <div className="lg:col-span-8">
               <div className="corporate-form-surface">
-              {formSubmitted ? (
-                  <div className="flex min-h-[30rem] flex-col items-center justify-center text-center">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-none bg-[var(--hero-green)] text-white"><CheckCircle2 size={27} /></div>
-                  <h3 className="mt-5 text-2xl font-semibold tracking-[-0.04em]">Corporate stay reserved.</h3>
-                  <p className="mt-3 max-w-md text-sm leading-6 text-black">Thank you, {partnerCompany || "your team"}. The selected houses are now held together in the shared Serenity calendar.</p>
-                  {submittedReference && <p className="mt-4 border-y border-neutral-300 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-black">Reference {submittedReference}</p>}
-                  <button type="button" className="mt-7 border border-black px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] hover:bg-black hover:text-white" onClick={() => { setFormSubmitted(false); setSubmissionKey(""); setSubmittedReference(""); }}>Book another stay</button>
-                </div>
-              ) : (
                 <form onSubmit={handleBookingSubmit} className="mt-8 space-y-8">
                   <div className="space-y-5">
-                    <h4 className="text-xl text-stone-900 border-b border-stone-200 pb-3">1. Partner ID</h4>
+                    <h4 className="text-xl text-stone-900 border-b border-stone-200 pb-3">1. Verify Partner ID</h4>
                     <div className="corporate-customer-id">
                       <FormInput id="corp-customer-id" label="Partner ID *" required maxLength={24} value={formData.customerId} onChange={(event) => { partnerLookupVersion.current += 1; setPartnerChecking(false); setFormData({ ...formData, customerId: event.target.value.toUpperCase() }); setPartnerCompany(""); setPartnerLookupError(""); }} onBlur={() => void verifyPartner()} placeholder="SER-XXXXXXXXXXXX" />
-                      <p className="mt-2 text-xs leading-5 text-stone-600">Your company and billing details are saved by Serenity. You only need your Partner ID here.</p>
+                      <p className="mt-2 text-xs leading-5 text-stone-600">Enter the ID issued by Serenity. Your registered company details will load after verification.</p>
                       {partnerChecking && <p className="mt-2 text-sm text-stone-600" role="status">Checking Partner ID…</p>}
                       {partnerCompany && <p className="mt-2 text-sm font-semibold text-[#002844]" role="status">Connected to {partnerCompany}</p>}
                       {partnerLookupError && <p className="mt-2 text-sm text-red-700" role="alert">{partnerLookupError}</p>}
@@ -476,7 +478,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                     </div>
                     
                     <div className="grid gap-5 sm:grid-cols-3">
-                      <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor="corp-guests">Guests / employees *</label><select id="corp-guests" className="field bg-white text-sm font-medium" value={formData.guests} onChange={(event) => setFormData({ ...formData, guests: event.target.value })}><option value="1-3">1 - 3 guests</option><option value="4-7">4 - 7 guests</option><option value="8-14">8 - 14 guests</option><option value="15-21">15 - 21 guests</option></select></div>
+                      <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor="corp-guests">Guests / employees *</label><select id="corp-guests" className="field bg-white text-sm font-medium" value={formData.guests} onChange={(event) => setFormData({ ...formData, guests: event.target.value })}>{Array.from({ length: 21 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1} guest{index === 0 ? "" : "s"}</option>)}</select></div>
                       <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor="corp-houses">Houses needed *</label><select id="corp-houses" className="field bg-white text-sm font-medium" value={formData.housesNeeded} onChange={(event) => updateHouseCount(event.target.value)}><option value="1">1 house</option><option value="2">2 houses beside each other</option><option value="3">All 3 houses beside each other</option></select></div>
                       <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor="corp-purpose">Stay purpose</label><select id="corp-purpose" className="field bg-white text-sm font-medium" value={formData.purpose} onChange={(event) => setFormData({ ...formData, purpose: event.target.value })}><option>Contractor project crew</option><option>Employee relocation</option><option>Business travel</option><option>Training or event</option><option>Other</option></select></div>
                     </div>
@@ -522,7 +524,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                           <p className="corporate-editorial-serif text-lg text-stone-900">Indicative estimate</p>
                           <p className="mt-1 text-sm text-stone-600">{selectedProperties.length} house{selectedProperties.length === 1 ? "" : "s"} · {corporateNights} night{corporateNights === 1 ? "" : "s"}</p>
                         </div>
-                        <p className="text-2xl sm:text-3xl font-bold text-stone-900">{formatAud(estimatedCorporateTotal)} AUD</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-stone-900">{formatAud(estimatedCorporateTotal)}</p>
                       </div>
                     )}
                   </div>
@@ -535,12 +537,12 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                   <div className="pt-4 border-t border-stone-200">
                     {formError && <p className="mb-5 border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-800" role="alert" aria-live="polite">{formError}</p>}
                     <button type="submit" className="inline-flex w-full items-center justify-center gap-2 bg-[var(--hero-green)] text-white px-6 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] rounded-none transition-colors disabled:cursor-not-allowed disabled:opacity-60" disabled={formSubmitting || partnerChecking || !partnerCompany || !allSelectedAvailable || !directBookingEnabled}>
-                      {formSubmitting ? "Reserving…" : directBookingEnabled ? "Book corporate stay" : "Enquiry required"}<ArrowUpRight size={15} />
+                      {formSubmitting ? "Opening checkout…" : directBookingEnabled ? "Continue to secure payment" : "Enquiry required"}<ArrowUpRight size={15} />
                     </button>
+                    <p className="mt-3 text-xs text-stone-600">Prices are in AUD. Your booking is confirmed only after Stripe verifies successful payment.</p>
                     {!directBookingEnabled && selectedProperties.length > 0 && <p className="mt-4 text-xs leading-relaxed text-stone-600">The selected house rules require review before confirmation. Use the separate corporate enquiry form above and the Serenity team can help.</p>}
                   </div>
                 </form>
-              )}
               </div>
             </div>
           </div>

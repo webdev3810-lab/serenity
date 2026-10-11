@@ -1,6 +1,6 @@
 import { hashCalendarToken } from "@/src/lib/calendar/security";
 import { buildIcsCalendar, groupCalendarDates, ICS_UPLOAD_PREFIX } from "@/src/lib/calendar/ical";
-import { ACTIVE_BOOKING_STATUSES } from "@/src/lib/calendar/conflicts";
+import { PUBLISHED_BOOKING_STATUSES } from "@/src/lib/calendar/conflicts";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 import { todayIso } from "@/src/lib/booking";
 import { normalizeCalendarPropertySlug } from "@/src/lib/calendar/validation";
@@ -20,7 +20,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
 
   const startDate = todayIso();
   const [{ data: bookings, error: bookingError }, { data: importedEvents, error: eventError }] = await Promise.all([
-    supabase.from("bookings").select("id, check_in, checkout").eq("property_id", property.id).in("booking_status", [...ACTIVE_BOOKING_STATUSES]).gte("checkout", startDate),
+    supabase.from("bookings").select("id, check_in, checkout").eq("property_id", property.id).in("booking_status", [...PUBLISHED_BOOKING_STATUSES]).gte("checkout", startDate),
     supabase.from("calendar_events").select("id, external_event_id, source_platform, start_date, end_date, summary").eq("property_id", property.id).eq("status", "active").eq("is_blocking", true).gte("end_date", startDate),
   ]);
   if (bookingError || eventError) return NextResponse.json({ error: "Calendar unavailable." }, { status: 500 });

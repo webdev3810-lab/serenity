@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isSupabaseConfigured } from "@/src/lib/supabase/config";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
-import { notifyContactMessage } from "@/src/lib/transactionalEmail";
+import { acknowledgeContactMessage, notifyContactMessage } from "@/src/lib/transactionalEmail";
 
 const messageReference = () => `MSG-${new Date().getUTCFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 
@@ -57,11 +57,12 @@ export async function POST(request: Request) {
       throw error;
     }
 
-    try {
-      await notifyContactMessage({ id: data.id, reference: data.reference, name: `${firstName} ${lastName}`, email, phone, projectType, preferredHouse, message });
-    } catch (notificationError) {
-      console.error("Contact notification failed", notificationError);
-    }
+    const deliveries = await Promise.allSettled([
+      notifyContactMessage({ id: data.id, reference: data.reference, name: `${firstName} ${lastName}`, email, phone, projectType, preferredHouse, message }),
+      acknowledgeContactMessage({ id: data.id, reference: data.reference, firstName, email }),
+    ]);
+    if (deliveries[0].status === "rejected") console.error("Contact admin notification failed", deliveries[0].reason);
+    if (deliveries[1].status === "rejected") console.error("Contact guest confirmation failed", deliveries[1].reason);
     return NextResponse.json({ configured: true, contactMessage: data }, { status: 201 });
   } catch (error) {
     console.error("Contact message persistence failed", error);

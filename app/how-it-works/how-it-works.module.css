@@ -129,7 +129,8 @@
 }
 
 .steps {
-  margin: 0;
+  max-width: 94rem;
+  margin: 0 auto;
   padding: 0;
   list-style: none;
   border-top: 1px solid rgba(0, 40, 68, 0.25);
@@ -137,31 +138,31 @@
 
 .step {
   display: grid;
-  grid-template-columns: minmax(4.5rem, 0.25fr) minmax(0, 1fr) minmax(16rem, 0.85fr);
-  gap: clamp(1rem, 3vw, 3rem);
+  grid-template-columns: 3.5rem minmax(0, 1.2fr) minmax(16rem, 0.9fr);
+  gap: clamp(1rem, 2vw, 2rem);
   align-items: center;
-  padding: clamp(1.5rem, 2.8vw, 2.5rem) 0;
+  padding: clamp(1rem, 1.65vw, 1.6rem) 0;
   border-bottom: 1px solid rgba(0, 40, 68, 0.25);
 }
 
 .stepNumber {
   color: #9a804c;
   font-family: var(--serif);
-  font-size: clamp(2rem, 3.2vw, 3.5rem);
+  font-size: clamp(1.7rem, 2.3vw, 2.35rem);
   line-height: 1;
 }
 
 .stepHeading {
   display: flex;
   align-items: center;
-  gap: clamp(0.8rem, 2vw, 1.5rem);
+  gap: clamp(0.75rem, 1.3vw, 1.1rem);
 }
 
 .stepIcon {
   display: grid;
   flex: 0 0 auto;
-  width: 3.25rem;
-  height: 3.25rem;
+  width: 2.7rem;
+  height: 2.7rem;
   place-items: center;
   border: 1px solid rgba(0, 40, 68, 0.22);
   border-radius: 50%;
@@ -171,7 +172,7 @@
 .step h3 {
   margin: 0;
   font-family: var(--serif);
-  font-size: clamp(1.55rem, 2.2vw, 2.5rem);
+  font-size: clamp(1.4rem, 1.8vw, 1.95rem);
   font-weight: 400;
   letter-spacing: -0.04em;
   line-height: 1.08;
@@ -181,8 +182,8 @@
   max-width: 28rem;
   margin: 0;
   color: #425663;
-  font-size: clamp(0.93rem, 1vw, 1.08rem);
-  line-height: 1.6;
+  font-size: clamp(0.88rem, 0.9vw, 1rem);
+  line-height: 1.5;
 }
 
 .closing {
@@ -323,5 +324,139 @@
 
   .step h3 {
     font-size: 1.55rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 1.35rem 1.25rem 2.4rem;
+  }
+
+  .heroTopline {
+    padding-bottom: 0.85rem;
+    font-size: 0.63rem;
+  }
+
+  .heroGrid {
+    gap: 1.4rem;
+    padding-top: 2.5rem;
+  }
+
+  .eyebrow,
+  .sectionLabel {
+    font-size: 0.63rem;
+    line-height: 1.4;
+  }
+
+  .hero h1 {
+    margin-top: 0.8rem;
+    font-size: clamp(3rem, 12vw, 4rem);
+    line-height: 0.96;
+  }
+
+  .heroIntro p {
+    font-size: clamp(1.08rem, 4.7vw, 1.25rem);
+    line-height: 1.38;
+  }
+
+  .heroLinks {
+    display: grid;
+    gap: 0;
+    margin-top: 1.4rem;
+  }
+
+  .heroLinks a {
+    justify-content: space-between;
+    min-height: 2.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 0;
+    padding: 0.7rem 0;
+    font-size: 0.82rem;
+  }
+
+  .heroLinks a:last-child {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .process {
+    padding: 2.8rem 1.25rem 3rem;
+  }
+
+  .sectionIntro {
+    gap: 0.8rem;
+    padding-bottom: 1.7rem;
+  }
+
+  .sectionLabel {
+    padding-top: 0;
+  }
+
+  .sectionIntro h2 {
+    max-width: 18ch;
+    font-size: clamp(2.25rem, 9vw, 3rem);
+    line-height: 1.03;
+  }
+
+  .step {
+    grid-template-columns: 2.35rem minmax(0, 1fr);
+    gap: 0.3rem 0.65rem;
+    padding: 1.15rem 0;
+  }
+
+  .stepNumber {
+    font-size: 1.55rem;
+  }
+
+  .stepHeading {
+    gap: 0.65rem;
+  }
+
+  .stepIcon {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .stepIcon svg {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  .step h3 {
+    font-size: clamp(1.15rem, 4.8vw, 1.4rem);
+    line-height: 1.12;
+  }
+
+  .step > p {
+    font-size: 0.84rem;
+    line-height: 1.45;
+  }
+
+  .closing {
+    min-height: 0;
+    margin-bottom: 2rem;
+  }
+
+  .closingMedia {
+    min-height: clamp(12rem, 55vw, 16rem);
+  }
+
+  .closingCopy {
+    padding: 1.75rem 1.25rem 2rem;
+  }
+
+  .closingCopy h2 {
+    margin: 0.8rem 0 1rem;
+    font-size: clamp(2.5rem, 10vw, 3.25rem);
+  }
+
+  .closingCopy > p:not(.eyebrow) {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .closingCopy a {
+    min-height: 2.75rem;
+    margin-top: 1.4rem;
+    padding: 0.7rem 1.1rem;
   }
 }

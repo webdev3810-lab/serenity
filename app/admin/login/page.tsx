@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/src/lib/supabase/client";
 import { AdminThemeToggle, useAdminTheme } from "@/src/components/AdminTheme";
 import { BrandWordmark } from "@/src/components/BrandWordmark";
+import { AdminPasswordField } from "@/src/components/admin/AdminPasswordField";
 
 type Mode = "login" | "forgot" | "register";
 
@@ -44,8 +45,12 @@ export default function AdminLoginPage() {
     setLoading(true);
     try {
       if (mode === "forgot") {
-        const supabase = createSupabaseBrowserClient();
-        await supabase.auth.resetPasswordForEmail(trimmedEmail, { redirectTo: `${window.location.origin}/admin/reset-password` });
+        const response = await fetch("/api/admin/password-recovery", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: trimmedEmail }),
+        });
+        if (!response.ok) throw new Error("Recovery email is temporarily unavailable. Please try again later.");
         setMessage("If an admin account uses that email, recovery instructions have been sent.");
       } else if (mode === "register") {
         const response = await fetch("/api/admin/bootstrap", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: trimmedEmail, password }) });
@@ -79,8 +84,8 @@ export default function AdminLoginPage() {
         {hasAdmin === null && !statusError && <p className="mt-4 text-sm text-[var(--admin-muted)]">Checking admin setup…</p>}
         <div className="mt-6 space-y-4">
           <label className="block text-sm font-medium text-[var(--admin-text)]">Email<input className="admin-field mt-1" type="email" autoComplete="email" required value={email} onChange={(event) => setEmail(event.target.value)} /></label>
-          {mode !== "forgot" && <label className="block text-sm font-medium text-[var(--admin-text)]">Password<input className="admin-field mt-1" type="password" minLength={8} autoComplete={mode === "register" ? "new-password" : "current-password"} required value={password} onChange={(event) => setPassword(event.target.value)} /></label>}
-          {mode === "register" && <label className="block text-sm font-medium text-[var(--admin-text)]">Confirm password<input className="admin-field mt-1" type="password" minLength={8} autoComplete="new-password" required value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} /></label>}
+          {mode !== "forgot" && <AdminPasswordField label="Password" value={password} onChange={setPassword} autoComplete={mode === "register" ? "new-password" : "current-password"} />}
+          {mode === "register" && <AdminPasswordField label="Confirm password" value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" />}
           {(message || resetMessage) && <p className="rounded-xl border border-[var(--admin-success-border)] bg-[var(--admin-success-bg)] p-3 text-sm font-semibold text-[var(--admin-success-text)]" role="status">{message || resetMessage}</p>}
           {error && <p role="alert" className="rounded-xl border border-[var(--admin-danger-border)] bg-[var(--admin-danger-bg)] p-3 text-sm font-semibold text-[var(--admin-danger-text)]">{error}</p>}
           <button className="admin-button admin-button-primary w-full justify-center" disabled={loading}>{loading ? "Please wait…" : mode === "login" ? "Sign in" : mode === "forgot" ? "Send recovery email" : "Create first admin account"}</button>

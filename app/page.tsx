@@ -1,12 +1,11 @@
 import SerenityEditorialHome, {
-  type SerenityEditorialGalleryImage,
   type SerenityEditorialHouse,
   type SerenityEditorialPreviewImage,
 } from "@/src/components/homepage/SerenityEditorialHome";
 import { getHomepageContent, getHomepageHeroMedia, getPublicProperties } from "@/src/lib/supabase/content";
 import { lodgingBusinessJsonLd, pageMetadata } from "@/src/lib/seo";
 import { isApprovedHomepageMediaSource } from "@/src/lib/homepageMedia";
-import { defaultHomepageFaqs } from "@/src/data/homepageFaqs";
+import { normalizeEditorialHomepageContent } from "@/src/lib/homepageEditorialContent";
 
 export const metadata = pageMetadata("Serenity on the Rocks");
 export const dynamic = "force-dynamic";
@@ -19,21 +18,7 @@ export default async function Home() {
     getHomepageHeroMedia(),
     getHomepageContent(),
   ]);
-  const faqEntries = Array.isArray(homepageContent?.faqs) ? homepageContent.faqs : defaultHomepageFaqs;
-  const faqs = faqEntries.flatMap((entry) => {
-    if (!entry || typeof entry !== "object") return [];
-    const faq = entry as { question?: unknown; answer?: unknown };
-    if (typeof faq.question !== "string" || typeof faq.answer !== "string") return [];
-    const question = faq.question.trim();
-    const answer = faq.answer.trim();
-    return question && answer ? [{ question, answer }] : [];
-  });
-  const faqHeading = typeof homepageContent?.faq_heading === "string"
-    ? homepageContent.faq_heading
-    : "Good to know before arrival.";
-  const faqDescription = typeof homepageContent?.faq_description === "string"
-    ? homepageContent.faq_description
-    : "Clear answers for families, business travellers, contractors, and longer-stay guests.";
+  const editorialContent = normalizeEditorialHomepageContent(homepageContent);
   const featuredProperties = properties.filter((property) => property.featured);
   const homepageProperties = (featuredProperties.length ? featuredProperties : properties).slice(0, 3);
 
@@ -64,11 +49,6 @@ export default async function Home() {
     : heroHouse
       ? { src: heroHouse.image, alt: heroHouse.imageAlt }
       : undefined;
-  const gallery: SerenityEditorialGalleryImage[] = houses.map((house) => ({
-    src: house.image,
-    alt: house.imageAlt,
-    label: house.name,
-  }));
   const photoPreviews: SerenityEditorialPreviewImage[] = homepageProperties.flatMap((property) => {
     const propertyName = displayName(property.name);
     const imagesBySource = new Map(
@@ -92,15 +72,6 @@ export default async function Home() {
       photoNumber: index + 1,
     }));
   });
-  const locationProperty = houses.at(-1);
-  if (locationProperty?.image) {
-    gallery.push({
-      src: locationProperty.image,
-      alt: `${locationProperty.name} exterior in Pakenham`,
-      label: locationProperty.name,
-    });
-  }
-
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd) }} />
@@ -108,11 +79,8 @@ export default async function Home() {
         heroImage={heroImage?.src || ""}
         heroAlt={heroImage?.alt || "Serenity on the Rocks furnished interior"}
         houses={houses}
-        gallery={gallery}
         photoPreviews={photoPreviews}
-        faqHeading={faqHeading}
-        faqDescription={faqDescription}
-        faqs={faqs.length ? faqs : defaultHomepageFaqs}
+        content={editorialContent}
       />
     </>
   );

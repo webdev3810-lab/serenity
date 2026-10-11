@@ -8,6 +8,7 @@ import { CheckCircle2, CreditCard, Loader2, Printer, ShieldCheck, Lock } from "l
 import type { Property } from "@/src/data/properties";
 import { useBooking } from "@/src/context/BookingContext";
 import { calculatePrice, formatAud, formatDateAu, nightsBetween, reservationCode } from "@/src/lib/booking";
+import { receiptCode } from "@/src/lib/paymentReceipt";
 import { FormInput, TextArea } from "@/src/components/UI";
 import { PriceBreakdownView } from "@/src/components/BookingWidgets";
 import ScrollWipeText from "@/src/components/homepage/ScrollWipeText";
@@ -120,7 +121,6 @@ export function GuestDetailsPage() {
   const router = useRouter();
   const { booking, setBooking } = useBooking();
   const property = useCurrentProperty();
-  const [corporate, setCorporate] = useState(Boolean(booking.guestDetails?.corporate));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState<Record<string, string>>({
     firstName: "", lastName: "", email: "", phone: "", country: "Australia", address: "", city: "", state: "", postcode: "", arrival: "", purpose: "Holiday", requests: "",
@@ -137,10 +137,9 @@ export function GuestDetailsPage() {
     const required = ["firstName", "lastName", "email", "phone", "country", "address", "city", "state", "postcode", "arrival", "purpose"];
     const nextErrors = Object.fromEntries(required.filter((key) => !form[key]).map((key) => [key, "Required"]));
     if (!form.email.includes("@")) nextErrors.email = "Enter a valid email address.";
-    if (corporate) ["companyName", "businessContact", "businessEmail", "businessPhone", "billingAddress"].forEach((key) => { if (!form[key]) nextErrors[key] = "Required for corporate bookings"; });
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
-    setBooking({ guestDetails: { ...form, corporate } });
+    setBooking({ guestDetails: { ...form, corporate: false } });
     router.push("/booking/payment");
   };
 
@@ -170,22 +169,8 @@ export function GuestDetailsPage() {
           <TextArea id="requests" label="Special Requests or Notes" value={form.requests} onChange={(e) => update("requests", e.target.value)} />
         </div>
 
-        <div className="rounded-none border border-stone-200 bg-white p-5 space-y-4">
-          <label className="flex items-center gap-3 font-bold text-sm text-stone-900 cursor-pointer">
-            <input type="checkbox" checked={corporate} onChange={(e) => setCorporate(e.target.checked)} className="accent-[#7A4E2D] w-4 h-4" />
-            Is a company paying for this stay? (Corporate / Tax Invoice)
-          </label>
-
-          {corporate && (
-            <div className="grid gap-4 border-t border-stone-200 pt-4 md:grid-cols-2">
-              {["companyName", "businessContact", "businessEmail", "businessPhone", "billingAddress", "abn", "po", "employees"].map((key) => (
-                <FormInput key={key} id={key} label={labelize(key)} value={form[key]} error={errors[key]} onChange={(e) => update(key, e.target.value)} />
-              ))}
-              <p className="md:col-span-2 rounded-none bg-[#FAF5EF] border border-[#EADCCF] p-3 text-xs text-[#7A4E2D] font-medium">
-                Note: Serenity can issue an Australian Tax Invoice (GST) and support multi-house bookings for teams staying at Serenity 7, 9, or 11.
-              </p>
-            </div>
-          )}
+        <div className="rounded-none border border-stone-200 bg-white p-5 text-sm text-stone-700">
+          Booking for a company? Corporate reservations require a Partner ID. <Link href="/corporate-stays#corporate-booking" className="font-semibold underline text-[#002844]">Book a corporate stay</Link> or send an enquiry to request an ID.
         </div>
 
         <button type="submit" className="btn-primary w-full justify-center text-base">
@@ -219,7 +204,7 @@ export function PaymentPage() {
 
   if (!property || !booking.checkIn || !booking.checkout || !booking.guestDetails) return <MissingBooking />;
 
-  const price = calculatePrice(property, booking.checkIn, booking.checkout, booking.guests, booking.guestDetails?.corporate === true);
+  const price = calculatePrice(property, booking.checkIn, booking.checkout, booking.guests, false);
 
   const pay = async () => {
     setError("");
@@ -228,7 +213,7 @@ export function PaymentPage() {
       const response = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ propertySlug: property.slug, checkIn: booking.checkIn, checkout: booking.checkout, guests: booking.guests, guestDetails: booking.guestDetails, corporateDetails: booking.guestDetails, notes: booking.guestDetails?.requests }),
+        body: JSON.stringify({ propertySlug: property.slug, checkIn: booking.checkIn, checkout: booking.checkout, guests: booking.guests, guestDetails: { ...booking.guestDetails, corporate: false }, notes: booking.guestDetails?.requests }),
       });
       const result = await response.json();
       if (!response.ok || !result.checkoutUrl) throw new Error(result.error || "Could not start secure checkout.");
@@ -267,7 +252,7 @@ export function PaymentPage() {
           {error && <p className="text-sm font-semibold text-red-700 bg-red-50 p-3 rounded-none border border-red-200" role="alert">{error}</p>}
 
           <button type="button" className="btn-primary w-full justify-center text-base" onClick={pay} disabled={processing}>
-            {processing ? <Loader2 className="animate-spin" size={18} /> : <CreditCard size={18} />} Continue to Stripe · {formatAud(price.total)} AUD
+            {processing ? <Loader2 className="animate-spin" size={18} /> : <CreditCard size={18} />} Continue to Stripe · {formatAud(price.total)}
           </button>
         </section>
 
@@ -291,27 +276,29 @@ export function ConfirmationPage() {
   const { booking, setBooking } = useBooking();
   const property = useCurrentProperty();
   const verificationStarted = useRef(false);
-  const [verification, setVerification] = useState<"checking" | "paid" | "error">(booking.paymentStatus === "paid" ? "paid" : "checking");
+  const [verification, setVerification] = useState<"checking" | "paid" | "error">("checking");
   const [verificationError, setVerificationError] = useState("");
+  const [verifiedReference, setVerifiedReference] = useState("");
+  const [verifiedTotal, setVerifiedTotal] = useState<number | null>(null);
 
   useEffect(() => {
     if (verificationStarted.current) return;
     verificationStarted.current = true;
     const sessionId = new URLSearchParams(window.location.search).get("session_id");
     if (!sessionId) {
-      const missingSessionTimer = window.setTimeout(() => {
-        if (booking.paymentStatus !== "paid") {
-          setVerificationError("This confirmation is missing its Stripe payment session. Please return to payment and try again.");
-          setVerification("error");
-        }
-      }, 0);
-      return () => window.clearTimeout(missingSessionTimer);
+      void Promise.resolve().then(() => {
+        setVerificationError("This confirmation is missing its Stripe payment session. Please return to payment and try again.");
+        setVerification("error");
+      });
+      return;
     }
 
-    void fetch(`/api/stripe/session?session_id=${encodeURIComponent(sessionId)}`)
+    void fetch(`/api/stripe/session?session_id=${encodeURIComponent(sessionId)}`, { cache: "no-store" })
       .then(async (response) => {
         const result = await response.json();
-        if (!response.ok || !result.paid) throw new Error(result.error || "Payment could not be verified.");
+        if (!response.ok || !result.paid || typeof result.booking?.reference !== "string") throw new Error(result.error || "Payment could not be verified.");
+        setVerifiedReference(result.booking.reference);
+        setVerifiedTotal(Number.isFinite(Number(result.booking.total)) ? Number(result.booking.total) : null);
         setBooking({ paymentStatus: "paid", reservationReference: result.booking?.reference });
         setVerification("paid");
       })
@@ -319,12 +306,12 @@ export function ConfirmationPage() {
         setVerificationError(error instanceof Error ? error.message : "We could not verify this payment yet.");
         setVerification("error");
       });
-  }, [booking.paymentStatus, setBooking]);
+  }, [setBooking]);
 
   if (!property || !booking.checkIn || !booking.checkout) return <MissingBooking />;
 
   const price = calculatePrice(property, booking.checkIn, booking.checkout, booking.guests);
-  const reference = booking.reservationReference ?? reservationCode(property.slug);
+  const reference = verifiedReference;
 
   if (verification === "checking") {
     return (
@@ -360,16 +347,17 @@ export function ConfirmationPage() {
         <div>
           <span className="eyebrow">Reservation Confirmed</span>
         <ScrollWipeText as="h1" className="text-4xl font-extrabold text-stone-900 mt-1">Booking Confirmation #{reference}</ScrollWipeText>
-          <p className="text-xs text-stone-500 mt-1">A confirmation receipt has been generated for your record.</p>
+          <p className="text-xs text-stone-500 mt-1">Keep your receipt code as proof of the confirmed booking and payment.</p>
         </div>
 
         <div className="grid gap-4 text-left sm:grid-cols-2 bg-white p-5 rounded-none border border-stone-200">
           <Info label="Property" value={property.name} />
           <Info label="Dates" value={`${formatDateAu(booking.checkIn)} to ${formatDateAu(booking.checkout)}`} />
           <Info label="Guests" value={`${booking.guests.adults + booking.guests.children} guests, ${booking.guests.pets} pets`} />
-          <Info label="Total Paid" value={`${formatAud(price.total)} AUD`} />
+          <Info label="Total Paid" value={formatAud(verifiedTotal ?? price.total)} />
           <Info label="Guest Name" value={`${booking.guestDetails?.firstName ?? "Guest"} ${booking.guestDetails?.lastName ?? ""}`} />
           <Info label="Reservation Ref" value={reference} />
+          <Info label="Receipt Code" value={receiptCode(reference)} />
         </div>
 
         <div className="rounded-none bg-stone-900 text-white p-4 text-left text-xs space-y-1">

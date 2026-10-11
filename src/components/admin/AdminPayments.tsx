@@ -41,7 +41,7 @@ type PaymentData = {
   bookings: PaymentBooking[];
 };
 
-const money = (amount: number) => new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(amount);
+const money = (amount: number) => `AUD ${new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD" }).format(amount)}`;
 const dateTime = (value: string) => new Intl.DateTimeFormat("en-AU", { dateStyle: "medium", timeStyle: "short", timeZone: "Australia/Melbourne" }).format(new Date(value));
 const paymentUrl = (id: string, live: boolean) => `https://dashboard.stripe.com/${live ? "" : "test/"}payments/${encodeURIComponent(id)}`;
 const eventUrl = (id: string, live: boolean) => `https://dashboard.stripe.com/${live ? "" : "test/"}events/${encodeURIComponent(id)}`;

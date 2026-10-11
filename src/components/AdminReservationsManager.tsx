@@ -1,15 +1,17 @@
 "use client";
 
-import { addDays,todayIso } from "@/src/lib/booking";
-import { CalendarDays,ChevronLeft,ChevronRight,Plus,Save,Search,X } from "lucide-react";
+import { addDays,formatAud } from "@/src/lib/booking";
+import { ArrowDown,ArrowUp,ArrowUpDown,ChevronRight,Search,X } from "lucide-react";
 import { useMemo,useState } from "react";
 
-import { AdminBadge,AdminDialog,useAdminPagination,useAdminWorkspace,useDirtyGuard } from "@/src/components/admin/AdminUI";
+import { AdminBadge,AdminDialog,useAdminPagination } from "@/src/components/admin/AdminUI";
 import { statusPresentation } from "@/src/lib/admin-status";
+import { CALENDAR_PLATFORM_LABELS,CALENDAR_PLATFORMS,type CalendarPlatform } from "@/src/lib/calendar/types";
 type Row = Record<string, unknown>;
 type PropertyRow = Row & { id?: string; name?: string; slug?: string };
 type ReservationKind = "booking" | "block" | "enquiry";
 type BookingCategory = "standard" | "corporate";
+type BookingView = "all" | BookingCategory | CalendarPlatform;
 type ReservationItem = {
   id: string;
   kind: ReservationKind;
@@ -31,13 +33,8 @@ type Props = {
   bookings: Row[];
   enquiries: Row[];
   calendarEvents: Row[];
+  calendarConnections: Row[];
   properties: PropertyRow[];
-  reload: () => Promise<void>;
-  notify: (message: string) => void;
-  onError: (message: string) => void;
-  convertEnquiry: (enquiry: Row) => void;
-  updateEnquiryStatus: (enquiry: Row, status: string) => void;
-  openCalendar: () => void;
 };
 
 
@@ -45,6 +42,7 @@ const asObject = (value: unknown): Row => value && typeof value === "object" && 
 const asStringArray = (value: unknown) => Array.isArray(value) ? value.map(String) : [];
 const cleanLabel = (value: string) => value.replaceAll("_", " ");
 const formatDate = (value: string) => value ? new Intl.DateTimeFormat("en-AU", { dateStyle: "medium", timeZone: "Australia/Melbourne" }).format(new Date(`${value}T00:00:00Z`)) : "—";
+const formatSheetDate = (value: string) => value ? new Intl.DateTimeFormat("en-AU", { day: "2-digit", month: "short", year: "numeric", timeZone: "Australia/Melbourne" }).format(new Date(`${value}T00:00:00Z`)) : "—";
 const isTruthy = (value: unknown) => value === true || String(value ?? "").toLowerCase() === "true";
 const getBookingCategory = (booking: Row): BookingCategory => {
   const corporateDetails = asObject(booking.corporate_details);
@@ -61,9 +59,8 @@ const getBookingCategory = (booking: Row): BookingCategory => {
 };
 
 
-export default function AdminReservationsManager({ bookings, enquiries, calendarEvents, properties, reload, notify, onError, convertEnquiry, updateEnquiryStatus, openCalendar }: Props) {
-  const [view, setView] = useState<"list" | "calendar">("list");
-  const [bookingView, setBookingView] = useState<"all" | BookingCategory>("all");
+export default function AdminReservationsManager({ bookings, enquiries, calendarEvents, calendarConnections, properties }: Props) {
+  const [requestedBookingView, setBookingView] = useState<BookingView>("all");
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("all");
   const [type, setType] = useState("all");
@@ -73,23 +70,22 @@ export default function AdminReservationsManager({ bookings, enquiries, calendar
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [selected, setSelected] = useState<ReservationItem | null>(null);
-  const [showCreate, setShowCreate] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [dialogError, setDialogError] = useState("");
-  const [monthOffset, setMonthOffset] = useState(0);
-  const [manual, setManual] = useState({ propertyId: properties[0]?.id ?? "", checkIn: "", checkout: "", contactName: "", email: "", phone: "", companyName: "", adults: "1", children: "0", infants: "0", pets: "0", corporate: false, paymentStatus: "pending", internalNotes: "" });
+  const connectedPlatforms = CALENDAR_PLATFORMS.filter((platform) => calendarConnections.some((connection) => String(connection.platform).toLowerCase() === platform && connection.connection_type === "import" && isTruthy(connection.is_enabled)));
+  const bookingView = CALENDAR_PLATFORMS.some((platform) => platform === requestedBookingView) && !connectedPlatforms.some((platform) => platform === requestedBookingView) ? "all" : requestedBookingView;
+  const selectedPlatform = connectedPlatforms.find((platform) => platform === bookingView);
 
   const propertyMap = useMemo(() => new Map(properties.map((property) => [String(property.id), String(property.name ?? property.slug ?? "House")])), [properties]);
   const items = useMemo<ReservationItem[]>(() => {
     const bookingItems = bookings.map((booking): ReservationItem => {
       const guest = asObject(booking.guest_details);
+      const guestName = [guest.companyName, guest.contactName, [guest.firstName, guest.lastName].filter(Boolean).join(" "), guest.email].map((value) => String(value ?? "").trim()).find(Boolean) ?? "Guest booking";
       const property = String(booking.property_id ?? "");
       const category = getBookingCategory(booking);
       return {
         id: String(booking.id), kind: "booking", reference: String(booking.reference ?? ""), propertyIds: [property], propertyLabel: propertyMap.get(property) ?? "House",
         start: String(booking.check_in ?? ""), end: String(booking.checkout ?? ""), type: String(booking.booking_type ?? (category === "corporate" ? "corporate" : "standard")), bookingCategory: category,
         source: String(booking.booking_source ?? "website"), status: String(booking.booking_status ?? "pending_payment"), payment: String(booking.payment_status ?? "pending"),
-        title: String(guest.companyName ?? guest.contactName ?? guest.firstName ?? guest.email ?? "Guest booking"), raw: booking,
+        title: guestName, raw: booking,
       };
     });
     const blockItems = calendarEvents.filter((event) => event.status === "active").map((event): ReservationItem => {
@@ -127,117 +123,115 @@ export default function AdminReservationsManager({ bookings, enquiries, calendar
     all: filteredBeforeBookingView.length,
     standard: filteredBeforeBookingView.filter((item) => item.kind === "booking" && item.bookingCategory === "standard").length,
     corporate: filteredBeforeBookingView.filter((item) => item.kind === "booking" && item.bookingCategory === "corporate").length,
+    airbnb: filteredBeforeBookingView.filter((item) => item.kind === "block" && item.source.toLowerCase() === "airbnb").length,
+    vrbo: filteredBeforeBookingView.filter((item) => item.kind === "block" && item.source.toLowerCase() === "vrbo").length,
+    stayz: filteredBeforeBookingView.filter((item) => item.kind === "block" && item.source.toLowerCase() === "stayz").length,
   };
-  const filtered = filteredBeforeBookingView.filter((item) => bookingView === "all" || (item.kind === "booking" && item.bookingCategory === bookingView));
-
-  const updateBooking = async (bookingId: string, changes: Row) => {
-    setBusy(true); onError(""); setDialogError("");
-    try {
-      const response = await fetch(`/api/admin/bookings/${bookingId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(changes) });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Could not update booking.");
-      notify("Booking updated in the shared calendar.");
-      setSelected(null);
-      await reload();
-    } catch (error) { setDialogError(error instanceof Error ? error.message : "Could not update booking."); }
-    finally { setBusy(false); }
-  };
-
-  const createBooking = async (event: React.FormEvent) => {
-    event.preventDefault(); setBusy(true); onError(""); setDialogError("");
-    try {
-      const response = await fetch("/api/admin/bookings", {
-        method: "POST", headers: { "Content-Type": "application/json", "Idempotency-Key": `admin:${crypto.randomUUID()}` },
-        body: JSON.stringify({ ...manual, guests: { adults: Number(manual.adults), children: Number(manual.children), infants: Number(manual.infants), pets: Number(manual.pets) } }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Could not create booking.");
-      notify("Manual booking created and dates blocked everywhere.");
-      setShowCreate(false);
-      setManual((current) => ({ ...current, checkIn: "", checkout: "", contactName: "", email: "", phone: "", companyName: "", internalNotes: "" }));
-      await reload();
-    } catch (error) { setDialogError(error instanceof Error ? error.message : "Could not create booking."); }
-    finally { setBusy(false); }
-  };
+  const filtered = filteredBeforeBookingView.filter((item) => bookingView === "all" || (bookingView === "standard" || bookingView === "corporate" ? item.kind === "booking" && item.bookingCategory === bookingView : item.kind === "block" && item.source.toLowerCase() === bookingView));
+  const hasActiveFilters = Boolean(query || propertyId !== "all" || type !== "all" || source !== "all" || status !== "all" || payment !== "all" || fromDate || toDate || bookingView !== "all");
 
   return <>
-    <header className="admin-page-header">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-      <div><p className="admin-section-kicker">Reservations</p><h2 className="mt-2">Shared booking workspace</h2><p className="mt-2 max-w-2xl text-sm text-[var(--admin-muted)]">Website bookings, corporate reservations, enquiries, manual blocks, and connected calendars in one operational view.</p></div>
-      <div className="flex flex-wrap gap-2"><button type="button" className="admin-button" onClick={openCalendar}><CalendarDays size={16} /> Manage blocks & sync</button><button type="button" className="admin-button admin-button-primary" onClick={() => { setDialogError(""); setShowCreate(true); }}><Plus size={16} /> New manual booking</button></div>
-      </div>
+    <header className="admin-page-header admin-bookings-header">
+      <div><p className="admin-section-kicker">Reservations</p><h2>Bookings &amp; reservations</h2><p>View direct and corporate stays, enquiries, and calendar blocks. Create and manage reservations in Calendar.</p></div>
     </header>
 
-    <div className="admin-filter-panel mb-5 grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-4">
-      <label className="relative xl:col-span-2"><span className="sr-only">Search reservations</span><Search className="admin-search-icon" size={18} /><input className="admin-field admin-search-input" aria-label="Search guest, company, reference, or house" placeholder="Search guest, company, reference, or house" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
-      <select className="admin-field" aria-label="Filter by house" value={propertyId} onChange={(event) => setPropertyId(event.target.value)}><option value="all">All houses</option>{properties.map((property) => <option key={String(property.id)} value={String(property.id)}>{String(property.name)}</option>)}</select>
-      <select className="admin-field" aria-label="Filter by type" value={type} onChange={(event) => setType(event.target.value)}><option value="all">All types</option>{Array.from(new Set(items.map((item) => item.type))).map((value) => <option key={value} value={value}>{statusPresentation("source", value).label}</option>)}</select>
-      <select className="admin-field" aria-label="Filter by source" value={source} onChange={(event) => setSource(event.target.value)}><option value="all">All sources</option>{Array.from(new Set(items.map((item) => item.source))).map((value) => <option key={value} value={value}>{statusPresentation("source", value).label}</option>)}</select>
-      <select className="admin-field" aria-label="Filter by status" value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">All statuses</option>{Array.from(new Set(items.map((item) => item.status))).map((value) => <option key={value} value={value}>{statusPresentation("source", value).label}</option>)}</select>
-      <select className="admin-field" aria-label="Filter by payment" value={payment} onChange={(event) => setPayment(event.target.value)}><option value="all">All payments</option>{Array.from(new Set(items.map((item) => item.payment))).map((value) => <option key={value} value={value}>{statusPresentation("source", value).label}</option>)}</select>
-      <div className="grid grid-cols-2 gap-2"><input className="admin-field" aria-label="From date" type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} /><input className="admin-field" aria-label="To date" type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} /></div>
-      <button type="button" className="admin-button" onClick={() => { setQuery(""); setPropertyId("all"); setType("all"); setSource("all"); setStatus("all"); setPayment("all"); setFromDate(""); setToDate(""); setBookingView("all"); }}>Reset filters</button>
-    </div>
+    <section className="admin-filter-panel admin-booking-filters" aria-label="Filter reservations">
+      <div className="admin-booking-filters-heading"><div><h3>Find a reservation</h3><p>{filtered.length} matching {filtered.length === 1 ? "record" : "records"}</p></div><button type="button" className="admin-booking-clear" disabled={!hasActiveFilters} onClick={() => { setQuery(""); setPropertyId("all"); setType("all"); setSource("all"); setStatus("all"); setPayment("all"); setFromDate(""); setToDate(""); setBookingView("all"); }}>Clear filters</button></div>
+      <div className="admin-booking-filters-grid">
+        <label className="admin-booking-filter is-search"><span>Search</span><div className="admin-booking-search"><Search size={17} aria-hidden="true" /><input className="admin-field" aria-label="Search guest, company, reference, or house" placeholder="Name, reference or house" value={query} onChange={(event) => setQuery(event.target.value)} /></div></label>
+        <label className="admin-booking-filter is-house"><span>House</span><select className="admin-field" aria-label="Filter by house" value={propertyId} onChange={(event) => setPropertyId(event.target.value)}><option value="all">All houses</option>{properties.map((property) => <option key={String(property.id)} value={String(property.id)}>{String(property.name)}</option>)}</select></label>
+        <label className="admin-booking-filter is-type"><span>Type</span><select className="admin-field" aria-label="Filter by type" value={type} onChange={(event) => setType(event.target.value)}><option value="all">All types</option>{Array.from(new Set(items.map((item) => item.type))).map((value) => <option key={value} value={value}>{statusPresentation("source", value).label}</option>)}</select></label>
+        <label className="admin-booking-filter is-source"><span>Source</span><select className="admin-field" aria-label="Filter by source" value={source} onChange={(event) => setSource(event.target.value)}><option value="all">All sources</option>{Array.from(new Set(items.map((item) => item.source))).map((value) => <option key={value} value={value}>{statusPresentation("source", value).label}</option>)}</select></label>
+        <label className="admin-booking-filter is-status"><span>Status</span><select className="admin-field" aria-label="Filter by status" value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">All statuses</option>{Array.from(new Set(items.map((item) => item.status))).map((value) => <option key={value} value={value}>{statusPresentation("source", value).label}</option>)}</select></label>
+        <label className="admin-booking-filter is-payment"><span>Payment</span><select className="admin-field" aria-label="Filter by payment" value={payment} onChange={(event) => setPayment(event.target.value)}><option value="all">All payments</option>{Array.from(new Set(items.map((item) => item.payment))).map((value) => <option key={value} value={value}>{statusPresentation("source", value).label}</option>)}</select></label>
+        <label className="admin-booking-filter is-from"><span>From</span><input className="admin-field" aria-label="From date" type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} /></label>
+        <label className="admin-booking-filter is-to"><span>To</span><input className="admin-field" aria-label="To date" type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} /></label>
+      </div>
+    </section>
 
-    <div className="admin-booking-type-tabs mb-4" role="group" aria-label="Booking type">
-      {(["all", "standard", "corporate"] as const).map((category) => (
+    <div className="admin-booking-controls"><div className="admin-booking-type-tabs" role="group" aria-label="Booking type">
+      {(["all", "standard", "corporate", ...connectedPlatforms] as BookingView[]).map((category) => (
         <button key={category} type="button" aria-pressed={bookingView === category} data-booking-type={category} className={`admin-booking-type-tab ${bookingView === category ? "is-active" : ""}`} onClick={() => setBookingView(category)}>
-          <span>{category === "all" ? "All records" : `${category === "standard" ? "Standard" : "Corporate"} bookings`}</span>
+          <span>{category === "all" ? "All" : category === "standard" ? "Standard" : category === "corporate" ? "Corporate" : CALENDAR_PLATFORM_LABELS[category]}</span>
           <strong>{bookingViewCounts[category]}</strong>
         </button>
       ))}
     </div>
 
-    <div className="admin-view-tabs mb-4" role="group" aria-label="Booking layout"><button type="button" aria-pressed={view === "list"} className={`admin-view-tab ${view === "list" ? "is-active" : ""}`} onClick={() => setView("list")}>List · {filtered.length}</button><button type="button" aria-pressed={view === "calendar"} className={`admin-view-tab ${view === "calendar" ? "is-active" : ""}`} onClick={() => setView("calendar")}>Calendar</button></div>
-    <div id="admin-booking-records" aria-label="Reservation results">{view === "calendar" ? <ReservationCalendar items={filtered} offset={monthOffset} setOffset={setMonthOffset} onSelect={(item) => { setDialogError(""); setSelected(item); }} /> : <ReservationList items={filtered} onSelect={setSelected} />}</div>
+    </div>
+    {selectedPlatform && <p className="admin-booking-source-note">{CALENDAR_PLATFORM_LABELS[selectedPlatform]} iCal shows blocked dates only. Reservation and guest details stay in {CALENDAR_PLATFORM_LABELS[selectedPlatform]}.</p>}
+    <div id="admin-booking-records" aria-label="Reservation results"><ReservationList items={filtered} onSelect={setSelected} /></div>
 
-    {selected && <ReservationDetail error={dialogError} item={selected} busy={busy} onClose={() => setSelected(null)} updateBooking={updateBooking} updateEnquiryStatus={updateEnquiryStatus} convertEnquiry={convertEnquiry} openCalendar={openCalendar} />}
-    {showCreate && <ManualBookingForm error={dialogError} manual={manual} setManual={setManual} properties={properties} busy={busy} close={() => { setShowCreate(false); setManual({ propertyId: properties[0]?.id ?? "", checkIn: "", checkout: "", contactName: "", email: "", phone: "", companyName: "", adults: "1", children: "0", infants: "0", pets: "0", corporate: false, paymentStatus: "pending", internalNotes: "" }); }} submit={createBooking} />}
+    {selected && <ReservationPreview item={selected} onClose={() => setSelected(null)} />}
   </>;
 }
 
+type SheetSortKey = "reference" | "title" | "propertyLabel" | "start" | "end" | "type" | "source" | "status" | "payment";
+const sheetColumns: { key: SheetSortKey; label: string }[] = [
+  { key: "reference", label: "Reference" },
+  { key: "title", label: "Guest / event" },
+  { key: "propertyLabel", label: "House" },
+  { key: "start", label: "Check-in" },
+  { key: "end", label: "Checkout" },
+  { key: "type", label: "Type" },
+  { key: "source", label: "Source" },
+  { key: "status", label: "Status" },
+  { key: "payment", label: "Payment" },
+];
+
 function ReservationList({ items, onSelect }: { items: ReservationItem[]; onSelect: (item: ReservationItem) => void }) {
-  const { visible, pagination } = useAdminPagination(items);
-  return <><div className="admin-card admin-table-shell overflow-x-auto bg-[var(--admin-surface)]"><table className="admin-responsive-table w-full min-w-[1050px] text-left text-sm"><thead><tr className="border-b border-[var(--admin-border)] bg-[var(--admin-surface-alt)] text-sm font-semibold text-[var(--admin-muted)]"><th className="p-3">Reference</th><th className="p-3">Guest / event</th><th className="p-3">House</th><th className="p-3">Dates</th><th className="p-3">Type & source</th><th className="p-3">Status</th><th className="p-3">Payment</th><th className="p-3 text-right">Details</th></tr></thead><tbody>{visible.map((item) => <tr key={`${item.kind}:${item.id}`} className="border-b border-[var(--admin-border)] align-top last:border-b-0 hover:bg-[var(--admin-surface-alt)]"><td data-label="Reference" className="p-3 font-semibold">{item.reference}</td><td data-label="Guest / event" className="p-3">{item.title}</td><td data-label="House" className="p-3">{item.propertyLabel}</td><td data-label="Dates" className="whitespace-nowrap p-3">{formatDate(item.start)} – {formatDate(item.end)}</td><td data-label="Type & source" className="p-3"><div className="flex flex-wrap gap-1">{item.bookingCategory ? <AdminBadge domain="category" value={item.bookingCategory} label={`${item.bookingCategory === "corporate" ? "Corporate" : "Standard"} booking`} /> : <AdminBadge domain="category" value={item.type} />}<AdminBadge domain="source" value={item.source} /></div></td><td data-label="Status" className="p-3"><AdminBadge domain={item.kind === "enquiry" ? "enquiry" : item.kind === "block" ? "calendar" : "booking"} value={item.status} /></td><td data-label="Payment" className="p-3"><AdminBadge domain="payment" value={item.payment} /></td><td data-label="Details" className="p-3 text-right"><button type="button" className="admin-button min-h-9 px-3 text-sm" onClick={() => onSelect(item)}>Open details</button></td></tr>)}</tbody></table>{!items.length && <p className="p-10 text-center text-sm text-[var(--admin-muted)]">No reservations match these filters.</p>}</div>{pagination}</>;
+  const [sort, setSort] = useState<{ key: SheetSortKey; direction: "asc" | "desc" }>({ key: "start", direction: "asc" });
+  const sorted = useMemo(() => [...items].sort((a, b) => {
+    const comparison = String(a[sort.key] ?? "").localeCompare(String(b[sort.key] ?? ""), "en-AU", { numeric: true, sensitivity: "base" });
+    return (sort.direction === "asc" ? comparison : -comparison) || a.reference.localeCompare(b.reference);
+  }), [items, sort]);
+  const { visible, pagination, page, pageSize } = useAdminPagination(sorted);
+  const changeSort = (key: SheetSortKey) => setSort((current) => ({ key, direction: current.key === key && current.direction === "asc" ? "desc" : "asc" }));
+
+  return <section className="admin-booking-sheet" aria-label="Booking spreadsheet">
+    <div className="admin-booking-sheet-toolbar"><div><strong>Reservation sheet</strong><span>{items.length} matching {items.length === 1 ? "record" : "records"}</span></div><p>Choose a column to sort · Open a row for full details</p></div>
+    <div className="admin-booking-sheet-scroll" role="region" aria-label="Scrollable booking table" tabIndex={0}>
+      <table className="admin-booking-sheet-table">
+        <colgroup><col className="admin-sheet-col-number" /><col className="admin-sheet-col-reference" /><col className="admin-sheet-col-guest" /><col className="admin-sheet-col-house" /><col className="admin-sheet-col-date" /><col className="admin-sheet-col-date" /><col className="admin-sheet-col-type" /><col className="admin-sheet-col-source" /><col className="admin-sheet-col-status" /><col className="admin-sheet-col-payment" /><col className="admin-sheet-col-action" /></colgroup>
+        <thead><tr><th scope="col" className="admin-sheet-row-number">#</th>{sheetColumns.map((column) => <th key={column.key} scope="col" aria-sort={sort.key === column.key ? (sort.direction === "asc" ? "ascending" : "descending") : "none"}><button type="button" onClick={() => changeSort(column.key)}>{column.label}{sort.key === column.key ? sort.direction === "asc" ? <ArrowUp size={13} aria-hidden="true" /> : <ArrowDown size={13} aria-hidden="true" /> : <ArrowUpDown size={12} aria-hidden="true" />}</button></th>)}<th scope="col">Details</th></tr></thead>
+        <tbody>{visible.map((item, index) => <tr key={`${item.kind}:${item.id}`}>
+          <th scope="row" className="admin-sheet-row-number">{(page - 1) * pageSize + index + 1}</th>
+          <td className="admin-sheet-reference"><span title={item.reference}>{item.reference || "—"}</span></td>
+          <td><span className="admin-sheet-cell-clip" title={item.title}>{item.title}</span></td>
+          <td><span className="admin-sheet-cell-clip" title={item.propertyLabel}>{item.propertyLabel}</span></td>
+          <td className="admin-sheet-date">{formatSheetDate(item.start)}</td>
+          <td className="admin-sheet-date">{formatSheetDate(item.end)}</td>
+          <td>{item.bookingCategory ? `${item.bookingCategory === "corporate" ? "Corporate" : "Standard"} booking` : statusPresentation("source", item.type).label}</td>
+          <td><AdminBadge domain="source" value={item.source} /></td>
+          <td><AdminBadge domain={item.kind === "enquiry" ? "enquiry" : item.kind === "block" ? "calendar" : "booking"} value={item.status} /></td>
+          <td><AdminBadge domain="payment" value={item.payment} /></td>
+          <td><button type="button" className="admin-sheet-open" onClick={() => onSelect(item)} aria-label={`Open details for ${item.reference || item.title}`}>View <ChevronRight size={14} aria-hidden="true" /></button></td>
+        </tr>)}</tbody>
+      </table>
+      {!items.length && <p className="admin-booking-sheet-empty">No reservations match these filters.</p>}
+    </div>
+    <p className="admin-booking-sheet-mobile-hint">Scroll sideways to view every column.</p>
+    <div className="admin-booking-sheet-pagination">{pagination}</div>
+  </section>;
 }
 
-function ReservationCalendar({ items, offset, setOffset, onSelect }: { items: ReservationItem[]; offset: number; setOffset: (value: number) => void; onSelect: (item: ReservationItem) => void }) {
-  const today = new Date(`${todayIso()}T00:00:00Z`);
-  const month = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + offset, 1));
-  const days = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + 1, 0)).getUTCDate();
-  const leading = month.getUTCDay();
-  const cells = [...Array.from({ length: leading }, () => null), ...Array.from({ length: days }, (_, index) => index + 1)];
-  const label = new Intl.DateTimeFormat("en-AU", { month: "long", year: "numeric", timeZone: "UTC" }).format(month);
-  return <div className="admin-reservation-calendar"><div className="flex min-w-[44rem] items-center justify-between border-b border-[var(--admin-border)] p-3"><button type="button" className="admin-button min-h-9 px-3" onClick={() => setOffset(offset - 1)} aria-label="Previous month"><ChevronLeft size={16} /></button><h2 className="text-lg font-semibold">{label}</h2><button type="button" className="admin-button min-h-9 px-3" onClick={() => setOffset(offset + 1)} aria-label="Next month"><ChevronRight size={16} /></button></div><div className="grid grid-cols-7 border-b border-[var(--admin-border)] bg-[var(--admin-surface-alt)] text-center text-sm font-semibold text-[var(--admin-muted)]">{["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => <div key={day} className="border-r border-[var(--admin-border)] py-2 last:border-r-0">{day}</div>)}</div><div className="grid grid-cols-7">{cells.map((day, index) => {
-    if (!day) return <div key={`empty-${index}`} className="min-h-28 border-b border-r border-[var(--admin-border)] bg-[var(--admin-surface-alt)]" />;
-    const iso = `${month.getUTCFullYear()}-${String(month.getUTCMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    const matches = items.filter((item) => item.start <= iso && item.end > iso);
-    return <div key={iso} className="min-h-28 border-b border-r border-[var(--admin-border)] p-2"><span className="text-sm font-semibold">{day}</span><div className="mt-1 space-y-1">{matches.slice(0, 3).map((item) => <button type="button" key={`${item.kind}:${item.id}:${iso}`} onClick={() => onSelect(item)} className={`block w-full truncate border-l-4 px-1.5 py-1 text-left text-sm font-semibold ${item.kind === "booking" ? item.bookingCategory === "corporate" ? "border-[var(--admin-violet-border)] bg-[var(--admin-violet-bg)]" : "border-[var(--admin-success-border)] bg-[var(--admin-success-bg)]" : item.kind === "enquiry" ? "border-[var(--admin-warning-border)] bg-[var(--admin-warning-bg)]" : "border-[var(--admin-border)] bg-[var(--admin-surface-alt)]"}`}>{item.kind === "booking" ? `${item.bookingCategory === "corporate" ? "Corporate" : "Standard"} · ` : ""}{item.propertyLabel} · {item.title}</button>)}{matches.length > 3 && <p className="text-sm font-medium text-[var(--admin-muted)]">+{matches.length - 3} more</p>}</div></div>;
-  })}</div></div>;
-}
-
-function ReservationDetail({ error, item, busy, onClose, updateBooking, updateEnquiryStatus, convertEnquiry, openCalendar }: { error: string; item: ReservationItem; busy: boolean; onClose: () => void; updateBooking: (id: string, changes: Row) => Promise<void>; updateEnquiryStatus: (enquiry: Row, status: string) => void; convertEnquiry: (enquiry: Row) => void; openCalendar: () => void }) {
-  const { confirm } = useAdminWorkspace();
-  const [bookingStatus, setBookingStatus] = useState(item.status);
-  const [paymentStatus, setPaymentStatus] = useState(item.payment);
-  const [internalNotes, setInternalNotes] = useState(String(item.raw.internal_notes ?? ""));
-  const [reason, setReason] = useState("");
+function ReservationPreview({ item, onClose }: { item: ReservationItem; onClose: () => void }) {
   const guest = asObject(item.raw.guest_details);
-  const dirty = item.kind === "booking" && (bookingStatus !== String(item.raw.booking_status ?? item.status) || paymentStatus !== String(item.raw.payment_status ?? item.payment) || internalNotes !== String(item.raw.internal_notes ?? "") || Boolean(reason));
-  useDirtyGuard(dirty);
-  const requestClose = async () => { if (!busy && (!dirty || await confirm({ title: "Discard booking edits?", description: "Your unsaved status and notes changes will be lost.", confirmLabel: "Discard changes", destructive: true }))) onClose(); };
-  return <AdminDialog label="Reservation details" drawer busy={busy} onClose={requestClose}><aside className="w-full p-5 sm:p-7"><div className="flex items-start justify-between gap-4 border-b border-[var(--admin-border)] pb-5"><div><p className="text-sm font-semibold text-[var(--admin-text)]">{cleanLabel(item.kind)}</p><h2 className="mt-1 text-2xl font-semibold tracking-[-0.04em]">{item.reference}</h2></div><button type="button" className="admin-button min-h-10 px-3" onClick={requestClose} disabled={busy} aria-label="Close details"><X size={17} /></button></div>{error && <div className="admin-notice is-error mt-4" role="alert">{error}</div>}<dl className="grid grid-cols-2 border-b border-[var(--admin-border)] text-sm"><Detail label="Guest / event" value={item.title} /><Detail label="House" value={item.propertyLabel} /><Detail label="Check-in" value={formatDate(item.start)} /><Detail label="Checkout" value={formatDate(item.end)} /><Detail label="Type" value={item.bookingCategory ? `${item.bookingCategory === "corporate" ? "Corporate" : "Standard"} booking` : cleanLabel(item.type)} /><Detail label="Source" value={cleanLabel(item.source)} /></dl>{item.kind === "booking" && <div className="space-y-5 pt-6"><div className="grid gap-4 sm:grid-cols-2"><Field label="Booking status"><select className="admin-field" value={bookingStatus} onChange={(event) => setBookingStatus(event.target.value)}>{["pending_payment", "confirmed", "corporate", "cancelled", "checked_in", "checked_out", "expired"].map((value) => <option key={value} value={value}>{statusPresentation("source", value).label}</option>)}</select></Field><Field label="Payment status"><select className="admin-field" value={paymentStatus} disabled={Boolean(item.raw.stripe_checkout_session_id)} onChange={(event) => setPaymentStatus(event.target.value)}>{["pending", "paid", "failed", "refunded"].map((value) => <option key={value} value={value}>{statusPresentation("source", value).label}</option>)}</select>{Boolean(item.raw.stripe_checkout_session_id) && <small className="mt-1 block text-[var(--admin-muted)]">Managed by verified Stripe events. View details in Payments.</small>}</Field></div><Field label="Internal notes"><textarea className="admin-field min-h-28" maxLength={4000} value={internalNotes} onChange={(event) => setInternalNotes(event.target.value)} /></Field>{bookingStatus === "cancelled" && <Field label="Cancellation reason"><input className="admin-field" maxLength={500} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Required for the audit trail" /></Field>}<div className="border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4 text-sm"><p className="font-semibold">{String(guest.firstName ?? guest.contactName ?? "Guest")}</p><p className="mt-1 text-[var(--admin-muted)]">{String(guest.email ?? "No email")} · {String(guest.phone ?? "No phone")}</p><p className="mt-3 text-sm text-[var(--admin-muted)]">{Number(item.raw.adults ?? 0)} adults · {Number(item.raw.children ?? 0)} children · {Number(item.raw.infants ?? 0)} infants · {Number(item.raw.pets ?? 0)} pets</p></div><button type="button" disabled={busy || (bookingStatus === "cancelled" && !reason && item.status !== "cancelled")} className="admin-button admin-button-primary w-full justify-center" onClick={() => void updateBooking(item.id, { bookingStatus, paymentStatus, internalNotes, cancellationReason: reason })}><Save size={16} /> Save booking</button></div>}{item.kind === "enquiry" && <div className="space-y-5 pt-6"><p className="text-sm leading-6 text-[var(--admin-text)]">{String(item.raw.notes ?? "No guest notes supplied.")}</p><Field label="Enquiry status"><select className="admin-field" value={item.status} onChange={(event) => updateEnquiryStatus(item.raw, event.target.value)}>{["new", "contacted", "pending_approval", "approved", "declined", "converted"].map((value) => <option key={value} value={value}>{statusPresentation("source", value).label}</option>)}</select></Field>{item.status === "approved" && <button type="button" className="admin-button admin-button-primary w-full justify-center" onClick={() => convertEnquiry(item.raw)}>Convert to bookings</button>}</div>}{item.kind === "block" && <div className="pt-6"><p className="text-sm leading-6 text-[var(--admin-text)]">{String(item.raw.internal_note ?? item.raw.summary ?? "Blocked dates")}</p><button type="button" className="admin-button admin-button-primary mt-5 w-full justify-center" onClick={openCalendar}>Manage this block</button></div>}</aside></AdminDialog>;
+  const details = item.kind === "booking" ? [
+    ["Booking status", cleanLabel(item.status)],
+    ["Payment", cleanLabel(item.payment)],
+    ["Total", formatAud(Number(item.raw.total ?? 0))],
+    ["Email", String(guest.email ?? "—")],
+    ["Phone", String(guest.phone ?? "—")],
+    ["Guests", `${Number(item.raw.adults ?? 0)} adults · ${Number(item.raw.children ?? 0)} children · ${Number(item.raw.infants ?? 0)} infants · ${Number(item.raw.pets ?? 0)} pets`],
+  ] : item.kind === "enquiry" ? [["Status", cleanLabel(item.status)], ["Notes", String(item.raw.notes ?? "—")]] : [["Status", cleanLabel(item.status)], ["Note", String(item.raw.internal_note ?? item.raw.summary ?? "—")]];
+  return <AdminDialog label="Reservation preview" drawer onClose={onClose}>
+    <aside className="w-full p-5 sm:p-7">
+      <div className="flex items-start justify-between gap-4 border-b border-[var(--admin-border)] pb-5"><div><p className="text-sm font-semibold text-[var(--admin-text)]">{cleanLabel(item.kind)} · preview</p><h2 className="mt-1 break-all text-2xl font-semibold tracking-[-0.04em]">{item.reference || item.title}</h2></div><button type="button" className="admin-button min-h-10 px-3" onClick={onClose} aria-label="Close preview"><X size={17} /></button></div>
+      <dl className="grid grid-cols-2 border-b border-[var(--admin-border)] text-sm"><Detail label="Guest / event" value={item.title} /><Detail label="House" value={item.propertyLabel} /><Detail label="Check-in" value={formatDate(item.start)} /><Detail label="Checkout" value={formatDate(item.end)} /><Detail label="Type" value={item.bookingCategory ? `${item.bookingCategory === "corporate" ? "Corporate" : "Standard"} booking` : cleanLabel(item.type)} /><Detail label="Source" value={cleanLabel(item.source)} />{details.map(([label, value]) => <Detail key={label} label={label} value={value} />)}</dl>
+      <p className="mt-5 text-sm text-[var(--admin-muted)]">This is a read-only preview. Use Calendar to manage bookings and blocked dates.</p>
+    </aside>
+  </AdminDialog>;
 }
 
-function ManualBookingForm({ error, manual, setManual, properties, busy, close, submit }: { error: string; manual: Record<string, string | boolean>; setManual: React.Dispatch<React.SetStateAction<{ propertyId: string; checkIn: string; checkout: string; contactName: string; email: string; phone: string; companyName: string; adults: string; children: string; infants: string; pets: string; corporate: boolean; paymentStatus: string; internalNotes: string }>>; properties: PropertyRow[]; busy: boolean; close: () => void; submit: (event: React.FormEvent) => Promise<void> }) {
-  const { confirm } = useAdminWorkspace();
-  const [baseline] = useState(() => JSON.stringify(manual));
-  const dirty = JSON.stringify(manual) !== baseline;
-  useDirtyGuard(dirty);
-  const requestClose = async () => { if (!busy && (!dirty || await confirm({ title: "Discard manual booking?", description: "This reservation has not been created. Your entered details will be lost.", confirmLabel: "Discard details", destructive: true }))) close(); };
-  const update = (key: string, value: string | boolean) => setManual((current) => ({ ...current, [key]: value }));
-  return <AdminDialog label="New manual booking" drawer busy={busy} onClose={requestClose}><form onSubmit={submit} className="w-full p-5 sm:p-7"><div className="flex items-start justify-between border-b border-[var(--admin-border)] pb-5"><div><p className="text-sm font-semibold text-[var(--admin-text)]">Admin reservation</p><h2 className="mt-1 text-2xl font-semibold">New manual booking</h2></div><button type="button" className="admin-button min-h-10 px-3" onClick={requestClose} disabled={busy} aria-label="Close manual booking"><X size={17} /></button></div>{error && <div className="admin-notice is-error mt-4" role="alert">{error}</div>}<div className="grid gap-4 py-6 sm:grid-cols-2"><Field label="House"><select required className="admin-field" value={String(manual.propertyId)} onChange={(event) => update("propertyId", event.target.value)}>{properties.map((property) => <option key={String(property.id)} value={String(property.id)}>{String(property.name)}</option>)}</select></Field><label className="flex items-center gap-3 border border-[var(--admin-border)] bg-[var(--admin-surface)] p-3 text-sm font-semibold"><input type="checkbox" checked={Boolean(manual.corporate)} onChange={(event) => update("corporate", event.target.checked)} /> Corporate booking</label><Field label="Check-in"><input required className="admin-field" type="date" min={todayIso()} value={String(manual.checkIn)} onChange={(event) => update("checkIn", event.target.value)} /></Field><Field label="Checkout"><input required className="admin-field" type="date" min={String(manual.checkIn) ? addDays(String(manual.checkIn), 1) : todayIso()} value={String(manual.checkout)} onChange={(event) => update("checkout", event.target.value)} /></Field><Field label="Guest / contact name"><input required className="admin-field" value={String(manual.contactName)} onChange={(event) => update("contactName", event.target.value)} /></Field><Field label="Email"><input required type="email" className="admin-field" value={String(manual.email)} onChange={(event) => update("email", event.target.value)} /></Field><Field label="Phone"><input className="admin-field" value={String(manual.phone)} onChange={(event) => update("phone", event.target.value)} /></Field><Field label="Company (optional)"><input className="admin-field" value={String(manual.companyName)} onChange={(event) => update("companyName", event.target.value)} /></Field>{["adults", "children", "infants", "pets"].map((key) => <Field key={key} label={key}><input className="admin-field" type="number" min={key === "adults" ? 1 : 0} value={String(manual[key])} onChange={(event) => update(key, event.target.value)} /></Field>)}<Field label="Payment status"><select className="admin-field" value={String(manual.paymentStatus)} onChange={(event) => update("paymentStatus", event.target.value)}><option value="pending">Pending</option><option value="paid">Paid</option></select></Field></div><Field label="Internal notes"><textarea className="admin-field min-h-28" maxLength={4000} value={String(manual.internalNotes)} onChange={(event) => update("internalNotes", event.target.value)} /></Field><div className="mt-6 flex gap-3 border-t border-[var(--admin-border)] pt-5"><button type="submit" className="admin-button admin-button-primary flex-1 justify-center" disabled={busy}><Save size={16} />{busy ? "Saving…" : "Create booking"}</button><button type="button" className="admin-button" onClick={requestClose} disabled={busy}>Cancel</button></div></form></AdminDialog>;
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) { return <label className="block text-sm font-semibold text-[var(--admin-text)]">{label}<span className="mt-1.5 block normal-case tracking-normal">{children}</span></label>; }
 function Detail({ label, value }: { label: string; value: string }) { return <div className="border-b border-r border-[var(--admin-border)] p-4"><dt className="text-sm font-semibold text-[var(--admin-muted)]">{label}</dt><dd className="mt-1 font-medium text-[var(--admin-text)]">{value}</dd></div>; }

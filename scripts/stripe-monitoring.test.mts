@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { assertAudCheckout, describeStripeEvent } from "../src/lib/stripeMonitoring.ts";
+import { assertAudCheckout, bookingConfirmationState, describeStripeEvent } from "../src/lib/stripeMonitoring.ts";
 
 const event = (type: string, object: Record<string, unknown>) => ({
   id: "evt_test", type, created: 1_700_000_000,
@@ -43,4 +43,14 @@ test("checkout must match its booking in AUD and cents", () => {
   assert.throws(() => assertAudCheckout({ ...session, currency: "usd" }, booking), /AUD/);
   assert.throws(() => assertAudCheckout({ ...session, amount_total: 12344 }, booking), /amount/);
   assert.throws(() => assertAudCheckout({ ...session, id: "cs_other" }, booking), /session/);
+});
+
+test("only pending bookings can transition to paid; confirmed bookings remain idempotent", () => {
+  assert.equal(bookingConfirmationState({ payment_status: "pending", booking_status: "pending_payment" }), "pending");
+  assert.equal(bookingConfirmationState({ payment_status: "paid", booking_status: "confirmed" }), "confirmed");
+  assert.equal(bookingConfirmationState({ payment_status: "paid", booking_status: "checked_in" }), "confirmed");
+  assert.throws(() => bookingConfirmationState({ payment_status: "refunded", booking_status: "cancelled" }), /no longer eligible/);
+  assert.throws(() => bookingConfirmationState({ payment_status: "pending", booking_status: "cancelled" }), /no longer eligible/);
+  assert.throws(() => bookingConfirmationState({ payment_status: "failed", booking_status: "pending_payment" }), /no longer eligible/);
+  assert.throws(() => bookingConfirmationState({ payment_status: "paid", booking_status: "cancelled" }), /no longer eligible/);
 });

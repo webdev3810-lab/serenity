@@ -112,7 +112,7 @@ export function getPromotionEligibilityError(
   return "";
 }
 
-const formatAudNumber = (amount: number) => new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(amount);
+const formatAudNumber = (amount: number) => `AUD ${new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(amount)}`;
 
 export function calculatePromotionDiscount(promotion: PromotionRecord, bookingAmount: number) {
   if (promotion.discount_type === "fixed_aud") return Math.min(Math.max(0, bookingAmount), Math.max(0, promotion.discount_value));

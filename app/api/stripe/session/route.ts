@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getStripeClient, markBookingPaid } from "@/src/lib/stripe";
+import { getStripeClient, markBookingPaid, markCorporateGroupPaid } from "@/src/lib/stripe";
 
 export async function GET(request: Request) {
   const sessionId = new URL(request.url).searchParams.get("session_id");
@@ -12,7 +12,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "This payment has not been completed." }, { status: 402 });
     }
 
-    const booking = await markBookingPaid(session);
+    const booking = session.metadata?.groupReference ? await markCorporateGroupPaid(session) : await markBookingPaid(session);
     return NextResponse.json({ paid: true, booking });
   } catch (error) {
     console.error("Stripe session verification failed", error);

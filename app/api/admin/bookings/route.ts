@@ -6,6 +6,7 @@ import { getPublicPropertyBySlug } from "@/src/lib/supabase/content";
 import type { Json } from "@/src/lib/supabase/types";
 
 const reference = () => `ADM-${new Date().getUTCFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+const partnerIdPattern = /^SER-(?:[A-F0-9]{12}|[A-F0-9]{20})$/;
 
 const guestCounts = (value: unknown): GuestCounts => {
   const row = value && typeof value === "object" ? value as Record<string, unknown> : {};
@@ -32,15 +33,24 @@ export async function POST(request: Request) {
     const companyName = String(body.companyName ?? "").trim();
     const internalNotes = String(body.internalNotes ?? "").trim();
     const corporate = body.corporate === true;
+    const partnerId = String(body.partnerId ?? "").trim().toUpperCase();
     const guests = guestCounts(body.guests);
     const idempotencyKey = String(request.headers.get("Idempotency-Key") ?? body.idempotencyKey ?? "").trim() || `admin:${crypto.randomUUID()}`;
     const paymentStatus = String(body.paymentStatus ?? "pending");
     if (!propertyId || !checkIn || !checkout || !contactName || !email) return NextResponse.json({ error: "House, dates, guest name, and email are required." }, { status: 400 });
     if (!/^\S+@\S+\.\S+$/.test(email)) return NextResponse.json({ error: "Enter a valid guest email address." }, { status: 400 });
+    if (corporate && !partnerIdPattern.test(partnerId)) return NextResponse.json({ error: "A valid Partner ID is required for corporate reservations." }, { status: 400 });
     if (!(["pending", "paid"] as const).includes(paymentStatus as "pending" | "paid")) return NextResponse.json({ error: "Manual bookings can start as pending or paid." }, { status: 400 });
     if (internalNotes.length > 4000) return NextResponse.json({ error: "Internal notes must be 4,000 characters or fewer." }, { status: 400 });
 
     const supabase = createSupabaseAdminClient();
+    let partner: { id: string; company_name: string } | null = null;
+    if (corporate) {
+      const { data, error: partnerError } = await supabase.from("corporate_partners").select("id, company_name").eq("partner_id", partnerId).eq("active", true).maybeSingle();
+      if (partnerError) throw partnerError;
+      if (!data) return NextResponse.json({ error: "Partner ID not found or inactive. Check the ID in Partners." }, { status: 403 });
+      partner = data;
+    }
     const { data: propertyRow, error: propertyError } = await supabase.from("properties").select("id, slug, unavailable_dates, corporate_booking_allowed").eq("id", propertyId).maybeSingle();
     if (propertyError) throw propertyError;
     if (!propertyRow) return NextResponse.json({ error: "House not found." }, { status: 404 });
@@ -53,6 +63,7 @@ export async function POST(request: Request) {
 
     const bookingReference = reference();
     const price = calculatePrice(property, checkIn, checkout, guests, corporate);
+    const bookingCompanyName = corporate ? partner?.company_name ?? companyName : companyName;
     const rows = [{
       reference: bookingReference,
       property_id: propertyId,
@@ -62,8 +73,8 @@ export async function POST(request: Request) {
       children: guests.children,
       infants: guests.infants,
       pets: guests.pets,
-      guest_details: { firstName: contactName, contactName, email, phone, companyName },
-      corporate_details: corporate ? { corporate: true, companyName } : {},
+      guest_details: { firstName: contactName, contactName, email, phone, companyName: bookingCompanyName },
+      corporate_details: corporate ? { corporate: true, companyName: bookingCompanyName, customerId: partnerId, partnerAccountId: partner?.id } : {},
       price_breakdown: price,
       total: price.total,
       currency: "AUD",

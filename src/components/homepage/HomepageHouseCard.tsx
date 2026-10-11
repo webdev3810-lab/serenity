@@ -56,7 +56,7 @@ export default function HomepageHouseCard({ property, displayName, reverse = fal
         </p>
 
         <span className="text-xl font-bold text-stone-900 mb-8 block">
-          From AUD {formatAud(property.nightlyPrice)} per night
+          From {formatAud(property.nightlyPrice)} per night
         </span>
 
         <div className="flex flex-wrap items-center gap-4 w-full">

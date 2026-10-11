@@ -9,7 +9,7 @@ export function pricingDates(start: string, end: string): string[] {
 }
 export function applyDateRates(existing: DateRate[], start: string, end: string, rate: number | null, label = ""): DateRate[] {
   const dates=pricingDates(start,end), selected=new Set(dates);
-  if (rate !== null && (!Number.isFinite(rate) || rate < 0 || rate > 100000)) throw new Error("Use a nightly rate between $0 and $100,000.");
+  if (rate !== null && (!Number.isFinite(rate) || rate < 0 || rate > 100000)) throw new Error("Use a nightly rate between AUD $0 and AUD $100,000.");
   if(label.length>120)throw new Error("Rate labels must be 120 characters or fewer.");
   return [...existing.filter(r=>!selected.has(r.price_date)),...(rate===null?[]:dates.map(price_date=>({price_date,nightly_price:rate,label:label.trim(),is_active:true})))].sort((a,b)=>a.price_date.localeCompare(b.price_date));
 }

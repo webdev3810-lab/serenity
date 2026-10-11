@@ -77,5 +77,5 @@ export function AdminPagination({ page, total, pageSize = 20, onPage }: { page: 
 export function useAdminPagination<T>(items: T[], pageSize = 20) {
   const [requested, setPage] = useState(1);
   const page = Math.min(requested, Math.max(1, Math.ceil(items.length / pageSize)));
-  return { visible: items.slice((page - 1) * pageSize, page * pageSize), pagination: <AdminPagination page={page} total={items.length} pageSize={pageSize} onPage={setPage} />, resetPage: () => setPage(1) };
+  return { visible: items.slice((page - 1) * pageSize, page * pageSize), pagination: <AdminPagination page={page} total={items.length} pageSize={pageSize} onPage={setPage} />, page, pageSize, resetPage: () => setPage(1) };
 }

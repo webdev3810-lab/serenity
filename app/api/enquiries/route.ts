@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { isSupabaseConfigured } from "@/src/lib/supabase/config";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 import { datesInRange } from "@/src/lib/booking";
-import { notifyCorporateEnquiry } from "@/src/lib/transactionalEmail";
+import { acknowledgeCorporateEnquiry, notifyCorporateEnquiry } from "@/src/lib/transactionalEmail";
 
 const enquiryReference = () => `ENQ-${new Date().getUTCFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 
@@ -89,11 +89,13 @@ export async function POST(request: Request) {
       }
       throw error;
     }
-    try {
-      await notifyCorporateEnquiry({ id: data.id, reference: data.reference, company: companyName, contact: contactName, email, phone, arrival, departure, houses: propertySlugs, notes });
-    } catch (notificationError) {
-      console.error("Corporate enquiry notification failed", notificationError);
-    }
+    const kind = isCorporateQuestion ? "question" : "stay";
+    const deliveries = await Promise.allSettled([
+      notifyCorporateEnquiry({ id: data.id, reference: data.reference, company: companyName, contact: contactName, email, phone, arrival, departure, houses: propertySlugs, notes, kind }),
+      acknowledgeCorporateEnquiry({ id: data.id, reference: data.reference, contact: contactName, email, kind }),
+    ]);
+    if (deliveries[0].status === "rejected") console.error("Corporate enquiry admin notification failed", deliveries[0].reason);
+    if (deliveries[1].status === "rejected") console.error("Corporate enquiry guest confirmation failed", deliveries[1].reason);
     return NextResponse.json({ configured: true, enquiry: data });
   } catch (error) {
     console.error("Enquiry persistence failed", error);

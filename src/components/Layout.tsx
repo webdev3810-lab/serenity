@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
 import { BookingProvider } from "@/src/context/BookingContext";
 import { ContactSettingsProvider } from "@/src/context/ContactSettingsContext";
 import type { ContactSettings } from "@/src/lib/siteSettings";
@@ -101,7 +101,7 @@ function Header({ pathname }: { pathname: string | null }) {
       </Link>
 
       <nav id="serenity-primary-navigation" className="serenity-editorial-nav__links" aria-label="Primary navigation" data-open={mobileMenuOpen || undefined}>
-        {links.map(({ label, href }) => {
+        {links.map(({ label, href }, index) => {
           const active = isCurrent(href);
           return (
             <Link
@@ -110,10 +110,20 @@ function Header({ pathname }: { pathname: string | null }) {
               aria-current={active ? (href.includes("#") ? "location" : "page") : undefined}
               onClick={() => setMobileMenuOpen(false)}
             >
-              {label}
+              <span className="serenity-editorial-nav__item-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+              <span>{label}</span>
             </Link>
           );
         })}
+        <Link
+          href={partnerBookingHref}
+          className="serenity-editorial-nav__partner-menu"
+          aria-current={isCurrent(partnerBookingHref) ? "location" : undefined}
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <span>Partner Booking</span>
+          <ArrowUpRight size={17} aria-hidden="true" />
+        </Link>
       </nav>
 
       <div className="serenity-editorial-nav__actions">

@@ -42,7 +42,7 @@ export type PriceBreakdown = {
 export const defaultGuests: GuestCounts = { adults: 2, children: 0, infants: 0, pets: 0 };
 
 export const formatAud = (amount: number) =>
-  new Intl.NumberFormat(AU_LOCALE, { style: "currency", currency: "AUD", minimumFractionDigits: Number.isInteger(amount) ? 0 : 2, maximumFractionDigits: 2 }).format(amount);
+  `AUD ${new Intl.NumberFormat(AU_LOCALE, { style: "currency", currency: "AUD", minimumFractionDigits: Number.isInteger(amount) ? 0 : 2, maximumFractionDigits: 2 }).format(amount)}`;
 
 const padDatePart = (value: number) => String(value).padStart(2, "0");
 

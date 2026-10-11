@@ -24,6 +24,7 @@ export async function proxy(request: NextRequest) {
     "/admin/reset-password",
     "/api/admin/status",
     "/api/admin/bootstrap",
+    "/api/admin/password-recovery",
   ]);
   const isPublicAdminAuthPath = publicAdminAuthPaths.has(request.nextUrl.pathname);
 
