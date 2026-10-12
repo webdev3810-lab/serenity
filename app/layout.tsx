@@ -18,6 +18,9 @@ import "./contact-story.css";
 import "./public-neutral.css";
 import "./policy-editorial.css";
 import "./public-spacing.css";
+import "./property-showcase.css";
+import "./location-map-image.css";
+import "./guest-information/guest-information.css";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700", "800", "900"],

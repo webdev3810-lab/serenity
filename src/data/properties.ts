@@ -23,6 +23,8 @@ export type PropertyDatePrice = {
 export type PropertyImage = {
   src: string;
   alt: string;
+  width?: number;
+  height?: number;
   category?: string;
   categoryLabel?: string;
   categoryDescription?: string;
@@ -98,6 +100,7 @@ export type Property = {
   cancellationPolicy?: string;
   corporateInformation?: string;
   images: PropertyImage[];
+  floorPlan?: PropertyImage;
   featuredImage: string;
   unavailableDates: string[];
   houseRules: string[];

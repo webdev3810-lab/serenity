@@ -144,7 +144,7 @@ export function ContactEditorialPage({ properties }: { properties: Property[] })
             <span className="contact-story-eyebrow">The setting</span>
             <h2 id="contact-story-location-title">Close to what brings you here.</h2>
           </div>
-          <p>Serenity homes sit together in Pakenham, near transport and everyday essentials. Exact street details are shared after a confirmed booking to protect guest privacy.</p>
+          <p>Serenity homes sit together in Pakenham, near transport and everyday essentials. Select a place on the illustrated map to open it in Google Maps.</p>
         </div>
         <div className="contact-story-location__map"><SerenityLocationMap /></div>
         <div className="contact-story-location__links">

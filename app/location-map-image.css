@@ -1,0 +1,51 @@
+/* Keep the entire illustrated guide visible; the hotspots follow its image coordinates. */
+.location-editorial-map.location-illustrated-map,
+.public-map-frame:has(.location-illustrated-map),
+.property-theme .stay-location-map:has(.location-illustrated-map),
+.contact-story-location__map:has(.location-illustrated-map) {
+  aspect-ratio: 1672 / 941;
+}
+
+.location-editorial-map.location-illustrated-map {
+  height: auto;
+  max-height: none;
+}
+
+.public-map-frame:has(.location-illustrated-map),
+.property-theme .stay-location-map:has(.location-illustrated-map),
+.contact-story-location__map:has(.location-illustrated-map) {
+  height: auto;
+}
+
+.location-illustrated-map .location-openseadragon-map {
+  width: 100%;
+  height: 100%;
+}
+
+.location-map-image-hotspot {
+  display: block;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.location-map-image-hotspot:hover {
+  outline: 2px solid rgba(255, 239, 177, .85);
+  outline-offset: -2px;
+}
+
+.location-map-image-hotspot:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: -3px;
+  box-shadow: inset 0 0 0 5px #002844;
+}
+
+@media (max-width: 767px) {
+  /* A taller window lets the zoomed map remain legible and draggable on phones. */
+  .location-editorial-map.location-illustrated-map,
+  .public-map-frame:has(.location-illustrated-map),
+  .property-theme .stay-location-map:has(.location-illustrated-map),
+  .contact-story-location__map:has(.location-illustrated-map) {
+    aspect-ratio: auto;
+    height: clamp(19rem, 85vw, 28rem);
+  }
+}

@@ -281,7 +281,7 @@ function ContactLocationSection({ contact }: { contact: ContactSettings }) {
               <MapPin size={17} aria-hidden="true" />
               <p>
                 {contact.publicAddress ? `${contact.publicAddress}. ` : ""}
-                Exact street details are shared after a confirmed booking to protect guest privacy.
+                Select a place on the illustrated map below to open it in Google Maps.
               </p>
             </div>
           </div>

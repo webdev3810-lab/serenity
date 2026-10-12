@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   }
 
   const supabase = createSupabaseAdminClient();
-  const { data: property, error: propertyError } = await supabase.from("properties").select("id").eq("id", propertyId).maybeSingle();
+  const { data: property, error: propertyError } = await supabase.from("properties").select("id, name").eq("id", propertyId).maybeSingle();
   if (propertyError || !property) return NextResponse.json({ error: "That house could not be found." }, { status: 404 });
 
   const { data: objectInfo, error: objectError } = await supabase.storage.from("property-images").info(path);
@@ -54,10 +54,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "The uploaded image could not be verified." }, { status: 400 });
   }
 
+  if (category === "floor-plan") {
+    const { data: existing, error: existingError } = await supabase.from("property_images").select("id").eq("property_id", propertyId).eq("category", "floor-plan").limit(1).maybeSingle();
+    if (existingError || existing) {
+      await supabase.storage.from("property-images").remove([path]);
+      return NextResponse.json({ error: existingError?.message || "This house already has a floor plan. Remove it before uploading another." }, { status: existingError ? 500 : 409 });
+    }
+  }
+
   const { data, error } = await supabase.from("property_images").insert({
     property_id: propertyId,
     storage_path: path,
-    alt_text: originalFilename.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").slice(0, 220),
+    alt_text: category === "floor-plan" ? `${property.name} floor plan` : originalFilename.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").slice(0, 220),
     original_filename: originalFilename,
     file_size: actualSize,
     mime_type: mimeType,

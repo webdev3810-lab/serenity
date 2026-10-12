@@ -24,9 +24,10 @@ export function EditorialFooter() {
         </div>
         <div>
           <h2>Information</h2>
-          <Link href="/terms">Terms &amp; conditions</Link>
-          <Link href="/privacy">Privacy policy</Link>
-          <Link href="/cancellation-policy">Cancellation policy</Link>
+          <Link href="/guest-information">Guest information</Link>
+          <Link href="/guest-information#self-check-in">Arrival &amp; check-in</Link>
+          <Link href="/guest-information#house-rules">House rules</Link>
+          <Link href="/guest-information#cancellations">Stay policies</Link>
         </div>
       </div>
       <Link href="/" className="serenity-editorial-footer__wordmark" aria-label="Serenity home">

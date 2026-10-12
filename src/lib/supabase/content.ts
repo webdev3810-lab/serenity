@@ -97,6 +97,8 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
     .map((image) => ({
       src: image.storage_path ? storageUrl(image.storage_path) : image.external_url ?? "",
       alt: String(image.alt_text ?? `${row.name} property photo`),
+      width: Number(image.width) || undefined,
+      height: Number(image.height) || undefined,
       category: String(image.category ?? "other"),
       categoryLabel: String(image.category_label ?? "Other"),
       categoryDescription: String(categoryState.get(String(image.category ?? "other"))?.category_description ?? image.category_description ?? ""),
@@ -105,7 +107,8 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
       isVisible: image.is_visible !== false,
     }))
     .filter((image) => isApprovedHomepageMediaSource(image.src));
-  const safeImages = orderedImages;
+  const floorPlan = orderedImages.find((image) => image.category === "floor-plan");
+  const safeImages = orderedImages.filter((image) => image.category !== "floor-plan");
 
   return {
     id: row.id,
@@ -175,6 +178,7 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
     cancellationPolicy: String(row.cancellation_policy ?? ""),
     corporateInformation: String(row.corporate_information ?? ""),
     images: safeImages,
+    floorPlan,
     featuredImage: safeImages.find((image) => image.isCover)?.src ?? safeImages[0]?.src ?? "",
     unavailableDates: row.unavailable_dates ?? [],
     houseRules: row.house_rules ?? [],

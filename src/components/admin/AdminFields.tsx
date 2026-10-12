@@ -30,8 +30,7 @@ const INTERNAL_LINK_OPTIONS = [
   { value: "/booking", label: "Booking" },
   { value: "/#faqs", label: "FAQs" },
   { value: "/contact", label: "Contact" },
-  { value: "/terms", label: "Terms and conditions" },
-  { value: "/privacy", label: "Privacy policy" },
+  { value: "/guest-information", label: "Guest information & stay policies" },
 ];
 
 const DEFAULT_CHARACTER_LIMIT = 300;

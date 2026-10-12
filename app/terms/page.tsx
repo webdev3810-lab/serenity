@@ -1,8 +1,5 @@
-import { PolicyPage } from "@/src/components/ContentPages";
-import { pageMetadata } from "@/src/lib/seo";
-
-export const metadata = pageMetadata("Terms and Conditions");
+import { permanentRedirect } from "next/navigation";
 
 export default function Page() {
-  return <PolicyPage type="Terms and Conditions" />;
+  permanentRedirect("/guest-information#terms");
 }
