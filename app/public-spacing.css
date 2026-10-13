@@ -521,9 +521,11 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .houses-editorial-list {
+  max-width: 86rem;
+  margin-inline: auto;
   gap: clamp(0.75rem, 1.2vw, 1.25rem);
   padding: clamp(0.75rem, 1.2vw, 1.25rem);
-  padding-bottom: clamp(2rem, 3vw, 3rem);
+  padding-bottom: 1rem;
 }
 
 .public-site .houses-editorial-list__caption {
@@ -536,7 +538,7 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .houses-editorial-comfort {
-  padding: var(--guest-section-space) var(--guest-gutter);
+  padding: clamp(2.5rem, 4vw, 4rem) var(--guest-gutter) var(--guest-section-space);
 }
 
 .public-site .houses-editorial-comfort__heading h2 {

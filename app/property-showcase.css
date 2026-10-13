@@ -111,6 +111,31 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
 .property-theme .property-showcase-partner h2 { margin: 0 0 .25rem; color: #fff; font-size: 1.75rem; }
 .property-showcase-partner span { color: #d6e2e7; font-size: .86rem; }
 
+/* Keep the sleeping arrangements scannable without oversized room photos. */
+.public-site .property-theme:has(.property-showcase) #sleep {
+  padding-block: clamp(2rem, 3vw, 3.5rem);
+}
+.public-site .property-theme:has(.property-showcase) #sleep h2 {
+  margin-bottom: 1.4rem;
+  font-size: clamp(2.6rem, 4vw, 4.5rem);
+  line-height: .95;
+}
+.public-site .property-theme:has(.property-showcase) #sleep .stay-room-grid {
+  max-width: 70rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .85rem;
+}
+.public-site .property-theme:has(.property-showcase) #sleep .stay-room-card {
+  padding: 1rem;
+}
+.public-site .property-theme:has(.property-showcase) #sleep .stay-room-photo {
+  aspect-ratio: 4 / 3;
+  margin: -1rem -1rem 1rem;
+}
+.public-site .property-theme:has(.property-showcase) #sleep .stay-room-card h3 {
+  font-size: 1.05rem;
+}
+
 .property-theme .property-floor-plan { scroll-margin-top: 7rem; }
 .property-floor-plan-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
 .property-theme .property-floor-plan-heading h2 { margin-bottom: .35rem; }
@@ -127,12 +152,17 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
 .property-floor-plan-dialog-content > a { display: inline-block; margin-top: .75rem; color: var(--hero-green, #002844); font-size: .85rem; font-weight: 700; text-decoration: underline; text-underline-offset: .2rem; }
 
 @media (max-width: 900px) {
+  .public-site .property-theme:has(.property-showcase) #sleep .stay-room-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .property-showcase-nav { justify-content: flex-start; padding-inline: .75rem; }
   .property-showcase-overview { grid-template-columns: 1fr; gap: 1.4rem; }
   .property-showcase-info-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .property-showcase-details-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 767px) {
+  .public-site .property-theme:has(.property-showcase) #sleep { padding-block: 2rem; }
+  .public-site .property-theme:has(.property-showcase) #sleep h2 { margin-bottom: 1rem; font-size: clamp(2.25rem, 9vw, 3.25rem); }
+  .public-site .property-theme:has(.property-showcase) #sleep .stay-room-grid { grid-template-columns: 1fr; gap: .75rem; }
+  .public-site .property-theme:has(.property-showcase) #sleep .stay-room-photo { aspect-ratio: 16 / 10; }
   .public-site .property-theme:has(.property-showcase) { padding-top: 4.5rem; }
   .public-site .property-theme:has(.property-showcase) .stay-shell { display: block; padding: 0 0 8rem; }
   .public-site .property-theme:has(.property-showcase) .stay-body,

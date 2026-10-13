@@ -144,7 +144,7 @@ export function HousesEditorialPage({ properties }: { properties: Property[] }) 
       const scrollTrigger = {
         trigger: card,
         start: "top bottom",
-        end: "bottom top",
+        end: "center center",
         scrub: 0.6,
       };
 

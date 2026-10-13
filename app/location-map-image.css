@@ -28,11 +28,6 @@
   cursor: pointer;
 }
 
-.location-map-image-hotspot:hover {
-  outline: 2px solid rgba(255, 239, 177, .85);
-  outline-offset: -2px;
-}
-
 .location-map-image-hotspot:focus-visible {
   outline: 3px solid #fff;
   outline-offset: -3px;

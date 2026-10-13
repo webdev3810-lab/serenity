@@ -98,7 +98,6 @@ export function SerenityLocationMap() {
           link.target = "_blank";
           link.rel = "noopener noreferrer";
           link.setAttribute("aria-label", `Open ${hotspot.label} in Google Maps`);
-          link.title = `Open ${hotspot.label} in Google Maps`;
           link.addEventListener("pointerdown", (event) => event.stopPropagation());
           link.addEventListener("click", (event) => event.stopPropagation());
 

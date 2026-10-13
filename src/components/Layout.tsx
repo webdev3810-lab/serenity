@@ -4,11 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { BookingProvider } from "@/src/context/BookingContext";
 import { ContactSettingsProvider } from "@/src/context/ContactSettingsContext";
 import type { ContactSettings } from "@/src/lib/siteSettings";
 import { EditorialFooter } from "@/src/components/EditorialFooter";
+import StaggeredMobileMenu from "@/src/components/StaggeredMobileMenu";
 
 export function AppShell({ children, contactSettings }: { children: React.ReactNode; contactSettings: ContactSettings }) {
   const pathname = usePathname();
@@ -77,6 +78,16 @@ function Header({ pathname }: { pathname: string | null }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    const desktopQuery = window.matchMedia("(min-width: 1024px)");
+    const closeOnDesktop = () => {
+      if (desktopQuery.matches) setMobileMenuOpen(false);
+    };
+
+    desktopQuery.addEventListener("change", closeOnDesktop);
+    return () => desktopQuery.removeEventListener("change", closeOnDesktop);
+  }, []);
+
   const isCurrent = (href: string) => {
     const [targetPathValue, targetHash] = href.split("#");
     const targetPath = targetPathValue || "/";
@@ -101,7 +112,7 @@ function Header({ pathname }: { pathname: string | null }) {
         </span>
       </Link>
 
-      <nav id="serenity-primary-navigation" className="serenity-editorial-nav__links" aria-label="Primary navigation" data-open={mobileMenuOpen || undefined}>
+      <nav id="serenity-primary-navigation" className="serenity-editorial-nav__links" aria-label="Primary navigation">
         {links.map(({ label, href }, index) => {
           const active = isCurrent(href);
           return (
@@ -136,16 +147,19 @@ function Header({ pathname }: { pathname: string | null }) {
         >
           Partner Booking
         </Link>
-        <button
-          type="button"
-          className="serenity-editorial-nav__toggle"
-          aria-label={mobileMenuOpen ? "Close navigation" : "Open navigation"}
-          aria-expanded={mobileMenuOpen}
-          aria-controls="serenity-primary-navigation"
-          onClick={() => setMobileMenuOpen((open) => !open)}
-        >
-          {mobileMenuOpen ? <X size={19} aria-hidden="true" /> : <Menu size={19} aria-hidden="true" />}
-        </button>
+        <StaggeredMobileMenu
+          open={mobileMenuOpen}
+          items={links.map(({ label, href }) => ({
+            label,
+            href,
+            ariaLabel: `Go to ${label}`,
+            active: isCurrent(href),
+          }))}
+          partnerBookingHref={partnerBookingHref}
+          partnerBookingActive={isCurrent(partnerBookingHref)}
+          onToggle={() => setMobileMenuOpen((open) => !open)}
+          onClose={() => setMobileMenuOpen(false)}
+        />
       </div>
     </header>
   );
