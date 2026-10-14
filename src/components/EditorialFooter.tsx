@@ -16,6 +16,7 @@ export function EditorialFooter() {
           <Link href="/about">About</Link>
           <Link href="/corporate-stays">Corporate stays</Link>
           <Link href="/long-term-stays">Long-term stays</Link>
+          <Link href="/other-businesses">Other businesses</Link>
         </div>
         <div>
           <h2>Visit</h2>

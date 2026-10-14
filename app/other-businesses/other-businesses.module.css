@@ -1,0 +1,183 @@
+.page {
+  --navy: #002844;
+  --gold: #d9bc7c;
+  --serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
+  overflow: hidden;
+  background: #fff;
+  color: var(--navy);
+}
+
+.page a { text-decoration: none; }
+.page .stayFacts > div, .page .placesList li { border-radius: 0 !important; }
+.page .heroAside span, .page .landingOverview > div + div, .page .factStrip > div, .page .roomCard > span { border-radius: 0 !important; }
+.eyebrow, .factsLabel { margin: 0; font-size: .7rem; font-weight: 600; letter-spacing: .16em; line-height: 1.5; text-transform: uppercase; }
+.landingHero { padding: clamp(3.5rem, 7vw, 8rem) clamp(1.25rem, 3.5vw, 4rem) clamp(4rem, 7vw, 7rem); background: #f8f7f2; }
+.landingHeroGrid { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(11rem,.6fr); align-items: end; gap: 2rem; max-width: 110rem; margin: 0 auto; }
+.landingHero > .eyebrow { max-width: 110rem; margin: 0 auto; color: #977845; }
+.landingHero h1 { margin: 1rem 0 1.4rem; font-family: var(--serif); font-size: clamp(4rem, 8vw, 9.5rem); font-weight: 400; letter-spacing: -.065em; line-height: .91; }
+.landingHero h1 em, .bataanFeature h2 em, .discoverSection h2 em { color: #a5844e; font-weight: 400; }
+.landingHeroGrid > div:first-child > p { max-width: 34rem; margin: 0; color: #3a5262; font-size: clamp(1rem, 1.22vw, 1.24rem); line-height: 1.65; }
+.buttonRow { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-top: 1.8rem; }
+.outlineButton { display: inline-flex; min-height: 3.4rem; align-items: center; justify-content: space-between; gap: 1.5rem; padding: .85rem 1.2rem; border: 1px solid #8197a4; background: transparent; color: var(--navy); font-size: .8rem; font-weight: 700; letter-spacing: .03em; transition: background-color .18s ease, transform .18s ease; }
+.page .outlineButton { border-radius: 999px !important; }
+.outlineButton:hover { transform: translateY(-2px); background: #ecf0ef; }
+.heroAside { display: grid; gap: 0; max-width: 19rem; justify-self: end; width: 100%; color: #4f6472; font-size: .73rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+.heroAside span { padding: .9rem 0; border-top: 1px solid #cbd4d6; }
+.landingOverview { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: clamp(2rem, 6vw, 7rem); max-width: 110rem; margin: clamp(1.25rem, 2vw, 2rem) auto; padding: clamp(2rem, 4vw, 4rem) clamp(1.25rem, 3.5vw, 4rem); background: #eff2f0; }
+.landingOverview > div + div { border-left: 1px solid #cbd6d8; padding-left: clamp(2rem, 4vw, 4rem); }
+.landingOverview h2, .roomsSection h2, .discoverSection h2 { margin: .5rem 0 .9rem; font-family: var(--serif); font-size: clamp(2.7rem, 4.4vw, 5.4rem); font-weight: 400; letter-spacing: -.055em; line-height: 1; }
+.landingOverview p:not(.eyebrow), .discoverSection p:not(.eyebrow) { max-width: 38rem; color: #455b68; font-size: .98rem; line-height: 1.7; }
+.textLink { display: inline-flex; align-items: center; gap: .5rem; margin-top: .7rem; border-bottom: 1px solid currentColor; padding-bottom: .3rem; color: var(--navy); font-size: .82rem; font-weight: 700; }
+.textLink:hover { color: #9a7839; }
+.bataanFeature { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); align-items: center; gap: clamp(2rem, 5vw, 6rem); max-width: 110rem; margin: 0 auto; padding: clamp(4rem, 7vw, 8rem) clamp(1.25rem, 3.5vw, 4rem); scroll-margin-top: 5rem; }
+.bataanFeature h2 { margin: .8rem 0 1.2rem; font-family: var(--serif); font-size: clamp(4rem, 6.5vw, 8rem); font-weight: 400; letter-spacing: -.065em; line-height: .9; }
+.bataanFeatureCopy > p:not(.eyebrow):not(.locationLine) { max-width: 33rem; color: #4b6270; font-size: .98rem; line-height: 1.7; }
+.bataanFeatureCopy .featureLead { color: var(--navy) !important; font-size: clamp(1.1rem, 1.4vw, 1.45rem) !important; font-weight: 500; }
+.locationLine { display: flex; align-items: center; gap: .5rem; margin: 1.5rem 0 0; color: #647a85; font-size: .8rem; }
+.featureImage { position: relative; display: block; height: clamp(24rem, 38vw, 42rem); overflow: hidden; background: #d5dedf; }
+.page .featureImage { border-radius: 2rem !important; }
+.featureImage img { object-fit: cover; transition: transform .5s ease; }
+.featureImage:hover img { transform: scale(1.035); }
+.featureImage > span { position: absolute; right: 1.2rem; bottom: 1.2rem; display: inline-flex; align-items: center; gap: .5rem; padding: .7rem 1rem; background: #fff; color: var(--navy); font-size: .75rem; font-weight: 700; }
+.factStrip { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1px; padding: 0 clamp(1.25rem, 3.5vw, 4rem); background: var(--navy); color: #fff; }
+.factStrip > div { display: grid; gap: .3rem; padding: 1.5rem 1rem; border-right: 1px solid rgba(255,255,255,.22); }
+.factStrip > div:last-child { border-right: 0; }
+.factStrip strong { font-family: var(--serif); font-size: clamp(1.3rem, 2vw, 2rem); font-weight: 400; }
+.factStrip span { color: #d6e0e6; font-size: .78rem; }
+.roomsSection { max-width: 110rem; margin: 0 auto; padding: clamp(4rem, 7vw, 8rem) clamp(1.25rem, 3.5vw, 4rem); }
+.sectionIntro { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin-bottom: 1.75rem; }
+.sectionIntro h2 { margin-bottom: 0; }
+.sectionIntro > p { max-width: 27rem; margin: 0; color: #506775; font-size: .92rem; line-height: 1.65; }
+.roomGrid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1rem; }
+.roomCard { min-width: 0; color: var(--navy); }
+.roomImage { position: relative; height: clamp(13rem, 20vw, 24rem); overflow: hidden; background: #e7ebed; }
+.roomImage img { object-fit: cover; transition: transform .5s ease; }
+.roomCard:hover img { transform: scale(1.04); }
+.roomCard > span { display: flex; justify-content: space-between; gap: 1rem; padding: .85rem 0; border-bottom: 1px solid #d8e1e5; font-size: .8rem; font-weight: 600; }
+.discoverSection { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: clamp(2rem, 6vw, 7rem); padding: clamp(4rem, 7vw, 8rem) clamp(1.25rem, 3.5vw, 4rem); background: #f0f2eb; }
+.discoverSection > div:first-child { justify-self: end; width: min(100%, 48rem); }
+.discoverSection h2 { max-width: 12ch; }
+.placesList { align-self: center; width: min(100%, 42rem); margin: 0; padding: 0; list-style: none; }
+.placesList li { display: flex; align-items: center; gap: 1.15rem; padding: 1.15rem 0; border-bottom: 1px solid #cbd5d4; }
+.placesList li:first-child { border-top: 1px solid #cbd5d4; }
+.placesList li > span { color: #9c7e48; font-family: var(--serif); font-size: 1.6rem; }
+.placesList li > div { display: grid; gap: .15rem; flex: 1; }
+.placesList strong { font-size: .9rem; font-weight: 600; }
+.placesList small { color: #627985; font-size: .73rem; }
+.placesList svg { flex: 0 0 auto; color: #9c7e48; }
+
+.stayMain { max-width: 110rem; margin: 0 auto; padding: clamp(1.5rem, 3vw, 3rem) clamp(1.25rem, 3.5vw, 4rem) 5rem; }
+.backLink { display: inline-flex; align-items: center; gap: .5rem; color: #35566d; font-size: .85rem; font-weight: 500; }
+.backLink:hover { color: #9a7839; }
+.stayHeading { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(15rem,.6fr); align-items: end; gap: 2rem; padding: clamp(3rem, 5vw, 6rem) 0 2rem; }
+.stayHeading h1 { margin: 1.1rem 0 0; font-family: var(--serif); font-size: clamp(3.3rem, 6.5vw, 8rem); font-weight: 400; letter-spacing: -.06em; line-height: .92; }
+.stayHeading h1 em { color: #a5844e; font-weight: 400; }
+.stayIntro { justify-self: end; padding-bottom: .4rem; }
+.stayIntro p { display: flex; align-items: center; gap: .5rem; margin: 0 0 1.5rem; color: #3e5e71; font-size: .9rem; }
+.primaryButton, .lightButton { display: inline-flex; min-height: 3.4rem; align-items: center; justify-content: space-between; gap: 2rem; padding: .85rem 1.2rem; border-radius: 999px; font-size: .8rem; font-weight: 700; letter-spacing: .04em; transition: transform .18s ease, background-color .18s ease; }
+.primaryButton { background: var(--navy); color: #fff; }
+.page .primaryButton, .page .lightButton { border-radius: 999px !important; }
+.primaryButton:hover { transform: translateY(-2px); background: #124662; }
+.photoGrid { display: grid; height: clamp(22rem, 40vw, 42rem); grid-template-columns: 2fr 1fr 1fr; grid-template-rows: repeat(2, minmax(0,1fr)); gap: .55rem; overflow: hidden; border-radius: 1.4rem; }
+.photo { position: relative; min-height: 0; overflow: hidden; background: #e5e9ec; }
+.photoMain { grid-row: span 2; }
+.photo img { object-fit: cover; }
+.stayDetails { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(17rem,.65fr); gap: clamp(2rem, 7vw, 8rem); padding: clamp(4rem, 7vw, 8rem) 0; }
+.stayCopy h2, .bookingBand h2 { margin: .6rem 0 1.5rem; font-family: var(--serif); font-size: clamp(3rem, 5vw, 6rem); font-weight: 400; letter-spacing: -.055em; line-height: .96; }
+.stayCopy > p:not(.eyebrow) { max-width: 40rem; color: #405b6c; font-size: clamp(.98rem, 1.1vw, 1.1rem); line-height: 1.75; }
+.stayFacts { align-self: start; padding: 1.75rem; border: 1px solid #dfe6e9; border-radius: 1.4rem; background: #f7f9fa; }
+.factsLabel { padding-bottom: .9rem; color: #987a43; }
+.stayFacts > div { display: flex; align-items: center; gap: 1rem; padding: 1.05rem 0; border-top: 1px solid #dce5e8; font-size: .95rem; }
+.stayFacts svg { flex: 0 0 auto; color: #b09256; stroke-width: 1.6; }
+.bookingBand { display: flex; align-items: end; justify-content: space-between; gap: 2rem; padding: clamp(2rem, 4vw, 4rem); border-radius: 1.6rem; background: var(--navy); color: #fff; }
+.bookingBand h2 { margin-bottom: .7rem; }
+.bookingBand p:last-child { margin: 0; color: #d2dee4; }
+.lightButton { flex: 0 0 auto; background: #fff; color: var(--navy); }
+.lightButton:hover { transform: translateY(-2px); background: #f2e7cf; }
+
+@media (max-width: 900px) {
+  .landingHeroGrid, .stayHeading { grid-template-columns: 1fr; }
+  .heroAside { display: none; }
+  .stayIntro { justify-self: start; }
+}
+@media (max-width: 760px) {
+  .landingHero { padding-top: 3.5rem; padding-bottom: 3.5rem; }
+  .landingHero h1, .stayHeading h1 { font-size: clamp(3.2rem, 12vw, 5.5rem); }
+  .landingOverview, .bataanFeature, .discoverSection, .stayDetails { grid-template-columns: 1fr; }
+  .landingOverview { margin: 1rem; padding: 1.5rem; }
+  .landingOverview > div + div { border-left: 0; border-top: 1px solid #cbd6d8; padding: 1.5rem 0 0; }
+  .bataanFeature { padding-top: 4rem; padding-bottom: 4rem; }
+  .bataanFeature h2 { font-size: clamp(3.6rem, 12vw, 5.5rem); }
+  .featureImage { height: clamp(20rem, 85vw, 34rem); }
+  .factStrip { grid-template-columns: 1fr; }
+  .factStrip > div { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.22); padding: 1.1rem 0; }
+  .factStrip > div:last-child { border-bottom: 0; }
+  .sectionIntro { align-items: flex-start; flex-direction: column; gap: 1rem; }
+  .roomGrid { grid-template-columns: 1fr; }
+  .roomImage { height: clamp(15rem, 67vw, 24rem); }
+  .discoverSection > div:first-child { justify-self: start; }
+  .bookingBand { align-items: flex-start; flex-direction: column; }
+  .stayHeading { gap: 1.5rem; padding-top: 3rem; }
+  .photoGrid { height: auto; grid-template-columns: repeat(2, minmax(0,1fr)); grid-template-rows: clamp(17rem, 74vw, 28rem) repeat(2, 8rem); }
+  .photoMain { grid-column: span 2; grid-row: auto; }
+  .stayDetails { gap: 2rem; padding: 4rem 0; }
+  .lightButton { width: 100%; }
+}
+@media (max-width: 430px) {
+  .landingHero h1, .stayHeading h1 { font-size: clamp(3rem, 12vw, 4rem); }
+  .buttonRow > a { width: 100%; }
+}
+
+/* Other businesses hub */
+.hubHero { padding: 1.3rem clamp(1.25rem, 3.5vw, 4rem) clamp(3.5rem, 6vw, 7rem); background: var(--navy); color: #fff; }
+.hubTopline { display: flex; justify-content: space-between; gap: 1rem; max-width: 110rem; margin: 0 auto; padding: .8rem 0 1.5rem; border-bottom: 1px solid rgba(255,255,255,.24); color: #d9e0e3; font-size: .68rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+.page .hubTopline { border-radius: 0 !important; }
+.hubHeroContent { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(15rem,.6fr); align-items: end; gap: 2rem; max-width: 110rem; margin: 0 auto; padding-top: clamp(3rem, 6vw, 6rem); }
+.hubHeroContent .eyebrow { color: var(--gold); }
+.hubHero h1 { margin: .9rem 0 0; font-family: var(--serif); font-size: clamp(3.5rem, 7.3vw, 8rem); font-weight: 400; letter-spacing: -.065em; line-height: .94; }
+.hubHero h1 em { color: var(--gold); font-weight: 400; }
+.hubHeroContent > p { max-width: 26rem; margin: 0 0 .5rem; color: #d9e2e6; font-size: clamp(.95rem, 1.1vw, 1.12rem); line-height: 1.65; }
+.hubMain { max-width: 110rem; margin: 0 auto; padding: clamp(3rem, 5vw, 5rem) clamp(1.25rem, 3.5vw, 4rem) 4rem; }
+.hubSectionHeading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin-bottom: 1.6rem; }
+.hubSectionHeading .eyebrow { color: #9b7b43; }
+.hubSectionHeading h2 { margin: .5rem 0 0; font-family: var(--serif); font-size: clamp(2.6rem, 4.2vw, 5rem); font-weight: 400; letter-spacing: -.055em; line-height: 1; }
+.hubSectionHeading > p { max-width: 18rem; margin: 0; color: #607584; font-size: .9rem; line-height: 1.5; text-align: right; }
+.businessGrid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: clamp(1rem, 2vw, 2rem); }
+.businessCard { min-width: 0; overflow: hidden; border: 1px solid #e2e9ec; background: #fff; box-shadow: 0 14px 45px rgba(0,40,68,.07); }
+.page .businessCard { border-radius: 1.5rem !important; }
+.businessImage, .clinicArtwork { position: relative; display: block; height: clamp(16rem, 28vw, 29rem); overflow: hidden; }
+.businessImage { background: #dce5e8; }
+.businessImage img { object-fit: cover; transition: transform .4s ease; }
+.businessImage:hover img { transform: scale(1.035); }
+.clinicArtwork { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.15rem; background: #eae1cf; color: var(--navy); text-align: center; }
+.clinicArtwork::before, .clinicArtwork::after { position: absolute; width: 24rem; height: 24rem; border: 1px solid rgba(0,40,68,.13); border-radius: 50%; content: ""; }
+.clinicArtwork::before { transform: translate(-55%,-23%); }
+.clinicArtwork::after { transform: translate(53%,30%); }
+.clinicArtwork > span { z-index: 1; }
+.clinicArtwork > span:last-child { font-family: var(--serif); font-size: clamp(1.35rem, 2vw, 2.2rem); line-height: 1.1; }
+.clinicMonogram { display: grid; width: 5.5rem; height: 5.5rem; place-items: center; border: 1px solid rgba(0,40,68,.35); color: var(--navy); font-family: var(--serif); font-size: 3.2rem; line-height: 1; }
+.page .clinicMonogram { border-radius: 50% !important; }
+.clinicMonogram span { position: absolute; margin: 2.8rem 0 0 2.8rem; font-family: Arial, sans-serif; font-size: 1.2rem; }
+.businessBody { display: flex; min-height: 19rem; flex-direction: column; align-items: flex-start; padding: clamp(1.35rem, 2.2vw, 2.5rem); }
+.businessLocation { display: inline-flex; align-items: center; gap: .4rem; margin: 0 0 .75rem; color: #9c7b41; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.businessBody h3 { margin: 0; font-family: var(--serif); font-size: clamp(2.4rem, 3.5vw, 4rem); font-weight: 400; letter-spacing: -.055em; line-height: 1; }
+.businessBody > p:not(.businessLocation) { max-width: 35rem; margin: .9rem 0 1.5rem; color: #526b79; font-size: .95rem; line-height: 1.6; }
+.businessAction { display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%; margin-top: auto; padding: .95rem 0 .6rem; border-top: 1px solid #d8e2e6; color: var(--navy); font-size: .82rem; font-weight: 700; letter-spacing: .04em; }
+.page .businessAction { border-radius: 0 !important; }
+.businessAction:hover, .businessSecondary:hover, .hubClosing a:hover { color: #a28045; }
+.businessSecondary { display: inline-flex; align-items: center; gap: .4rem; margin-top: .35rem; color: #526b79; font-size: .75rem; font-weight: 600; }
+.hubClosing { display: flex; justify-content: space-between; gap: 1rem; margin-top: clamp(2rem, 4vw, 4rem); padding-top: 1.4rem; border-top: 1px solid #dbe4e7; color: #526b79; font-size: .9rem; }
+.page .hubClosing { border-radius: 0 !important; }
+.hubClosing a { display: inline-flex; align-items: center; gap: .4rem; color: var(--navy); font-weight: 700; }
+
+@media (max-width: 760px) {
+  .hubTopline span:last-child { display: none; }
+  .hubHeroContent { grid-template-columns: 1fr; gap: 1.3rem; }
+  .hubHero h1 { font-size: clamp(3.5rem, 12vw, 5.4rem); }
+  .hubSectionHeading { align-items: flex-start; flex-direction: column; gap: .6rem; }
+  .hubSectionHeading > p { text-align: left; }
+  .businessGrid { grid-template-columns: 1fr; }
+  .businessImage, .clinicArtwork { height: clamp(15rem, 58vw, 27rem); }
+  .businessBody { min-height: 0; }
+  .hubClosing { flex-direction: column; }
+}

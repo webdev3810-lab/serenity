@@ -46,6 +46,7 @@ function Header({ pathname }: { pathname: string | null }) {
     { label: "How It Works", href: "/how-it-works" },
     { label: "Guest Info", href: "/guest-information" },
     { label: "Corporate", href: "/corporate-stays" },
+    { label: "Other Businesses", href: "/other-businesses" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ];
