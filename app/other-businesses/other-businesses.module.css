@@ -145,19 +145,9 @@
 .businessGrid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: clamp(1rem, 2vw, 2rem); }
 .businessCard { min-width: 0; overflow: hidden; border: 1px solid #e2e9ec; background: #fff; box-shadow: 0 14px 45px rgba(0,40,68,.07); }
 .page .businessCard { border-radius: 1.5rem !important; }
-.businessImage, .clinicArtwork { position: relative; display: block; height: clamp(16rem, 28vw, 29rem); overflow: hidden; }
-.businessImage { background: #dce5e8; }
+.businessImage { position: relative; display: block; height: clamp(16rem, 28vw, 29rem); overflow: hidden; background: #dce5e8; }
 .businessImage img { object-fit: cover; transition: transform .4s ease; }
 .businessImage:hover img { transform: scale(1.035); }
-.clinicArtwork { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.15rem; background: #eae1cf; color: var(--navy); text-align: center; }
-.clinicArtwork::before, .clinicArtwork::after { position: absolute; width: 24rem; height: 24rem; border: 1px solid rgba(0,40,68,.13); border-radius: 50%; content: ""; }
-.clinicArtwork::before { transform: translate(-55%,-23%); }
-.clinicArtwork::after { transform: translate(53%,30%); }
-.clinicArtwork > span { z-index: 1; }
-.clinicArtwork > span:last-child { font-family: var(--serif); font-size: clamp(1.35rem, 2vw, 2.2rem); line-height: 1.1; }
-.clinicMonogram { display: grid; width: 5.5rem; height: 5.5rem; place-items: center; border: 1px solid rgba(0,40,68,.35); color: var(--navy); font-family: var(--serif); font-size: 3.2rem; line-height: 1; }
-.page .clinicMonogram { border-radius: 50% !important; }
-.clinicMonogram span { position: absolute; margin: 2.8rem 0 0 2.8rem; font-family: Arial, sans-serif; font-size: 1.2rem; }
 .businessBody { display: flex; min-height: 19rem; flex-direction: column; align-items: flex-start; padding: clamp(1.35rem, 2.2vw, 2.5rem); }
 .businessLocation { display: inline-flex; align-items: center; gap: .4rem; margin: 0 0 .75rem; color: #9c7b41; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .businessBody h3 { margin: 0; font-family: var(--serif); font-size: clamp(2.4rem, 3.5vw, 4rem); font-weight: 400; letter-spacing: -.055em; line-height: 1; }
@@ -177,7 +167,7 @@
   .hubSectionHeading { align-items: flex-start; flex-direction: column; gap: .6rem; }
   .hubSectionHeading > p { text-align: left; }
   .businessGrid { grid-template-columns: 1fr; }
-  .businessImage, .clinicArtwork { height: clamp(15rem, 58vw, 27rem); }
+  .businessImage { height: clamp(15rem, 58vw, 27rem); }
   .businessBody { min-height: 0; }
   .hubClosing { flex-direction: column; }
 }

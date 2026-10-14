@@ -6,6 +6,7 @@ import { AIRBNB_URL, ORANI_PHOTOS } from "./listing";
 import styles from "./other-businesses.module.css";
 
 const SPECIALIST_SUITES_URL = "https://specialistsuiteshub.com.au/";
+const SPECIALIST_SUITES_IMAGE = "https://jiuvzvqeoguxjprpltsf.supabase.co/storage/v1/object/public/site-media/benefits/a47efbb3-b90d-4342-a8ed-fa65cf8d4301-front.webp";
 
 export const metadata = pageMetadata(
   "Other Businesses",
@@ -53,9 +54,8 @@ export default function OtherBusinessesPage() {
           </article>
 
           <article className={styles.businessCard}>
-            <a href={SPECIALIST_SUITES_URL} target="_blank" rel="noopener noreferrer" className={styles.clinicArtwork} aria-label="Open Specialist Suites & Allied Health Hub website">
-              <span className={styles.clinicMonogram} aria-hidden="true">S<span>+</span></span>
-              <span>Specialist Suites<br />&amp; Allied Health Hub</span>
+            <a href={SPECIALIST_SUITES_URL} target="_blank" rel="noopener noreferrer" className={styles.businessImage} aria-label="Open Specialist Suites & Allied Health Hub website">
+              <Image src={SPECIALIST_SUITES_IMAGE} alt="Front of Specialist Suites & Allied Health Hub in Skye" fill sizes="(max-width: 760px) 100vw, 50vw" />
             </a>
             <div className={styles.businessBody}>
               <p className={styles.businessLocation}><MapPin size={16} aria-hidden="true" /> Skye, Victoria · Australia</p>
