@@ -1355,18 +1355,6 @@
   font-size: 1rem;
 }
 
-.public-site .page-frame .discount-summary {
-  border-color: var(--public-line);
-  border-radius: var(--radius-card, 1.125rem);
-  background: var(--public-soft);
-}
-
-.public-site .page-frame .discount-summary .discount-value {
-  color: var(--public-green) !important;
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-}
-
 .public-site .page-frame .card img {
   filter: none;
 }

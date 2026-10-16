@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { SupabaseAdminDashboardV2, type AdminTab } from "@/src/components/SupabaseAdminDashboardV2";
 import { getAdminUser } from "@/src/lib/supabase/auth";
 
-const ADMIN_TABS = new Set<AdminTab>(["overview", "homepage", "houses", "bookings", "payments", "calendar", "partners", "enquiries", "contacts", "users", "settings"]);
+const ADMIN_TABS = new Set<AdminTab>(["overview", "homepage", "guest-information", "houses", "bookings", "payments", "calendar", "partners", "enquiries", "contacts", "users", "settings"]);
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<{ tab?: string | string[]; view?: string | string[] }> }) {
   const admin = await getAdminUser();

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useRef } from "react";
 import type { CSSProperties, FC, ReactNode } from "react";
 
@@ -232,16 +233,19 @@ const ScrollExpand: FC<ScrollExpandProps> = ({
       loop
       playsInline
     />
-  ) : (
-    <img
+  ) : src ? (
+    <Image
       ref={mediaRef}
       className="scroll-expand-media"
       src={src}
       alt={alt}
+      fill
+      sizes="100vw"
+      unoptimized={src.startsWith("http")}
       draggable={false}
       referrerPolicy={src.includes("a0.muscache.com") ? "no-referrer" : undefined}
     />
-  );
+  ) : null;
 
   return (
     <div

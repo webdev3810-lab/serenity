@@ -1,0 +1,195 @@
+.page {
+  --ink: #111111;
+  --blue: #002b49;
+  --gold: #caa65b;
+  --paper: #ffffff;
+  --serif: Didot, "Bodoni 72", "Iowan Old Style", Georgia, serif;
+  background: var(--paper);
+  color: var(--ink);
+  overflow: clip;
+}
+
+.page :is(h1, h2, h3, p) { margin-block: 0; }
+.page a { text-decoration: none; }
+.page a:focus-visible { outline: 2px solid var(--gold); outline-offset: 5px; }
+
+.previewBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.5rem;
+  padding: 0.7rem clamp(1.1rem, 3vw, 3rem);
+  background: var(--blue);
+  color: white;
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.previewBar > span,
+.previewBar a { display: inline-flex; align-items: center; gap: 0.65rem; }
+.previewBar i { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: var(--gold); }
+.previewBar a { color: white; white-space: nowrap; }
+.previewBar a:hover { opacity: 0.8; }
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.93fr) minmax(0, 1.07fr);
+  min-height: min(49rem, 83vh);
+  margin: clamp(0.6rem, 1vw, 1rem);
+  overflow: hidden;
+  border-radius: clamp(1.4rem, 2.2vw, 2.2rem);
+  background: white;
+}
+
+.heroCopy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: clamp(2rem, 5vw, 6rem) clamp(1.6rem, 5vw, 6rem) clamp(1.5rem, 3vw, 3rem);
+}
+
+.kicker,
+.sectionKicker {
+  color: var(--ink);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.kicker { display: flex; align-items: center; gap: 0.8rem; }
+.kicker span:first-child { color: var(--ink); }
+.kickerRule { width: 1.75rem; height: 1px; background: var(--gold); }
+
+/* The global card-radius rule also reaches decorative dividers. Keep lines straight. */
+.kickerRule,
+.textAction,
+.heroImageCaption,
+.journeyAccent,
+.journeyList,
+.journeyStep,
+.pauseCopy a,
+.closingFoot { border-radius: 0 !important; }
+
+.hero h1,
+.journey h2,
+.pause h2,
+.closing h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  letter-spacing: -0.07em;
+}
+
+.hero h1 { margin-top: auto; padding-top: clamp(4rem, 8vw, 9rem); font-size: clamp(5.5rem, 8.3vw, 10rem); line-height: 0.83; }
+.hero h1 em,
+.journey h2 em,
+.pause h2 em,
+.closing h2 em {
+  color: var(--gold);
+  font-weight: 400;
+}
+.heroIntro { max-width: 32rem; margin-top: clamp(2rem, 3vw, 3.5rem) !important; color: var(--ink); font-size: clamp(1rem, 1.18vw, 1.18rem); line-height: 1.75; }
+
+.heroActions { display: flex; flex-wrap: wrap; align-items: center; gap: 1.1rem 1.6rem; margin-top: 2rem; }
+.primaryAction { display: inline-flex; align-items: center; justify-content: space-between; gap: 2.5rem; min-height: 3.6rem; padding: 0.85rem 1.25rem; border-radius: 999px; background: var(--blue); color: white; font-size: 0.76rem; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; transition: background 180ms ease, transform 180ms ease; }
+.primaryAction:hover { background: #06416a; transform: translateY(-2px); }
+.textAction { display: inline-flex; align-items: center; gap: 0.6rem; border-bottom: 1px solid var(--gold); padding: 0.5rem 0; color: var(--ink); font-size: 0.78rem; font-weight: 600; }
+.textAction:hover { opacity: 0.8; }
+.heroFootnote { display: flex; gap: 1.5rem; margin-top: auto; padding-top: 3rem; color: var(--ink); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; }
+.heroFootnote span + span::before { content: "·"; margin-right: 1.5rem; color: var(--gold); }
+
+.heroVisual,
+.pauseImage { position: relative; overflow: hidden; background: var(--blue); }
+.coverImage { object-fit: cover; }
+.heroVisual::after { content: ""; position: absolute; inset: 55% 0 0; background: linear-gradient(transparent, rgba(2, 24, 38, 0.52)); pointer-events: none; }
+.imagePlaceholder { position: absolute; inset: 0; background: var(--blue); }
+.heroImageCaption { position: absolute; z-index: 1; right: clamp(1.5rem, 3vw, 3rem); bottom: clamp(1.5rem, 3vw, 3rem); left: clamp(1.5rem, 3vw, 3rem); display: flex; justify-content: space-between; align-items: end; gap: 1rem; border-top: 1px solid rgba(255,255,255,.6); padding-top: 1rem; color: white; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; }
+
+.chapterLine { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: clamp(1.5rem, 3vw, 3rem) clamp(1.5rem, 4vw, 4rem); color: var(--ink); font-size: 0.65rem; font-weight: 650; letter-spacing: 0.16em; text-transform: uppercase; }
+.chapterOrnament { color: var(--gold); font-size: 1.1rem; line-height: 1; }
+
+.journey { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(2.5rem, 7vw, 9rem); padding: clamp(5rem, 8vw, 9rem) clamp(1.5rem, 5vw, 6rem) clamp(6rem, 10vw, 11rem); background: #fff; }
+.journeyIntro { align-self: start; position: sticky; top: 7rem; }
+.journey h2 { margin-top: 2rem; font-size: clamp(3.5rem, 5vw, 6.5rem); line-height: 0.94; }
+.journeyIntro > p:not(.sectionKicker) { max-width: 24rem; margin-top: 2.2rem; color: var(--ink); font-size: 1rem; line-height: 1.8; }
+.journeyAccent { position: relative; width: min(20rem, 70%); height: 5.8rem; margin-top: clamp(3rem, 6vw, 7rem); border-bottom: 1px solid var(--gold); }
+.journeyAccent span { position: absolute; bottom: -0.22rem; left: 0; width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--gold); }
+.journeyList { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--blue); }
+.journeyStep { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr) 1.5rem; gap: 1rem; min-height: 11.5rem; padding: clamp(1.8rem, 3vw, 3rem) 0; border-bottom: 1px solid var(--blue); }
+.stepNumber { color: var(--ink); font-family: var(--serif); font-size: 2.2rem; line-height: 1; }
+.stepCopy > p { color: var(--ink); font-size: 0.65rem; font-weight: 650; letter-spacing: 0.17em; text-transform: uppercase; }
+.stepCopy h3 { margin-top: 0.7rem; font-family: var(--serif); font-size: clamp(1.9rem, 2.45vw, 3.15rem); font-weight: 400; letter-spacing: -0.045em; line-height: 1.05; }
+.stepCopy > span { display: block; max-width: 35rem; margin-top: 0.85rem; color: var(--ink); font-size: 0.92rem; line-height: 1.7; }
+.stepArrow { margin-top: 0.15rem; color: var(--gold); }
+
+.pause { display: grid; grid-template-columns: 1fr 1fr; min-height: clamp(36rem, 54vw, 48rem); margin: clamp(0.6rem, 1vw, 1rem); overflow: hidden; border-radius: clamp(1.4rem, 2.2vw, 2.2rem); background: var(--blue); color: white; }
+.pauseCopy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: clamp(2.5rem, 6vw, 7.5rem); }
+.pause .sectionKicker { color: white; }
+.goldMark { display: block; margin-top: clamp(3rem, 6vw, 6rem); color: var(--gold); font-size: 2.5rem; line-height: 1; }
+.pause h2 { margin-top: 1.7rem; font-size: clamp(3.8rem, 6vw, 7rem); line-height: 0.9; }
+.pauseCopy > p:not(.sectionKicker) { max-width: 25rem; margin-top: 2rem; color: white; font-size: 1rem; line-height: 1.8; }
+.pauseCopy a { display: inline-flex; align-items: center; gap: 1rem; margin-top: 2.25rem; border-bottom: 1px solid var(--gold); padding-bottom: 0.55rem; color: white; font-size: 0.76rem; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; }
+.pauseCopy a:hover { opacity: 0.8; }
+
+.closing { margin: clamp(0.6rem, 1vw, 1rem); padding: clamp(3rem, 5vw, 6rem) clamp(1.5rem, 5vw, 6rem) clamp(1.5rem, 2.5vw, 3rem); border: 0; border-radius: clamp(1.4rem, 2.2vw, 2.2rem); background: white; color: var(--ink); }
+.closing .sectionKicker { color: var(--ink); }
+.closingGrid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr); align-items: end; gap: 4rem; padding: clamp(4rem, 7vw, 8rem) 0 clamp(5rem, 7vw, 8rem); }
+.closing h2 { font-size: clamp(4.5rem, 8vw, 10rem); line-height: 0.87; }
+.closingGrid > div > p { max-width: 24rem; color: var(--ink); font-size: clamp(1.05rem, 1.4vw, 1.3rem); line-height: 1.65; }
+.closingActions { display: flex; flex-wrap: wrap; gap: 0.85rem; margin-top: 2rem; }
+.closingActions a { display: inline-flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 3.5rem; padding: 0.8rem 1.2rem; border: 0; border-radius: 999px; color: var(--ink); font-size: 0.75rem; font-weight: 650; letter-spacing: 0.05em; text-transform: uppercase; transition: background 180ms ease, color 180ms ease; }
+.closingActions a:first-child { background: var(--blue); color: white; }
+.closingActions a:first-child:hover { background: white; color: var(--ink); }
+.closingActions a:not(:first-child) { padding-inline: 0; }
+.closingActions a:not(:first-child):hover { color: var(--blue); }
+.closingFoot { display: flex; justify-content: space-between; gap: 1rem; border-top: 1px solid rgba(0, 43, 73, 0.14); padding-top: 1.3rem; color: var(--ink); font-size: 0.65rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+
+@media (max-width: 850px) {
+  .hero, .journey, .pause, .closingGrid { grid-template-columns: 1fr; }
+  .hero { min-height: 0; }
+  .heroCopy { min-height: 39rem; }
+  .hero h1 { font-size: clamp(5.2rem, 12vw, 8rem); }
+  .heroVisual { min-height: clamp(28rem, 70vw, 42rem); }
+  .journey { gap: 3.5rem; }
+  .journeyIntro { position: static; }
+  .journeyAccent { display: none; }
+  .pauseImage { min-height: clamp(25rem, 65vw, 38rem); }
+  .pauseCopy { min-height: 30rem; }
+  .goldMark { margin-top: 3rem; }
+  .closingGrid { gap: 2.5rem; }
+}
+
+@media (max-width: 560px) {
+  .previewBar { font-size: 0.57rem; letter-spacing: 0.09em; }
+  .heroCopy { min-height: 38rem; padding: 2rem 1.5rem; }
+  .hero h1 { font-size: clamp(4.2rem, 15vw, 6rem); }
+  .heroIntro { margin-top: 2rem !important; font-size: 0.94rem; }
+  .heroActions { gap: 0.8rem; }
+  .primaryAction { min-height: 3.25rem; gap: 1rem; }
+  .heroFootnote { gap: 0.65rem; font-size: 0.53rem; letter-spacing: 0.08em; }
+  .heroFootnote span + span::before { margin-right: 0.65rem; }
+  .heroVisual { min-height: 30rem; }
+  .heroImageCaption { display: block; font-size: 0.57rem; line-height: 1.7; }
+  .heroImageCaption span { display: block; }
+  .chapterLine { font-size: 0.55rem; }
+  .journey { padding: 5rem 1.5rem 6rem; }
+  .journey h2 { font-size: clamp(3.2rem, 12vw, 4.5rem); }
+  .journeyStep { grid-template-columns: 2.6rem minmax(0, 1fr); gap: 0.6rem; min-height: 0; padding: 1.8rem 0; }
+  .stepNumber { font-size: 1.65rem; }
+  .stepArrow { display: none; }
+  .stepCopy h3 { font-size: 2rem; }
+  .pauseImage { min-height: 25rem; }
+  .pauseCopy { min-height: 30rem; padding: 3.2rem 1.7rem; }
+  .pause h2 { font-size: clamp(3.7rem, 14vw, 5.5rem); }
+  .closing { padding: 3.2rem 1.5rem 1.5rem; }
+  .closingGrid { padding: 4rem 0 5rem; }
+  .closing h2 { font-size: clamp(4.1rem, 14vw, 6rem); }
+  .closingFoot { font-size: 0.54rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryAction, .closingActions a { transition: none; }
+}

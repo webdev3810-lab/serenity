@@ -163,15 +163,16 @@ export async function notifyCorporateEnquiry(input: {
   departure: string;
   houses: string[];
   notes: string;
-  kind: "question" | "stay";
+  kind: "question" | "stay" | "insurance";
 }) {
+  const enquiryLabel = input.kind === "insurance" ? "insurance accommodation quote request" : input.kind === "question" ? "corporate question" : "corporate stay enquiry";
   await sendAdminNotification({
     replyTo: input.email,
-    subject: `New Serenity corporate ${input.kind === "question" ? "question" : "stay enquiry"} · ${input.reference}`,
+    subject: `New Serenity ${enquiryLabel} · ${input.reference}`,
     idempotencyKey: `corporate-enquiry/${input.id}`,
     text: [
-      `New corporate ${input.kind === "question" ? "question" : "stay enquiry"} ${input.reference}`,
-      `Company: ${input.company}`,
+      `New ${enquiryLabel} ${input.reference}`,
+      `${input.kind === "insurance" ? "Insurer / organisation" : "Company"}: ${input.company}`,
       `Contact: ${input.contact}`,
       `Email: ${input.email}`,
       `Phone: ${input.phone || "Not provided"}`,
@@ -188,7 +189,7 @@ export async function acknowledgeCorporateEnquiry(input: {
   reference: string;
   contact: string;
   email: string;
-  kind: "question" | "stay";
+  kind: "question" | "stay" | "insurance";
 }) {
   if (!process.env.RESEND_API_KEY || !sender()) {
     throw new Error("Resend is not configured for corporate enquiry confirmations.");
@@ -197,12 +198,14 @@ export async function acknowledgeCorporateEnquiry(input: {
   await sendEmail({
     to: input.email,
     replyTo: notificationsInbox(),
-    subject: `We received your corporate ${input.kind === "question" ? "question" : "enquiry"} · ${input.reference}`,
+    subject: `We received your ${input.kind === "insurance" ? "insurance accommodation request" : input.kind === "question" ? "corporate question" : "corporate enquiry"} · ${input.reference}`,
     idempotencyKey: `corporate-enquiry-confirmation/${input.id}`,
     text: [
       `Hi ${input.contact},`,
       "",
-      input.kind === "question"
+      input.kind === "insurance"
+        ? "Thanks for your insurance accommodation request. The Serenity team has received it and will review suitable options and quote details with you."
+        : input.kind === "question"
         ? "Thanks for your question about a corporate stay. The Serenity team has received it and will get back to you."
         : "Thanks for your corporate stay enquiry. The Serenity team has received it and will review the details with you.",
       `Your reference: ${input.reference}`,

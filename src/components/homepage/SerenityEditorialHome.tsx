@@ -1,12 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import SerenityHouseTitleRail from "./SerenityHouseTitleRail";
 import SerenityHeroImage from "./SerenityHeroImage";
 import SerenityPhotoPreviewRail from "./SerenityPhotoPreviewRail";
 import ScrollWipeText from "./ScrollWipeText";
 import StayHighlightIcon from "./StayHighlightIcon";
 import type { EditorialHomepageContent } from "@/src/lib/homepageEditorialContent";
+import { editorialHouseDetails } from "@/src/lib/editorialHouseDetails";
 
 export type SerenityEditorialHouse = {
   name: string;
@@ -17,6 +17,8 @@ export type SerenityEditorialHouse = {
   bedrooms: number;
   beds: number;
   bathrooms: number;
+  parkingType: string;
+  amenities: string[];
 };
 
 export type SerenityEditorialPreviewImage = {
@@ -34,31 +36,6 @@ type SerenityEditorialHomeProps = {
   photoPreviews: SerenityEditorialPreviewImage[];
   content: EditorialHomepageContent;
 };
-
-function EditorialImage({
-  src,
-  alt,
-  priority = false,
-  sizes = "100vw",
-}: {
-  src: string;
-  alt: string;
-  priority?: boolean;
-  sizes?: string;
-}) {
-  if (!src) return <div className="serenity-editorial-image-fallback" aria-hidden="true" />;
-
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      fill
-      priority={priority}
-      sizes={sizes}
-      unoptimized={src.includes("a0.muscache.com") || src.includes(".supabase.co/")}
-    />
-  );
-}
 
 export default function SerenityEditorialHome({
   heroImage,
@@ -97,25 +74,33 @@ export default function SerenityEditorialHome({
         </div>
       </section>
 
-      <section className="serenity-editorial-houses" aria-label="The Serenity houses">
-        <SerenityHouseTitleRail houses={houses.map(({ name, slug, maxGuests, bedrooms, beds, bathrooms }) => ({ name, slug, maxGuests, bedrooms, beds, bathrooms }))} />
-        {houses.map((house, index) => (
-          <article className="serenity-editorial-house" key={house.slug} style={{ zIndex: index + 1 }}>
-            <div className="serenity-editorial-house__media">
-              <EditorialImage src={house.image} alt={house.imageAlt} />
-              <div className="serenity-editorial-house__shade" aria-hidden="true" />
-            </div>
-            <h2 className="serenity-editorial-visually-hidden serenity-editorial-house__desktop-heading">{house.name}</h2>
-            <div className="serenity-editorial-house__mobile-content">
-              <h2>{house.name}</h2>
-              <ul aria-label={`${house.name} details`}>
-                <li>Sleeps up to {house.maxGuests}</li>
-                <li>{house.bedrooms} bedrooms</li>
-                <li>{house.beds} beds</li>
-                <li>{house.bathrooms} bathrooms</li>
-              </ul>
-              <Link href={`/properties/${house.slug}`}>Explore {house.name} <ArrowUpRight size={18} aria-hidden="true" /></Link>
-            </div>
+      <section className="houses-editorial-list serenity-editorial-house-cards" aria-label="The Serenity houses">
+        {houses.map((house) => (
+          <article className="houses-editorial-list__card" key={house.slug}>
+            <Link href={`/properties/${house.slug}`} className="houses-editorial-list__link">
+              <span className="houses-editorial-list__media">
+                {house.image ? (
+                  <Image
+                    src={house.image}
+                    alt={house.imageAlt}
+                    fill
+                    sizes="(max-width: 520px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                    unoptimized={house.image.includes(".supabase.co/")}
+                  />
+                ) : <span className="houses-editorial-list__fallback">House photos coming soon</span>}
+              </span>
+              <div className="houses-editorial-list__content">
+                <div className="houses-editorial-list__caption">
+                  <h2 className="houses-editorial-list__title">{house.name}</h2>
+                </div>
+                <ul className="houses-editorial-list__details" aria-label={`${house.name} at a glance`}>
+                  {editorialHouseDetails(house).map(({ label, Icon }) => (
+                    <li key={label}><Icon size={17} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span></li>
+                  ))}
+                </ul>
+                <span className="houses-editorial-list__cta">Explore house <ArrowUpRight size={17} aria-hidden="true" /></span>
+              </div>
+            </Link>
           </article>
         ))}
       </section>

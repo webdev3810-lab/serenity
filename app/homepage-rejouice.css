@@ -1605,25 +1605,6 @@ body:has(.serenity-editorial-home) .public-site > main {
   text-decoration: none;
 }
 
-.serenity-editorial-footer__wordmark {
-  display: block;
-  width: 100%;
-  overflow: hidden;
-  border-top: 1px solid rgba(247, 244, 237, 0.3);
-  border-radius: 0 !important;
-  padding: 1.5rem 0 0.15em;
-  color: inherit;
-  font-family: var(--serenity-editorial-serif);
-  font-size: clamp(7rem, 18vw, 21rem);
-  font-weight: 400;
-  letter-spacing: -0.075em;
-  line-height: 0.72;
-  text-align: center;
-  text-decoration: none;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
 .serenity-editorial-footer__legal {
   display: flex;
   justify-content: space-between;
@@ -1983,17 +1964,6 @@ body:has(.serenity-editorial-home) .public-site > main {
 
   .serenity-editorial-footer__grid {
     gap: 2.5rem;
-  }
-
-  .serenity-editorial-footer__wordmark {
-    display: block;
-    padding-top: 2rem;
-    font-size: clamp(3.5rem, 19vw, 8rem);
-    white-space: nowrap;
-  }
-
-  .serenity-editorial-footer__wordmark span {
-    display: block;
   }
 
   .serenity-editorial-footer__legal {

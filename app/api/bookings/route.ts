@@ -92,7 +92,7 @@ export async function POST(request: Request) {
     const dateError = validateDateRange(property, checkIn, checkout, todayIso(), [...bookedDates, ...importedBlockedDates], false);
     const guestError = validateGuestCapacity(property, guests);
     if (dateError || guestError) return NextResponse.json({ error: dateError || guestError }, { status: 400 });
-    const basePrice = calculatePrice(property, checkIn, checkout, guests, false);
+    const basePrice = calculatePrice(property, checkIn, checkout, guests);
     if (!basePrice.nights || basePrice.total <= 0) return NextResponse.json({ error: "Invalid booking dates or price." }, { status: 400 });
 
     const price = basePrice;

@@ -52,11 +52,14 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
   const [enquiryError, setEnquiryError] = useState("");
   const [enquiryReference, setEnquiryReference] = useState("");
   const [enquirySubmissionKey, setEnquirySubmissionKey] = useState("");
+  const [enquiryType, setEnquiryType] = useState<"corporate" | "insurance">("corporate");
   const [enquiryData, setEnquiryData] = useState({
     companyName: "",
     contactName: "",
     email: "",
     phone: "",
+    preferredDates: "",
+    accommodationNeeds: "",
     question: "",
   });
   const [formData, setFormData] = useState({
@@ -73,7 +76,7 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
   const selectedProperties = properties.filter((property) => formData.propertySlugs.includes(property.slug));
   const corporateGuestCount = Number(formData.guests) || 1;
   const guestsPerHouse = { ...defaultGuests, adults: Math.max(1, Math.ceil(corporateGuestCount / Math.max(1, selectedProperties.length))) };
-  const estimatedCorporateTotal = selectedProperties.reduce((total, property) => total + calculatePrice(property, formData.arrival, formData.departure, guestsPerHouse, true).total, 0);
+  const estimatedCorporateTotal = selectedProperties.reduce((total, property) => total + calculatePrice(property, formData.arrival, formData.departure, guestsPerHouse).total, 0);
   const corporateNights = nightsBetween(formData.arrival, formData.departure);
   const selectedDates = formData.arrival && formData.departure > formData.arrival ? datesInRange(formData.arrival, formData.departure) : [];
   const availabilityReady = selectedDates.length > 0 && selectedProperties.every((property) => Boolean(availability[property.slug]) && availability[property.slug] !== "checking");
@@ -225,11 +228,25 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
     await submitCorporateBooking();
   };
 
+  const selectEnquiryType = (type: "corporate" | "insurance") => {
+    if (type !== enquiryType) {
+      setEnquiryType(type);
+      setEnquiryError("");
+      setEnquirySubmissionKey("");
+      setEnquirySubmitted(false);
+    }
+  };
+
+  const openEnquiryType = (type: "corporate" | "insurance") => {
+    selectEnquiryType(type);
+    document.getElementById("corporate-question")?.scrollIntoView({ block: "start" });
+  };
+
   const handleEnquirySubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setEnquiryError("");
-    if (!enquiryData.companyName.trim() || !enquiryData.contactName.trim() || !enquiryData.email.trim() || !enquiryData.question.trim()) {
-      setEnquiryError("Complete your company, contact name, email, and question.");
+    if ((enquiryType === "corporate" && !enquiryData.companyName.trim()) || !enquiryData.contactName.trim() || !enquiryData.email.trim() || !enquiryData.question.trim()) {
+      setEnquiryError(enquiryType === "insurance" ? "Complete your name, email, and accommodation needs." : "Complete your company, contact name, email, and question.");
       return;
     }
 
@@ -241,13 +258,18 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
         method: "POST",
         headers: { "Content-Type": "application/json", "Idempotency-Key": key },
         body: JSON.stringify({
-          enquiryType: "corporate_question",
+          enquiryType: enquiryType === "insurance" ? "insurance_question" : "corporate_question",
           companyName: enquiryData.companyName,
           contactName: enquiryData.contactName,
           email: enquiryData.email,
           phone: enquiryData.phone,
-          purpose: "Corporate question",
-          notes: enquiryData.question,
+          notes: enquiryType === "insurance"
+            ? [
+                `Preferred dates: ${enquiryData.preferredDates.trim() || "To be confirmed"}`,
+                `People / bedrooms needed: ${enquiryData.accommodationNeeds.trim() || "To be confirmed"}`,
+                `Accommodation request: ${enquiryData.question.trim()}`,
+              ].join("\n")
+            : enquiryData.question,
           idempotencyKey: key,
         }),
       });
@@ -263,6 +285,8 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
   };
 
   const corporateFaqs = [
+    ["Can I request temporary accommodation while my home is being repaired?", "Yes. Tell us your preferred dates, household size and bedroom needs through the insurance accommodation enquiry. We can discuss suitable furnished homes and provide a written quote, subject to availability."],
+    ["Do insurance accommodation enquiries need a Partner ID?", "No. A Partner ID is only needed for registered corporate partners booking and paying online. Insurance accommodation is arranged by enquiry and confirmed separately."],
     ["Do you offer corporate accommodation in Pakenham?", "Yes. Serenity Stays provides direct accommodation in Pakenham for project teams, contractor crews, executive relocations, and extended business stays."],
     ["Can our company book multiple houses for work crews?", "Yes. Serenity 7, Serenity 9, and Serenity 11 sit beside each other, so companies can hold two or all three houses together."],
     ["Are the houses furnished with utilities and Wi-Fi included?", "Every house is turn-key furnished with Wi-Fi, electricity, gas, water, a full kitchen, laundry facilities, and linen included."],
@@ -277,7 +301,7 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
   return (
     <main className="corporate-stays-page corporate-editorial-page homepage-theme">
       <header className="corporate-editorial-masthead">
-        <h1>Corporate stays</h1>
+        <h1>Insurance &amp; corporate stays</h1>
         <span>Pakenham · Victoria</span>
       </header>
 
@@ -296,13 +320,70 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
           <span>Three private homes.<br />One point of contact.</span>
         </div>
         <div className="corporate-editorial-hero__copy">
-          <span className="corporate-editorial-eyebrow">Space for the people doing the work</span>
-          <h2 id="corporate-hero-title">Room for the workday. Privacy after it.</h2>
-          <p>Furnished whole-home stays for project teams, contractors and relocating employees, managed locally from first enquiry to checkout.</p>
+          <span className="corporate-editorial-eyebrow">A private place to settle in</span>
+          <h2 id="corporate-hero-title">A home while life moves forward.</h2>
+          <p>Furnished whole-home stays for families needing temporary accommodation, relocating employees and project teams. One local contact from enquiry to checkout.</p>
           <div className="corporate-editorial-links">
-            <Link href="#corporate-question">Ask about a stay <ArrowUpRight size={17} aria-hidden="true" /></Link>
+            <Link href="#corporate-question" onClick={() => openEnquiryType("insurance")}>Request an insurance quote <ArrowUpRight size={17} aria-hidden="true" /></Link>
             <Link href="#corporate-booking">Book a corporate stay <ArrowUpRight size={17} aria-hidden="true" /></Link>
           </div>
+        </div>
+      </section>
+
+      <section id="insurance-accommodation" className="corporate-insurance" aria-labelledby="corporate-insurance-title">
+        <div className="corporate-insurance__heading">
+          <span>Flexible accommodation, personally arranged</span>
+          <h2 id="corporate-insurance-title">One enquiry. A suitable home. A clear quote.</h2>
+          <p>Tell us what you need and we&apos;ll help find the right furnished home and confirm the arrangements before you commit.</p>
+        </div>
+        <div className="corporate-insurance__paths">
+          <article className="corporate-insurance__path corporate-insurance__path--insurance">
+            <span className="corporate-insurance__number">01 / Insurance stays</span>
+            <div>
+              <h3>Insurance &amp; temporary relocation.</h3>
+              <p>A private, furnished base for families who need somewhere to stay while home repairs or a claim are being resolved.</p>
+            </div>
+            <ul>
+              <li>Household and bedroom needs reviewed with you</li>
+              <li>Written accommodation quote on request</li>
+              <li>Stay extensions subject to availability</li>
+            </ul>
+            <Link href="#corporate-question" onClick={() => openEnquiryType("insurance")}>Request an insurance quote <ArrowUpRight size={19} aria-hidden="true" /></Link>
+          </article>
+          <article className="corporate-insurance__path corporate-insurance__path--corporate">
+            <span className="corporate-insurance__number">02 / Corporate stays</span>
+            <div>
+              <h3>Space for the people doing the work.</h3>
+              <p>Practical whole-home accommodation for project teams, contractors and employees working away from home.</p>
+            </div>
+            <ul>
+              <li>Separate bedrooms and everyday facilities</li>
+              <li>Multiple adjacent homes can be requested</li>
+              <li>Billing and invoice requirements discussed upfront</li>
+            </ul>
+            <Link href="#corporate-question" onClick={() => openEnquiryType("corporate")}>Ask about a corporate stay <ArrowUpRight size={19} aria-hidden="true" /></Link>
+          </article>
+        </div>
+        <div className="corporate-insurance__homes">
+          <div className="corporate-insurance__homes-heading">
+            <h3>Three homes. Flexible options.</h3>
+            <p>Explore the layout and features of each home before you enquire.</p>
+          </div>
+          <div className="corporate-insurance__homes-grid">
+            {properties.map((property) => (
+              <Link href={`/properties/${property.slug}`} className="corporate-insurance__home" key={property.slug}>
+                <span className="corporate-insurance__home-image">
+                  {property.featuredImage ? <Image src={property.featuredImage} alt={`${property.name.replace(" - Whole", "")} exterior`} fill sizes="(max-width: 760px) 100vw, 33vw" /> : null}
+                </span>
+                <span className="corporate-insurance__home-details">
+                  <strong>{property.name.replace(" - Whole", "")}</strong>
+                  <small>{property.bedrooms} bedrooms · Up to {property.maxGuests} guests</small>
+                  <span>View house &amp; bed layout <ArrowUpRight size={17} aria-hidden="true" /></span>
+                </span>
+              </Link>
+            ))}
+          </div>
+          <p className="corporate-insurance__homes-note">Parking, accessibility and individual bedroom needs can be discussed when you enquire.</p>
         </div>
       </section>
 
@@ -329,12 +410,12 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-5 flex flex-col justify-center">
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black block mb-4">Enquiry</span>
-              <h2>Ask about a corporate stay.</h2>
-              <p className="text-base text-stone-600 leading-relaxed max-w-md mb-8">Use this short enquiry form for rates, invoices, longer stays, team arrangements, or anything you want to clarify before booking.</p>
+              <h2>{enquiryType === "insurance" ? "Request a place to stay." : "Ask about a corporate stay."}</h2>
+              <p className="text-base text-stone-600 leading-relaxed max-w-md mb-8">{enquiryType === "insurance" ? "Tell us about the people, dates and type of home you need. We’ll respond with suitable options and a written quote; no stay is reserved by submitting this form." : "Use this short enquiry form for rates, invoices, longer stays, team arrangements, or anything you want to clarify before booking."}</p>
               <ul className="space-y-4 text-sm text-stone-600">
-                <li className="flex items-start gap-3"><CalendarCheck size={18} className="text-[var(--hero-green)] shrink-0 mt-0.5" /> Weekly and monthly stays welcome</li>
-                <li className="flex items-start gap-3"><ShieldCheck size={18} className="text-[var(--hero-green)] shrink-0 mt-0.5" /> Exact details confirmed before arrival</li>
-                <li className="flex items-start gap-3"><Car size={18} className="text-[var(--hero-green)] shrink-0 mt-0.5" /> Parking for team vehicles</li>
+                <li className="flex items-start gap-3"><CalendarCheck size={18} className="text-[var(--hero-green)] shrink-0 mt-0.5" /> Flexible dates discussed with you</li>
+                <li className="flex items-start gap-3"><ShieldCheck size={18} className="text-[var(--hero-green)] shrink-0 mt-0.5" /> Clear details before you commit</li>
+                <li className="flex items-start gap-3"><Car size={18} className="text-[var(--hero-green)] shrink-0 mt-0.5" /> Parking and access needs considered</li>
               </ul>
             </div>
             
@@ -343,22 +424,32 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
                 {enquirySubmitted ? (
                   <div className="py-10 text-center">
                     <div className="mx-auto flex h-12 w-12 items-center justify-center bg-[var(--hero-green)] text-white"><CheckCircle2 size={24} /></div>
-                    <h4 className="mt-5 text-xl font-semibold">Your question has been sent.</h4>
-                    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-black">Thank you, {enquiryData.contactName || "we've received your enquiry"}. The Serenity team will reply to your business email.</p>
+                    <h4 className="mt-5 text-xl font-semibold">Your enquiry has been sent.</h4>
+                    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-black">Thank you, {enquiryData.contactName || "we've received your enquiry"}. The Serenity team will reply to your email with the next steps.</p>
                     {enquiryReference && <p className="mt-4 inline-block border-y border-neutral-300 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-black">Reference {enquiryReference}</p>}
-                    <div><button type="button" className="mt-6 border border-black px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] hover:bg-black hover:text-white" onClick={() => { setEnquirySubmitted(false); setEnquirySubmissionKey(""); setEnquiryReference(""); setEnquiryData({ companyName: "", contactName: "", email: "", phone: "", question: "" }); }}>Ask another question</button></div>
+                    <div><button type="button" className="mt-6 border border-black px-5 py-3 text-xs font-bold uppercase tracking-[0.14em] hover:bg-black hover:text-white" onClick={() => { setEnquirySubmitted(false); setEnquirySubmissionKey(""); setEnquiryReference(""); setEnquiryData({ companyName: "", contactName: "", email: "", phone: "", preferredDates: "", accommodationNeeds: "", question: "" }); }}>Send another enquiry</button></div>
                   </div>
                 ) : (
                   <form onSubmit={handleEnquirySubmit} className="mt-6 space-y-5">
+                    <div className="corporate-enquiry-type" role="group" aria-label="Enquiry type">
+                      <button type="button" aria-pressed={enquiryType === "insurance"} onClick={() => selectEnquiryType("insurance")}>Insurance accommodation</button>
+                      <button type="button" aria-pressed={enquiryType === "corporate"} onClick={() => selectEnquiryType("corporate")}>Corporate stay</button>
+                    </div>
                     <div className="grid gap-5 sm:grid-cols-2">
-                      <FormInput id="corp-enquiry-company" label="Company name *" required value={enquiryData.companyName} onChange={(event) => setEnquiryData({ ...enquiryData, companyName: event.target.value })} placeholder="Your company" />
+                      <FormInput id="corp-enquiry-company" label={enquiryType === "insurance" ? "Insurer / organisation (optional)" : "Company name *"} required={enquiryType === "corporate"} value={enquiryData.companyName} onChange={(event) => setEnquiryData({ ...enquiryData, companyName: event.target.value })} placeholder={enquiryType === "insurance" ? "If applicable" : "Your company"} />
                       <FormInput id="corp-enquiry-contact" label="Contact name *" required value={enquiryData.contactName} onChange={(event) => setEnquiryData({ ...enquiryData, contactName: event.target.value })} placeholder="Full name" />
-                      <FormInput id="corp-enquiry-email" label="Business email *" type="email" required value={enquiryData.email} onChange={(event) => setEnquiryData({ ...enquiryData, email: event.target.value })} placeholder="name@company.com.au" />
+                      <FormInput id="corp-enquiry-email" label={enquiryType === "insurance" ? "Email address *" : "Business email *"} type="email" required value={enquiryData.email} onChange={(event) => setEnquiryData({ ...enquiryData, email: event.target.value })} placeholder={enquiryType === "insurance" ? "you@example.com" : "name@company.com.au"} />
                       <FormInput id="corp-enquiry-phone" label="Phone number (optional)" type="tel" value={enquiryData.phone} onChange={(event) => setEnquiryData({ ...enquiryData, phone: event.target.value })} placeholder="+61 400 000 000" />
                     </div>
-                    <TextArea id="corp-enquiry-question" label="Your question *" required value={enquiryData.question} onChange={(event) => setEnquiryData({ ...enquiryData, question: event.target.value })} placeholder="What would you like to know about a corporate stay?" rows={4} />
+                    {enquiryType === "insurance" && (
+                      <div className="grid gap-5 sm:grid-cols-2">
+                        <FormInput id="insurance-dates" label="Preferred dates (optional)" value={enquiryData.preferredDates} onChange={(event) => setEnquiryData({ ...enquiryData, preferredDates: event.target.value })} placeholder="Approximate dates are fine" />
+                        <FormInput id="insurance-needs" label="People / bedrooms needed (optional)" value={enquiryData.accommodationNeeds} onChange={(event) => setEnquiryData({ ...enquiryData, accommodationNeeds: event.target.value })} placeholder="e.g. 4 people, 3 bedrooms" />
+                      </div>
+                    )}
+                    <TextArea id="corp-enquiry-question" label={enquiryType === "insurance" ? "Accommodation needs *" : "Your question *"} required value={enquiryData.question} onChange={(event) => setEnquiryData({ ...enquiryData, question: event.target.value })} placeholder={enquiryType === "insurance" ? "Tell us what kind of home you need. You don’t need to share private claim details." : "What would you like to know about a corporate stay?"} rows={4} />
                     {enquiryError && <p className="border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700" role="alert" aria-live="polite">{enquiryError}</p>}
-                    <button type="submit" className="inline-flex w-full items-center justify-center gap-2 bg-[var(--hero-green)] text-white px-6 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] rounded-none transition-colors disabled:cursor-not-allowed disabled:opacity-60" disabled={enquirySubmitting}>{enquirySubmitting ? "Sending question…" : "Send corporate question"}<ArrowUpRight size={15} /></button>
+                    <button type="submit" className="inline-flex w-full items-center justify-center gap-2 bg-[var(--hero-green)] text-white px-6 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] rounded-none transition-colors disabled:cursor-not-allowed disabled:opacity-60" disabled={enquirySubmitting}>{enquirySubmitting ? "Sending enquiry…" : enquiryType === "insurance" ? "Request accommodation quote" : "Send corporate question"}<ArrowUpRight size={15} /></button>
                   </form>
                 )}
               </div>
@@ -577,10 +668,10 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
         <div className="container max-w-[92rem] px-5 py-20 sm:px-8 sm:py-28 lg:flex lg:items-end lg:justify-between lg:gap-16 lg:px-12">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white block mb-6">Personalised guest support</span>
-            <h2 className="max-w-3xl">A comfortable home for the people doing the work.</h2>
+            <h2 className="max-w-3xl">A comfortable home for the next chapter.</h2>
           </div>
           <div className="mt-10 max-w-sm lg:mt-0">
-            <p className="text-base leading-relaxed text-white">We&apos;re here to make company stays simple, from the first enquiry to the final invoice.</p>
+            <p className="text-base leading-relaxed text-white">Whether you&apos;re arranging a temporary family stay or accommodation for a team, we&apos;re here to help from the first enquiry onward.</p>
             <div className="mt-8 space-y-4 text-sm font-medium tracking-wide text-white">
               <p className="flex items-center gap-4"><Phone size={18} className="text-white" /> <a href={`tel:${contact.phoneNumber.replace(/[^+\d]/g, "")}`} className="hover:underline transition-colors">{contact.phoneNumber}</a></p>
               <p className="flex items-center gap-4"><Mail size={18} className="text-white" /> <a href={`mailto:${contact.corporateEnquiryEmail}`} className="break-words hover:underline transition-colors">{contact.corporateEnquiryEmail}</a></p>

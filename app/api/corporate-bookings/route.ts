@@ -111,7 +111,7 @@ export async function POST(request: Request) {
 
     const groupReference = corporateReference();
     const bookingRows = loadedProperties.map((property, index) => {
-      const price = calculatePrice(property, checkIn, checkout, guests, true);
+      const price = calculatePrice(property, checkIn, checkout, guests);
       return {
         reference: `${groupReference}-${String(index + 1).padStart(2, "0")}`,
         property_id: orderedRows[index].id,

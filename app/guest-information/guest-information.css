@@ -120,23 +120,8 @@ body:has(.guest-information-page) .public-site > main { background: #f8f8f5; }
 .guest-information-card-art svg { flex: none; }
 .guest-information-card-art span { max-width: 10rem; font-family: var(--guest-serif); font-size: 1.4rem; font-style: italic; line-height: 1.1; }
 
-.guest-information-support { display: grid; grid-template-columns: auto minmax(0, 1.15fr) minmax(0, 1fr) auto; align-items: center; gap: 1.8rem; padding: 2rem max(2rem, calc((100vw - 87rem) / 2)); background: var(--guest-navy); color: #fff; }
-.guest-information-support-icon { color: #d5b275; }
-.guest-information-support > div:nth-child(2) > p { color: #d5b275; font-size: .69rem !important; font-weight: 750; letter-spacing: .13em; text-transform: uppercase; }
-.guest-information-support h2 { max-width: 19rem; margin-top: .25rem; font-family: var(--guest-serif); font-size: clamp(1.55rem, 2.1vw, 2.4rem); font-weight: 400; line-height: 1.12; }
-.guest-information-support > p { max-width: 17rem; padding-left: 1.5rem; border-left: 1px solid rgba(255,255,255,.35); color: #dce6e9; font-size: .8rem !important; line-height: 1.6 !important; }
-.guest-information-support-actions { display: grid; gap: .55rem; min-width: 14rem; }
-.guest-information-support-actions a { display: flex; align-items: center; gap: .55rem; justify-content: space-between; min-height: 2.6rem; padding: .55rem .8rem; border: 1px solid #d5b275; border-radius: .3rem; color: #fff; font-size: .72rem; font-weight: 700; text-decoration: none; }
-.guest-information-support-actions a:first-child { background: #d5b275; color: var(--guest-navy); }
-.guest-information-support-actions a:hover { filter: brightness(1.1); }
-.guest-information-values { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem max(2rem, calc((100vw - 87rem) / 2)); background: #fff; }
-.guest-information-values span { display: flex; align-items: center; gap: .6rem; color: #304758; font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
-.guest-information-values svg { color: #8f6b32; }
-
 @media (max-width: 1050px) {
   .guest-information-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .guest-information-support { grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr); }
-  .guest-information-support-actions { grid-column: 2 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 700px) {
   .guest-information-hero { display: block; min-height: 0; background: #fff; }
@@ -165,10 +150,4 @@ body:has(.guest-information-page) .public-site > main { background: #f8f8f5; }
   .guest-information-card h3 { font-size: 1.65rem; }
   .guest-information-card li { font-size: .82rem; }
   .guest-information-card-photo, .guest-information-card-art { height: 8.5rem; }
-  .guest-information-support { grid-template-columns: auto minmax(0, 1fr); gap: .85rem; padding: 1.5rem 1rem; }
-  .guest-information-support h2 { font-size: 1.7rem; }
-  .guest-information-support > p { grid-column: 1 / -1; max-width: none; padding: 0; border: 0; }
-  .guest-information-support-actions { grid-column: 1 / -1; grid-template-columns: 1fr; }
-  .guest-information-values { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem .5rem; padding: 1rem; }
-  .guest-information-values span { font-size: .58rem; }
 }

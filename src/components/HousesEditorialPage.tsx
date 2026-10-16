@@ -7,11 +7,12 @@ import { useMemo, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowUpRight, Bath, BedDouble, BedSingle, CarFront, UsersRound, WashingMachine, Wifi, type LucideIcon } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import type { Property } from "@/src/data/properties";
 import type { GuestCounts } from "@/src/lib/booking";
 import { hasUnavailableConflict, validateGuestCapacity } from "@/src/lib/booking";
 import { isApprovedHomepageMediaSource } from "@/src/lib/homepageMedia";
+import { editorialHouseDetails } from "@/src/lib/editorialHouseDetails";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -85,30 +86,6 @@ function approvedImage(property: Property) {
   return property.images.find((image) => isApprovedHomepageMediaSource(image.src))?.src ?? "";
 }
 
-function houseDetails(property: Property): { label: string; Icon: LucideIcon }[] {
-  const details: { label: string; Icon: LucideIcon }[] = [
-    { label: `Sleeps up to ${property.maxGuests}`, Icon: UsersRound },
-    { label: `${property.bedrooms} ${property.bedrooms === 1 ? "bedroom" : "bedrooms"}`, Icon: BedDouble },
-    { label: `${property.bathrooms} ${property.bathrooms === 1 ? "bathroom" : "bathrooms"}`, Icon: Bath },
-    { label: `${property.beds} ${property.beds === 1 ? "bed" : "beds"}`, Icon: BedSingle },
-  ];
-
-  const parking = property.parkingType?.trim();
-  if (parking) {
-    const label = /free parking on premises/i.test(parking) && /free street parking/i.test(parking)
-      ? "Free on-site & street parking"
-      : /^free parking on premises$/i.test(parking) ? "Free on-site parking" : parking;
-    details.push({ label, Icon: CarFront });
-  }
-  if (property.amenities.some((amenity) => /wi[\s-]?fi|wireless internet/i.test(amenity))) {
-    details.push({ label: "Wi-Fi", Icon: Wifi });
-  } else if (property.amenities.some((amenity) => /laundry|washer|washing machine/i.test(amenity))) {
-    details.push({ label: "Laundry", Icon: WashingMachine });
-  }
-
-  return details;
-}
-
 function parseNonNegativeInteger(value: string | null) {
   if (value === null || value === "") return null;
   const parsed = Number(value);
@@ -177,7 +154,7 @@ export function HousesEditorialPage({ properties }: { properties: Property[] }) 
           const name = property.name.replace(" - Whole", "");
           const image = approvedImage(property);
           const href = `/properties/${property.slug}`;
-          const details = houseDetails(property);
+          const details = editorialHouseDetails(property);
 
           return (
             <article className="houses-editorial-list__card" key={property.id || property.slug}>

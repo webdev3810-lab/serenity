@@ -45,6 +45,7 @@ import { fetchAllAdminRows } from "@/src/lib/admin-pagination";
 
 import { Overview } from "@/src/components/admin/AdminOverview";
 import { HomepageSectionsEditor } from "./admin/AdminHomepageEditor";
+import { GuestInformationEditor } from "./admin/GuestInformationEditor";
 import { HouseEditor } from "./admin/AdminHouseEditor";
 import { AdminUserManager,ContactManager,EnquiryManager } from "./admin/AdminInboxSections";
 import { AdminNavItem,AdminRole,AdminUser,asBeds,asDatePrices,asList,emptyHomepage,emptyProperty,emptySettings,formatMelbourneCompactDateTime,formatMelbourneDateTime,HomepageDraft,HomepageSectionKey,normalizeAdminSettings,normalizeProperty,Row,Tab } from "./admin/AdminModels";
@@ -61,7 +62,7 @@ export function SupabaseAdminDashboardV2({ email, role, initialTab = "overview",
   const { theme } = useAdminTheme();
   const [localTab, setTab] = useState<Tab>(initialTab);
   const routeTab = searchParams.get("tab") as Tab | null;
-  const tab = initialHouseId || initialNewHouse ? localTab : routeTab && ["overview", "homepage", "houses", "bookings", "payments", "receipts", "calendar", "partners", "enquiries", "contacts", "users", "settings"].includes(routeTab) && (routeTab !== "users" || role === "super_admin") ? routeTab : initialTab;
+  const tab = initialHouseId || initialNewHouse ? localTab : routeTab && ["overview", "homepage", "guest-information", "houses", "bookings", "payments", "receipts", "calendar", "partners", "enquiries", "contacts", "users", "settings"].includes(routeTab) && (routeTab !== "users" || role === "super_admin") ? routeTab : initialTab;
   const calendarView = searchParams.get("view") === "settings" ? "settings" : "calendar";
   const [properties, setProperties] = useState<Row[]>([]);
   const [images, setImages] = useState<Row[]>([]);
@@ -452,6 +453,7 @@ useEffect(() => {
   const navItems: AdminNavItem[] = [
     { id: "overview", label: "Overview", description: "At a glance", icon: BarChart3 },
     { id: "homepage", label: "Homepage", description: "Edit landing content", icon: Home },
+    { id: "guest-information", label: "Guest information", description: "Guide, policies and images", icon: ReceiptText },
     { id: "houses", label: "Houses", description: "Content, pricing, photos", icon: Building2 },
     { id: "bookings", label: "Bookings", description: "Reservations and status", icon: CalendarDays },
     { id: "payments", label: "Payments", description: "Stripe transactions and webhooks", icon: CreditCard },
@@ -545,6 +547,7 @@ useEffect(() => {
             : loadFailed && !loaded ? <div className="admin-card p-8"><h2>Workspace unavailable</h2><p className="mt-2 text-[var(--admin-muted)]">Your records could not be loaded. Use Retry above to try again.</p></div>
             : tab === "overview" ? <Overview properties={properties} enquiries={enquiries} bookings={bookings} calendarEvents={calendarEvents} calendarConnections={calendarConnections} onNavigate={handleNavigation} />
             : tab === "homepage" ? <HomepageSectionsEditor baseline={savedHomepage} homepage={homepage} setHomepage={setHomepage} published={homepagePublished} saveSection={saveHomepageSection} saving={saving} properties={properties} toggleFeatured={toggleFeaturedProperty} />
+            : tab === "guest-information" ? <GuestInformationEditor images={images} properties={properties} />
             : tab === "houses" ? houseEditor
             : tab === "bookings" ? <AdminReservationsManager bookings={bookings} enquiries={enquiries} calendarEvents={calendarEvents} calendarConnections={calendarConnections} properties={properties} />
             : tab === "payments" ? <AdminPayments />

@@ -64,7 +64,7 @@ export function LongTermPage() {
     <PageFrame
       eyebrow="Long-Term Stays"
       title="Weekly and Monthly Furnished Accommodation"
-      text="Serenity Stays offers discounted weekly and monthly pricing for relocation housing, long-term project teams, insurance replacement accommodation, and temporary family stays."
+      text="Serenity Stays offers furnished accommodation for relocation housing, long-term project teams, insurance replacement accommodation, and temporary family stays."
     >
       <div className="grid gap-6 lg:grid-cols-3">
         {properties.map((property) => (
@@ -77,16 +77,6 @@ export function LongTermPage() {
                 </span>
                 <h2 className="text-2xl font-bold text-stone-900">{property.name}</h2>
                 <p className="text-base leading-relaxed text-stone-600 line-clamp-2">{property.shortDescription}</p>
-                <div className="discount-summary pt-3 border-t border-stone-100 space-y-2 text-sm font-semibold text-stone-800">
-                  <p className="flex justify-between">
-                    <span>Save {property.weeklyDiscount}% on weekly stays</span>
-                    <span className="discount-value text-[#7A4E2D] font-bold">{property.weeklyDiscount}%</span>
-                  </p>
-                  <p className="flex justify-between">
-                    <span>Save {property.monthlyDiscount}% on monthly stays</span>
-                    <span className="discount-value text-[#7A4E2D] font-bold">{property.monthlyDiscount}%</span>
-                  </p>
-                </div>
               </div>
             </div>
             <div className="p-5 pt-0">

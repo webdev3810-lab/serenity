@@ -154,7 +154,7 @@ function HouseSelector({ properties, selectedSlug, photoMap, onSelect }: HouseSe
           </div>
           <p className="gallery-project-list-intro">Each home has its own edited collection. Select a house to see its rooms and details.</p>
           <div className="gallery-project-list-items" role="list" aria-label="Serenity houses">
-            {properties.map((property, index) => {
+            {properties.map((property) => {
               const isSelected = selectedSlug === property.slug;
               const isPreview = previewProperty?.slug === property.slug;
               return (

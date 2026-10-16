@@ -110,7 +110,7 @@ export function ReviewBookingPage() {
         <aside className="booking-review-price">
           <span className="booking-review-kicker">Your total</span>
           <h2>Price summary <small>AUD</small></h2>
-          <PriceBreakdownView property={property} checkIn={booking.checkIn} checkout={booking.checkout} guests={booking.guests} corporate={booking.guestDetails?.corporate === true} />
+          <PriceBreakdownView property={property} checkIn={booking.checkIn} checkout={booking.checkout} guests={booking.guests} />
         </aside>
       </div>
     </BookingFrame>
@@ -204,7 +204,7 @@ export function PaymentPage() {
 
   if (!property || !booking.checkIn || !booking.checkout || !booking.guestDetails) return <MissingBooking />;
 
-  const price = calculatePrice(property, booking.checkIn, booking.checkout, booking.guests, false);
+  const price = calculatePrice(property, booking.checkIn, booking.checkout, booking.guests);
 
   const pay = async () => {
     setError("");
@@ -264,7 +264,7 @@ export function PaymentPage() {
             <p>Guest: {booking.guestDetails?.firstName} {booking.guestDetails?.lastName}</p>
           </div>
           <div className="pt-2">
-            <PriceBreakdownView property={property} checkIn={booking.checkIn} checkout={booking.checkout} guests={booking.guests} corporate={booking.guestDetails?.corporate === true} />
+            <PriceBreakdownView property={property} checkIn={booking.checkIn} checkout={booking.checkout} guests={booking.guests} />
           </div>
         </aside>
       </div>

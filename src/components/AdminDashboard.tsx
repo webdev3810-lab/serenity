@@ -823,8 +823,6 @@ function HousesSection() {
                   ["Min Stay", `${p.minimumStay} nights`],
                   ["Cleaning Fee", formatAud(p.cleaningFee)],
                   ["Pet Fee", formatAud(p.petFee)],
-                  ["Weekly Disc.", `${p.weeklyDiscount}%`],
-                  ["Monthly Disc.", `${p.monthlyDiscount}%`],
                   ["Parking", p.parkingType.replace("Free ", "")],
                 ].map(([label, value]) => (
                   <div key={label} className="flex justify-between items-center py-1 border-b" style={{ borderColor: "#F3EFE9" }}>

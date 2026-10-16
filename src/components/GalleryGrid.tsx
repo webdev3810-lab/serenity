@@ -101,9 +101,8 @@ export default function GalleryGrid({ properties }: GalleryGridProps) {
     return photos.filter((photo) => photo.categorySlug === activeFilter.replace("category:", ""));
   }, [activeFilter, photos]);
 
-  const propertySections = useMemo(() => properties.map((property, index) => ({
+  const propertySections = useMemo(() => properties.map((property) => ({
     property,
-    index,
     photos: visiblePhotos.filter((photo) => photo.propertySlug === property.slug),
   })).filter((section) => section.photos.length > 0), [properties, visiblePhotos]);
 
@@ -201,7 +200,7 @@ export default function GalleryGrid({ properties }: GalleryGridProps) {
 
       {propertySections.length > 0 ? (
         <div className="gallery-property-sections">
-          {propertySections.map(({ property, index, photos: propertyPhotos }) => (
+          {propertySections.map(({ property, photos: propertyPhotos }) => (
             <section key={property.slug} className="gallery-property-section" data-gallery-reveal aria-labelledby={`gallery-property-${property.slug}`}>
               <div className="gallery-property-heading">
                 <div className="gallery-property-copy">

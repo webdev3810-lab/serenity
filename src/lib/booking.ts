@@ -142,8 +142,7 @@ export const validateGuestCapacity = (property: Property, guests: GuestCounts) =
   return "";
 };
 
-export const calculatePrice = (property: Property, checkIn?: string, checkout?: string, guests: GuestCounts = defaultGuests, _corporate = false): PriceBreakdown => {
-  void _corporate;
+export const calculatePrice = (property: Property, checkIn?: string, checkout?: string, guests: GuestCounts = defaultGuests): PriceBreakdown => {
   const nights = nightsBetween(checkIn, checkout);
   const nightlyRates = checkIn && checkout ? datesInRange(checkIn, checkout).map((date) => {
     const override = property.datePrices?.find((price) => price.date === date && price.active !== false);
@@ -154,8 +153,7 @@ export const calculatePrice = (property: Property, checkIn?: string, checkout?: 
   const petFee = guests.pets > 0 ? property.petFee : 0;
   const extraGuests = Math.max(0, totalStayingGuests(guests) - property.extraGuestThreshold);
   const extraGuestFee = extraGuests * property.extraGuestFee * nights;
-  const discount = 0;
-  const taxable = nightlySubtotal + property.cleaningFee + petFee + extraGuestFee - discount;
+  const taxable = nightlySubtotal + property.cleaningFee + petFee + extraGuestFee;
   const tax = Math.round(taxable * 0.1);
   return {
     nights,
@@ -164,7 +162,7 @@ export const calculatePrice = (property: Property, checkIn?: string, checkout?: 
     cleaningFee: property.cleaningFee,
     petFee,
     extraGuestFee,
-    discount,
+    discount: 0,
     discountLabel: "",
     nightlyRateSummary: hasDatedRate ? "Nightly accommodation (seasonal rates applied)" : `${formatAud(property.nightlyPrice)} × ${nights} night${nights === 1 ? "" : "s"}`,
     tax,

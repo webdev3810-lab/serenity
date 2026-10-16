@@ -15,7 +15,7 @@ BarChart3
 
 export type Row = Record<string, any>;
 export type AdminRole = "admin" | "editor" | "super_admin";
-export type AdminTab = "overview" | "homepage" | "houses" | "reviews" | "bookings" | "payments" | "receipts" | "calendar" | "partners" | "enquiries" | "contacts" | "users" | "settings";
+export type AdminTab = "overview" | "homepage" | "guest-information" | "houses" | "reviews" | "bookings" | "payments" | "receipts" | "calendar" | "partners" | "enquiries" | "contacts" | "users" | "settings";
 export type Tab = AdminTab;
 export type HomepageSectionKey = "hero" | "houses" | "intro" | "services" | "faqs" | "social";
 export type AdminNavItem = { id: Tab; label: string; description: string; icon: typeof BarChart3 };

@@ -40,7 +40,7 @@ export async function POST(_request: Request, { params }: { params: Promise<{ en
     if (!property) return NextResponse.json({ error: "Could not load a selected house for conversion." }, { status: 409 });
     const capacityError = validateGuestCapacity(property, guestsPerHouse);
     if (capacityError) return NextResponse.json({ error: `${property.name}: ${capacityError}` }, { status: 409 });
-    const price = calculatePrice(property, arrival, departure, guestsPerHouse, true);
+    const price = calculatePrice(property, arrival, departure, guestsPerHouse);
     bookingRows.push({
       reference: `${groupReference}-${String(index + 1).padStart(2, "0")}`,
       property_id: row.id,

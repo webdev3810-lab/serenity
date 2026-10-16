@@ -8,7 +8,7 @@ import { useState } from "react";
 
 import { AdminBadge as StatusBadge,useAdminPagination,useAdminWorkspace } from "@/src/components/admin/AdminUI";
 
-import { CharacterField,EmptyState,PageHeader } from "./AdminFields";
+import { EmptyState,PageHeader } from "./AdminFields";
 import { AdminPasswordField } from "./AdminPasswordField";
 import { AdminRole,AdminUser,formatDate,Row } from "./AdminModels";
 export { ReviewManager } from "./ReviewEditor";

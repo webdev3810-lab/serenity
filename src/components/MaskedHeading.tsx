@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useId, useMemo, useRef } from "react";
 import type { CSSProperties, ElementType } from "react";
 import { gsap } from "gsap";
@@ -283,9 +284,9 @@ export default function MaskedHeading({
           <span ref={mediaRef} className="masked-heading-media">
             {mediaType === "video" ? (
               <video className="masked-heading-media-content" src={src} poster={poster} autoPlay muted loop playsInline />
-            ) : (
-              <img className="masked-heading-media-content" src={src} alt="" draggable={false} referrerPolicy={src.includes("a0.muscache.com") ? "no-referrer" : undefined} />
-            )}
+            ) : src ? (
+              <Image className="masked-heading-media-content" src={src} alt="" fill sizes="100vw" unoptimized={src.startsWith("http")} draggable={false} referrerPolicy={src.includes("a0.muscache.com") ? "no-referrer" : undefined} />
+            ) : null}
           </span>
         </span>
       </span>

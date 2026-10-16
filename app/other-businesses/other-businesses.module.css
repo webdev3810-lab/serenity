@@ -66,7 +66,7 @@
 .placesList small { color: #627985; font-size: .73rem; }
 .placesList svg { flex: 0 0 auto; color: #9c7e48; }
 
-.stayMain { max-width: 110rem; margin: 0 auto; padding: clamp(1.5rem, 3vw, 3rem) clamp(1.25rem, 3.5vw, 4rem) 5rem; }
+.stayMain { max-width: none; margin: 0 auto; padding: clamp(1.5rem, 3vw, 3rem) var(--public-card-gutter, 1rem) 5rem; }
 .backLink { display: inline-flex; align-items: center; gap: .5rem; color: #35566d; font-size: .85rem; font-weight: 500; }
 .backLink:hover { color: #9a7839; }
 .stayHeading { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(15rem,.6fr); align-items: end; gap: 2rem; padding: clamp(3rem, 5vw, 6rem) 0 2rem; }
@@ -129,15 +129,13 @@
 }
 
 /* Other businesses hub */
-.hubHero { padding: 1.3rem clamp(1.25rem, 3.5vw, 4rem) clamp(3.5rem, 6vw, 7rem); background: var(--navy); color: #fff; }
+.hubHero { padding: 1.3rem var(--public-card-gutter, 1rem) clamp(3.5rem, 6vw, 7rem); background: var(--navy); color: #fff; }
 .hubTopline { display: flex; justify-content: space-between; gap: 1rem; max-width: 110rem; margin: 0 auto; padding: .8rem 0 1.5rem; border-bottom: 1px solid rgba(255,255,255,.24); color: #d9e0e3; font-size: .68rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
 .page .hubTopline { border-radius: 0 !important; }
-.hubHeroContent { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(15rem,.6fr); align-items: end; gap: 2rem; max-width: 110rem; margin: 0 auto; padding-top: clamp(3rem, 6vw, 6rem); }
-.hubHeroContent .eyebrow { color: var(--gold); }
-.hubHero h1 { margin: .9rem 0 0; font-family: var(--serif); font-size: clamp(3.5rem, 7.3vw, 8rem); font-weight: 400; letter-spacing: -.065em; line-height: .94; }
-.hubHero h1 em { color: var(--gold); font-weight: 400; }
+.hubHeroContent { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(15rem,.6fr); align-items: end; gap: 2rem; max-width: 110rem; margin: 0 auto; padding-top: clamp(2.25rem, 4vw, 4rem); }
+.hubHero h1 { margin: 0; font-family: var(--serif); font-size: clamp(3.25rem, 5.2vw, 5.75rem); font-weight: 400; letter-spacing: -.065em; line-height: .85; text-transform: uppercase; }
 .hubHeroContent > p { max-width: 26rem; margin: 0 0 .5rem; color: #d9e2e6; font-size: clamp(.95rem, 1.1vw, 1.12rem); line-height: 1.65; }
-.hubMain { max-width: 110rem; margin: 0 auto; padding: clamp(3rem, 5vw, 5rem) clamp(1.25rem, 3.5vw, 4rem) 4rem; }
+.hubMain { max-width: none; margin: 0 auto; padding: clamp(3rem, 5vw, 5rem) var(--public-card-gutter, 1rem) 4rem; }
 .hubSectionHeading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin-bottom: 1.6rem; }
 .hubSectionHeading .eyebrow { color: #9b7b43; }
 .hubSectionHeading h2 { margin: .5rem 0 0; font-family: var(--serif); font-size: clamp(2.6rem, 4.2vw, 5rem); font-weight: 400; letter-spacing: -.055em; line-height: 1; }
@@ -163,7 +161,7 @@
 @media (max-width: 760px) {
   .hubTopline span:last-child { display: none; }
   .hubHeroContent { grid-template-columns: 1fr; gap: 1.3rem; }
-  .hubHero h1 { font-size: clamp(3.5rem, 12vw, 5.4rem); }
+  .hubHero h1 { font-size: clamp(2.65rem, 9vw, 4.5rem); }
   .hubSectionHeading { align-items: flex-start; flex-direction: column; gap: .6rem; }
   .hubSectionHeading > p { text-align: left; }
   .businessGrid { grid-template-columns: 1fr; }

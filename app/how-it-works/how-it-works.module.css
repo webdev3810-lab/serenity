@@ -9,7 +9,7 @@
 }
 
 .hero {
-  padding: clamp(2rem, 4vw, 4rem) clamp(1.25rem, 3.5vw, 4rem) clamp(4rem, 7vw, 7rem);
+  padding: clamp(2rem, 4vw, 4rem) var(--public-card-gutter, 1rem) clamp(4rem, 7vw, 7rem);
   border-radius: 0 0 1.75rem 1.75rem;
   background: var(--navy);
   color: #fff;
@@ -100,7 +100,7 @@
 
 .process {
   margin-block: clamp(0.75rem, 1.2vw, 1.25rem);
-  padding: clamp(4rem, 7vw, 7rem) clamp(1.25rem, 3.5vw, 4rem);
+  padding: clamp(4rem, 7vw, 7rem) var(--public-card-gutter, 1rem);
   border-radius: 1.25rem;
   background: #ffffff;
   box-shadow: 0 0.75rem 2.25rem rgba(0, 40, 68, 0.09);
@@ -129,7 +129,7 @@
 }
 
 .steps {
-  max-width: 94rem;
+  max-width: none;
   margin: 0 auto;
   padding: 0;
   list-style: none;
@@ -379,7 +379,7 @@
   }
 
   .process {
-    padding: 2.8rem 1.25rem 3rem;
+    padding: 2.8rem var(--public-card-gutter, 0.5rem) 3rem;
   }
 
   .sectionIntro {

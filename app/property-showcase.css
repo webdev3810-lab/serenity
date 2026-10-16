@@ -11,10 +11,15 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
 .public-site .property-theme:has(.property-showcase) .stay-section#location,
 .public-site .property-theme:has(.property-showcase) .stay-related-homes,
 .public-site .property-theme:has(.property-showcase) #reviews {
-  width: calc(100% - clamp(2rem, 4vw, 5rem)); max-width: 100rem; margin-inline: auto;
+  width: calc(100% - 2 * var(--public-card-gutter)); max-width: none; margin-inline: auto;
 }
 .public-site .property-theme:has(.property-showcase) .stay-body { margin-top: 2.25rem; }
 .public-site .property-theme:has(.property-showcase) .stay-section { scroll-margin-top: 7rem; }
+.public-site .property-theme:has(.property-showcase) .stay-related-homes > h2,
+.public-site .property-theme:has(.property-showcase) .related-houses-preview {
+  max-width: none;
+  padding-inline: 0;
+}
 
 .property-showcase { --showcase-navy: var(--hero-green, #002844); --showcase-gold: #b98b3e; color: var(--showcase-navy); }
 .property-showcase-hero {
@@ -28,7 +33,7 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
   background: linear-gradient(90deg, rgba(0, 30, 53, .88) 0%, rgba(0, 30, 53, .55) 48%, rgba(0, 30, 53, .07) 100%),
               linear-gradient(0deg, rgba(0, 30, 53, .35), transparent 55%);
 }
-.property-showcase-hero-content { position: relative; z-index: 1; width: calc(100% - clamp(2rem, 4vw, 5rem)); max-width: 100rem; margin: 0 auto; padding: 7rem 0 3.5rem; color: #fff; }
+.property-showcase-hero-content { position: relative; z-index: 1; width: calc(100% - 2 * var(--public-card-gutter)); max-width: none; margin: 0 auto; padding: 7rem 0 3.5rem; color: #fff; }
 .property-showcase-back { display: inline-block; margin-bottom: 1.5rem; color: #f6ead7 !important; font-size: .82rem; font-weight: 650; text-decoration: underline; text-underline-offset: .35rem; }
 .property-showcase-eyebrow { margin: 0 0 .65rem; color: #e8cf9c; font-size: .75rem !important; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
 .property-theme .property-showcase h1 { max-width: 48rem; margin: 0 0 .8rem; color: #fff; font-family: var(--property-serif); font-size: clamp(3.5rem, 7vw, 6rem); font-weight: 400; line-height: .95; letter-spacing: -.055em; }
@@ -67,7 +72,7 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
 .property-showcase-features,
 .property-showcase-info-grid,
 .property-showcase-details-grid,
-.property-showcase-partner { width: calc(100% - clamp(2rem, 4vw, 5rem)); max-width: 100rem; margin-inline: auto; }
+.property-showcase-partner { width: calc(100% - 2 * var(--public-card-gutter)); max-width: none; margin-inline: auto; }
 .property-showcase-overview { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.25fr); gap: clamp(2rem, 5vw, 5rem); align-items: center; padding: 3.5rem 0 3rem; scroll-margin-top: 7rem; }
 .property-showcase-overview:not(:has(.property-showcase-mosaic)) { grid-template-columns: 1fr; }
 .property-showcase-kicker { margin: 0 0 .6rem; color: #9d752f; font-size: .76rem !important; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
@@ -168,12 +173,12 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
   .public-site .property-theme:has(.property-showcase) .stay-body,
   .public-site .property-theme:has(.property-showcase) .stay-section#location,
   .public-site .property-theme:has(.property-showcase) .stay-related-homes,
-  .public-site .property-theme:has(.property-showcase) #reviews { width: calc(100% - 2rem); }
+  .public-site .property-theme:has(.property-showcase) #reviews { width: calc(100% - 2 * var(--public-card-gutter)); }
   .property-showcase-hero { display: block; min-height: 0; background: #fff; }
   .property-showcase-hero-media { position: relative; inset: auto; height: clamp(14rem, 66vw, 20rem); }
   .property-showcase-hero-media img { object-position: center; }
   .property-showcase-hero::after { display: none; }
-  .property-showcase-hero-content { width: calc(100% - 2rem); padding: 1.25rem 0 1.6rem; color: var(--showcase-navy); }
+  .property-showcase-hero-content { width: calc(100% - 2 * var(--public-card-gutter)); padding: 1.25rem 0 1.6rem; color: var(--showcase-navy); }
   .property-showcase-back { color: var(--showcase-navy) !important; }
   .property-showcase-eyebrow { color: var(--showcase-navy); }
   .property-theme .property-showcase h1 { color: var(--showcase-navy); font-size: clamp(2.8rem, 12vw, 4.2rem); }
@@ -186,7 +191,7 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
   .property-showcase .property-showcase-button.is-outline { border-color: var(--showcase-navy); color: var(--showcase-navy); background: #fff; }
   .property-showcase .property-showcase-button.is-outline:hover { background: #eef3f6; }
   .property-showcase-nav a { min-height: 4.45rem; min-width: 5.4rem; font-size: .68rem; }
-  .property-showcase-overview, .property-showcase-features, .property-showcase-info-grid, .property-showcase-details-grid, .property-showcase-partner { width: calc(100% - 2rem); }
+  .property-showcase-overview, .property-showcase-features, .property-showcase-info-grid, .property-showcase-details-grid, .property-showcase-partner { width: calc(100% - 2 * var(--public-card-gutter)); }
   .property-showcase-overview { padding: 2.2rem 0 1.5rem; }
   .property-showcase-mosaic { grid-template-rows: 11rem 5.5rem; min-height: 16.8rem; }
   .property-showcase-features { padding: 1.1rem; }

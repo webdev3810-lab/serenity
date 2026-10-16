@@ -10,7 +10,10 @@ export async function POST(request: Request) {
   if (!isSupabaseConfigured || !process.env.SUPABASE_SERVICE_ROLE_KEY) return NextResponse.json({ configured: false });
   try {
     const body = await request.json();
-    const companyName = String(body.companyName ?? "").trim();
+    const isInsuranceQuestion = body.enquiryType === "insurance_question";
+    const isCorporateQuestion = body.enquiryType === "corporate_question";
+    const isShortEnquiry = isInsuranceQuestion || isCorporateQuestion;
+    const companyName = String(body.companyName ?? "").trim() || (isInsuranceQuestion ? "Private insurance enquiry" : "");
     const contactName = String(body.contactName ?? "").trim();
     const email = String(body.email ?? "").trim().toLowerCase();
     const phone = String(body.phone ?? "").trim();
@@ -21,14 +24,13 @@ export async function POST(request: Request) {
     const abn = String(body.abn ?? "").trim();
     const purchaseOrder = String(body.purchaseOrder ?? "").trim();
     const notes = String(body.notes ?? "").trim();
-    const isCorporateQuestion = body.enquiryType === "corporate_question";
     const idempotencyKey = String(request.headers.get("Idempotency-Key") ?? body.idempotencyKey ?? "").trim();
-    if (!companyName || !contactName || !email) return NextResponse.json({ error: "Company, contact name, and business email are required." }, { status: 400 });
-    if (isCorporateQuestion && !notes) return NextResponse.json({ error: "Enter your corporate stay question." }, { status: 400 });
-    if (!isCorporateQuestion && (!arrival || !departure)) return NextResponse.json({ error: "Arrival and departure are required for a stay enquiry." }, { status: 400 });
-    if (!/^\S+@\S+\.\S+$/.test(email)) return NextResponse.json({ error: "Enter a valid business email address." }, { status: 400 });
-    if (!isCorporateQuestion && departure <= arrival) return NextResponse.json({ error: "Departure must be after arrival." }, { status: 400 });
-    if (!isCorporateQuestion && (!Number.isInteger(housesNeeded) || housesNeeded < 1 || housesNeeded > 3 || propertySlugs.length !== housesNeeded)) return NextResponse.json({ error: "Select the same number of adjacent houses as requested." }, { status: 400 });
+    if (!companyName || !contactName || !email) return NextResponse.json({ error: isInsuranceQuestion ? "Contact name and email are required." : "Company, contact name, and business email are required." }, { status: 400 });
+    if (isShortEnquiry && !notes) return NextResponse.json({ error: "Enter your accommodation question." }, { status: 400 });
+    if (!isShortEnquiry && (!arrival || !departure)) return NextResponse.json({ error: "Arrival and departure are required for a stay enquiry." }, { status: 400 });
+    if (!/^\S+@\S+\.\S+$/.test(email)) return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
+    if (!isShortEnquiry && departure <= arrival) return NextResponse.json({ error: "Departure must be after arrival." }, { status: 400 });
+    if (!isShortEnquiry && (!Number.isInteger(housesNeeded) || housesNeeded < 1 || housesNeeded > 3 || propertySlugs.length !== housesNeeded)) return NextResponse.json({ error: "Select the same number of adjacent houses as requested." }, { status: 400 });
     if (idempotencyKey.length > 128 || companyName.length > 160 || contactName.length > 120 || email.length > 150 || phone.length > 30 || abn.length > 30 || purchaseOrder.length > 120 || notes.length > 1000) return NextResponse.json({ error: "Please shorten one or more enquiry fields." }, { status: 400 });
 
     const supabase = createSupabaseAdminClient();
@@ -37,7 +39,7 @@ export async function POST(request: Request) {
       if (existing) return NextResponse.json({ configured: true, enquiry: existing });
     }
     let propertyIds: string[] = [];
-    if (!isCorporateQuestion) {
+    if (!isShortEnquiry) {
       const { data: propertyRows, error: propertyError } = await supabase.from("properties").select("id, slug, corporate_booking_allowed, minimum_corporate_stay, minimum_corporate_houses, maximum_corporate_houses, adjacent_houses_allowed, unavailable_dates").in("slug", propertySlugs).eq("published", true);
       if (propertyError) throw propertyError;
       if (!propertyRows || propertyRows.length !== propertySlugs.length) return NextResponse.json({ error: "One or more selected houses are not available for corporate enquiries." }, { status: 409 });
@@ -71,8 +73,8 @@ export async function POST(request: Request) {
       arrival: arrival || null,
       departure: departure || null,
       guests: body.guests ?? "",
-      houses_needed: isCorporateQuestion ? "0" : String(housesNeeded),
-      purpose: isCorporateQuestion ? "Corporate question" : body.purpose ?? "",
+      houses_needed: isShortEnquiry ? "0" : String(housesNeeded),
+      purpose: isInsuranceQuestion ? "Insurance accommodation quote" : isCorporateQuestion ? "Corporate question" : body.purpose ?? "",
       notes,
       property_ids: propertyIds,
       abn,
@@ -89,7 +91,7 @@ export async function POST(request: Request) {
       }
       throw error;
     }
-    const kind = isCorporateQuestion ? "question" : "stay";
+    const kind = isInsuranceQuestion ? "insurance" : isCorporateQuestion ? "question" : "stay";
     const deliveries = await Promise.allSettled([
       notifyCorporateEnquiry({ id: data.id, reference: data.reference, company: companyName, contact: contactName, email, phone, arrival, departure, houses: propertySlugs, notes, kind }),
       acknowledgeCorporateEnquiry({ id: data.id, reference: data.reference, contact: contactName, email, kind }),

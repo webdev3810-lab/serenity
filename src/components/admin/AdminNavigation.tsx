@@ -25,7 +25,7 @@ export function SidebarProfile({ email, role, collapsed }: { email: string; role
 export function AdminNavigation({ items, active, collapsed, onSelect }: { items: AdminNavItem[]; active: Tab; collapsed: boolean; onSelect: (id: Tab) => void }) {
   const groups = [
     { label: "Workspace", items: items.filter((item) => item.id === "overview") },
-    { label: "Content", items: items.filter((item) => ["homepage", "houses", "promotions"].includes(item.id)) },
+    { label: "Content", items: items.filter((item) => ["homepage", "guest-information", "houses", "promotions"].includes(item.id)) },
     { label: "Operations", items: items.filter((item) => ["bookings", "payments", "receipts", "calendar", "partners", "enquiries", "contacts"].includes(item.id)) },
     { label: "Administration", items: items.filter((item) => ["users", "settings"].includes(item.id)) },
   ];

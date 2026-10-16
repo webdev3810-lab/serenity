@@ -37,6 +37,8 @@ export default async function Home() {
       bedrooms: property.bedrooms,
       beds: property.beds,
       bathrooms: property.bathrooms,
+      parkingType: property.parkingType,
+      amenities: property.amenities,
     };
   });
 

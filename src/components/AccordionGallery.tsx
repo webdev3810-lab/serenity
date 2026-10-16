@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import { useRef, useEffect, useState, useCallback, CSSProperties, KeyboardEvent, MouseEvent } from 'react';
 import { gsap } from 'gsap';
 
@@ -268,9 +269,12 @@ const AccordionGallery = ({
                 }}
               >
                 {item.image ? (
-                  <img
+                  <Image
                     src={item.image}
                     alt={item.alt || item.label || ''}
+                    fill
+                    sizes="(max-width: 520px) 100vw, 33vw"
+                    unoptimized={item.image.startsWith('http')}
                     draggable={false}
                     className="block h-full w-full select-none object-cover [-webkit-user-drag:none]"
                   />

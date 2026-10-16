@@ -29,7 +29,7 @@ export function AppShell({ children, contactSettings }: { children: React.ReactN
         <div className="public-site">
           <Header pathname={pathname} />
           <main className="min-h-screen bg-background">{children}</main>
-          <EditorialFooter />
+          <EditorialFooter draft={pathname === "/how-it-works-draft"} />
         </div>
       </BookingProvider>
     </ContactSettingsProvider>
@@ -46,9 +46,9 @@ function Header({ pathname }: { pathname: string | null }) {
     { label: "How It Works", href: "/how-it-works" },
     { label: "Guest Info", href: "/guest-information" },
     { label: "Corporate", href: "/corporate-stays" },
-    { label: "Other Businesses", href: "/other-businesses" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
+    { label: "Other Businesses", href: "/other-businesses" },
   ];
   const partnerBookingHref = "/corporate-stays#corporate-booking";
 
@@ -61,7 +61,6 @@ function Header({ pathname }: { pathname: string | null }) {
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
-
     const onScroll = () => {
       const currentScrollY = window.scrollY;
       if (currentScrollY <= 24) {

@@ -2,6 +2,7 @@
 import type { DateRate } from "@/src/lib/date-pricing";
 import { AmenityEditor } from "./AmenityEditor";
 import { GuestsPricingEditor } from "./GuestsPricingEditor";
+import { FloorPlanManager } from "./FloorPlanManager";
 import { PricingCalendar } from "./PricingCalendar";
 import { ReviewManager } from "./ReviewEditor";
 import { RoomsEditor } from "./RoomsEditor";
@@ -11,7 +12,7 @@ import { RoomsEditor } from "./RoomsEditor";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import PropertyPhotoManager,{type PropertyPhotoManagerHandle} from "@/src/components/PropertyPhotoManager";
-import { BedDouble,Building2,CalendarDays,ChevronLeft,ChevronRight,ClipboardList,Images,Plus,Save,Search,Settings2,Star,Tags,UsersRound } from "lucide-react";
+import { BedDouble,Building2,CalendarDays,ChevronLeft,ChevronRight,ClipboardList,Images,Map,Plus,Save,Search,Settings2,Star,Tags,UsersRound } from "lucide-react";
 import Image from "next/image";
 import { useRef,useState } from "react";
 
@@ -31,9 +32,10 @@ export function ListingDetailsEditor({ draft, setDraft }: { draft:Row; setDraft:
  <div className="md:col-span-2 flex flex-wrap gap-5"><Toggle label="Published on public website" checked={Boolean(draft.published)} onChange={v=>field("published",v)}/><Toggle label="Featured house" checked={Boolean(draft.featured)} onChange={v=>field("featured",v)}/></div></section>;
 }
 
-type HouseEditorTab = "photos" | "details" | "guest-info" | "guests-pricing" | "nightly-rates" | "rooms" | "booking-rules" | "reviews";
+type HouseEditorTab = "photos" | "floor-plan" | "details" | "guest-info" | "guests-pricing" | "nightly-rates" | "rooms" | "booking-rules" | "reviews";
 const houseEditorTabs = [
   { id: "photos", label: "Property images", icon: Images },
+  { id: "floor-plan", label: "Floor plan", icon: Map },
   { id: "details", label: "House details", icon: Building2 },
   { id: "guest-info", label: "Guest information", icon: ClipboardList },
   { id: "guests-pricing", label: "Guests & pricing", icon: UsersRound },
@@ -78,7 +80,7 @@ export function HouseEditor(props: any) {
   const isDetailPage = Boolean(props.isDetailPage);
   const field = (key:string,value:unknown) => props.setDraft((draft:Row)=>({...draft,[key]:value}));
   const photos = props.images.filter((image:Row)=>String(image.property_id)===String(props.selectedId)&&!image.is_placeholder&&String(image.category)!=="floor-plan").map((image:Row)=>({src:propertyImageSource(image),label:String(image.alt_text||image.category||"Property photo")})).filter((photo:{src:string})=>photo.src);
-  const tabs = houseEditorTabs.filter(tab=>(tab.id!=="photos" && tab.id!=="reviews") || Boolean(props.selectedId));
+  const tabs = houseEditorTabs.filter(tab=>(tab.id!=="photos" && tab.id!=="floor-plan" && tab.id!=="reviews") || Boolean(props.selectedId));
   const selectTab = (tab:HouseEditorTab) => {
     setActiveTab(tab);
     requestAnimationFrame(() => document.getElementById(`house-panel-${tab}`)?.scrollIntoView({ block: "start" }));
@@ -102,7 +104,8 @@ export function HouseEditor(props: any) {
       <div className="admin-house-tabs" role="tablist" aria-label="House editor sections">
         {tabs.map((tab,index)=><button key={tab.id} id={`house-tab-${tab.id}`} type="button" role="tab" aria-selected={activeTab===tab.id} aria-controls={`house-panel-${tab.id}`} tabIndex={activeTab===tab.id?0:-1} onClick={()=>selectTab(tab.id)} onKeyDown={event=>handleTabKeyDown(event,index)}><tab.icon size={16} aria-hidden="true" /><span>{tab.label}</span></button>)}
       </div>
-      {props.selectedId && <div id="house-panel-photos" role="tabpanel" aria-labelledby="house-tab-photos" hidden={activeTab!=="photos"} className="admin-house-tab-panel"><section className="admin-card overflow-hidden bg-[var(--admin-surface)]"><div className="border-b border-[var(--admin-border)] px-5 py-4 sm:px-7"><p className="text-sm font-medium text-[var(--admin-text)]">Media</p><h2 className="mt-1 text-xl font-semibold">Photos & floor plan</h2><p className="mt-1 text-sm text-[var(--admin-muted)]">Upload, organise, and publish house photos or a floor plan.</p></div><div className="p-5 sm:p-7"><PropertyPhotoManager ref={photoManagerRef} properties={props.properties} selectedId={props.selectedId} setSelectedId={props.setSelectedId} onSelectProperty={handleSelect} images={props.images} reload={props.reload} notify={props.notify} onError={props.onError} onDirtyChange={setGalleryDirty} embedded showHeader={false} showPropertySelector={false} /></div></section></div>}
+      {props.selectedId && <div id="house-panel-photos" role="tabpanel" aria-labelledby="house-tab-photos" hidden={activeTab!=="photos"} className="admin-house-tab-panel"><section className="admin-card overflow-hidden bg-[var(--admin-surface)]"><div className="border-b border-[var(--admin-border)] px-5 py-4 sm:px-7"><p className="text-sm font-medium text-[var(--admin-text)]">Media</p><h2 className="mt-1 text-xl font-semibold">Property images</h2><p className="mt-1 text-sm text-[var(--admin-muted)]">Upload, organise, and publish house photos.</p></div><div className="p-5 sm:p-7"><PropertyPhotoManager ref={photoManagerRef} properties={props.properties} selectedId={props.selectedId} setSelectedId={props.setSelectedId} onSelectProperty={handleSelect} images={props.images} reload={props.reload} notify={props.notify} onError={props.onError} onDirtyChange={setGalleryDirty} embedded showHeader={false} showPropertySelector={false} /></div></section></div>}
+      {props.selectedId && <div id="house-panel-floor-plan" role="tabpanel" aria-labelledby="house-tab-floor-plan" hidden={activeTab!=="floor-plan"} className="admin-house-tab-panel"><FloorPlanManager key={String(props.selectedId)} propertyId={String(props.selectedId)} propertyName={String(selectedProperty?.name || "Selected house")} images={props.images} reload={props.reload} notify={props.notify} onError={props.onError} /></div>}
       <div id="house-panel-details" role="tabpanel" aria-labelledby="house-tab-details" hidden={activeTab!=="details"} className="admin-house-tab-panel"><ListingDetailsEditor draft={props.draft} setDraft={props.setDraft} /><HouseDetailsEditor draft={props.draft} setDraft={props.setDraft} section="practical" /></div>
       <div id="house-panel-guest-info" role="tabpanel" aria-labelledby="house-tab-guest-info" hidden={activeTab!=="guest-info"} className="admin-house-tab-panel"><HouseDetailsEditor draft={props.draft} setDraft={props.setDraft} section="guest-info" /></div>
       <div id="house-panel-guests-pricing" role="tabpanel" aria-labelledby="house-tab-guests-pricing" hidden={activeTab!=="guests-pricing"} className="admin-house-tab-panel"><GuestsPricingEditor draft={props.draft} setDraft={props.setDraft} /></div>
@@ -113,7 +116,7 @@ export function HouseEditor(props: any) {
         {(props.dirty || galleryDirty) && <p className="admin-notice mb-5">You have unsaved house changes. Return to a house tab to save them.</p>}
         <ReviewManager key={String(props.selectedId)} selectedPropertyId={String(props.selectedId)} properties={props.properties} reviews={props.reviews} createReview={props.createReview} updateReview={props.updateReview} deleteReview={props.deleteReview} />
       </div>}
-      {activeTab!=="reviews" && <HouseEditorActionBar dirty={props.dirty || galleryDirty} draft={props.draft} saving={props.saving || savingAll} invalid={bookingErrors.length > 0} onOpenBookingRules={() => selectTab("booking-rules")} onSave={() => void handleSave()} onCancel={handleCancel} />}
+      {activeTab!=="reviews" && (activeTab!=="floor-plan" || props.dirty || galleryDirty) && <HouseEditorActionBar dirty={props.dirty || galleryDirty} draft={props.draft} saving={props.saving || savingAll} invalid={bookingErrors.length > 0} onOpenBookingRules={() => selectTab("booking-rules")} onSave={() => void handleSave()} onCancel={handleCancel} />}
     </> : isDetailPage ? <div className="rounded-2xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface)] p-8 text-center"><Building2 className="mx-auto text-[var(--admin-text)]" size={28} aria-hidden="true" /><h3 className="mt-3 text-lg font-semibold text-[var(--admin-text)]">House not found</h3><p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-[var(--admin-muted)]">Return to Houses and choose a published or draft house from the list.</p><button type="button" className="admin-button mt-4" onClick={props.onBackToHouses}>Back to houses</button></div> : null}
   </div>;
 }
@@ -164,5 +167,5 @@ export function HouseDetailsEditor({ draft, setDraft, section }: { draft:Row;set
 
 export function BookingRulesEditor({draft,setDraft,propertyCount}:{draft:Row;setDraft:(update:(r:Row)=>Row)=>void;propertyCount:number}) {
  const field=(key:string,value:unknown)=>setDraft(r=>({...r,[key]:value}));const errors=getBookingRuleErrors(draft,propertyCount);
- return <section className="admin-card p-5 sm:p-7 grid gap-5"><h2 className="text-xl font-semibold">Availability and booking rules</h2><p className="text-sm text-[var(--admin-muted)]">These rules are checked again when a booking is submitted.</p>{errors.length>0&&<div role="alert" className="admin-notice is-error">{errors.join(" ")}</div>}<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[["Minimum stay (nights)","minimum_stay"],["Maximum stay (nights)","maximum_stay"],["Minimum advance notice (days)","minimum_advance_notice_days"],["Maximum advance booking (days)","maximum_advance_booking_days"],["Minimum corporate stay (nights)","minimum_corporate_stay"],["Minimum corporate houses","minimum_corporate_houses"],["Maximum corporate houses","maximum_corporate_houses"],["Corporate discount (%)","corporate_discount"],["Weekly discount (%)","weekly_discount"],["Monthly discount (%)","monthly_discount"]].map(([label,key])=><NumberField key={key} label={label} value={draft[key]} onChange={v=>field(key,v)}/>)}</div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[["Allow same-day booking","same_day_booking_allowed"],["Allow weekend bookings","weekend_booking_allowed"],["Instant booking","instant_booking_enabled"],["Booking request required","booking_request_required"],["Allow corporate bookings","corporate_booking_allowed"],["Adjacent houses allowed","adjacent_houses_allowed"],["Allow long-term stays","long_term_stays_allowed"],["Corporate approval required","corporate_approval_required"],["Corporate deposit required","corporate_deposit_required"],["Corporate online payment","corporate_online_payment"],["GST invoice available","gst_invoice_available"]].map(([label,key])=><Toggle key={key} label={label} checked={Boolean(draft[key])} onChange={v=>field(key,v)}/>)}</div><CharacterField label="Corporate booking instructions" value={draft.corporate_instructions} onChange={v=>field("corporate_instructions",v)} limit={1000} textarea/></section>;
+ return <section className="admin-card p-5 sm:p-7 grid gap-5"><h2 className="text-xl font-semibold">Availability and booking rules</h2><p className="text-sm text-[var(--admin-muted)]">These rules are checked again when a booking is submitted.</p>{errors.length>0&&<div role="alert" className="admin-notice is-error">{errors.join(" ")}</div>}<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{[["Minimum stay (nights)","minimum_stay"],["Maximum stay (nights)","maximum_stay"],["Minimum advance notice (days)","minimum_advance_notice_days"],["Maximum advance booking (days)","maximum_advance_booking_days"],["Minimum corporate stay (nights)","minimum_corporate_stay"],["Minimum corporate houses","minimum_corporate_houses"],["Maximum corporate houses","maximum_corporate_houses"]].map(([label,key])=><NumberField key={key} label={label} value={draft[key]} onChange={v=>field(key,v)}/>)}</div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[["Allow same-day booking","same_day_booking_allowed"],["Allow weekend bookings","weekend_booking_allowed"],["Instant booking","instant_booking_enabled"],["Booking request required","booking_request_required"],["Allow corporate bookings","corporate_booking_allowed"],["Adjacent houses allowed","adjacent_houses_allowed"],["Allow long-term stays","long_term_stays_allowed"],["Corporate approval required","corporate_approval_required"],["Corporate deposit required","corporate_deposit_required"],["Corporate online payment","corporate_online_payment"],["GST invoice available","gst_invoice_available"]].map(([label,key])=><Toggle key={key} label={label} checked={Boolean(draft[key])} onChange={v=>field(key,v)}/>)}</div><CharacterField label="Corporate booking instructions" value={draft.corporate_instructions} onChange={v=>field("corporate_instructions",v)} limit={1000} textarea/></section>;
 }

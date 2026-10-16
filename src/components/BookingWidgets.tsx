@@ -263,7 +263,7 @@ export function PropertyCard({ property }: { property: Property }) {
   );
 }
 
-export function PriceBreakdownView({ property, checkIn, checkout, guests, corporate = false, price: providedPrice }: { property: Property; checkIn?: string; checkout?: string; guests: GuestCounts; corporate?: boolean; price?: ReturnType<typeof calculatePrice> }) {
+export function PriceBreakdownView({ property, checkIn, checkout, guests, price: providedPrice }: { property: Property; checkIn?: string; checkout?: string; guests: GuestCounts; price?: ReturnType<typeof calculatePrice> }) {
   if (!checkIn || !checkout) {
     return (
       <div className="booking-price-breakdown space-y-2 text-base">
@@ -276,7 +276,7 @@ export function PriceBreakdownView({ property, checkIn, checkout, guests, corpor
     );
   }
 
-  const price = providedPrice ?? calculatePrice(property, checkIn, checkout, guests, corporate);
+  const price = providedPrice ?? calculatePrice(property, checkIn, checkout, guests);
   const rows = [
     [price.nightlyRateSummary, price.nightlySubtotal],
     ["Cleaning fee", price.cleaningFee],

@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     if (dateError || guestError) return NextResponse.json({ error: dateError || guestError }, { status: 400 });
 
     const bookingReference = reference();
-    const price = calculatePrice(property, checkIn, checkout, guests, corporate);
+    const price = calculatePrice(property, checkIn, checkout, guests);
     const bookingCompanyName = corporate ? partner?.company_name ?? companyName : companyName;
     const rows = [{
       reference: bookingReference,

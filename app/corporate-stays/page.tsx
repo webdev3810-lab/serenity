@@ -4,7 +4,7 @@ import { pageMetadata } from "@/src/lib/seo";
 import { getHomepageHeroMedia, getPublicProperties } from "@/src/lib/supabase/content";
 import { isApprovedHomepageMediaSource } from "@/src/lib/homepageMedia";
 
-export const metadata = pageMetadata("Corporate Accommodation & Team Housing in Pakenham VIC");
+export const metadata = pageMetadata("Insurance & Corporate Accommodation in Pakenham VIC");
 export const dynamic = "force-dynamic";
 
 export default async function Page() {

@@ -90,6 +90,8 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
     .filter((image) => image.property_id === row.id)
     .filter((image) => image.is_visible !== false && image.is_placeholder !== true)
     .filter((image) => {
+      // Floor plans are managed independently from photo-gallery categories.
+      if (image.category === "floor-plan") return true;
       const state = categoryState.get(String(image.category ?? "other"));
       return state?.is_visible !== false && state?.no_photo_available !== true;
     })
@@ -159,14 +161,11 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
     maximumCorporateHouses: Number(row.maximum_corporate_houses ?? 3),
     adjacentHousesAllowed: row.adjacent_houses_allowed !== false,
     longTermStaysAllowed: row.long_term_stays_allowed !== false,
-    corporateDiscount: Number(row.corporate_discount ?? 0),
     corporateApprovalRequired: row.corporate_approval_required === true,
     corporateDepositRequired: row.corporate_deposit_required === true,
     corporateOnlinePayment: row.corporate_online_payment !== false,
     gstInvoiceAvailable: row.gst_invoice_available !== false,
     corporateInstructions: String(row.corporate_instructions ?? ""),
-    weeklyDiscount: Number(row.weekly_discount),
-    monthlyDiscount: Number(row.monthly_discount),
     listingTitle: String(row.listing_title ?? ""),
     kitchenFacilities: String(row.kitchen_facilities ?? ""),
     laundryFacilities: String(row.laundry_facilities ?? ""),

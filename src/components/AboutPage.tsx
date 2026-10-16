@@ -130,6 +130,35 @@ export function AboutPage({ properties }: { properties: Property[] }) {
         </div>
       </section>
 
+      <section className="about-story-host" aria-labelledby="about-story-host-title">
+        <div className="about-story-section-topline">
+          <span>The person behind your stay</span>
+          <span>03 / Your host</span>
+        </div>
+        <div className="about-story-host__content">
+          <div className="about-story-host__intro">
+            <p className="about-story-eyebrow">A local point of contact</p>
+            <h2 id="about-story-host-title">Meet Francis.</h2>
+            <p>Based in Melbourne, Francis brings eight years of hosting experience to every stay.</p>
+          </div>
+          <div className="about-story-host__profile">
+            <div className="about-story-host__name">
+              <strong>Francis</strong>
+              <span>Host</span>
+            </div>
+            <dl className="about-story-host__metrics" aria-label="Francis’s hosting profile">
+              <div><dt>Reviews</dt><dd>79</dd></div>
+              <div><dt>Rating</dt><dd>4.62<span aria-label="stars">★</span></dd></div>
+              <div><dt>Years hosting</dt><dd>8</dd></div>
+            </dl>
+            <div className="about-story-host__details">
+              <p>Lives in Melbourne, Australia</p>
+              <p>Identity verified on Airbnb</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {reviews.length > 0 ? (
         <HomepageReviewsSection
           id="guest-reviews"

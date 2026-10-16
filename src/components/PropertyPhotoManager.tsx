@@ -64,13 +64,11 @@ const DEFAULT_CATEGORIES: Array<Pick<CategoryDraft, "category" | "category_label
   { category: "bathroom", category_label: "Bathroom" },
   { category: "laundry", category_label: "Laundry" },
   { category: "backyard", category_label: "Backyard" },
-  { category: FLOOR_PLAN_CATEGORY, category_label: "Floor plan" },
   { category: "other", category_label: "Other" },
 ];
 
 const isStagingCategory = (category: string) => category === DEFAULT_UPLOAD_CATEGORY;
-const categoryLimit = (category: string) => category === FLOOR_PLAN_CATEGORY ? 1 : MAX_IMAGES_PER_HOUSE_CATEGORY;
-const categoryCountLabel = (category: string, count: number) => isStagingCategory(category) ? `${count} staged` : `${count}/${categoryLimit(category)}`;
+const categoryCountLabel = (category: string, count: number) => isStagingCategory(category) ? `${count} staged` : `${count}/${MAX_IMAGES_PER_HOUSE_CATEGORY}`;
 const categoriesWithOtherLast = <T extends { category: string }>(items: T[]) => [...items].sort((a, b) => Number(a.category === "other") - Number(b.category === "other"));
 
 const defaultCategories = (): CategoryDraft[] => DEFAULT_CATEGORIES.map((item, index) => ({
@@ -95,14 +93,9 @@ const getErrorMessage = (error: unknown, fallback: string) => {
   return fallback;
 };
 
-async function prepareImage(file: File, preserveOriginal = false) {
+async function prepareImage(file: File) {
   if (file.size > MAX_IMAGE_BYTES) throw new Error(`${file.name} is larger than 5 MB.`);
   const bitmap = await createImageBitmap(file);
-  if (preserveOriginal) {
-    const { width, height } = bitmap;
-    bitmap.close();
-    return { blob: file as Blob, width, height, contentType: file.type, fileName: file.name };
-  }
   const scale = Math.min(1, 2400 / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
   canvas.width = Math.max(1, Math.round(bitmap.width * scale));
@@ -138,12 +131,12 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
   const [savedCategories, setSavedCategories] = useState<CategoryDraft[]>(defaultCategories);
   const dirty = edited && (JSON.stringify(localImages) !== JSON.stringify(savedImages) || JSON.stringify(categories) !== JSON.stringify(savedCategories));
 
-  const imageKey = images.map((image) => `${image.id}:${image.updated_at ?? ""}:${image.display_order ?? 0}`).join("|");
+  const imageKey = images.filter((image) => String(image.property_id) === String(selectedId) && image.category !== FLOOR_PLAN_CATEGORY).map((image) => `${image.id}:${image.updated_at ?? ""}:${image.display_order ?? 0}`).join("|");
 
   useEffect(() => {
     // The parent reloads from Supabase after uploads and saves; mirror that
     // external snapshot into the local draft used by the editor.
-    const selectedImages = images.filter((image) => image.property_id === selectedId).map((image) => ({ ...image }));
+    const selectedImages = images.filter((image) => String(image.property_id) === String(selectedId) && image.category !== FLOOR_PLAN_CATEGORY).map((image) => ({ ...image }));
     setLocalImages(selectedImages); setSavedImages(selectedImages);
     setUploadCategory(DEFAULT_UPLOAD_CATEGORY);
     setDirty(false);
@@ -179,15 +172,16 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
         return;
       }
       const saved = (result.data ?? []) as Row[];
-      const selectedPropertyCategories = saved.filter((category) => String(category.property_id) === selectedId);
+      const selectedPropertyCategories = saved.filter((category) => String(category.property_id) === selectedId && category.category !== FLOOR_PLAN_CATEGORY);
       const sharedCategories = [...saved.reduce((result, category) => {
         const slug = String(category.category);
+        if (slug === FLOOR_PLAN_CATEGORY) return result;
         const existing = result.get(slug);
         if (!existing || String(category.property_id) === selectedId) result.set(slug, category);
         return result;
       }, new Map<string, Row>()).values()];
       setSavedCategorySlugs(selectedPropertyCategories.map((category) => String(category.category)));
-      const propertyImages = images.filter((image) => image.property_id === selectedId);
+      const propertyImages = images.filter((image) => String(image.property_id) === String(selectedId) && image.category !== FLOOR_PLAN_CATEGORY);
       const savedDrafts = sharedCategories.map((stored, index) => ({
           category: String(stored.category),
           category_label: String(stored.category_label || stored.category || "Other"),
@@ -227,13 +221,12 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
       setCategories(loadedCategories); setSavedCategories(loadedCategories);
     })();
     return () => { cancelled = true; };
-  }, [imageKey, images, onError, selectedId, supabase]);
+  }, [imageKey, onError, selectedId, supabase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const propertyName = properties.find((property) => property.id === selectedId)?.name ?? "Selected house";
   const sortedImages = localImages;
-  const coverId = sortedImages.find((image) => !isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY)) && image.category !== FLOOR_PLAN_CATEGORY && image.is_cover === true)?.id
-    ?? sortedImages.find((image) => !isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY)) && image.category !== FLOOR_PLAN_CATEGORY)?.id;
-  const floorPlanImage = sortedImages.find((image) => image.category === FLOOR_PLAN_CATEGORY);
+  const coverId = sortedImages.find((image) => !isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY)) && image.is_cover === true)?.id
+    ?? sortedImages.find((image) => !isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY)))?.id;
   const categoryBySlug = new Map(categories.map((category) => [category.category, category]));
   const categoryOptions = categoriesWithOtherLast([...categories].sort((a, b) => a.category_label.localeCompare(b.category_label, undefined, { sensitivity: "base" })));
   const activeUploadCategory = categoryBySlug.has(uploadCategory) ? uploadCategory : DEFAULT_UPLOAD_CATEGORY;
@@ -404,8 +397,8 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
     const currentCategory = String(image.category ?? "other");
     if (currentCategory === nextCategory) return;
     const nextCount = imageCountByCategory.get(nextCategory) ?? 0;
-    if (!isStagingCategory(nextCategory) && nextCount >= categoryLimit(nextCategory)) {
-      onError(nextCategory === FLOOR_PLAN_CATEGORY ? "This house already has a floor plan. Remove it before assigning another." : `This house's ${categoryBySlug.get(nextCategory)?.category_label ?? "category"} already has ${categoryLimit(nextCategory)} photos.`);
+    if (!isStagingCategory(nextCategory) && nextCount >= MAX_IMAGES_PER_HOUSE_CATEGORY) {
+      onError(`This house's ${categoryBySlug.get(nextCategory)?.category_label ?? "category"} already has ${MAX_IMAGES_PER_HOUSE_CATEGORY} photos.`);
       return;
     }
     updateImage(image.id, {
@@ -414,7 +407,7 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
     });
   };
 
-  const upload = async (event: React.ChangeEvent<HTMLInputElement>, requestedCategory = activeUploadCategory) => {
+  const upload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
     event.target.value = "";
     if (!selectedId || !files.length) return;
@@ -422,10 +415,10 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
       onError(`Choose up to ${MAX_UPLOAD_BATCH} images at a time.`);
       return;
     }
-    const targetCategory = categoryBySlug.has(requestedCategory) ? requestedCategory : activeUploadCategory;
+    const targetCategory = activeUploadCategory;
     const existingCategoryCount = imageCountByCategory.get(targetCategory) ?? 0;
-    if (!isStagingCategory(targetCategory) && existingCategoryCount + files.length > categoryLimit(targetCategory)) {
-      onError(targetCategory === FLOOR_PLAN_CATEGORY ? "This house already has a floor plan. Remove it before uploading another." : `This house's ${categoryBySlug.get(targetCategory)?.category_label ?? "category"} can contain up to ${categoryLimit(targetCategory)} photos.`);
+    if (!isStagingCategory(targetCategory) && existingCategoryCount + files.length > MAX_IMAGES_PER_HOUSE_CATEGORY) {
+      onError(`This house's ${categoryBySlug.get(targetCategory)?.category_label ?? "category"} can contain up to ${MAX_IMAGES_PER_HOUSE_CATEGORY} photos.`);
       return;
     }
     const invalid = files.find((file) => !ALLOWED_TYPES.has(file.type) || file.size > MAX_IMAGE_BYTES);
@@ -441,7 +434,7 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
     try {
       for (const [index, file] of files.entries()) {
         setUploadMessage(`Uploading ${file.name} (${index + 1} of ${files.length})`);
-        const optimized = await prepareImage(file, targetCategory === FLOOR_PLAN_CATEGORY);
+        const optimized = await prepareImage(file);
         const response = await fetch("/api/admin/upload-url", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -471,7 +464,7 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
         if (!completeResponse.ok) throw new Error(complete.error || "The image uploaded but could not be added to the gallery.");
         setUploadProgress(Math.round(((index + 1) / files.length) * 100));
       }
-      notify(targetCategory === FLOOR_PLAN_CATEGORY ? "Floor plan uploaded. Mark it Visible and save changes to publish it." : `${files.length === 1 ? "Image" : `${files.length} images`} uploaded to ${categoryBySlug.get(targetCategory)?.category_label ?? "Unsorted uploads"}. Mark them Visible when you are ready to publish.`);
+      notify(`${files.length === 1 ? "Image" : `${files.length} images`} uploaded to ${categoryBySlug.get(targetCategory)?.category_label ?? "Unsorted uploads"}. Mark them Visible when you are ready to publish.`);
       await reload();
     } catch (error) {
       setUploadMessage("Cleaning up failed uploads…");
@@ -516,7 +509,7 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
           category: imageCategory,
           category_label: String(categoryBySlug.get(imageCategory)?.category_label ?? image.category_label ?? (isStaging ? "Unsorted uploads" : "Other")),
           display_order: index,
-          is_cover: !isStaging && imageCategory !== FLOOR_PLAN_CATEGORY && image.id === coverId,
+          is_cover: !isStaging && image.id === coverId,
           is_visible: !isStaging && image.is_visible !== false,
           is_placeholder: image.is_placeholder === true,
         }).eq("id", image.id);
@@ -602,15 +595,11 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
         </div>
       </div> : <div className="flex justify-end"><label className="admin-button admin-button-primary inline-flex min-h-10 cursor-pointer items-center gap-2"><Upload size={16} /> Upload photos<input type="file" multiple accept="image/jpeg,image/png,image/webp,image/avif" className="sr-only" onChange={upload} disabled={uploading} /></label></div>}
       <div className="mt-5 grid gap-3 text-sm text-[var(--admin-muted)] sm:grid-cols-3"><p>New photos go to Unsorted uploads and stay hidden.</p><p>JPG, PNG, WebP, AVIF · max 5 MB each</p><p>Upload up to {MAX_UPLOAD_BATCH} at a time · room categories max {MAX_IMAGES_PER_HOUSE_CATEGORY}</p></div>
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-alt)] p-4 sm:p-5">
-        <div><h3 className="text-base font-semibold text-[var(--admin-text)]">Floor plan</h3><p className="mt-1 max-w-xl text-sm text-[var(--admin-muted)]">Add one plan for this house. It appears in its own section, not in the photo tour. JPG, PNG, WebP or AVIF, up to 5 MB; the original file is kept so labels stay sharp.</p>{floorPlanImage && <p className="mt-1 text-sm font-medium text-[var(--admin-text)]">{floorPlanImage.is_visible === false ? "Uploaded but hidden — set Visible below and save to publish." : "Floor plan added. Manage or remove it below."}</p>}</div>
-        {!floorPlanImage && <label className="admin-button admin-button-primary inline-flex min-h-10 cursor-pointer items-center gap-2"><Upload size={16} /> Upload floor plan<input type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="sr-only" onChange={(event) => void upload(event, FLOOR_PLAN_CATEGORY)} disabled={uploading} /></label>}
-      </div>
       {uploading ? <div className="mt-5 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-alt)] p-4" role="status"><div className="flex items-center gap-2 text-sm font-medium"><LoaderCircle size={16} className="animate-spin" /> {uploadMessage}</div><div className="mt-3 h-2 overflow-hidden rounded-xl bg-[var(--admin-surface-alt)]"><div className="h-full bg-[var(--admin-accent)] transition-all" style={{ width: `${Math.max(uploadProgress, 8)}%` }} /></div></div> : null}
       {sortedImages.length ? <div className="mt-6 space-y-8">
         {groupedImages.map((group) => <section key={group.category} aria-labelledby={`photo-group-${group.category}`}>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--admin-border)] pb-2">
-            <div><h3 id={`photo-group-${group.category}`} className="text-sm font-semibold text-[var(--admin-text)]">{group.label}</h3><p className="mt-1 text-sm text-[var(--admin-muted)]">{isStagingCategory(group.category) ? "Hidden staging area — assign a room and publish when ready." : group.category === FLOOR_PLAN_CATEGORY ? "This plan is shown separately from house photos when Visible is on." : `${group.images.length} of ${MAX_IMAGES_PER_HOUSE_CATEGORY} photos used for this house category`}</p></div>
+            <div><h3 id={`photo-group-${group.category}`} className="text-sm font-semibold text-[var(--admin-text)]">{group.label}</h3><p className="mt-1 text-sm text-[var(--admin-muted)]">{isStagingCategory(group.category) ? "Hidden staging area — assign a room and publish when ready." : `${group.images.length} of ${MAX_IMAGES_PER_HOUSE_CATEGORY} photos used for this house category`}</p></div>
             <span className="rounded-xl bg-[var(--admin-surface-alt)] px-3 py-1 text-sm font-medium text-[var(--admin-muted)]">{categoryCountLabel(group.category, group.images.length)}</span>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -619,8 +608,8 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
           const src = image.storage_path ? storageUrl(image.storage_path) : String(image.external_url ?? "");
           return <article key={image.id} data-photo-card={String(image.id)} onPointerDown={(event) => startCardDrag(event, String(image.id))} className={`will-change-transform cursor-grab overflow-hidden rounded-xl border bg-[var(--admin-surface)] transition-[transform,box-shadow,opacity,border-color] duration-200 ease-out active:cursor-grabbing ${draggedId === image.id ? "pointer-events-none touch-none opacity-0" : dragOverId === image.id && draggedId !== null ? "translate-y-1 scale-[1.01] border-[var(--admin-border)] " : "border-[var(--admin-border)]  hover:-translate-y-0.5 hover:shadow-md"}`}>
               <div className="relative h-52 bg-[var(--admin-surface-alt)] sm:h-60">
-              {src ? <Image src={src} alt={String(image.alt_text || "Property photo")} fill sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw" loading={eagerlyLoadedImageIds.has(String(image.id)) ? "eager" : "lazy"} className={image.category === FLOOR_PLAN_CATEGORY ? "object-contain" : "object-cover"} draggable={false} unoptimized={Boolean(image.external_url) || image.category === FLOOR_PLAN_CATEGORY} /> : <div className="flex h-full items-center justify-center text-sm text-[var(--admin-muted)]">No preview available</div>}
-              <span className="absolute left-3 top-3 rounded-xl bg-[var(--admin-accent)] px-2.5 py-1 text-xs font-medium text-[var(--admin-on-accent)]">{image.category === FLOOR_PLAN_CATEGORY ? "Floor plan" : image.id === coverId ? "Cover" : `Photo ${index + 1}`}</span>
+              {src ? <Image src={src} alt={String(image.alt_text || "Property photo")} fill sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw" loading={eagerlyLoadedImageIds.has(String(image.id)) ? "eager" : "lazy"} className="object-cover" draggable={false} unoptimized={Boolean(image.external_url)} /> : <div className="flex h-full items-center justify-center text-sm text-[var(--admin-muted)]">No preview available</div>}
+              <span className="absolute left-3 top-3 rounded-xl bg-[var(--admin-accent)] px-2.5 py-1 text-xs font-medium text-[var(--admin-on-accent)]">{image.id === coverId ? "Cover" : `Photo ${index + 1}`}</span>
               {isPreviewImage(image) ? <span className="absolute bottom-3 left-3 rounded-xl bg-[var(--admin-surface-alt)] px-2.5 py-1 text-xs font-medium text-[var(--admin-danger-text)]">Preview image — replace with your photo</span> : null}
             </div>
             <div className="space-y-2 p-3">

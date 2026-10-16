@@ -23,8 +23,7 @@ export default function OtherBusinessesPage() {
         </div>
         <div className={styles.hubHeroContent}>
           <div>
-            <p className={styles.eyebrow}>Other businesses</p>
-            <h1>More places.<br /><em>More possibilities.</em></h1>
+            <h1>Other businesses</h1>
           </div>
           <p>From a getaway in the Philippines to purpose-built spaces for healthcare professionals in Victoria, explore what else we do.</p>
         </div>

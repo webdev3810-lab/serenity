@@ -1,6 +1,7 @@
 /* Guest-facing rhythm. Keep this scoped to the public shell so admin UI is unchanged. */
 .public-site {
   --public-content-max: 92rem;
+  --public-card-gutter: clamp(0.5rem, 1.5vw, 1.5rem);
   --guest-gutter: clamp(1.25rem, 3.5vw, 4rem);
   --guest-section-space: clamp(4rem, 7vw, 7rem);
   --guest-canvas: #ffffff;
@@ -229,8 +230,132 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .serenity-editorial-footer {
+  --guest-navy: var(--hero-green, #002844);
+  --guest-serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
+  padding: clamp(1rem, 2vw, 2rem) 0 max(1rem, env(safe-area-inset-bottom));
+  border-top: 0;
+  border-radius: 0;
   background: #ffffff;
   color: var(--hero-green-deep, #001e35);
+}
+
+.public-site .serenity-editorial-footer__support {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1.15fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.8rem;
+  margin: 0;
+  padding: 2rem var(--public-card-gutter, 1rem);
+  background: var(--guest-navy);
+  color: #ffffff;
+  border-radius: 1.5rem;
+}
+
+.public-site .serenity-editorial-footer__support-icon,
+.public-site .serenity-editorial-footer__values svg {
+  color: #d5b275;
+}
+
+.public-site .serenity-editorial-footer__support-heading > p {
+  margin: 0;
+  color: #d5b275;
+  font-size: 0.69rem;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.public-site .serenity-editorial-footer__support-heading h2 {
+  max-width: 19rem;
+  margin: 0.25rem 0 0;
+  color: #ffffff;
+  font-family: var(--guest-serif);
+  font-size: clamp(1.55rem, 2.1vw, 2.4rem);
+  font-weight: 400;
+  line-height: 1.12;
+}
+
+.public-site .serenity-editorial-footer__support-copy {
+  max-width: 17rem;
+  margin: 0;
+  padding-left: 1.5rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0 !important;
+  color: #dce6e9;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.public-site .serenity-editorial-footer__support-actions {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 14rem;
+}
+
+.public-site .serenity-editorial-footer__support-actions a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d5b275;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.public-site .serenity-editorial-footer__support-actions a:first-child {
+  background: #d5b275;
+  color: var(--guest-navy);
+}
+
+.public-site .serenity-editorial-footer__support-actions a:hover {
+  filter: brightness(1.1);
+}
+
+.public-site .serenity-editorial-footer__values {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem var(--public-card-gutter, 1rem);
+  border-radius: 1rem;
+  background: #ffffff;
+}
+
+.public-site .serenity-editorial-footer__values span {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #304758;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.public-site .serenity-editorial-footer__grid {
+  width: 100%;
+  margin: 0;
+  padding: clamp(4rem, 7vw, 8rem) var(--public-card-gutter, 1rem) 3rem;
+}
+
+.public-site .serenity-editorial-footer__legal {
+  padding: 1.25rem var(--public-card-gutter, 1rem) 0;
+  border-top: 1px solid var(--public-line);
+}
+
+@media (max-width: 1050px) {
+  .public-site .serenity-editorial-footer__support {
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .public-site .serenity-editorial-footer__support-actions {
+    grid-column: 2 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .public-site .serenity-editorial-social {
@@ -309,10 +434,6 @@ body:has(.corporate-editorial-page) .public-site > main,
 
 .public-site .serenity-editorial-footer__grid h2 {
   color: #65717a;
-}
-
-.public-site .serenity-editorial-footer__wordmark {
-  border-top-color: rgba(0, 40, 68, 0.22);
 }
 
 .public-site .serenity-editorial-footer__legal {
@@ -499,7 +620,20 @@ body:has(.corporate-editorial-page) .public-site > main,
 
 .public-site :is(.about-story-hero, .corporate-editorial-hero, .contact-story-hero) {
   gap: clamp(0.75rem, 1.2vw, 1.25rem);
-  padding: clamp(0.75rem, 1.2vw, 1.25rem);
+  padding: var(--public-card-gutter);
+}
+
+/* Keep public card rows aligned with the full-width house cards. */
+.public-site :is(.about-story-principles__grid, .contact-story-methods, .contact-story-nearby__grid, .corporate-editorial-benefits .corporate-benefits-grid) {
+  padding-inline: var(--public-card-gutter);
+}
+
+.public-site .about-story-host {
+  padding-inline: var(--public-card-gutter);
+}
+
+.public-site .corporate-editorial-page > section:not(.corporate-editorial-hero):not(.corporate-editorial-benefits) {
+  padding-inline: var(--public-card-gutter);
 }
 
 .public-site :is(.about-story-hero__copy, .corporate-editorial-hero__copy, .contact-story-hero__copy) {
@@ -521,11 +655,25 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .houses-editorial-list {
-  max-width: 86rem;
-  margin-inline: auto;
+  max-width: none;
+  margin-inline: 0;
   gap: clamp(0.75rem, 1.2vw, 1.25rem);
-  padding: clamp(0.75rem, 1.2vw, 1.25rem);
-  padding-bottom: 1rem;
+  padding: var(--public-card-gutter);
+}
+
+.public-site .serenity-editorial-house-cards {
+  --houses-paper: #ffffff;
+  --houses-ink: #111111;
+  --houses-serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
+  max-width: none;
+  padding: var(--public-card-gutter);
+  background: #ffffff;
+  color: var(--houses-ink);
+}
+
+.public-site .serenity-editorial-house-cards .houses-editorial-list__media {
+  max-height: none;
+  aspect-ratio: 1.8;
 }
 
 .public-site .houses-editorial-list__caption {
@@ -551,7 +699,18 @@ body:has(.corporate-editorial-page) .public-site > main,
 
 .public-site .houses-editorial-comfort__grid {
   gap: clamp(0.75rem, 1.2vw, 1.25rem);
+  padding-inline: var(--public-card-gutter);
   background: transparent;
+}
+
+.public-site .guest-information-content,
+.public-site .guest-information-hero-content {
+  width: calc(100% - 2 * var(--public-card-gutter));
+  max-width: none;
+}
+
+.public-site .guest-information-jump {
+  padding-inline: var(--public-card-gutter);
 }
 
 .public-site .policy-editorial-hero h1 {
@@ -581,8 +740,18 @@ body:has(.corporate-editorial-page) .public-site > main,
 
 .public-site .booking-flow-page,
 .public-site .page-frame {
-  max-width: min(100% - 2 * var(--guest-gutter), var(--public-content-max));
+  width: calc(100% - 2 * var(--public-card-gutter));
+  max-width: none;
   margin-inline: auto;
+}
+
+.public-site .page-frame > .container {
+  width: 100%;
+  max-width: none;
+}
+
+.public-site .page-frame {
+  padding-inline: 0;
 }
 
 .public-site .page-frame .page-heading {
@@ -645,6 +814,10 @@ body:has(.corporate-editorial-page) .public-site > main,
     gap: 0.5rem;
     padding: 0.5rem;
     padding-bottom: 2rem;
+  }
+
+  .public-site .houses-editorial-comfort__grid {
+    padding-inline: 0.5rem;
   }
 
   .public-site .serenity-editorial-houses {
@@ -844,17 +1017,53 @@ body:has(.corporate-editorial-page) .public-site > main,
 @media (max-width: 760px) {
   .public-site .serenity-editorial-footer,
   body:has(.property-theme) .public-site .serenity-editorial-footer {
-    padding: 2.5rem 1.25rem max(1.5rem, env(safe-area-inset-bottom));
-    border-top: 1px solid #dce4e9;
-    border-radius: 1.5rem 1.5rem 0 0 !important;
+    padding: 0 0 max(1.5rem, env(safe-area-inset-bottom));
+    border-top: 0;
+    border-radius: 0 !important;
     background: #ffffff;
     color: #002844;
+  }
+
+  .public-site .serenity-editorial-footer__support {
+    padding: 1.5rem var(--public-card-gutter, 1rem);
+  }
+
+  .public-site .serenity-editorial-footer__support {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.85rem;
+  }
+
+  .public-site .serenity-editorial-footer__support-heading h2 {
+    font-size: 1.7rem;
+  }
+
+  .public-site .serenity-editorial-footer__support-copy {
+    grid-column: 1 / -1;
+    max-width: none;
+    padding: 0;
+    border: 0;
+  }
+
+  .public-site .serenity-editorial-footer__support-actions {
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
+  }
+
+  .public-site .serenity-editorial-footer__values {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.9rem 0.5rem;
+    padding: 1rem var(--public-card-gutter, 1rem);
+  }
+
+  .public-site .serenity-editorial-footer__values span {
+    font-size: 0.58rem;
   }
 
   .public-site .serenity-editorial-footer__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.75rem 1rem;
-    padding-bottom: 2rem;
+    padding: 2.75rem var(--public-card-gutter, 1rem) 2rem;
   }
 
   .public-site .serenity-editorial-footer__grid > div {
@@ -862,21 +1071,6 @@ body:has(.corporate-editorial-page) .public-site > main,
     gap: 0;
     padding-top: 0.85rem;
     border-top: 1px solid #dce4e9;
-  }
-
-  .public-site .serenity-editorial-footer__grid > div:nth-child(3) {
-    grid-column: 1 / -1;
-    grid-row: 3;
-    padding: 1.25rem;
-    border: 0;
-    border-radius: 1rem;
-    background: #002844;
-    color: #ffffff;
-  }
-
-  .public-site .serenity-editorial-footer__grid > div:nth-child(4) {
-    grid-column: 1 / -1;
-    grid-row: 2;
   }
 
   .public-site .serenity-editorial-footer__grid h2,
@@ -905,55 +1099,12 @@ body:has(.corporate-editorial-page) .public-site > main,
     text-underline-offset: 0.2em;
   }
 
-  .public-site .serenity-editorial-footer__grid > div:nth-child(3) h2,
-  .public-site .serenity-editorial-footer__grid > div:nth-child(3) p,
-  .public-site .serenity-editorial-footer__grid > div:nth-child(3) a,
-  body:has(.property-theme) .public-site .serenity-editorial-footer__grid > div:nth-child(3) :is(h2, p, a) {
-    color: #ffffff;
-  }
-
-  .public-site .serenity-editorial-footer__grid > div:nth-child(3) h2 {
-    opacity: 0.75;
-  }
-
-  .public-site .serenity-editorial-footer__grid > div:nth-child(3) p {
-    padding: 0;
-  }
-
-  .public-site .serenity-editorial-footer__grid > div:nth-child(3) a {
-    align-self: flex-start;
-    width: max-content;
-    margin-top: 0.65rem;
-    padding: 0.45rem 0 0.1rem;
-    border-bottom: 1px solid #e5ca8b;
-    border-radius: 0 !important;
-    color: #e5ca8b;
-    text-decoration: none;
-  }
-
-  .public-site .serenity-editorial-footer__grid > div:nth-child(3) a:is(:hover, :focus-visible) {
-    border-bottom-color: #ffffff;
-    color: #ffffff;
-    text-decoration: none;
-  }
-
-  .public-site .serenity-editorial-footer__wordmark {
-    display: block;
-    width: 100%;
-    padding: 1.2rem 0 0.2rem;
-    border-top: 1px solid #dce4e9;
-    color: #002844;
-    font-size: clamp(3.2rem, 15vw, 5rem);
-    line-height: 0.95;
-    text-align: left;
-  }
-
   .public-site .serenity-editorial-footer__legal {
     display: flex;
     flex-wrap: wrap;
     gap: 0.2rem 1rem;
     justify-content: space-between;
-    padding-top: 1.3rem;
+    padding: 1.3rem var(--public-card-gutter, 1rem) 0;
     border-top: 1px solid #dce4e9;
     color: #5a7080;
     font: 400 0.78rem/1.5 var(--font-poppins), sans-serif;
@@ -966,6 +1117,108 @@ body:has(.corporate-editorial-page) .public-site > main,
     margin: 0;
     padding: 0;
     color: #5a7080;
+  }
+}
+
+/* Keep the draft footer's support panel navy, with the link directory and legal row on white. */
+.public-site .serenity-editorial-footer--draft {
+  --draft-footer-navy: #002b49;
+  --draft-footer-gold: #d5b275;
+  --draft-footer-inset: clamp(1.5rem, 5vw, 6rem);
+  padding: 0;
+  background: #fff;
+  color: var(--draft-footer-navy);
+}
+
+.public-site .serenity-editorial-footer--draft .serenity-editorial-footer__grid {
+  gap: clamp(1.5rem, 3vw, 3.5rem);
+  padding: clamp(3rem, 5vw, 5rem) var(--draft-footer-inset) clamp(2.5rem, 4vw, 4rem);
+}
+
+.public-site .serenity-editorial-footer--draft .serenity-editorial-footer__grid h2 {
+  color: #8a6c39;
+  letter-spacing: .13em;
+}
+
+.public-site .serenity-editorial-footer--draft .serenity-editorial-footer__grid :is(a, p) {
+  color: var(--draft-footer-navy);
+}
+
+.public-site .serenity-editorial-footer--draft .serenity-editorial-footer__grid a:hover,
+.public-site .serenity-editorial-footer--draft .serenity-editorial-footer__grid a:focus-visible {
+  color: #8a6c39;
+}
+
+.public-site .serenity-editorial-footer--draft .serenity-editorial-footer__values {
+  padding: 1.4rem var(--draft-footer-inset) clamp(2rem, 3vw, 3rem);
+  border-top: 1px solid rgba(0, 43, 73, .14);
+  border-radius: 0 !important;
+  background: #fff;
+}
+
+.public-site .serenity-editorial-footer--draft .serenity-editorial-footer__values span {
+  color: var(--draft-footer-navy);
+}
+
+.public-site .serenity-editorial-footer--draft .serenity-editorial-footer__support {
+  margin: 0;
+  padding: clamp(2rem, 4vw, 4rem) var(--draft-footer-inset);
+  border-radius: 0 !important;
+  background: var(--draft-footer-navy);
+}
+
+.public-site .serenity-editorial-footer--draft .serenity-editorial-footer__support-actions a {
+  border: 0;
+}
+
+.public-site .serenity-editorial-footer--draft .serenity-editorial-footer__support-actions a:not(:first-child) {
+  padding-inline: 0;
+}
+
+.public-site .serenity-editorial-footer--draft .serenity-editorial-footer__legal {
+  margin: 0;
+  padding: 1.25rem var(--draft-footer-inset) max(1.5rem, env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(0, 43, 73, .14);
+  border-radius: 0 !important;
+  background: #fff;
+  color: var(--draft-footer-navy);
+}
+
+.public-site .serenity-editorial-footer--draft .serenity-editorial-footer__legal p {
+  color: var(--draft-footer-navy);
+}
+
+@media (max-width: 760px) {
+  .public-site .serenity-editorial-footer--draft {
+    padding: 0;
+    background: #fff;
+    color: var(--draft-footer-navy);
+  }
+
+  .public-site .serenity-editorial-footer--draft .serenity-editorial-footer__grid {
+    gap: 1.75rem 1rem;
+    padding: 2.75rem var(--draft-footer-inset) 2rem;
+  }
+
+  .public-site .serenity-editorial-footer--draft .serenity-editorial-footer__grid > div {
+    border-top-color: rgba(0, 43, 73, .14);
+  }
+
+  .public-site .serenity-editorial-footer--draft .serenity-editorial-footer__grid h2 {
+    color: #8a6c39;
+  }
+
+  .public-site .serenity-editorial-footer--draft .serenity-editorial-footer__grid :is(a, p) {
+    color: var(--draft-footer-navy);
+  }
+
+  .public-site .serenity-editorial-footer--draft .serenity-editorial-footer__values {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .public-site .serenity-editorial-footer--draft .serenity-editorial-footer__legal {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
   }
 }
 
