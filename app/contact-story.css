@@ -9,7 +9,7 @@ body:has(.contact-story-page) .public-site > main {
   --contact-ink: #111111;
   --contact-green: var(--hero-green, #002844);
   --contact-cream: #fff7ef;
-  --contact-serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
+  --contact-serif: var(--font-brand-serif), Georgia, serif;
   display: grid;
   gap: 2px;
   padding-bottom: 2px;

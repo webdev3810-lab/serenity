@@ -1,5 +1,6 @@
 import Script from "next/script";
 import { Poppins } from "next/font/google";
+import localFont from "next/font/local";
 import { ADMIN_THEME_STYLE_ID, adminThemeCss, adminThemeBootstrap } from "@/src/lib/admin-theme";
 import type { Metadata, Viewport } from "next";
 import { AppShell } from "@/src/components/Layout";
@@ -30,6 +31,17 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
+const libreBaskerville = localFont({
+  src: [
+    { path: "./fonts/LibreBaskerville[wght].ttf", weight: "400 700", style: "normal" },
+    { path: "./fonts/LibreBaskerville-Italic[wght].ttf", weight: "400 700", style: "italic" },
+  ],
+  display: "swap",
+  fallback: ["Georgia", "serif"],
+  adjustFontFallback: "Times New Roman",
+  variable: "--font-brand-serif",
+});
+
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
@@ -51,7 +63,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const contactSettings = await getPublicContactSettings();
 
   return (
-    <html lang="en-AU" className={`${poppins.variable} ${poppins.className} h-full antialiased`} data-scroll-behavior="smooth">
+    <html lang="en-AU" className={`${poppins.variable} ${libreBaskerville.variable} ${poppins.className} h-full antialiased`} data-scroll-behavior="smooth">
       <head><style id={ADMIN_THEME_STYLE_ID}>{adminThemeCss}</style><Script id="serenity-admin-theme-init" strategy="beforeInteractive">{adminThemeBootstrap}</Script></head>
       <body className="min-h-full font-sans">
         <AppShell contactSettings={contactSettings}>{children}</AppShell>

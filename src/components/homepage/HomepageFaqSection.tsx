@@ -39,22 +39,23 @@ export default function HomepageFaqSection({
           )}
         </div>
 
-        <div className="homepage-faq-editorial-list" aria-label="Frequently asked questions">
+        <div className="homepage-faq-editorial-list serenity-editorial-faq__list" aria-label="Frequently asked questions">
           {faqs.map((faq, index) => (
             <details
               key={index}
-              className="homepage-faq-editorial-item"
+              className="serenity-editorial-faq__item"
               open={index === 0}
             >
-              <summary className="homepage-faq-editorial-summary">
-                <span className="homepage-faq-editorial-question font-marcellus">
+              <summary>
+                <span className="serenity-editorial-faq__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                <span className="serenity-editorial-faq__question">
                   {faq.question}
                 </span>
-                <span className="homepage-faq-editorial-toggle" aria-hidden="true">
+                <span className="serenity-editorial-faq__toggle" aria-hidden="true">
                   +
                 </span>
               </summary>
-              <div className="homepage-faq-editorial-answer">
+              <div className="serenity-editorial-faq__answer">
                 {faq.answer}
               </div>
             </details>

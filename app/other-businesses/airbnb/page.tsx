@@ -14,17 +14,19 @@ export default function AirbnbHomePage() {
   return (
     <div className={styles.page}>
       <div className={styles.stayMain}>
-        <Link href="/other-businesses" className={styles.backLink}><ArrowLeft size={18} aria-hidden="true" /> Back to other businesses</Link>
-        <div className={styles.stayHeading}>
-          <div>
-            <p className={styles.eyebrow}>Vacation home in Orani Bataan</p>
-            <h1>Casa de<br /><em>Vacacion.</em></h1>
+        <header className={styles.stayMasthead}>
+          <Link href="/other-businesses" className={styles.backLink}><ArrowLeft size={18} aria-hidden="true" /> Back to other businesses</Link>
+          <div className={styles.stayHeading}>
+            <div>
+              <p className={styles.eyebrow}>Vacation home in Orani Bataan</p>
+              <h1>Casa de<br /><em>Vacacion.</em></h1>
+            </div>
+            <div className={styles.stayIntro}>
+              <p><MapPin size={18} aria-hidden="true" /> Orani, Bataan, Philippines</p>
+              <a href={AIRBNB_URL} target="_blank" rel="noopener noreferrer" className={styles.primaryButton}>View on Airbnb <ArrowUpRight size={19} aria-hidden="true" /></a>
+            </div>
           </div>
-          <div className={styles.stayIntro}>
-            <p><MapPin size={18} aria-hidden="true" /> Orani, Bataan, Philippines</p>
-            <a href={AIRBNB_URL} target="_blank" rel="noopener noreferrer" className={styles.primaryButton}>View on Airbnb <ArrowUpRight size={19} aria-hidden="true" /></a>
-          </div>
-        </div>
+        </header>
 
         <div className={styles.photoGrid}>
           {ORANI_PHOTOS.map((photo, index) => (

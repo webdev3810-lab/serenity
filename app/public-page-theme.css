@@ -3,6 +3,9 @@
    colour, controls, rules, and spacing. Each page keeps its own composition
    while this layer removes the older one-off brown treatment. */
 .public-site {
+  --font-serif: var(--font-brand-serif), Georgia, serif;
+  --font-display: var(--font-brand-serif), Georgia, serif;
+  --font-sans: var(--font-poppins), Arial, sans-serif;
   /* Keep the guest-facing neutral palette separate from the admin theme. */
   --foreground: #111111;
   --primary-black: #111111;
@@ -28,6 +31,15 @@
   background: var(--public-surface);
   color: var(--public-body);
   font-family: var(--font-sans);
+}
+
+.public-site :where(*) {
+  font-family: var(--font-sans) !important;
+}
+
+.public-site :is(h1, h2, h3, h4, h5, h6),
+.public-site :is(h1, h2, h3, h4, h5, h6) * {
+  font-family: var(--font-display) !important;
 }
 
 .public-site > main {

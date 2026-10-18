@@ -231,7 +231,7 @@ body:has(.corporate-editorial-page) .public-site > main,
 
 .public-site .serenity-editorial-footer {
   --guest-navy: var(--hero-green, #002844);
-  --guest-serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
+  --guest-serif: var(--font-brand-serif), Georgia, serif;
   padding: clamp(1rem, 2vw, 2rem) 0 max(1rem, env(safe-area-inset-bottom));
   border-top: 0;
   border-radius: 0;
@@ -241,11 +241,11 @@ body:has(.corporate-editorial-page) .public-site > main,
 
 .public-site .serenity-editorial-footer__support {
   display: grid;
-  grid-template-columns: auto minmax(0, 1.15fr) minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1.15fr) minmax(0, 1fr) minmax(13.5rem, 0.8fr);
   align-items: center;
-  gap: 1.8rem;
-  margin: 0;
-  padding: 2rem var(--public-card-gutter, 1rem);
+  gap: clamp(1.25rem, 2.5vw, 2.75rem);
+  margin: 0 var(--public-card-gutter, 1rem);
+  padding: clamp(2rem, 3vw, 3rem) clamp(1.5rem, 3vw, 3.5rem);
   background: var(--guest-navy);
   color: #ffffff;
   border-radius: 1.5rem;
@@ -266,23 +266,23 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .serenity-editorial-footer__support-heading h2 {
-  max-width: 19rem;
-  margin: 0.25rem 0 0;
+  max-width: 22rem;
+  margin: 0.5rem 0 0;
   color: #ffffff;
   font-family: var(--guest-serif);
-  font-size: clamp(1.55rem, 2.1vw, 2.4rem);
+  font-size: clamp(1.55rem, 1.9vw, 2.15rem);
   font-weight: 400;
-  line-height: 1.12;
+  line-height: 1.18;
 }
 
 .public-site .serenity-editorial-footer__support-copy {
-  max-width: 17rem;
+  max-width: 20rem;
   margin: 0;
   padding-left: 1.5rem;
   border-left: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 0 !important;
   color: #dce6e9;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   line-height: 1.6;
 }
 
@@ -320,7 +320,7 @@ body:has(.corporate-editorial-page) .public-site > main,
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem var(--public-card-gutter, 1rem);
+  padding: 1rem var(--guest-gutter) 1.25rem;
   border-radius: 1rem;
   background: #ffffff;
 }
@@ -337,14 +337,26 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .serenity-editorial-footer__grid {
-  width: 100%;
-  margin: 0;
-  padding: clamp(4rem, 7vw, 8rem) var(--public-card-gutter, 1rem) 3rem;
+  margin: clamp(2.5rem, 4vw, 4rem) var(--guest-gutter) 0;
+  width: auto;
+  gap: clamp(1.5rem, 3vw, 3.5rem);
+  padding: 2.25rem 0 clamp(2.75rem, 4vw, 4rem);
+  border-top: 1px solid #dce4e9;
+  border-radius: 0 !important;
+}
+
+.public-site .serenity-editorial-footer__grid > div {
+  border-radius: 0 !important;
 }
 
 .public-site .serenity-editorial-footer__legal {
-  padding: 1.25rem var(--public-card-gutter, 1rem) 0;
+  padding: 1.25rem var(--guest-gutter) 0;
   border-top: 1px solid var(--public-line);
+  border-radius: 0 !important;
+}
+
+.public-site .serenity-editorial-footer__legal p:first-child {
+  padding-left: 0;
 }
 
 @media (max-width: 1050px) {
@@ -359,53 +371,74 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .serenity-editorial-social {
+  margin-inline: var(--public-card-gutter, 1rem);
   background: var(--hero-green, #002844);
   color: #ffffff;
 }
 
+.public-site .serenity-editorial-social > h2 {
+  font-weight: 400;
+}
+
 @media (min-width: 761px) {
   .public-site .serenity-editorial-social {
-    padding: clamp(4rem, 6vw, 6rem) var(--guest-gutter);
+    padding: clamp(3.5rem, 5vw, 5.5rem) var(--guest-gutter);
   }
 
-  .public-site .serenity-editorial-social > p {
-    max-width: 16ch;
-    margin: 0 0 2.5rem;
-    font-size: clamp(2rem, 3vw, 3.4rem);
-    line-height: 1.08;
+  .public-site .serenity-editorial-social > h2 {
+    position: relative;
+    max-width: 13ch;
+    margin: 0 0 2rem;
+    padding-top: 1.4rem;
+    font-family: var(--font-brand-serif), Georgia, serif;
+    font-size: clamp(1.8rem, 2.4vw, 2.65rem);
+    letter-spacing: -0.045em;
+    line-height: 1.15;
+  }
+
+  .public-site .serenity-editorial-social > h2::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2.5rem;
+    border-top: 2px solid var(--hero-yellow, #e5ca8b);
+    content: "";
   }
 
   .public-site .serenity-editorial-social > div {
     display: grid;
     gap: 0;
     min-width: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.42);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 0 !important;
   }
 
   .public-site .serenity-editorial-social a {
-    display: flex;
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    gap: clamp(0.85rem, 1.5vw, 1.5rem);
     width: 100%;
-    padding: 1.15rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.42);
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 0 !important;
-    font-size: clamp(2.1rem, 3.6vw, 3.7rem);
-    line-height: 1.05;
+    font-family: var(--font-poppins), Arial, sans-serif;
+    font-size: clamp(1.35rem, 2.1vw, 2.15rem);
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    line-height: 1.2;
     transition: color 180ms ease, border-color 180ms ease;
   }
 
-  .public-site .serenity-editorial-social a::after {
-    content: "↗";
-    display: inline-block;
+  .public-site .serenity-editorial-social__number {
     color: var(--hero-yellow, #e5ca8b);
-    font-family: Arial, sans-serif;
-    flex: 0 0 auto;
-    font-size: 0.48em;
-    font-weight: 400;
-    line-height: 1;
+    font-size: 0.67rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+  }
+
+  .public-site .serenity-editorial-social a svg {
+    color: var(--hero-yellow, #e5ca8b);
     transition: transform 180ms ease;
   }
 
@@ -414,7 +447,7 @@ body:has(.corporate-editorial-page) .public-site > main,
     border-bottom-color: currentColor;
   }
 
-  .public-site .serenity-editorial-social a:is(:hover, :focus-visible)::after {
+  .public-site .serenity-editorial-social a:is(:hover, :focus-visible) svg {
     transform: translate(0.14em, -0.14em);
   }
 }
@@ -422,18 +455,33 @@ body:has(.corporate-editorial-page) .public-site > main,
 @media (min-width: 1024px) {
   .public-site .serenity-editorial-social {
     display: grid;
-    grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
     align-items: start;
-    gap: clamp(3rem, 6vw, 7rem);
+    gap: clamp(2.5rem, 5vw, 6rem);
   }
 
-  .public-site .serenity-editorial-social > p {
+  .public-site .serenity-editorial-social > h2 {
     margin-bottom: 0;
   }
 }
 
 .public-site .serenity-editorial-footer__grid h2 {
-  color: #65717a;
+  margin-bottom: 1rem;
+  color: #687b88;
+  font-family: var(--font-poppins), Arial, sans-serif !important;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+
+.public-site .serenity-editorial-footer__grid > div {
+  gap: 0.4rem;
+}
+
+.public-site .serenity-editorial-footer__grid :is(a, p) {
+  font-size: clamp(0.9rem, 0.95vw, 1.02rem);
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 .public-site .serenity-editorial-footer__legal {
@@ -444,26 +492,19 @@ body:has(.corporate-editorial-page) .public-site > main,
   background: #ffffff;
 }
 
-.public-site .serenity-editorial-photo-preview__group {
-  gap: 0.5rem;
-  padding-right: 0.5rem;
+.public-site .serenity-editorial-photo-preview {
+  padding: 0 var(--guest-gutter) clamp(2.5rem, 4vw, 4rem);
+  border-radius: 0;
 }
 
-.public-site .serenity-editorial-photo-preview__caption small {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  border-radius: 999px;
-  padding: 0.55rem 0.8rem;
-  background: #ffffff;
-  color: var(--hero-green-deep, #001e35);
-  font-size: 0.68rem;
-  letter-spacing: 0.04em;
-  opacity: 1;
-  text-shadow: none;
-  box-shadow: 0 0.3rem 1rem rgba(0, 30, 53, 0.25);
-  transition: background-color 220ms ease, transform 220ms ease;
-  white-space: nowrap;
+.public-site .serenity-editorial-photo-preview__group {
+  gap: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.public-site .serenity-editorial-photo-preview__caption strong {
+  color: #ffffff;
+  font-family: var(--font-brand-serif), Georgia, serif !important;
 }
 
 .public-site :is(
@@ -516,24 +557,8 @@ body:has(.corporate-editorial-page) .public-site > main,
   color: var(--corp-green, #002844) !important;
 }
 
-.public-site .serenity-editorial-photo-preview__caption small {
-  color: var(--hero-green-deep, #001e35) !important;
-}
-
-.public-site .serenity-editorial-photo-preview__card:is(:hover, :focus-visible) .serenity-editorial-photo-preview__caption small {
-  background: var(--hero-yellow, #E5CA8B);
-  transform: translateY(-2px);
-}
-
-@media (hover: none) {
-  .public-site .serenity-editorial-photo-preview__caption small {
-    font-size: 0.6rem;
-    transform: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .public-site .serenity-editorial-photo-preview__caption small {
+  .public-site .serenity-editorial-photo-preview__arrow {
     transition: none;
   }
 }
@@ -543,18 +568,70 @@ body:has(.corporate-editorial-page) .public-site > main,
   padding-block: var(--guest-section-space);
 }
 
+.public-site .serenity-editorial-services {
+  margin-inline: var(--public-card-gutter, 1rem);
+  padding-block: clamp(3.5rem, 5vw, 5.5rem);
+}
+
 .public-site .serenity-editorial-intro {
   min-height: 0;
-  padding-block: clamp(2.5rem, 4vw, 4rem);
+  padding-block: clamp(2.75rem, 4vw, 4.5rem) clamp(2.25rem, 3vw, 3.5rem);
+}
+
+.public-site .serenity-editorial-intro__topline {
+  align-items: center;
+  padding-bottom: 1.25rem;
+  border-bottom-color: rgba(0, 40, 68, 0.18);
+}
+
+.public-site .serenity-editorial-intro__topline h2 {
+  position: relative;
+  margin-left: 0.85rem;
+  color: #002844;
+  font-family: var(--font-poppins), Arial, sans-serif !important;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+}
+
+.public-site .serenity-editorial-intro__topline h2::before {
+  position: absolute;
+  top: 0.15em;
+  bottom: 0.15em;
+  left: -0.85rem;
+  border-left: 2px solid #d5b275;
+  content: "";
+}
+
+.public-site .serenity-editorial-intro__topline h2 span {
+  font-family: var(--font-poppins), Arial, sans-serif !important;
+}
+
+.public-site .serenity-editorial-intro__topline a {
+  color: #002844;
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+}
+
+.public-site .serenity-editorial-intro__topline a svg {
+  color: #b88f4b;
+  transition: transform 220ms ease;
+}
+
+.public-site .serenity-editorial-intro__topline a:is(:hover, :focus-visible) svg {
+  transform: translate(0.15rem, -0.15rem);
 }
 
 .public-site .serenity-editorial-hero__content {
   width: min(58%, 48rem);
   padding-inline: var(--guest-gutter);
+  transform: translateY(-2rem);
 }
 
 .public-site .serenity-editorial-hero h1 {
-  font-size: clamp(3rem, 4.3vw, 5rem);
+  font-size: clamp(2.5rem, 3.1vw, 3.75rem);
   line-height: 1.02;
 }
 
@@ -565,45 +642,147 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .serenity-editorial-intro__statement {
-  gap: clamp(2rem, 5vw, 6rem);
+  grid-template-columns: minmax(0, 1.3fr) minmax(17rem, 0.7fr);
+  gap: clamp(2rem, 6vw, 7rem);
   min-height: 0;
-  padding-top: clamp(1.5rem, 3vw, 3rem);
+  padding-top: clamp(2rem, 3vw, 3rem);
 }
 
 .public-site .serenity-editorial-intro__statement p:first-child {
-  font-size: clamp(3rem, 5.2vw, 5.75rem);
+  justify-self: start;
+  max-width: 24ch;
+  color: #002844;
+  font-family: var(--font-brand-serif), Georgia, serif !important;
+  font-size: clamp(2.15rem, 3.3vw, 3.75rem);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.14;
+  text-align: left;
+}
+
+.public-site .serenity-editorial-intro__statement p:first-child span {
+  font-family: var(--font-brand-serif), Georgia, serif !important;
+}
+
+.public-site .serenity-editorial-intro__statement p:last-child {
+  max-width: 29rem;
+  color: #28475b;
+  font-family: var(--font-poppins), Arial, sans-serif !important;
+  font-size: clamp(0.95rem, 1.05vw, 1.1rem);
+  line-height: 1.65;
+}
+
+.public-site .serenity-editorial-intro__statement p:last-child span {
+  font-family: var(--font-poppins), Arial, sans-serif !important;
+}
+
+.public-site .serenity-editorial-intro .scroll-wipe-text-reveal {
+  color: #002844 !important;
+}
+
+.public-site .serenity-editorial-faq__question {
+  font-size: clamp(1rem, 1.3vw, 1.25rem);
 }
 
 .public-site .serenity-editorial-services__heading {
-  gap: clamp(2rem, 5vw, 5rem);
-  padding-bottom: clamp(3rem, 6vw, 6rem);
+  position: relative;
+  align-items: end;
+  gap: clamp(2rem, 4vw, 5rem);
+  padding-top: 1.5rem;
+  padding-bottom: clamp(2.5rem, 4vw, 4rem);
+}
+
+.public-site .serenity-editorial-services__heading::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2.5rem;
+  border-top: 2px solid var(--hero-yellow, #e5ca8b);
+  content: "";
 }
 
 .public-site .serenity-editorial-services__heading h2 {
-  font-size: clamp(3.5rem, 6vw, 6.5rem);
+  font-size: clamp(2.8rem, 4.4vw, 4.75rem);
+  letter-spacing: -0.055em;
+  line-height: 1;
 }
 
 .public-site .serenity-editorial-services__heading p {
-  font-size: clamp(1.5rem, 2.2vw, 2.5rem);
+  max-width: 23rem;
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-size: clamp(1rem, 1.35vw, 1.35rem);
+  letter-spacing: -0.025em;
+  line-height: 1.45;
 }
 
 .public-site .serenity-editorial-services__grid > a {
-  min-height: 17rem;
-  padding: 1.5rem clamp(1.25rem, 2vw, 2rem) 2rem;
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  padding: 1.4rem clamp(1.25rem, 2vw, 2rem) 1.75rem;
+}
+
+.public-site .serenity-editorial-services__grid > a:first-child {
+  padding-left: 0;
+}
+
+.public-site .serenity-editorial-services__grid > a:last-child {
+  padding-right: 0;
+}
+
+.public-site .serenity-editorial-services__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--hero-yellow, #e5ca8b);
+}
+
+.public-site .serenity-editorial-services .serenity-editorial-services__meta span {
+  color: var(--hero-yellow, #e5ca8b) !important;
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.public-site .serenity-editorial-services__meta svg {
+  flex: none;
+  transition: transform 180ms ease;
+}
+
+.public-site .serenity-editorial-services__grid > a:is(:hover, :focus-visible) .serenity-editorial-services__meta svg {
+  transform: translate(0.15rem, -0.15rem);
 }
 
 .public-site .serenity-editorial-services__grid h3 {
-  margin-top: 5rem;
-  font-size: clamp(1.8rem, 2.8vw, 3rem);
+  margin: clamp(2.25rem, 3vw, 3rem) 0 0.55rem;
+  font-size: clamp(1.45rem, 2vw, 2.1rem);
+  line-height: 1.12;
+}
+
+.public-site .serenity-editorial-services__grid p {
+  max-width: 23rem;
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-size: clamp(0.84rem, 0.93vw, 0.93rem);
+  line-height: 1.55;
+}
+
+.public-site .serenity-editorial-faq {
+  padding-block: clamp(3.5rem, 5vw, 5.5rem);
 }
 
 .public-site .serenity-editorial-faq__header h2 {
-  font-size: clamp(3.2rem, 5vw, 5.25rem);
+  font-size: clamp(2.8rem, 4vw, 4.5rem);
 }
 
 .public-site :is(.about-story-heading, .corporate-editorial-masthead, .contact-story-masthead, .houses-editorial-heading, .policy-editorial-masthead) {
   padding-inline: var(--guest-gutter);
   color: #ffffff;
+}
+
+.public-site .houses-editorial-heading {
+  margin-inline: var(--public-card-gutter, 1rem);
 }
 
 /* Keep every label in the navy headers legible, including text with its own color rule. */
@@ -664,7 +843,7 @@ body:has(.corporate-editorial-page) .public-site > main,
 .public-site .serenity-editorial-house-cards {
   --houses-paper: #ffffff;
   --houses-ink: #111111;
-  --houses-serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
+  --houses-serif: var(--font-brand-serif), Georgia, serif;
   max-width: none;
   padding: var(--public-card-gutter);
   background: #ffffff;
@@ -677,12 +856,11 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .houses-editorial-list__caption {
-  min-height: 5rem;
-  padding: 1rem var(--house-card-inset) 0.8rem;
+  padding: 1.3rem var(--house-card-inset) 1rem;
 }
 
 .public-site .houses-editorial-list__title {
-  font-size: clamp(1.7rem, 2.5vw, 2.7rem);
+  font-size: clamp(1.6rem, 2.15vw, 2.2rem);
 }
 
 .public-site .houses-editorial-comfort {
@@ -713,6 +891,54 @@ body:has(.corporate-editorial-page) .public-site > main,
   padding-inline: var(--public-card-gutter);
 }
 
+/* Align the entire guest guide, not just its card grid, with other guest pages. */
+.public-site .guest-information-page {
+  display: grid;
+  gap: clamp(0.75rem, 1.2vw, 1.25rem);
+  padding: 0 var(--public-card-gutter) clamp(0.75rem, 1.2vw, 1.25rem);
+}
+
+.public-site .guest-information-page :is(.guest-information-hero, .guest-information-jump) {
+  border-radius: 1.25rem;
+}
+
+.public-site .guest-information-content {
+  width: 100%;
+}
+
+.public-site .guest-information-hero h1 {
+  font-size: clamp(2.75rem, 4.2vw, 4.5rem);
+  line-height: 1.02;
+}
+
+.public-site .guest-information-hero-content > p:last-child {
+  font-size: clamp(1rem, 1.2vw, 1.2rem) !important;
+  line-height: 1.5 !important;
+}
+
+.public-site .guest-information-intro h2 {
+  font-size: clamp(2rem, 3vw, 3.25rem);
+}
+
+.public-site .guest-information-card h3 {
+  font-size: clamp(1.35rem, 1.7vw, 1.8rem);
+  line-height: 1.12;
+}
+
+@media (max-width: 700px) {
+  .public-site .guest-information-hero h1 {
+    font-size: clamp(2rem, 7vw, 2.75rem);
+  }
+
+  .public-site .guest-information-intro h2 {
+    font-size: 1.8rem;
+  }
+
+  .public-site .guest-information-card h3 {
+    font-size: 1.4rem;
+  }
+}
+
 .public-site .policy-editorial-hero h1 {
   font-size: clamp(4rem, 6.5vw, 7rem);
 }
@@ -733,9 +959,12 @@ body:has(.corporate-editorial-page) .public-site > main,
   font-size: clamp(4rem, 8vw, 7.5rem);
 }
 
-.public-site .property-theme .stay-section h2,
-.public-site .property-photo-tour .property-photo-tour-browser-heading h3 {
+.public-site .property-theme .stay-section h2 {
   font-size: clamp(3rem, 5.5vw, 6rem);
+}
+
+.public-site .property-photo-tour .property-photo-tour-browser-heading h3 {
+  font-size: clamp(3rem, 5.2vw, 5.5rem);
 }
 
 .public-site .booking-flow-page,
@@ -776,24 +1005,136 @@ body:has(.corporate-editorial-page) .public-site > main,
 
   .public-site .serenity-editorial-hero__content {
     width: 100%;
+    min-height: 0;
+    height: auto;
+    justify-content: flex-start;
+    padding: 1.5rem 1.25rem 1.65rem;
+    transform: none;
+    background: #002844;
+  }
+
+  .public-site .serenity-editorial-intro__statement p:first-child {
+    font-size: clamp(2rem, 7vw, 2.75rem);
+  }
+
+  .public-site .serenity-editorial-hero {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    margin: 0;
+    border-radius: 0 !important;
+    background: #002844;
+  }
+
+  .public-site .serenity-editorial-hero__media {
+    position: relative;
+    inset: auto;
+    z-index: 0;
+    width: 100%;
+    height: clamp(16rem, 75vw, 24rem);
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .public-site .serenity-editorial-hero__media img {
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .public-site .serenity-editorial-hero__content::before {
+    display: none;
+  }
+
+  .public-site .serenity-editorial-hero__actions a:first-child {
+    border-color: #ffffff;
+    background: #ffffff;
+    color: #002844;
+  }
+
+  .public-site .serenity-editorial-hero__actions a:first-child:is(:hover, :focus-visible) {
+    border-color: #dfe9ee;
+    background: #dfe9ee;
+    color: #002844;
+  }
+
+  .public-site .serenity-editorial-hero__actions a:last-child {
+    border-color: rgba(255, 255, 255, 0.72);
+    background: transparent;
+    color: #ffffff;
+  }
+
+  .public-site .serenity-editorial-hero__actions a:last-child:is(:hover, :focus-visible) {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
   }
 
   .public-site .serenity-editorial-hero h1 {
-    font-size: clamp(2.25rem, 8.4vw, 3.5rem);
+    font-size: clamp(1.85rem, 7vw, 2.4rem);
+    line-height: 1.04;
   }
 
   .public-site .serenity-editorial-hero__description {
-    font-size: clamp(0.84rem, 2.9vw, 0.96rem);
-    line-height: 1.5;
+    max-width: 30rem;
+    margin-top: 0.9rem;
+    font-size: clamp(0.8rem, 2.9vw, 0.93rem);
+    font-weight: 500;
+    line-height: 1.55;
+  }
+
+  .public-site .serenity-editorial-hero__eyebrow {
+    margin-bottom: 0.7rem;
+    font-size: 0.61rem;
+    line-height: 1.4;
+  }
+
+  .public-site .serenity-editorial-hero__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+    margin-top: 1.2rem;
+  }
+
+  .public-site .serenity-editorial-hero__actions a {
+    min-height: 2.8rem;
+    width: 100%;
+    padding: 0.65rem 1rem;
+    font-size: 0.75rem;
+  }
+
+  .public-site .serenity-editorial-home .serenity-editorial-hero__stats {
+    gap: 0.5rem;
+    padding: 0.65rem;
+    background: #f7f8f8;
+  }
+
+  .public-site .serenity-editorial-hero__stat {
+    min-height: 6.25rem;
+    padding: 0.75rem;
+    border: 0 !important;
+    border-radius: 0.65rem !important;
+    background: #fff;
+  }
+
+  .public-site .serenity-editorial-hero__stat-label {
+    font-size: 0.72rem;
   }
 
   .public-site .serenity-editorial-photo-preview__card {
-    width: clamp(13rem, 62vw, 18rem);
+    width: clamp(15rem, 76vw, 22rem);
   }
 
-  .public-site .serenity-editorial-photo-preview__caption small {
-    padding: 0.4rem 0.55rem;
-    font-size: 0.58rem;
+  .public-site .serenity-editorial-intro__statement {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding-top: 1.75rem;
+  }
+
+  .public-site .serenity-editorial-intro__statement p:first-child {
+    font-size: clamp(2rem, 7vw, 2.75rem);
+  }
+
+  .public-site .serenity-editorial-intro__statement p:last-child {
+    font-size: 0.92rem;
   }
 
   .public-site :is(.about-story-heading, .corporate-editorial-masthead, .contact-story-masthead, .houses-editorial-heading) h1 {
@@ -816,6 +1157,10 @@ body:has(.corporate-editorial-page) .public-site > main,
     padding-bottom: 2rem;
   }
 
+  .public-site .serenity-editorial-house-cards .houses-editorial-list__media {
+    max-height: 22rem;
+  }
+
   .public-site .houses-editorial-comfort__grid {
     padding-inline: 0.5rem;
   }
@@ -825,12 +1170,15 @@ body:has(.corporate-editorial-page) .public-site > main,
   }
 
   .public-site .houses-editorial-list__caption {
-    min-height: 4rem;
-    padding: 0.75rem var(--house-card-inset);
+    padding: 1rem var(--house-card-inset) 0.8rem;
   }
 
   .public-site .houses-editorial-list__title {
-    font-size: clamp(1.7rem, 6.2vw, 2.2rem);
+    font-size: clamp(1.5rem, 4.8vw, 1.9rem);
+  }
+
+  .public-site .property-photo-tour .property-photo-tour-browser-heading h3 {
+    font-size: clamp(2.65rem, 11vw, 3.7rem);
   }
 
   .public-site :is(h1, h2, h3) {
@@ -844,30 +1192,29 @@ body:has(.corporate-editorial-page) .public-site > main,
 
   .public-site .serenity-editorial-services {
     margin-bottom: 0.75rem;
-    padding-block: clamp(3rem, 9vw, 4rem);
+    padding-block: clamp(2.75rem, 8vw, 3.5rem);
   }
 
   .public-site .serenity-editorial-services__heading {
     gap: 1rem;
-    padding-bottom: 2rem;
+    padding-bottom: 1.75rem;
   }
 
   .public-site .serenity-editorial-services__heading h2 {
-    font-size: clamp(2.8rem, 11vw, 4rem);
-    line-height: 0.95;
+    font-size: clamp(2.25rem, 8.8vw, 3.2rem);
+    line-height: 1;
   }
 
   .public-site .serenity-editorial-services__heading p {
     justify-self: start;
     max-width: 19rem;
-    font-size: clamp(1.15rem, 4.3vw, 1.5rem);
-    line-height: 1.2;
+    font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+    line-height: 1.45;
   }
 
   .public-site .serenity-editorial-services__grid > a {
-    position: relative;
     min-height: 0;
-    padding: 1.35rem 2rem 1.35rem 2.6rem;
+    padding: 1.25rem 0 1.4rem;
     border-right: 0;
     border-bottom: 1px solid rgba(255, 247, 239, 0.38);
   }
@@ -876,34 +1223,16 @@ body:has(.corporate-editorial-page) .public-site > main,
     border-bottom: 0;
   }
 
-  .public-site .serenity-editorial-services__grid > a > span {
-    position: absolute;
-    top: 1.5rem;
-    left: 0.1rem;
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
-  }
-
   .public-site .serenity-editorial-services__grid h3 {
-    margin: 0 0 0.45rem;
-    font-size: clamp(1.6rem, 6vw, 2rem);
-    line-height: 1.05;
+    margin: 1.4rem 0 0.45rem;
+    font-size: clamp(1.3rem, 4.7vw, 1.7rem);
+    line-height: 1.12;
   }
 
   .public-site .serenity-editorial-services__grid p {
     max-width: 24rem;
-    font-size: 0.9rem;
-    line-height: 1.45;
-  }
-
-  .public-site .serenity-editorial-services__grid > a::after {
-    content: "↗";
-    position: absolute;
-    top: 1.35rem;
-    right: 0.1rem;
-    font-family: Arial, sans-serif;
-    font-size: 1.15rem;
-    line-height: 1;
+    font-size: 0.84rem;
+    line-height: 1.5;
   }
 
   .public-site .serenity-editorial-faq {
@@ -916,20 +1245,19 @@ body:has(.corporate-editorial-page) .public-site > main,
     padding-bottom: 1.75rem;
   }
 
-  .public-site .serenity-editorial-faq__header > p {
-    padding-top: 0;
+  .public-site .serenity-editorial-faq__title > p {
     font-size: 0.62rem;
   }
 
   .public-site .serenity-editorial-faq__header h2 {
-    font-size: clamp(2.35rem, 9vw, 3.25rem);
-    line-height: 1.02;
+    font-size: clamp(2.25rem, 8vw, 3rem);
+    line-height: 1.08;
   }
 
-  .public-site .serenity-editorial-faq__header div > p {
-    margin-top: 0.9rem;
-    font-size: 1rem;
-    line-height: 1.4;
+  .public-site .serenity-editorial-faq__header .serenity-editorial-faq__intro {
+    margin: 0;
+    font-size: 0.93rem;
+    line-height: 1.55;
   }
 
   .public-site .serenity-editorial-faq__list {
@@ -944,7 +1272,7 @@ body:has(.corporate-editorial-page) .public-site > main,
   }
 
   .public-site .serenity-editorial-faq__question {
-    font-size: clamp(1.1rem, 4.3vw, 1.3rem);
+    font-size: clamp(0.875rem, 2.3vw, 0.9rem);
     line-height: 1.2;
   }
 
@@ -973,10 +1301,24 @@ body:has(.corporate-editorial-page) .public-site > main,
     padding: clamp(2.75rem, 8vw, 3.5rem) var(--guest-gutter);
   }
 
-  .public-site .serenity-editorial-social > p {
-    margin-bottom: 1.5rem;
-    font-size: clamp(1.15rem, 4.5vw, 1.4rem);
-    line-height: 1.2;
+  .public-site .serenity-editorial-social > h2 {
+    position: relative;
+    max-width: 14ch;
+    margin-bottom: 1.75rem;
+    padding-top: 1.3rem;
+    font-family: var(--font-brand-serif), Georgia, serif;
+    font-size: clamp(1.6rem, 6vw, 2.25rem);
+    letter-spacing: -0.04em;
+    line-height: 1.15;
+  }
+
+  .public-site .serenity-editorial-social > h2::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2.5rem;
+    border-top: 2px solid var(--hero-yellow, #e5ca8b);
+    content: "";
   }
 
   .public-site .serenity-editorial-social > div {
@@ -987,14 +1329,31 @@ body:has(.corporate-editorial-page) .public-site > main,
   }
 
   .public-site .serenity-editorial-social a {
-    display: block;
+    display: grid;
+    grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
     width: 100%;
-    padding: 0.8rem 0;
+    padding: 1rem 0;
     border: 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.35);
     border-radius: 0 !important;
-    font-size: clamp(2rem, 8vw, 2.6rem);
-    line-height: 1.05;
+    font-family: var(--font-poppins), Arial, sans-serif;
+    font-size: clamp(1.15rem, 4.6vw, 1.5rem);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+  }
+
+  .public-site .serenity-editorial-social__number {
+    color: var(--hero-yellow, #e5ca8b);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+  }
+
+  .public-site .serenity-editorial-social a svg {
+    color: var(--hero-yellow, #e5ca8b);
   }
 }
 
@@ -1025,7 +1384,7 @@ body:has(.corporate-editorial-page) .public-site > main,
   }
 
   .public-site .serenity-editorial-footer__support {
-    padding: 1.5rem var(--public-card-gutter, 1rem);
+    padding: 1.5rem var(--guest-gutter);
   }
 
   .public-site .serenity-editorial-footer__support {
@@ -1053,7 +1412,7 @@ body:has(.corporate-editorial-page) .public-site > main,
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.9rem 0.5rem;
-    padding: 1rem var(--public-card-gutter, 1rem);
+    padding: 1rem var(--guest-gutter);
   }
 
   .public-site .serenity-editorial-footer__values span {
@@ -1063,7 +1422,9 @@ body:has(.corporate-editorial-page) .public-site > main,
   .public-site .serenity-editorial-footer__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.75rem 1rem;
-    padding: 2.75rem var(--public-card-gutter, 1rem) 2rem;
+    margin: 2rem var(--guest-gutter) 0;
+    padding: 0 0 2.25rem;
+    border-top: 0;
   }
 
   .public-site .serenity-editorial-footer__grid > div {
@@ -1077,7 +1438,7 @@ body:has(.corporate-editorial-page) .public-site > main,
   body:has(.property-theme) .public-site .serenity-editorial-footer__grid h2 {
     margin: 0 0 0.9rem;
     color: #5a7080;
-    font: 600 0.7rem/1.3 var(--font-poppins), sans-serif;
+    font: 600 0.66rem/1.3 var(--font-poppins), sans-serif;
     letter-spacing: 0.12em;
   }
 
@@ -1086,9 +1447,10 @@ body:has(.corporate-editorial-page) .public-site > main,
   body:has(.property-theme) .public-site .serenity-editorial-footer__grid :is(a, p) {
     width: 100%;
     min-width: 0;
-    padding: 0.43rem 0;
+    min-height: 2.5rem;
+    padding: 0.5rem 0;
     color: #002844;
-    font: 500 0.95rem/1.4 var(--font-poppins), sans-serif;
+    font: 500 0.88rem/1.4 var(--font-poppins), sans-serif;
     overflow-wrap: anywhere;
   }
 
@@ -1104,7 +1466,7 @@ body:has(.corporate-editorial-page) .public-site > main,
     flex-wrap: wrap;
     gap: 0.2rem 1rem;
     justify-content: space-between;
-    padding: 1.3rem var(--public-card-gutter, 1rem) 0;
+    padding: 1.3rem var(--guest-gutter) 0;
     border-top: 1px solid #dce4e9;
     color: #5a7080;
     font: 400 0.78rem/1.5 var(--font-poppins), sans-serif;
@@ -1161,7 +1523,7 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .serenity-editorial-footer--draft .serenity-editorial-footer__support {
-  margin: 0;
+  margin: 0 var(--public-card-gutter, 1rem);
   padding: clamp(2rem, 4vw, 4rem) var(--draft-footer-inset);
   border-radius: 0 !important;
   background: var(--draft-footer-navy);
@@ -1246,5 +1608,267 @@ body:has(.corporate-editorial-page) .public-site > main,
   .public-site .contact-story-closing h2,
   .public-site .contact-story-location__heading h2 {
     font-size: clamp(2.25rem, 7.5vw, 3.2rem);
+  }
+}
+
+/* Keep the About page's editorial type at the same restrained scale as the
+   other guest pages without changing their shared masthead styles. */
+.public-site .about-story-heading h1 {
+  font-size: clamp(2.75rem, 4.2vw, 4.5rem);
+  line-height: 0.95;
+}
+
+.public-site .about-story-hero__copy h2 {
+  font-size: clamp(2.65rem, 3.6vw, 4rem);
+  line-height: 1.02;
+}
+
+.public-site .about-story-hero__media-label {
+  font-size: clamp(1.45rem, 2.2vw, 2.3rem);
+}
+
+.public-site .about-story-page :is(
+  .about-story-intro__statement h2,
+  .about-story-principles__heading h2,
+  .about-story-host__intro h2,
+  .homepage-review-heading
+) {
+  font-size: clamp(2.65rem, 4vw, 4.5rem);
+  line-height: 1.02;
+}
+
+.public-site .about-story-stat strong {
+  font-size: clamp(3.2rem, 5vw, 5rem);
+}
+
+.public-site .about-story-principle h3 {
+  font-size: clamp(1.9rem, 2.6vw, 3rem);
+  line-height: 1.08;
+}
+
+.public-site .about-story-host__name strong {
+  font-size: clamp(2.4rem, 3.5vw, 3.6rem);
+}
+
+.public-site .about-story-host__metrics dd {
+  font-size: clamp(1.8rem, 2.4vw, 2.6rem);
+}
+
+.public-site .about-story-page :is(
+  .about-story-hero__copy > p:not(.about-story-eyebrow),
+  .about-story-intro__statement p,
+  .about-story-intro__details p,
+  .about-story-principles__heading p,
+  .about-story-principle p,
+  .about-story-host__intro > p:last-child,
+  .homepage-reviews-description
+) {
+  font-size: clamp(1rem, 1.2vw, 1.2rem);
+  line-height: 1.5;
+}
+
+.public-site .about-story-stat p {
+  font-size: clamp(1rem, 1.15vw, 1.15rem);
+  line-height: 1.4;
+}
+
+@media (max-width: 760px) {
+  .public-site .about-story-heading h1 {
+    font-size: clamp(2rem, 7vw, 2.75rem);
+  }
+
+  .public-site .about-story-hero__copy h2 {
+    font-size: clamp(1.9rem, 7vw, 2.8rem);
+  }
+
+  .public-site .about-story-page :is(
+    .about-story-intro__statement h2,
+    .about-story-principles__heading h2,
+    .about-story-host__intro h2,
+    .homepage-review-heading
+  ) {
+    font-size: clamp(2.2rem, 7vw, 3rem);
+  }
+
+  .public-site .about-story-principle h3 {
+    font-size: 1.8rem;
+  }
+}
+
+/* One outer gutter keeps every About, Contact, and Corporate section aligned. */
+.public-site :is(.about-story-page, .contact-story-page, .corporate-editorial-page) {
+  padding-inline: var(--public-card-gutter, 1rem);
+}
+
+.public-site .about-story-page :is(.about-story-hero, .about-story-principles__grid, .about-story-homes__grid),
+.public-site .contact-story-page :is(.contact-story-hero, .contact-story-methods, .contact-story-nearby__grid),
+.public-site .corporate-editorial-page :is(.corporate-editorial-hero, .corporate-benefits-grid) {
+  padding-inline: 0;
+}
+
+.public-site .about-story-heading,
+.public-site .corporate-editorial-masthead,
+.public-site .contact-story-page :is(.contact-story-masthead, .contact-story-nearby__heading, .contact-story-closing) {
+  border-radius: 1.25rem;
+}
+
+/* Give Corporate Stays the same restrained type scale as the other guest pages. */
+.public-site .corporate-editorial-page .corporate-editorial-masthead h1 {
+  font-size: clamp(2.75rem, 4.2vw, 4.5rem);
+  line-height: 0.95;
+}
+
+.public-site .corporate-editorial-hero__image > span {
+  font-size: clamp(1.45rem, 2.2vw, 2.3rem);
+}
+
+.public-site .corporate-editorial-hero__copy h2 {
+  font-size: clamp(2.65rem, 3.6vw, 4rem);
+  line-height: 1.02;
+}
+
+.public-site .corporate-editorial-page :is(
+  .corporate-insurance__heading h2,
+  .corporate-partner-direct h2,
+  .corporate-editorial-enquiry h2,
+  .corporate-editorial-booking h2,
+  .corporate-editorial-faq h2,
+  .corporate-editorial-closing h2
+) {
+  font-size: clamp(2.65rem, 4vw, 4.5rem);
+  line-height: 1.02;
+}
+
+.public-site .corporate-editorial-page .corporate-insurance__homes-heading h3 {
+  font-size: clamp(2.2rem, 3vw, 3.4rem);
+}
+
+.public-site .corporate-editorial-page :is(.corporate-insurance__path h3, .corporate-benefit-card h3) {
+  font-size: clamp(1.85rem, 2.5vw, 2.8rem);
+  line-height: 1.08;
+}
+
+.public-site .corporate-insurance__home-details strong {
+  font-size: clamp(1.5rem, 2vw, 2.2rem);
+}
+
+.public-site .corporate-stay-features__intro h2 {
+  font-size: clamp(1.8rem, 2.3vw, 2.7rem);
+}
+
+.public-site .corporate-stay-features__item h3 {
+  font-size: clamp(1.35rem, 1.7vw, 1.9rem);
+}
+
+.public-site .corporate-editorial-page :is(
+  .corporate-editorial-hero__copy p,
+  .corporate-insurance__heading p,
+  .corporate-insurance__path p,
+  .corporate-insurance__homes-heading p,
+  .corporate-benefit-card p
+) {
+  font-size: clamp(1rem, 1.2vw, 1.2rem);
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .public-site .corporate-editorial-page .corporate-editorial-masthead h1 {
+    font-size: clamp(2rem, 7vw, 2.75rem);
+  }
+
+  .public-site .corporate-editorial-hero__copy h2 {
+    font-size: clamp(1.9rem, 7vw, 2.8rem);
+  }
+
+  .public-site .corporate-editorial-page :is(
+    .corporate-insurance__heading h2,
+    .corporate-partner-direct h2,
+    .corporate-editorial-enquiry h2,
+    .corporate-editorial-booking h2,
+    .corporate-editorial-faq h2,
+    .corporate-editorial-closing h2
+  ) {
+    font-size: clamp(2.2rem, 7vw, 3rem);
+  }
+}
+
+/* Contact uses the same compact type hierarchy as the About page. */
+
+.public-site .contact-story-masthead h1 {
+  font-size: clamp(2.75rem, 4.2vw, 4.5rem);
+  line-height: 0.95;
+}
+
+.public-site .contact-story-hero__copy h2 {
+  font-size: clamp(2.65rem, 3.6vw, 4rem);
+  line-height: 1.02;
+}
+
+.public-site .contact-story-hero__media > span {
+  font-size: clamp(1.45rem, 2.2vw, 2.3rem);
+}
+
+.public-site .contact-story-page :is(
+  .contact-story-enquiry__intro h2,
+  .contact-story-location__heading h2,
+  .contact-story-nearby__heading h2,
+  .contact-story-closing h2
+) {
+  font-size: clamp(2.65rem, 4vw, 4.5rem);
+  line-height: 1.02;
+}
+
+.public-site .contact-story-methods strong,
+.public-site .contact-story-methods > :nth-child(2) strong {
+  font-size: clamp(1.75rem, 2.5vw, 2.7rem);
+  line-height: 1.12;
+}
+
+.public-site .contact-story-methods > :nth-child(2) strong {
+  font-size: clamp(1.4rem, 1.7vw, 2rem);
+}
+
+.public-site .contact-story-nearby__grid article h3 {
+  font-size: clamp(1.9rem, 2.6vw, 3rem);
+  line-height: 1.08;
+}
+
+.public-site .contact-story-page :is(
+  .contact-story-hero__copy p,
+  .contact-story-enquiry__intro > p,
+  .contact-story-location__heading p,
+  .contact-story-nearby__grid article p
+) {
+  font-size: clamp(1rem, 1.2vw, 1.2rem);
+  line-height: 1.5;
+}
+
+.public-site .contact-story-methods > :is(a, div) > span,
+.public-site .contact-story-enquiry__note,
+.public-site .contact-story-location__links {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .public-site .contact-story-masthead h1 {
+    font-size: clamp(2rem, 7vw, 2.75rem);
+  }
+
+  .public-site .contact-story-hero__copy h2 {
+    font-size: clamp(1.9rem, 7vw, 2.8rem);
+  }
+
+  .public-site .contact-story-page :is(
+    .contact-story-enquiry__intro h2,
+    .contact-story-location__heading h2,
+    .contact-story-nearby__heading h2,
+    .contact-story-closing h2
+  ) {
+    font-size: clamp(2.2rem, 7vw, 3rem);
+  }
+
+  .public-site .contact-story-nearby__grid article h3 {
+    font-size: 1.8rem;
   }
 }

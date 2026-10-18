@@ -2,15 +2,16 @@
   --navy: #002844;
   --gold: #e5ca8b;
   --canvas: #ffffff;
-  --serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
+  --serif: var(--font-brand-serif), Georgia, serif;
   overflow: hidden;
+  padding-inline: var(--public-card-gutter, 1rem);
   background: var(--canvas);
   color: var(--navy);
 }
 
 .hero {
   padding: clamp(2rem, 4vw, 4rem) var(--public-card-gutter, 1rem) clamp(4rem, 7vw, 7rem);
-  border-radius: 0 0 1.75rem 1.75rem;
+  border-radius: 1.75rem;
   background: var(--navy);
   color: #fff;
 }
@@ -53,7 +54,7 @@
   max-width: 10ch;
   margin: 1.25rem 0 0;
   font-family: var(--serif);
-  font-size: clamp(4.5rem, 9vw, 10rem);
+  font-size: clamp(3rem, 4.5vw, 5rem);
   font-weight: 400;
   letter-spacing: -0.07em;
   line-height: 0.86;
@@ -67,7 +68,7 @@
   max-width: 27rem;
   margin: 0;
   font-family: var(--serif);
-  font-size: clamp(1.35rem, 1.8vw, 2rem);
+  font-size: clamp(1rem, 1.2vw, 1.2rem);
   line-height: 1.35;
 }
 
@@ -122,7 +123,7 @@
   max-width: 16ch;
   margin: 0;
   font-family: var(--serif);
-  font-size: clamp(3rem, 5.4vw, 6rem);
+  font-size: clamp(2.65rem, 4vw, 4.5rem);
   font-weight: 400;
   letter-spacing: -0.055em;
   line-height: 0.98;
@@ -172,7 +173,7 @@
 .step h3 {
   margin: 0;
   font-family: var(--serif);
-  font-size: clamp(1.4rem, 1.8vw, 1.95rem);
+  font-size: clamp(1.25rem, 1.5vw, 1.65rem);
   font-weight: 400;
   letter-spacing: -0.04em;
   line-height: 1.08;
@@ -190,7 +191,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   min-height: clamp(29rem, 46vw, 42rem);
-  margin: 0 0 clamp(3rem, 5vw, 5rem);
+  margin-bottom: clamp(3rem, 5vw, 5rem);
   overflow: hidden;
   border-radius: 1.5rem;
   background: var(--navy);
@@ -227,7 +228,7 @@
 .closingCopy h2 {
   margin: 1.2rem 0 1.5rem;
   font-family: var(--serif);
-  font-size: clamp(3.2rem, 5vw, 6rem);
+  font-size: clamp(2.65rem, 4vw, 4.5rem);
   font-weight: 400;
   letter-spacing: -0.06em;
   line-height: 0.98;
@@ -279,7 +280,7 @@
   }
 
   .hero h1 {
-    font-size: clamp(4rem, 13vw, 7rem);
+    font-size: clamp(2.5rem, 6vw, 4rem);
   }
 
   .sectionIntro {
@@ -350,12 +351,12 @@
 
   .hero h1 {
     margin-top: 0.8rem;
-    font-size: clamp(3rem, 12vw, 4rem);
+    font-size: clamp(2.25rem, 8vw, 3rem);
     line-height: 0.96;
   }
 
   .heroIntro p {
-    font-size: clamp(1.08rem, 4.7vw, 1.25rem);
+    font-size: 1rem;
     line-height: 1.38;
   }
 
@@ -393,7 +394,7 @@
 
   .sectionIntro h2 {
     max-width: 18ch;
-    font-size: clamp(2.25rem, 9vw, 3rem);
+    font-size: clamp(2rem, 7vw, 2.75rem);
     line-height: 1.03;
   }
 
@@ -446,7 +447,7 @@
 
   .closingCopy h2 {
     margin: 0.8rem 0 1rem;
-    font-size: clamp(2.5rem, 10vw, 3.25rem);
+    font-size: clamp(2rem, 7vw, 2.75rem);
   }
 
   .closingCopy > p:not(.eyebrow) {

@@ -84,7 +84,7 @@ export default function SerenityEditorialHome({
                     src={house.image}
                     alt={house.imageAlt}
                     fill
-                    sizes="(max-width: 520px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                    sizes="(max-width: 760px) 100vw, (max-width: 1023px) 50vw, 33vw"
                     unoptimized={house.image.includes(".supabase.co/")}
                   />
                 ) : <span className="houses-editorial-list__fallback">House photos coming soon</span>}
@@ -129,7 +129,10 @@ export default function SerenityEditorialHome({
         </div>
         <div className="serenity-editorial-services__grid">
           {content.editorial_services.map((service, index) => <Link href={["/houses", "/corporate-stays", "/contact"][index]} key={index}>
-            <span>{String(index + 1).padStart(2, "0")}</span>
+            <div className="serenity-editorial-services__meta" aria-hidden="true">
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <ArrowUpRight size={18} strokeWidth={1.5} />
+            </div>
             <ScrollWipeText as="h3" tone="light">{service.title}</ScrollWipeText>
             <p>{service.description}</p>
           </Link>)}
@@ -138,11 +141,11 @@ export default function SerenityEditorialHome({
 
       <section className="serenity-editorial-faq" id="faqs" aria-labelledby="serenity-editorial-faq-title">
         <div className="serenity-editorial-faq__header">
-          <p>{content.editorial_faq_eyebrow}</p>
-          <div>
+          <div className="serenity-editorial-faq__title">
+            <p>{content.editorial_faq_eyebrow}</p>
             <ScrollWipeText as="h2" id="serenity-editorial-faq-title" tone="light">{content.faq_heading}</ScrollWipeText>
-            <ScrollWipeText as="p" tone="light">{content.faq_description}</ScrollWipeText>
           </div>
+          <ScrollWipeText as="p" className="serenity-editorial-faq__intro" tone="light">{content.faq_description}</ScrollWipeText>
         </div>
         <div className="serenity-editorial-faq__list" aria-label="Frequently asked questions">
           {content.faqs.map((faq, index) => (
@@ -162,12 +165,12 @@ export default function SerenityEditorialHome({
         </div>
       </section>
 
-      <section className="serenity-editorial-social" aria-label="Serenity social links">
-        <p>{content.editorial_social_heading}</p>
+      <section className="serenity-editorial-social" aria-labelledby="serenity-editorial-social-title">
+        <h2 id="serenity-editorial-social-title">{content.editorial_social_heading}</h2>
         <div>
-          <Link href="/houses">{content.editorial_social_houses_label}</Link>
-          <Link href="/about">{content.editorial_social_story_label}</Link>
-          <Link href="/contact">{content.editorial_social_contact_label}</Link>
+          <Link href="/houses"><span className="serenity-editorial-social__number" aria-hidden="true">01</span><span>{content.editorial_social_houses_label}</span><ArrowUpRight size={20} strokeWidth={1.5} aria-hidden="true" /></Link>
+          <Link href="/about"><span className="serenity-editorial-social__number" aria-hidden="true">02</span><span>{content.editorial_social_story_label}</span><ArrowUpRight size={20} strokeWidth={1.5} aria-hidden="true" /></Link>
+          <Link href="/contact"><span className="serenity-editorial-social__number" aria-hidden="true">03</span><span>{content.editorial_social_contact_label}</span><ArrowUpRight size={20} strokeWidth={1.5} aria-hidden="true" /></Link>
         </div>
       </section>
 

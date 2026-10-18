@@ -3,7 +3,7 @@
   --blue: #002b49;
   --gold: #caa65b;
   --paper: #ffffff;
-  --serif: Didot, "Bodoni 72", "Iowan Old Style", Georgia, serif;
+  --serif: var(--font-brand-serif), Georgia, serif;
   background: var(--paper);
   color: var(--ink);
   overflow: clip;
@@ -38,7 +38,7 @@
   display: grid;
   grid-template-columns: minmax(0, 0.93fr) minmax(0, 1.07fr);
   min-height: min(49rem, 83vh);
-  margin: clamp(0.6rem, 1vw, 1rem);
+  margin: var(--public-card-gutter, 1rem);
   overflow: hidden;
   border-radius: clamp(1.4rem, 2.2vw, 2.2rem);
   background: white;

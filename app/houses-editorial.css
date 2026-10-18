@@ -12,7 +12,7 @@ body:has(.houses-editorial-page) .public-site > main {
   --houses-heading-height: clamp(6.3rem, 8vw, 7.8rem);
   --houses-paper: #ffffff;
   --houses-ink: #111111;
-  --houses-serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
+  --houses-serif: var(--font-brand-serif), Georgia, serif;
   background: #11110f;
   color: var(--houses-ink);
 }
@@ -39,8 +39,8 @@ body:has(.houses-editorial-page) .public-site > main {
   align-items: end;
   justify-content: space-between;
   gap: 2rem;
+  border-radius: 1.25rem;
   padding: clamp(1.5rem, 2.5vw, 2.5rem);
-  border-radius: 0 0 1.25rem 1.25rem;
   background: var(--hero-green, #002844);
   color: #fff7ef;
 }
@@ -77,10 +77,10 @@ body:has(.houses-editorial-page) .public-site > main {
 }
 
 .houses-editorial-list__card {
-  --house-card-inset: clamp(1.125rem, 1.6vw, 1.5rem);
+  --house-card-inset: clamp(1.1rem, 1.55vw, 1.6rem);
   min-width: 0;
   overflow: hidden;
-  border-radius: 1.25rem;
+  border-radius: 1rem;
   background: var(--houses-paper);
 }
 
@@ -131,43 +131,42 @@ body:has(.houses-editorial-page) .public-site > main {
 
 .houses-editorial-list__caption {
   display: flex;
-  min-height: 4.25rem;
-  align-items: center;
-  padding: 1rem var(--house-card-inset) 0.8rem;
+  align-items: end;
+  padding: 1.3rem var(--house-card-inset) 1rem;
 }
 
 .houses-editorial-list__content {
   display: flex;
   flex: 1;
   flex-direction: column;
-  padding-bottom: clamp(1rem, 1.4vw, 1.5rem);
+  padding-bottom: clamp(1.15rem, 1.5vw, 1.5rem);
 }
 
 .houses-editorial-list__details {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.55rem 0.8rem;
-  margin: 0 var(--house-card-inset) 1.2rem;
+  gap: 0.7rem 0.75rem;
+  margin: 0 var(--house-card-inset) 1.45rem;
   padding: 0;
   list-style: none;
 }
 
 .houses-editorial-list__details li {
   display: grid;
-  grid-template-columns: 1.75rem minmax(0, 1fr);
+  grid-template-columns: 1.2rem minmax(0, 1fr);
   min-width: 0;
   align-items: center;
   gap: 0.55rem;
   color: #002844;
   font-family: var(--font-poppins), Arial, sans-serif;
-  font-size: clamp(0.8rem, 0.95vw, 0.875rem);
-  line-height: 1.4;
+  font-size: clamp(0.76rem, 0.9vw, 0.875rem);
+  line-height: 1.45;
 }
 
 .houses-editorial-list__details svg {
-  width: 1.75rem;
-  height: 1.75rem;
-  padding: 0.38rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  padding: 0;
   color: #987a42;
 }
 
@@ -177,12 +176,12 @@ body:has(.houses-editorial-page) .public-site > main {
   justify-content: space-between;
   gap: 1rem;
   margin: auto var(--house-card-inset) 0;
-  padding-top: 1rem;
+  padding-top: 0.95rem;
   border-top: 1px solid rgba(0, 40, 68, 0.16);
   border-radius: 0 !important;
   color: #002844;
   font-family: var(--font-poppins), Arial, sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -199,10 +198,10 @@ body:has(.houses-editorial-page) .public-site > main {
 
 .houses-editorial-list__title {
   font-family: var(--houses-serif);
-  font-size: clamp(1.8rem, 3vw, 3.25rem);
+  font-size: clamp(1.6rem, 2.2vw, 2.25rem);
   font-weight: 400;
-  letter-spacing: -0.055em;
-  line-height: 0.95;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
 }
 
 .houses-editorial-empty {
@@ -404,21 +403,20 @@ body:has(.houses-editorial-page) .public-site > main {
   }
 
   .houses-editorial-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .houses-editorial-list__media {
-    max-height: none;
-    aspect-ratio: 1.55;
+    max-height: 22rem;
+    aspect-ratio: 1.8;
   }
 
   .houses-editorial-list__caption {
-    min-height: 5.5rem;
-    padding: 0.9rem;
+    padding: 1.15rem var(--house-card-inset) 0.9rem;
   }
 
   .houses-editorial-list__title {
-    font-size: clamp(1.35rem, 5vw, 2rem);
+    font-size: clamp(1.55rem, 4vw, 1.9rem);
   }
 
   .houses-editorial-comfort__heading h2 {
@@ -448,12 +446,11 @@ body:has(.houses-editorial-page) .public-site > main {
   }
 
   .houses-editorial-list__caption {
-    min-height: 4rem;
-    padding: 0.8rem var(--house-card-inset);
+    padding: 1rem var(--house-card-inset) 0.8rem;
   }
 
   .houses-editorial-list__title {
-    font-size: clamp(1.7rem, 8vw, 2.25rem);
+    font-size: clamp(1.5rem, 6vw, 1.8rem);
   }
 
   .houses-editorial-list__details {
@@ -462,15 +459,14 @@ body:has(.houses-editorial-page) .public-site > main {
   }
 
   .houses-editorial-list__details li {
-    grid-template-columns: 1.4rem minmax(0, 1fr);
+    grid-template-columns: 1.2rem minmax(0, 1fr);
     gap: 0.4rem;
-    font-size: 0.75rem;
+    font-size: 0.78rem;
   }
 
   .houses-editorial-list__details svg {
-    width: 1.4rem;
-    height: 1.4rem;
-    padding: 0.22rem;
+    width: 1.2rem;
+    height: 1.2rem;
   }
 
   .houses-editorial-list__details,

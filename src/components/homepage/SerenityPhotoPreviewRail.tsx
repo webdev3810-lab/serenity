@@ -109,7 +109,7 @@ export default function SerenityPhotoPreviewRail({ photos, duration }: SerenityP
   };
 
   const trackStyle = { "--photo-preview-duration": duration } as CSSProperties;
-  const imageSizes = "(min-width: 1200px) 30vw, (min-width: 760px) 44vw, 82vw";
+  const imageSizes = "(min-width: 1200px) 32vw, (min-width: 760px) 44vw, 76vw";
 
   const renderPhoto = (photo: SerenityEditorialPreviewImage, duplicate = false) => {
     const media = (
@@ -117,7 +117,7 @@ export default function SerenityPhotoPreviewRail({ photos, duration }: SerenityP
         <Photo src={photo.src} alt={duplicate ? "" : photo.alt} sizes={imageSizes} />
         <span className="serenity-editorial-photo-preview__caption">
           <strong>{photo.houseName}</strong>
-          <small>View house <ArrowUpRight size={16} strokeWidth={2} aria-hidden="true" /></small>
+          <span className="serenity-editorial-photo-preview__arrow" aria-hidden="true"><ArrowUpRight size={22} strokeWidth={1.6} /></span>
         </span>
       </div>
     );

@@ -103,7 +103,7 @@ export function ContactEditorialPage({ properties }: { properties: Property[] })
         <div>
           <small>03 / Find us</small>
           <strong>{contact.publicAddress || "Pakenham, Victoria"}</strong>
-          <span>{contact.businessHours}</span>
+          <span>We&apos;re here 24/7 — message us anytime, any day.</span>
         </div>
       </section>
 

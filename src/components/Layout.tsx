@@ -44,10 +44,10 @@ function Header({ pathname }: { pathname: string | null }) {
     { label: "Home", href: "/" },
     { label: "Our Homes", href: "/houses" },
     { label: "How It Works", href: "/how-it-works" },
-    { label: "Guest Info", href: "/guest-information" },
     { label: "Corporate", href: "/corporate-stays" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
+    { label: "Guest Info", href: "/guest-information" },
     { label: "Other Businesses", href: "/other-businesses" },
   ];
   const partnerBookingHref = "/corporate-stays#corporate-booking";

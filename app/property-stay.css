@@ -1349,7 +1349,7 @@ body:has(.property-theme) .serenity-booking-drawer .stay-booking-card {
   --property-paper: #ffffff;
   --property-black: #11110f;
   --property-cream: #fff7ef;
-  --property-serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
+  --property-serif: var(--font-brand-serif), Georgia, serif;
   padding: 2px 0;
   background: var(--property-black);
 }
@@ -2311,38 +2311,39 @@ body:has(.property-theme) .public-site {
   }
 }
 
-/* Photo tour: editorial room index ------------------------------------- */
+/* Photo tour: light editorial room index -------------------------------- */
 .serenity-modal.property-photo-tour {
-  --tour-black: #11110f;
-  --tour-green: #002844;
-  --tour-white: #ffffff;
-  --tour-line: #11110f;
-  --tour-serif: Didot, "Bodoni 72", Georgia, "Times New Roman", serif;
-  width: calc(100vw - 1rem) !important;
+  --tour-ink: #082b45;
+  --tour-muted: #506575;
+  --tour-gold: #bd9554;
+  --tour-paper: #ffffff;
+  --tour-soft: #f5f7f7;
+  --tour-serif: var(--font-brand-serif), Georgia, serif;
+  width: calc(100vw - 1.5rem) !important;
   max-width: none !important;
-  height: calc(100dvh - 1rem) !important;
+  height: calc(100dvh - 1.5rem) !important;
   max-height: none !important;
   overflow: auto;
-  border: 2px solid var(--tour-black) !important;
-  border-radius: 1.5rem !important;
-  background: var(--tour-black) !important;
-  box-shadow: 0 2rem 6rem rgba(0, 0, 0, 0.35) !important;
-  color: var(--tour-black);
-  scrollbar-color: var(--tour-green) var(--tour-black);
+  border: 0 !important;
+  border-radius: 1rem !important;
+  background: var(--tour-paper) !important;
+  box-shadow: 0 2rem 5rem rgba(0, 20, 35, 0.18) !important;
+  color: var(--tour-ink);
+  scrollbar-color: #c5d0d6 var(--tour-paper);
 }
 
 .serenity-modal.property-photo-tour::backdrop {
-  background: rgba(17, 17, 15, 0.88);
+  background: rgba(5, 31, 49, 0.55);
 }
 
 .property-photo-tour .property-photo-tour-header {
   position: sticky;
   top: 0;
   z-index: 30;
-  border-bottom: 2px solid var(--tour-black);
-  background: var(--tour-black);
-  color: var(--tour-white);
-  backdrop-filter: none;
+  border-bottom: 1px solid #e0e7eb;
+  background: rgba(255, 255, 255, 0.97);
+  color: var(--tour-ink);
+  backdrop-filter: blur(14px);
 }
 
 .property-photo-tour .property-photo-tour-header-inner {
@@ -2353,19 +2354,22 @@ body:has(.property-theme) .public-site {
 }
 
 .property-photo-tour .property-photo-tour-close {
-  width: 3rem;
-  height: 3rem;
-  min-height: 0;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  border-radius: 50% !important;
+  min-height: 2.75rem;
+  width: fit-content;
+  height: auto;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border: 0;
+  border-radius: 0.35rem !important;
   background: transparent;
-  color: var(--tour-white);
-  font-family: var(--font-sans);
+  color: var(--tour-ink);
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
 }
 
 .property-photo-tour .property-photo-tour-close span {
-  display: none;
+  display: inline;
 }
 
 .property-photo-tour .property-photo-tour-close svg {
@@ -2376,32 +2380,31 @@ body:has(.property-theme) .public-site {
 
 .property-photo-tour .property-photo-tour-close:hover,
 .property-photo-tour .property-photo-tour-close:focus-visible {
-  border-color: var(--tour-white);
-  background: var(--tour-white);
-  color: var(--tour-black);
+  background: var(--tour-soft);
+  color: var(--tour-ink);
 }
 
 .property-photo-tour .property-photo-tour-identity p {
-  color: rgba(255, 255, 255, 0.7);
-  font-family: var(--font-sans);
+  color: var(--tour-gold);
+  font-family: var(--font-poppins), Arial, sans-serif;
 }
 
 .property-photo-tour .property-photo-tour-identity h2 {
   margin-top: 0.25rem;
-  color: var(--tour-white);
+  color: var(--tour-ink);
   font-family: var(--tour-serif);
-  font-size: clamp(1.45rem, 2.4vw, 2.55rem);
+  font-size: clamp(1.35rem, 2vw, 2rem);
   font-weight: 400;
   letter-spacing: -0.045em;
 }
 
 .property-photo-tour .property-photo-tour-count,
 .property-photo-tour .property-photo-tour-count strong {
-  color: var(--tour-white);
+  color: var(--tour-ink);
 }
 
 .property-photo-tour .property-photo-tour-count {
-  font-family: var(--font-sans);
+  font-family: var(--font-poppins), Arial, sans-serif;
   font-weight: 600;
 }
 
@@ -2415,63 +2418,63 @@ body:has(.property-theme) .public-site {
   display: grid;
   width: 100% !important;
   max-width: none !important;
-  gap: 2px;
-  padding: 0 0 2px !important;
-  background: var(--tour-black);
+  gap: 0;
+  padding: 0 !important;
+  background: var(--tour-paper);
 }
 
 .property-photo-tour .property-photo-tour-browser {
   margin: 0;
-  padding: clamp(2rem, 5vw, 5rem) clamp(1rem, 4vw, 4.5rem) clamp(2.25rem, 4vw, 4rem);
+  padding: clamp(2.5rem, 4vw, 4rem) clamp(1.25rem, 4vw, 4.5rem) clamp(2.5rem, 4vw, 4rem);
   border: 0;
-  border-radius: 0 0 1.5rem 1.5rem;
-  background: var(--tour-green);
-  color: var(--tour-white);
+  border-radius: 0;
+  background: var(--tour-soft);
+  color: var(--tour-ink);
 }
 
 .property-photo-tour .property-photo-tour-browser-heading {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(16rem, 0.55fr);
+  grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 0.6fr);
   align-items: end;
   gap: clamp(2rem, 8vw, 8rem);
-  margin-bottom: clamp(2rem, 4vw, 3.5rem);
+  margin-bottom: clamp(2rem, 3.5vw, 3rem);
 }
 
 .property-photo-tour .property-photo-tour-kicker {
   margin: 0 0 0.85rem;
-  color: rgba(255, 255, 255, 0.72);
-  font-family: var(--font-sans);
+  color: var(--tour-gold);
+  font-family: var(--font-poppins), Arial, sans-serif;
   order: initial;
   text-align: left;
 }
 
 .property-photo-tour .property-photo-tour-browser-heading h3 {
-  max-width: 10ch;
+  max-width: 13ch;
   margin: 0;
-  color: var(--tour-white);
+  color: var(--tour-ink);
   font-family: var(--tour-serif);
-  font-size: clamp(3.1rem, 7.2vw, 8.5rem);
+  font-size: clamp(3rem, 5.2vw, 5.5rem);
   font-weight: 400;
-  letter-spacing: -0.065em;
-  line-height: 0.83;
+  letter-spacing: -0.05em;
+  line-height: 0.98;
   text-wrap: balance;
 }
 
 .property-photo-tour .property-photo-tour-browser-copy {
   max-width: 27rem;
   margin: 0;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.42);
-  color: rgba(255, 255, 255, 0.82);
-  font-family: var(--tour-serif);
-  font-size: clamp(1rem, 1.35vw, 1.25rem);
-  line-height: 1.45;
+  padding: 0;
+  border: 0;
+  color: var(--tour-muted);
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-size: clamp(0.9rem, 1.1vw, 1.05rem);
+  line-height: 1.6;
 }
 
 .property-photo-tour .property-photo-tour-category-nav {
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)) !important;
-  gap: 0.65rem !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11.5rem), 1fr)) !important;
+  gap: 1.25rem 0.9rem !important;
   margin: 0 !important;
   border: 0 !important;
 }
@@ -2485,21 +2488,21 @@ body:has(.property-theme) .public-site {
   border: 0 !important;
   padding: 0 !important;
   background: transparent !important;
-  color: var(--tour-white) !important;
-  font-family: var(--font-sans) !important;
+  color: var(--tour-ink) !important;
+  font-family: var(--font-poppins), Arial, sans-serif !important;
   cursor: pointer;
 }
 
-.property-photo-tour .property-photo-tour-category-nav-thumb {
+.property-photo-tour .property-photo-tour-category-nav button .property-photo-tour-category-nav-thumb {
   display: block !important;
   width: 100% !important;
   height: auto !important;
   aspect-ratio: 4 / 3 !important;
   margin: 0 !important;
   overflow: hidden;
-  border: 2px solid var(--tour-black) !important;
-  border-radius: 1rem !important;
-  background: var(--tour-black) !important;
+  border: 0 !important;
+  border-radius: 0.6rem !important;
+  background: #e2e9eb !important;
 }
 
 .property-photo-tour .property-photo-tour-category-nav-thumb img {
@@ -2513,32 +2516,38 @@ body:has(.property-theme) .public-site {
   align-items: baseline;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.7rem 0.15rem 0;
+  padding: 0.65rem 0 0;
 }
 
 .property-photo-tour .property-photo-tour-category-nav-label {
-  overflow: hidden;
-  font-size: 0.69rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-overflow: ellipsis;
+  overflow: visible;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  text-overflow: clip;
   text-transform: uppercase;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .property-photo-tour .property-photo-tour-category-nav-count {
   flex: 0 0 auto;
   border: 0;
-  color: rgba(255, 255, 255, 0.7);
-  font-family: var(--tour-serif);
-  font-size: 0.9rem;
-  font-weight: 400;
+  color: var(--tour-muted);
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
 }
 
 .property-photo-tour .property-photo-tour-category-nav button:hover .property-photo-tour-category-nav-thumb,
 .property-photo-tour .property-photo-tour-category-nav button:focus-visible .property-photo-tour-category-nav-thumb {
-  border-color: var(--tour-white) !important;
+  border: 0 !important;
   box-shadow: none !important;
+}
+
+.property-photo-tour .property-photo-tour-category-nav button:focus-visible {
+  outline: 2px solid var(--tour-gold);
+  outline-offset: 4px;
 }
 
 .property-photo-tour .property-photo-tour-category-nav button:hover img,
@@ -2555,8 +2564,9 @@ body:has(.property-theme) .public-site {
   margin: 0 !important;
   padding: clamp(2.25rem, 5vw, 5rem) clamp(1rem, 4vw, 4.5rem) !important;
   border: 0 !important;
-  border-radius: 1.5rem !important;
-  background: var(--tour-white) !important;
+  border-top: 1px solid #e0e7eb !important;
+  border-radius: 0 !important;
+  background: var(--tour-paper) !important;
 }
 
 .property-photo-tour .property-photo-tour-room-section + .property-photo-tour-room-section {
@@ -2581,8 +2591,8 @@ body:has(.property-theme) .public-site {
 
 .property-photo-tour .property-photo-tour-category-index {
   padding-top: 0.35rem;
-  color: var(--tour-green);
-  font-family: var(--font-sans);
+  color: var(--tour-gold);
+  font-family: var(--font-poppins), Arial, sans-serif;
   font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -2590,20 +2600,20 @@ body:has(.property-theme) .public-site {
 
 .property-photo-tour .property-photo-tour-room-section .property-photo-tour-category-name h4 {
   margin: 0;
-  color: var(--tour-black);
+  color: var(--tour-ink);
   font-family: var(--tour-serif) !important;
-  font-size: clamp(2.7rem, 5vw, 5.8rem) !important;
+  font-size: clamp(2.4rem, 4vw, 4.3rem) !important;
   font-weight: 400 !important;
-  letter-spacing: -0.065em !important;
-  line-height: 0.87 !important;
+  letter-spacing: -0.05em !important;
+  line-height: 1 !important;
   text-wrap: balance;
 }
 
 .property-photo-tour .property-photo-tour-room-section .property-photo-tour-category-name div > span {
   display: block !important;
   margin-top: 1rem !important;
-  color: var(--tour-green) !important;
-  font-family: var(--font-sans);
+  color: var(--tour-muted) !important;
+  font-family: var(--font-poppins), Arial, sans-serif;
   font-size: 0.62rem !important;
   font-weight: 800 !important;
   letter-spacing: 0.14em !important;
@@ -2631,9 +2641,9 @@ body:has(.property-theme) .public-site {
   min-height: 0 !important;
   height: auto !important;
   overflow: hidden;
-  border: 2px solid var(--tour-black) !important;
-  border-radius: 1rem !important;
-  background: #ececea !important;
+  border: 0 !important;
+  border-radius: 0.6rem !important;
+  background: #e2e9eb !important;
 }
 
 .property-photo-tour .property-photo-tour-room-section .property-photo-tour-item:first-child {
@@ -2653,34 +2663,40 @@ body:has(.property-theme) .public-site {
   transform: scale(1.018) !important;
 }
 
+.property-photo-tour :is(.property-photo-tour-close, .property-photo-tour-item):focus-visible {
+  outline: 2px solid var(--tour-gold);
+  outline-offset: 3px;
+}
+
 .serenity-modal.property-photo-lightbox {
   padding: 0 clamp(0.75rem, 2vw, 2rem) !important;
-  background: var(--tour-black, #11110f) !important;
-  color: #ffffff;
+  border: 0 !important;
+  background: #ffffff !important;
+  color: #082b45;
 }
 
 .property-photo-lightbox .property-photo-lightbox-header,
 .property-photo-lightbox .property-photo-lightbox-caption {
-  border-color: rgba(255, 255, 255, 0.35);
+  border-color: #e0e7eb;
 }
 
 .property-photo-lightbox .property-photo-lightbox-header p,
 .property-photo-lightbox .property-photo-lightbox-caption p {
-  color: #ffffff;
-  font-family: var(--tour-serif, Didot, "Bodoni 72", Georgia, serif);
+  color: #082b45;
+  font-family: var(--tour-serif, var(--font-brand-serif), Georgia, serif);
   font-weight: 400;
 }
 
 .property-photo-lightbox .property-photo-lightbox-header span,
 .property-photo-lightbox .property-photo-lightbox-caption span {
-  color: rgba(255, 255, 255, 0.66);
+  color: #506575;
 }
 
 .property-photo-lightbox .property-photo-lightbox-close,
 .property-photo-lightbox .property-photo-lightbox-arrow {
-  border-color: rgba(255, 255, 255, 0.7);
-  background: transparent;
-  color: #ffffff;
+  border: 0;
+  background: #f5f7f7;
+  color: #082b45;
 }
 
 .property-photo-lightbox .property-photo-lightbox-image {
@@ -2698,9 +2714,13 @@ body:has(.property-theme) .public-site {
 .property-photo-lightbox .property-photo-lightbox-close:focus-visible,
 .property-photo-lightbox .property-photo-lightbox-arrow:hover,
 .property-photo-lightbox .property-photo-lightbox-arrow:focus-visible {
-  border-color: #ffffff;
-  background: #ffffff;
-  color: #11110f;
+  background: #e6edf0;
+  color: #082b45;
+}
+
+.property-photo-lightbox :is(.property-photo-lightbox-close, .property-photo-lightbox-arrow):focus-visible {
+  outline: 2px solid #bd9554;
+  outline-offset: 3px;
 }
 
 @media (max-width: 900px) {
@@ -2742,6 +2762,7 @@ body:has(.property-theme) .public-site {
     width: 2.75rem;
     height: 2.75rem;
     padding: 0;
+    justify-content: center;
   }
 
   .property-photo-tour .property-photo-tour-close span,
@@ -2751,34 +2772,35 @@ body:has(.property-theme) .public-site {
 
   .property-photo-tour .property-photo-tour-browser {
     padding: 2.5rem 0.75rem 2rem;
-    border-radius: 0 0 1rem 1rem;
+    border-radius: 0;
   }
 
   .property-photo-tour .property-photo-tour-browser-heading h3 {
-    font-size: clamp(3.5rem, 18vw, 5.5rem);
+    font-size: clamp(2.65rem, 11vw, 3.7rem);
   }
 
   .property-photo-tour .property-photo-tour-category-nav {
-    display: flex !important;
-    gap: 0.6rem !important;
-    overflow-x: auto;
-    padding-bottom: 0.5rem !important;
-    scroll-snap-type: x mandatory;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1.25rem 0.75rem !important;
+    overflow: visible;
+    padding-bottom: 0 !important;
+    scroll-snap-type: none;
   }
 
   .property-photo-tour .property-photo-tour-category-nav button {
-    width: 8.5rem !important;
-    flex: 0 0 8.5rem !important;
-    scroll-snap-align: start;
+    width: auto !important;
+    flex: none !important;
+    scroll-snap-align: none;
   }
 
   .property-photo-tour .property-photo-tour-room-section {
     padding: 2.5rem 0.75rem !important;
-    border-radius: 1rem !important;
+    border-radius: 0 !important;
   }
 
   .property-photo-tour .property-photo-tour-room-section .property-photo-tour-category-name h4 {
-    font-size: clamp(2.75rem, 14vw, 4.5rem) !important;
+    font-size: clamp(2.4rem, 10vw, 3.5rem) !important;
   }
 
   .property-photo-tour .property-photo-tour-room-section .property-photo-tour-grid {
@@ -2835,7 +2857,7 @@ body:has(.property-theme) .serenity-booking-drawer .stay-booking-price::before {
 .property-theme .stay-booking-card .stay-booking-price strong,
 body:has(.property-theme) .serenity-booking-drawer .stay-booking-price strong {
   color: #ffffff !important;
-  font-family: var(--property-serif, Didot, "Bodoni 72", Georgia, serif);
+  font-family: var(--property-serif, var(--font-brand-serif), Georgia, serif);
   font-size: clamp(3rem, 4vw, 4.25rem);
   font-weight: 400;
   letter-spacing: -0.065em;
@@ -2851,7 +2873,7 @@ body:has(.property-theme) .serenity-booking-drawer .stay-booking-price small {
 
 .property-theme .stay-booking-card .stay-booking-price span,
 body:has(.property-theme) .serenity-booking-drawer .stay-booking-price span {
-  font-family: var(--property-serif, Didot, "Bodoni 72", Georgia, serif);
+  font-family: var(--property-serif, var(--font-brand-serif), Georgia, serif);
   font-size: 1rem;
 }
 
@@ -2914,7 +2936,7 @@ body:has(.property-theme) .serenity-booking-drawer .stay-guest-trigger > span {
 body:has(.property-theme) .serenity-booking-drawer .stay-booking-dates strong,
 body:has(.property-theme) .serenity-booking-drawer .stay-guest-trigger strong {
   color: #11110f;
-  font-family: var(--property-serif, Didot, "Bodoni 72", Georgia, serif);
+  font-family: var(--property-serif, var(--font-brand-serif), Georgia, serif);
   font-size: 1.15rem;
   font-weight: 400;
   letter-spacing: -0.025em;
@@ -2987,7 +3009,7 @@ body:has(.property-theme) .serenity-booking-drawer .stay-reserve-button.is-loadi
 body:has(.property-theme) .serenity-booking-drawer .stay-booking-card > .stay-helper {
   margin: 1rem 1.5rem 1.5rem;
   color: #11110f !important;
-  font-family: var(--property-serif, Didot, "Bodoni 72", Georgia, serif);
+  font-family: var(--property-serif, var(--font-brand-serif), Georgia, serif);
   font-size: 0.95rem;
   text-align: center;
 }
@@ -2995,7 +3017,7 @@ body:has(.property-theme) .serenity-booking-drawer .stay-booking-card > .stay-he
 .property-theme #availability > .stay-helper {
   margin-bottom: 1.5rem;
   color: #555550;
-  font-family: var(--property-serif, Didot, "Bodoni 72", Georgia, serif);
+  font-family: var(--property-serif, var(--font-brand-serif), Georgia, serif);
   font-size: 1rem;
 }
 
@@ -3003,15 +3025,15 @@ body:has(.property-theme) .serenity-booking-drawer .stay-booking-card > .stay-he
 body:has(.property-theme) .serenity-modal .booking-calendar {
   overflow: hidden;
   padding: 0 !important;
-  border: 2px solid #11110f !important;
+  border: 0 !important;
   border-radius: 1.25rem !important;
-  background: #11110f !important;
+  background: #ffffff !important;
   box-shadow: none !important;
 }
 
 .property-theme #availability .booking-calendar-header,
 body:has(.property-theme) .serenity-modal .booking-calendar-header {
-  min-height: 5rem;
+  min-height: 4rem;
   margin: 0 !important;
   padding: 1rem clamp(1rem, 2vw, 1.75rem);
   background: #002844;
@@ -3021,8 +3043,8 @@ body:has(.property-theme) .serenity-modal .booking-calendar-header {
 .property-theme #availability .booking-calendar-header > span,
 body:has(.property-theme) .serenity-modal .booking-calendar-header > span {
   color: #ffffff !important;
-  font-family: var(--property-serif, Didot, "Bodoni 72", Georgia, serif);
-  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  font-family: var(--property-serif, var(--font-brand-serif), Georgia, serif);
+  font-size: clamp(1.15rem, 1.7vw, 1.5rem);
   font-weight: 400;
   letter-spacing: -0.025em;
 }
@@ -3048,8 +3070,8 @@ body:has(.property-theme) .serenity-modal .booking-calendar-header .icon-button:
 
 .property-theme #availability .booking-calendar-months,
 body:has(.property-theme) .serenity-modal .booking-calendar-months {
-  gap: clamp(1.5rem, 4vw, 4rem);
-  padding: clamp(1.5rem, 3.5vw, 3rem);
+  gap: clamp(1.25rem, 2.5vw, 2.25rem);
+  padding: clamp(1.25rem, 2.5vw, 2rem);
   border-radius: 1.15rem;
   background: #ffffff;
 }
@@ -3057,9 +3079,9 @@ body:has(.property-theme) .serenity-modal .booking-calendar-months {
 .property-theme #availability .booking-calendar-month-title,
 body:has(.property-theme) .serenity-modal .booking-calendar-month-title {
   margin-bottom: 1rem;
-  color: #11110f !important;
-  font-family: var(--property-serif, Didot, "Bodoni 72", Georgia, serif);
-  font-size: clamp(1.65rem, 2.5vw, 2.5rem);
+  color: #002844 !important;
+  font-family: var(--property-serif, var(--font-brand-serif), Georgia, serif);
+  font-size: clamp(1.5rem, 2vw, 2rem);
   font-weight: 400;
   letter-spacing: -0.04em;
 }
@@ -3081,11 +3103,11 @@ body:has(.property-theme) .serenity-modal .booking-calendar-days {
 .property-theme #availability .calendar-day,
 body:has(.property-theme) .serenity-modal .calendar-day {
   aspect-ratio: 1;
-  min-height: 3.5rem;
+  min-height: 3rem;
   border: 1px solid transparent;
   border-radius: 0.7rem !important;
   background: #ffffff;
-  color: #11110f;
+  color: #002844;
   font-size: 0.9rem;
   font-weight: 700;
   transform: none;
@@ -3143,9 +3165,9 @@ body:has(.property-theme) .serenity-modal .calendar-day.minimum-stay {
 .property-theme #availability .calendar-day.disabled,
 body:has(.property-theme) .serenity-modal .calendar-day.disabled {
   border-color: transparent;
-  background: #f1f1ed;
-  color: #9a9a94;
-  opacity: 0.58;
+  background: #f5f7f7;
+  color: #83939d;
+  opacity: 0.7;
   box-shadow: none;
   transform: none;
 }
@@ -3156,10 +3178,35 @@ body:has(.property-theme) .serenity-modal .booking-calendar-hint,
 body:has(.property-theme) .serenity-modal .booking-calendar-status {
   margin: 0 !important;
   padding: 1rem clamp(1rem, 2vw, 1.75rem);
-  background: #11110f;
-  color: rgba(255, 255, 255, 0.76) !important;
-  font-family: var(--property-serif, Didot, "Bodoni 72", Georgia, serif);
-  font-size: 0.9rem;
+  border-top: 1px solid #e5eae8;
+  background: #ffffff;
+  color: #526b79 !important;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+}
+
+body:has(.property-theme) .serenity-modal:has(.booking-calendar) {
+  border: 0;
+  border-radius: 1.25rem;
+  background: #ffffff;
+  color: #002844;
+  box-shadow: 0 1.25rem 3.5rem rgba(0, 40, 68, .14);
+}
+
+body:has(.property-theme) .serenity-modal:has(.booking-calendar) .serenity-modal-heading {
+  margin-bottom: 1rem;
+  border-bottom-color: #e5eae8;
+}
+
+body:has(.property-theme) .serenity-modal:has(.booking-calendar) .stay-button {
+  margin-top: 1rem;
+  border-color: #d7e1e5;
+  border-radius: 999px;
+  color: #002844;
+}
+
+body:has(.property-theme) .serenity-modal:has(.booking-calendar) .stay-button:hover {
+  background: #f6f8f7;
 }
 
 @media (max-width: 760px) {

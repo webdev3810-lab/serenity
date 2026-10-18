@@ -9,7 +9,6 @@ import {
   Car,
   Check,
   CheckCircle2,
-  ChevronDown,
   Mail,
   Phone,
   ShieldCheck,
@@ -642,20 +641,21 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
 
       <section className="corporate-editorial-faq bg-white py-20 sm:py-28">
         <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
-          <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+          <div className="grid gap-6 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-4">
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black block mb-4">Before your stay</span>
               <h2>Clear answers before arrival.</h2>
             </div>
             <div className="lg:col-span-8">
-              <div className="border-t border-neutral-200">
-                {corporateFaqs.map(([question, answer]) => (
-                  <details key={question} className="group border-b border-neutral-200 py-6">
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-lg corporate-editorial-serif text-stone-900 marker:hidden">
-                      <span>{question}</span>
-                      <ChevronDown size={20} className="shrink-0 text-[var(--hero-green)] transition-transform duration-300 group-open:rotate-180" />
+              <div className="serenity-editorial-faq__list" aria-label="Corporate stay frequently asked questions">
+                {corporateFaqs.map(([question, answer], index) => (
+                  <details key={question} className="serenity-editorial-faq__item">
+                    <summary>
+                      <span className="serenity-editorial-faq__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                      <span className="serenity-editorial-faq__question">{question}</span>
+                      <span className="serenity-editorial-faq__toggle" aria-hidden="true">+</span>
                     </summary>
-                    <p className="max-w-2xl pr-8 pt-4 text-sm leading-relaxed text-stone-600">{answer}</p>
+                    <div className="serenity-editorial-faq__answer">{answer}</div>
                   </details>
                 ))}
               </div>

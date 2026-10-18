@@ -1,7 +1,7 @@
 import { AmenityIcon } from "@/src/components/AmenityIcon";
 import type { Property, PropertyImage } from "@/src/data/properties";
 import { normalizeAmenities } from "@/src/lib/amenities";
-import { Bath, BedDouble, CalendarDays, Camera, Car, Check, ChevronRight, CookingPot, DoorOpen, KeyRound, Map, MapPin, ShieldCheck, Snowflake, Users, WashingMachine, Wifi } from "lucide-react";
+import { Bath, BedDouble, CalendarDays, Camera, Car, Check, ChevronRight, ClipboardList, CookingPot, DoorOpen, KeyRound, Map, MapPin, Shield, Snowflake, Users, WashingMachine, Wifi } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -29,8 +29,8 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
     ...(amenities.length ? [{ id: "house-amenities", label: "Amenities", Icon: Wifi }] : []),
     ...(property.floorPlan ? [{ id: "floor-plan", label: "Floor plan", Icon: Map }] : []),
     { id: "location", label: "Location", Icon: MapPin },
-    ...(property.houseRules.length ? [{ id: "house-rules", label: "House rules", Icon: Check }] : []),
-    ...(property.safetyInformation || safetyAmenities.length ? [{ id: "house-safety", label: "Guest safety", Icon: ShieldCheck }] : []),
+    ...(property.houseRules.length ? [{ id: "house-rules", label: "House rules", Icon: ClipboardList }] : []),
+    ...(property.safetyInformation || safetyAmenities.length ? [{ id: "house-safety", label: "Guest safety", Icon: Shield }] : []),
     { id: "house-booking", label: "Booking", Icon: CalendarDays },
     { id: "house-checkin", label: "Check-in", Icon: KeyRound },
     { id: "house-host", label: "Your host", Icon: Users },
@@ -73,6 +73,7 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
       </div>}
     </section>
 
+    <div className="property-showcase-card-band">
     <section className="property-showcase-features" aria-labelledby="property-showcase-features-title">
       <h2 id="property-showcase-features-title">Key features</h2>
       <div className="property-showcase-feature-list">
@@ -112,10 +113,11 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
     </div>
 
     <div className="property-showcase-details-grid">
-      {property.houseRules.length > 0 && <section className="property-showcase-panel" id="house-rules"><h2><Check size={23} aria-hidden="true" />House rules</h2><ul>{property.houseRules.map((rule) => <li key={rule}>{rule}</li>)}</ul>{property.petPolicy && <p className="property-showcase-panel-note">{property.petPolicy}</p>}</section>}
-      {(property.safetyInformation || safetyAmenities.length > 0) && <section className="property-showcase-panel" id="house-safety"><h2><ShieldCheck size={23} aria-hidden="true" />Guest safety</h2>{property.safetyInformation && <p>{property.safetyInformation}</p>}{safetyAmenities.length > 0 && <ul>{safetyAmenities.map((amenity) => <li key={amenity.id}>{amenity.label}</li>)}</ul>}</section>}
+      {property.houseRules.length > 0 && <section className="property-showcase-panel" id="house-rules"><h2><ClipboardList size={23} aria-hidden="true" />House rules</h2><ul className="property-showcase-check-list">{property.houseRules.map((rule) => <li key={rule}><Check size={16} aria-hidden="true" />{rule}</li>)}</ul>{property.petPolicy && <p className="property-showcase-panel-note">{property.petPolicy}</p>}</section>}
+      {(property.safetyInformation || safetyAmenities.length > 0) && <section className="property-showcase-panel" id="house-safety"><h2><Shield size={23} aria-hidden="true" />Guest safety</h2>{property.safetyInformation && <p>{property.safetyInformation}</p>}{safetyAmenities.length > 0 && <ul className="property-showcase-check-list">{safetyAmenities.map((amenity) => <li key={amenity.id}><Check size={16} aria-hidden="true" />{amenity.label}</li>)}</ul>}</section>}
       <section className="property-showcase-panel" id="house-booking"><h2><CalendarDays size={23} aria-hidden="true" />Booking & cancellation</h2><ul><li>Minimum stay: {property.minimumStay} nights</li><li>Direct booking subject to availability</li>{property.longTermStaysAllowed && <li>Longer stays available</li>}</ul>{property.cancellationPolicy && <p className="property-showcase-panel-note">{policyLink ? <a href={property.cancellationPolicy}>Read cancellation policy</a> : property.cancellationPolicy}</p>}<a className="property-showcase-text-action" href="#availability">View dates and pricing <ChevronRight size={16} aria-hidden="true" /></a></section>
       <section className="property-showcase-panel" id="house-host"><h2><Users size={23} aria-hidden="true" />About your host</h2><p>{hostBio || "The Serenity team can help with questions about the house and your stay."}</p><Link className="property-showcase-text-action" href="/contact">Contact Serenity <ChevronRight size={16} aria-hidden="true" /></Link></section>
+    </div>
     </div>
 
     {property.corporateBookingAllowed && <aside className="property-showcase-partner"><div><p>Regular corporate client?</p><h2>Book using your Partner ID</h2><span>Access your organisation’s booking arrangement for this home.</span></div><Link href="/corporate-stays#corporate-booking" className="property-showcase-button is-gold">Go to partner booking <ChevronRight size={16} aria-hidden="true" /></Link></aside>}
