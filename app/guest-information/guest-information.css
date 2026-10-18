@@ -114,7 +114,7 @@ body:has(.guest-information-page) .public-site > main { background: #f8f8f5; }
 .guest-information-card-link { display: inline-flex; align-items: center; gap: .4rem; width: fit-content; margin-top: auto; padding-top: .55rem; color: var(--guest-navy); font-size: .82rem; font-weight: 750; text-decoration: underline; text-underline-offset: .22rem; }
 .guest-information-card-link svg { transition: transform .2s; }
 .guest-information-card-link:hover svg { transform: translate(2px, -2px); }
-.guest-information-card-photo, .guest-information-card-art { position: relative; height: 9.5rem; margin-top: auto; overflow: hidden; border-radius: .35rem; background: #e8e7dd; }
+.guest-information-card-photo, .guest-information-card-art { position: relative; width: 100%; aspect-ratio: 16 / 10; flex: none; margin-top: auto; overflow: hidden; border-radius: .35rem; background: #e8e7dd; }
 .guest-information-card-photo img { object-fit: cover; object-position: center; }
 .guest-information-card-art { display: flex; align-items: center; justify-content: center; gap: 1rem; padding: 1.2rem; background: linear-gradient(110deg, #e8ece4, #f8f5e9); color: #41604b; }
 .guest-information-card-art svg { flex: none; }
@@ -149,5 +149,4 @@ body:has(.guest-information-page) .public-site > main { background: #f8f8f5; }
   .guest-information-card-icon { width: 3.35rem; height: 3.35rem; }
   .guest-information-card h3 { font-size: 1.65rem; }
   .guest-information-card li { font-size: .82rem; }
-  .guest-information-card-photo, .guest-information-card-art { height: 8.5rem; }
 }

@@ -1,7 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight, ClipboardList, Heart, House, Leaf, LifeBuoy, Sparkles, Users } from "lucide-react";
+import { useContactSettings } from "@/src/context/ContactSettingsContext";
+import { DEFAULT_CONTACT_SETTINGS } from "@/src/lib/siteSettings";
 
 export function EditorialFooter({ draft = false }: { draft?: boolean }) {
+  const contact = useContactSettings() ?? DEFAULT_CONTACT_SETTINGS;
+  const phoneHref = `tel:${contact.phoneNumber.replace(/[^+\d]/g, "")}`;
+
   return (
     <footer className={`serenity-editorial-footer${draft ? " serenity-editorial-footer--draft" : ""}`}>
       <div className="serenity-editorial-footer__values" aria-label="Serenity stay values">
@@ -36,7 +43,11 @@ export function EditorialFooter({ draft = false }: { draft?: boolean }) {
         </div>
         <div>
           <h2>Visit</h2>
-          <p>Pakenham, Victoria 3810<br />Australia</p>
+          {contact.contactPublished && <>
+            {contact.publicAddress && <p>{contact.publicAddress}</p>}
+            <a href={phoneHref}>{contact.phoneNumber}</a>
+            <a href={`mailto:${contact.contactEmail}`}>{contact.contactEmail}</a>
+          </>}
           <Link href="/contact">Get in touch</Link>
         </div>
         <div>
@@ -48,8 +59,8 @@ export function EditorialFooter({ draft = false }: { draft?: boolean }) {
         </div>
       </div>
       <div className="serenity-editorial-footer__legal">
-        <p>© {new Date().getFullYear()} Serenity on the Rocks</p>
-        <p>Pakenham · Victoria · Australia</p>
+        <p>© {new Date().getFullYear()} {contact.businessName}</p>
+        {contact.contactPublished && contact.publicAddress && <p>{contact.publicAddress}</p>}
       </div>
     </footer>
   );

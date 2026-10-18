@@ -63,9 +63,10 @@ export default async function Page() {
   const heroPhoto = chooseImage("hero", automaticImages.hero);
   const entryPhoto = chooseImage("checkIn", automaticImages.checkIn);
   const bedroomPhoto = chooseImage("houseRules", automaticImages.houseRules);
+  const homeCarePhoto = chooseImage("homeCare");
 
   const icons: Record<string, LucideIcon> = { terms: ClipboardList, privacy: ShieldCheck, cancellations: CalendarDays, "self-check-in": KeyRound, "house-rules": House, "home-care": Leaf };
-  const cards: InformationCard[] = content.cards.map((card) => ({ ...card, Icon: icons[card.id] || ClipboardList, image: card.id === "self-check-in" ? entryPhoto : card.id === "house-rules" ? bedroomPhoto : undefined }));
+  const cards: InformationCard[] = content.cards.map((card) => ({ ...card, Icon: icons[card.id] || ClipboardList, image: card.id === "self-check-in" ? entryPhoto : card.id === "house-rules" ? bedroomPhoto : card.id === "home-care" ? homeCarePhoto : undefined }));
 
   return (
     <div className="guest-information-page">

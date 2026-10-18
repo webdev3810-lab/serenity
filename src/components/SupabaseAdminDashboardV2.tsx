@@ -7,9 +7,9 @@ import { roomBedLabel,roomTotals } from "@/src/lib/rooms";
 
 import AdminReservationsManager from "@/src/components/AdminReservationsManager";
 import { AdminPayments } from "@/src/components/admin/AdminPayments";
+import { AdminEarnings } from "@/src/components/admin/AdminEarnings";
 import { AdminReceipts } from "@/src/components/admin/AdminReceipts";
 import { AdminThemeToggle,useAdminTheme } from "@/src/components/AdminTheme";
-import { BrandWordmark } from "@/src/components/BrandWordmark";
 import CalendarSyncManager from "@/src/components/CalendarSyncManager";
 import { AdminAvailabilityCalendar } from "@/src/components/admin/AdminAvailabilityCalendar";
 import { normalizeEditorialHomepageContent } from "@/src/lib/homepageEditorialContent";
@@ -18,6 +18,7 @@ import { validateNotificationRecipients } from "@/src/lib/notificationRecipients
 import { createSupabaseBrowserClient } from "@/src/lib/supabase/client";
 import {
 BarChart3,
+Bell,
 Building2,
 CalendarDays,
 CalendarRange,
@@ -32,12 +33,14 @@ Mail,
 Menu,
 MessageSquare,
 CreditCard,
+Wallet,
 ReceiptText,
 Settings,
 UsersRound,
 X
 } from "lucide-react";
 import { useRouter,useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { useEffect,useMemo,useRef,useState } from "react";
 
 import { AdminDialog,useAdminWorkspace,useDirtyGuard } from "@/src/components/admin/AdminUI";
@@ -51,7 +54,7 @@ import { AdminUserManager,ContactManager,EnquiryManager } from "./admin/AdminInb
 import { AdminNavItem,AdminRole,AdminUser,asBeds,asDatePrices,asList,emptyHomepage,emptyProperty,emptySettings,formatMelbourneCompactDateTime,formatMelbourneDateTime,HomepageDraft,HomepageSectionKey,normalizeAdminSettings,normalizeProperty,Row,Tab } from "./admin/AdminModels";
 import { AdminNavigation,SidebarProfile } from "./admin/AdminNavigation";
 import { AdminCorporatePartners } from "./admin/AdminCorporatePartners";
-import { SettingsPanel } from "./admin/AdminSettings";
+import { ContactPagePanel, EmailNotificationsPanel, SettingsPanel } from "./admin/AdminSettings";
 
 export type { AdminTab } from "./admin/AdminModels";
 export function SupabaseAdminDashboardV2({ email, role, initialTab = "overview", initialHouseId = "", initialNewHouse = false }: { email: string; role: AdminRole; initialTab?: Tab; initialHouseId?: string; initialNewHouse?: boolean }) {
@@ -62,7 +65,7 @@ export function SupabaseAdminDashboardV2({ email, role, initialTab = "overview",
   const { theme } = useAdminTheme();
   const [localTab, setTab] = useState<Tab>(initialTab);
   const routeTab = searchParams.get("tab") as Tab | null;
-  const tab = initialHouseId || initialNewHouse ? localTab : routeTab && ["overview", "homepage", "guest-information", "houses", "bookings", "payments", "receipts", "calendar", "partners", "enquiries", "contacts", "users", "settings"].includes(routeTab) && (routeTab !== "users" || role === "super_admin") ? routeTab : initialTab;
+  const tab = initialHouseId || initialNewHouse ? localTab : routeTab && ["overview", "homepage", "guest-information", "contact-page", "houses", "bookings", "payments", "earnings", "receipts", "calendar", "partners", "enquiries", "contacts", "email-notifications", "users", "settings"].includes(routeTab) && (!["users", "earnings"].includes(routeTab) || role === "super_admin") ? routeTab : initialTab;
   const calendarView = searchParams.get("view") === "settings" ? "settings" : "calendar";
   const [properties, setProperties] = useState<Row[]>([]);
   const [images, setImages] = useState<Row[]>([]);
@@ -88,7 +91,7 @@ export function SupabaseAdminDashboardV2({ email, role, initialTab = "overview",
   const [loadFailed, setLoadFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const houseDirty = JSON.stringify(draft) !== JSON.stringify(savedDraft);
-  useDirtyGuard((tab === "houses" && Boolean(initialHouseId || initialNewHouse) && houseDirty) || (tab === "homepage" && JSON.stringify(homepage) !== JSON.stringify(savedHomepage)) || (tab === "settings" && (JSON.stringify(siteSettings) !== JSON.stringify(savedSettings) || JSON.stringify(notificationEmails) !== JSON.stringify(savedNotificationEmails))));
+  useDirtyGuard((tab === "houses" && Boolean(initialHouseId || initialNewHouse) && houseDirty) || (tab === "homepage" && JSON.stringify(homepage) !== JSON.stringify(savedHomepage)) || ((tab === "settings" || tab === "contact-page") && JSON.stringify(siteSettings) !== JSON.stringify(savedSettings)) || (tab === "email-notifications" && JSON.stringify(notificationEmails) !== JSON.stringify(savedNotificationEmails)));
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -384,17 +387,24 @@ useEffect(() => {
     const cleaned = Object.fromEntries(Object.entries(siteSettings).map(([key, value]) => [key, String(trimCmsText(value))]));
     try {
       await validateOnServer("settings", cleaned);
-      const validated = validateNotificationRecipients(notificationEmails);
-      if (validated.error) throw new Error(validated.error);
-      const notificationResponse = await fetch("/api/admin/notification-recipients", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ emails: validated.emails }) });
-      const notificationData = await notificationResponse.json();
-      if (!notificationResponse.ok) throw new Error(notificationData.error || "Could not save notification emails.");
       const result = await supabase.from("site_settings").upsert({ key: "site", value: cleaned, is_public: true }, { onConflict: "key" });
       if (result.error) throw result.error;
       setSiteSettings(cleaned); setSavedSettings(cleaned);
-      setNotificationEmails(validated.emails); setSavedNotificationEmails(validated.emails);
-      notify("Site settings and notification emails saved.");
+      notify(tab === "contact-page" ? "Contact page saved." : "Site settings saved.");
     } catch (saveError) { setError(saveError instanceof Error ? saveError.message : "Could not save site settings."); } finally { setSaving(false); }
+  };
+
+  const saveNotificationEmails = async () => {
+    setSaving(true);
+    try {
+      const validated = validateNotificationRecipients(notificationEmails);
+      if (validated.error) throw new Error(validated.error);
+      const response = await fetch("/api/admin/notification-recipients", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ emails: validated.emails }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not save notification emails.");
+      setNotificationEmails(validated.emails); setSavedNotificationEmails(validated.emails);
+      notify("Notification emails saved.");
+    } catch (saveError) { setError(saveError instanceof Error ? saveError.message : "Could not save notification emails."); } finally { setSaving(false); }
   };
 
   const setEnquiryStatus = async (enquiry: Row, status: string) => {
@@ -454,16 +464,19 @@ useEffect(() => {
     { id: "overview", label: "Overview", description: "At a glance", icon: BarChart3 },
     { id: "homepage", label: "Homepage", description: "Edit landing content", icon: Home },
     { id: "guest-information", label: "Guest information", description: "Guide, policies and images", icon: ReceiptText },
+    { id: "contact-page", label: "Contact page", description: "Public details and links", icon: Mail },
     { id: "houses", label: "Houses", description: "Content, pricing, photos", icon: Building2 },
     { id: "bookings", label: "Bookings", description: "Reservations and status", icon: CalendarDays },
     { id: "payments", label: "Payments", description: "Stripe transactions and webhooks", icon: CreditCard },
+    ...(role === "super_admin" ? [{ id: "earnings" as Tab, label: "Earnings", description: "Stripe balance and payouts", icon: Wallet }] : []),
     { id: "receipts", label: "Receipts", description: "Paid booking proof", icon: ReceiptText },
     { id: "calendar", label: "Calendar", description: "Availability and rates", icon: CalendarRange },
     { id: "partners", label: "Partners", description: "Corporate IDs and details", icon: Building2 },
     { id: "enquiries", label: "Enquiries", description: "Corporate requests", icon: MessageSquare },
     { id: "contacts", label: "Contacts", description: "Customer messages", icon: Mail },
+    { id: "email-notifications", label: "Email notifications", description: "Alert recipients", icon: Bell },
     ...(role === "super_admin" ? [{ id: "users" as Tab, label: "Users", description: "Access and roles", icon: UsersRound }] : []),
-    { id: "settings", label: "Settings", description: "Locale and contact", icon: Settings },
+    { id: "settings", label: "Settings", description: "Regional defaults", icon: Settings },
   ];
 
   const activeNavItem = navItems.find((item) => item.id === tab) ?? navItems[0];
@@ -480,8 +493,9 @@ useEffect(() => {
     <main className="admin-shell"><a className="admin-skip-link" href="#admin-content">Skip to content</a>
       <header className="admin-header">
         <div className="admin-header-inner">
-          <div className="admin-header-site-brand" aria-label="Serenity on the Rocks">
-            <BrandWordmark variant="admin" />
+          <div className="admin-header-site-brand">
+            <Image className="admin-header-site-logo" src="/LOGO.png" alt="" width={1248} height={642} sizes="64px" priority />
+            <span className="admin-header-site-wordmark"><strong>SERENITY</strong><small>CORPORATE STAYS</small></span>
             <span className="admin-header-site-context">Admin workspace</span>
           </div>
           <div className="admin-header-brand">
@@ -551,13 +565,16 @@ useEffect(() => {
             : tab === "houses" ? houseEditor
             : tab === "bookings" ? <AdminReservationsManager bookings={bookings} enquiries={enquiries} calendarEvents={calendarEvents} calendarConnections={calendarConnections} properties={properties} />
             : tab === "payments" ? <AdminPayments />
+            : tab === "earnings" && role === "super_admin" ? <AdminEarnings />
             : tab === "receipts" ? <AdminReceipts />
             : tab === "calendar" ? <div className="space-y-5"><div className="admin-view-tabs" role="group" aria-label="Calendar views"><button type="button" className={`admin-view-tab ${calendarView === "calendar" ? "is-active" : ""}`} aria-pressed={calendarView === "calendar"} onClick={() => void navigate(() => { void load(); router.push("/admin?tab=calendar", { scroll: false }); })}>Availability calendar</button><button type="button" className={`admin-view-tab ${calendarView === "settings" ? "is-active" : ""}`} aria-pressed={calendarView === "settings"} onClick={() => void navigate(() => router.push("/admin?tab=calendar&view=settings", { scroll: false }))}>Calendar sync settings</button></div>{calendarView === "settings" ? <CalendarSyncManager /> : <AdminAvailabilityCalendar properties={properties} bookings={bookings} calendarEvents={calendarEvents} reload={load} startBlockSelection={searchParams.get("action") === "block"} />}</div>
             : tab === "partners" ? <AdminCorporatePartners canEdit={role !== "editor"} />
             : tab === "enquiries" ? <EnquiryManager enquiries={enquiries} updateStatus={setEnquiryStatus} convert={convertEnquiry} updateNotes={setEnquiryNotes} />
             : tab === "contacts" ? <ContactManager contacts={contactMessages} unavailable={contactMessagesUnavailable} updateStatus={setContactStatus} updateNotes={setContactNotes} />
             : tab === "users" && role === "super_admin" ? <AdminUserManager users={adminUsers} currentUserEmail={email} createUser={createAdminUser} updateUser={updateAdminUser} deleteUser={deleteAdminUser} />
-            : <SettingsPanel email={email} settings={siteSettings} setSettings={setSiteSettings} notificationEmails={notificationEmails} setNotificationEmails={setNotificationEmails} save={saveSettings} saving={saving} />}
+            : tab === "contact-page" ? <ContactPagePanel email={email} settings={siteSettings} setSettings={setSiteSettings} save={saveSettings} saving={saving} />
+            : tab === "email-notifications" ? <EmailNotificationsPanel email={email} notificationEmails={notificationEmails} setNotificationEmails={setNotificationEmails} save={saveNotificationEmails} saving={saving} />
+            : <SettingsPanel email={email} settings={siteSettings} setSettings={setSiteSettings} save={saveSettings} saving={saving} />}
         </section>
       </div>
       {mobileDrawerOpen && <AdminDialog label="Admin navigation" className="admin-mobile-navigation" drawer onClose={() => setMobileDrawerOpen(false)}><div><div className="admin-sidebar"><div className="admin-sidebar-top"><strong>Workspace</strong><button type="button" className="admin-sidebar-close" aria-label="Close navigation" onClick={() => setMobileDrawerOpen(false)}><X size={18} /></button></div><AdminNavigation items={navItems} active={tab} collapsed={false} onSelect={handleNavigation} /></div></div></AdminDialog>}

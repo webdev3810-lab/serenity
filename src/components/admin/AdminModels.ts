@@ -6,7 +6,7 @@ import { normalizeRooms, type RoomArrangement } from "@/src/lib/rooms";
 
 import { defaultEditorialHomepageContent, type EditorialHomepageContent } from "@/src/lib/homepageEditorialContent";
 import { AU_LOCALE,AU_TIME_ZONE } from "@/src/lib/localization";
-import { DEFAULT_CONTACT_SETTINGS_RECORD } from "@/src/lib/siteSettings";
+import { DEFAULT_CONTACT_SETTINGS_RECORD, resolveContactEmail, resolveContactPhone } from "@/src/lib/siteSettings";
 import {
 BarChart3
 } from "lucide-react";
@@ -15,7 +15,7 @@ BarChart3
 
 export type Row = Record<string, any>;
 export type AdminRole = "admin" | "editor" | "super_admin";
-export type AdminTab = "overview" | "homepage" | "guest-information" | "houses" | "reviews" | "bookings" | "payments" | "receipts" | "calendar" | "partners" | "enquiries" | "contacts" | "users" | "settings";
+export type AdminTab = "overview" | "homepage" | "guest-information" | "contact-page" | "houses" | "reviews" | "bookings" | "payments" | "earnings" | "receipts" | "calendar" | "partners" | "enquiries" | "contacts" | "email-notifications" | "users" | "settings";
 export type Tab = AdminTab;
 export type HomepageSectionKey = "hero" | "houses" | "intro" | "services" | "faqs" | "social";
 export type AdminNavItem = { id: Tab; label: string; description: string; icon: typeof BarChart3 };
@@ -116,14 +116,18 @@ export const normalizeAdminSettings = (value: unknown): Record<string, string> =
   const normalized: Record<string, string> = {
     ...defaults,
     ...Object.fromEntries(Object.entries(raw).map(([key, item]) => [key, String(item ?? "")])),
-    contact_email: String(raw.contact_email ?? raw.booking_enquiry_email ?? defaults.contact_email),
-    phone_number: String(raw.phone_number ?? raw.phone ?? defaults.phone_number),
+    contact_email: resolveContactEmail(raw.contact_email),
+    phone_number: resolveContactPhone(raw.phone_number ?? raw.phone),
     public_address: String(raw.public_address ?? raw.address ?? defaults.public_address),
   };
   // Migrate legacy aliases into the canonical admin-field names when the existing
   // JSONB row is next saved from the new editor.
   delete normalized.phone;
   delete normalized.address;
+  delete normalized.business_hours;
+  delete normalized.whatsapp_number;
+  delete normalized.booking_enquiry_email;
+  delete normalized.corporate_enquiry_email;
   delete normalized.promo_badge;
   delete normalized.promo_message;
   delete normalized.promo_mobile_message;

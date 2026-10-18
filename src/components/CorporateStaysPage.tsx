@@ -674,7 +674,7 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
             <p className="text-base leading-relaxed text-white">Whether you&apos;re arranging a temporary family stay or accommodation for a team, we&apos;re here to help from the first enquiry onward.</p>
             <div className="mt-8 space-y-4 text-sm font-medium tracking-wide text-white">
               <p className="flex items-center gap-4"><Phone size={18} className="text-white" /> <a href={`tel:${contact.phoneNumber.replace(/[^+\d]/g, "")}`} className="hover:underline transition-colors">{contact.phoneNumber}</a></p>
-              <p className="flex items-center gap-4"><Mail size={18} className="text-white" /> <a href={`mailto:${contact.corporateEnquiryEmail}`} className="break-words hover:underline transition-colors">{contact.corporateEnquiryEmail}</a></p>
+              <p className="flex items-center gap-4"><Mail size={18} className="text-white" /> <a href={`mailto:${contact.contactEmail}`} className="break-words hover:underline transition-colors">{contact.contactEmail}</a></p>
             </div>
           </div>
         </div>

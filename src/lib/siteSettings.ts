@@ -1,3 +1,5 @@
+import { formatAustralianContactPhone } from "@/src/lib/contactPhone";
+
 export type PromoSettings = {
   badge: string;
   message: string;
@@ -21,9 +23,7 @@ export type ContactSettingsRecord = {
   business_name: string;
   contact_email: string;
   phone_number: string;
-  whatsapp_number: string;
   public_address: string;
-  business_hours: string;
   contact_page_heading: string;
   contact_page_description: string;
   footer_text: string;
@@ -32,8 +32,6 @@ export type ContactSettingsRecord = {
   facebook_url: string;
   instagram_url: string;
   linkedin_url: string;
-  booking_enquiry_email: string;
-  corporate_enquiry_email: string;
   contact_published: string;
   public_address_visible: string;
 };
@@ -42,9 +40,9 @@ export type ContactSettings = {
   businessName: string;
   contactEmail: string;
   phoneNumber: string;
+  // Kept empty for clients that loaded before the WhatsApp UI was removed.
   whatsappNumber: string;
   publicAddress: string;
-  businessHours: string;
   contactPageHeading: string;
   contactPageDescription: string;
   footerText: string;
@@ -53,19 +51,15 @@ export type ContactSettings = {
   facebookUrl: string;
   instagramUrl: string;
   linkedinUrl: string;
-  bookingEnquiryEmail: string;
-  corporateEnquiryEmail: string;
   contactPublished: boolean;
   publicAddressVisible: boolean;
 };
 
 export const DEFAULT_CONTACT_SETTINGS_RECORD: ContactSettingsRecord = {
   business_name: "Serenity Stays",
-  contact_email: "bookings@serenitystays.com.au",
-  phone_number: "+61 3 9000 0000",
-  whatsapp_number: "",
+  contact_email: "cemcvr3977@gmail.com",
+  phone_number: "+61 412 634 002",
   public_address: "Pakenham, Victoria 3810, Australia",
-  business_hours: "Monday–Sunday · 9:00 AM–6:00 PM (AEST)",
   contact_page_heading: "Let's make your stay feel easy.",
   contact_page_description: "Tell us what you need and our local team will help you find the right Serenity house in Pakenham.",
   footer_text: "Furnished whole-house stays in Pakenham, Victoria, with local support for every kind of stay.",
@@ -74,8 +68,6 @@ export const DEFAULT_CONTACT_SETTINGS_RECORD: ContactSettingsRecord = {
   facebook_url: "",
   instagram_url: "",
   linkedin_url: "",
-  booking_enquiry_email: "bookings@serenitystays.com.au",
-  corporate_enquiry_email: "bookings@serenitystays.com.au",
   contact_published: "true",
   public_address_visible: "true",
 };
@@ -84,9 +76,8 @@ export const DEFAULT_CONTACT_SETTINGS: ContactSettings = {
   businessName: DEFAULT_CONTACT_SETTINGS_RECORD.business_name,
   contactEmail: DEFAULT_CONTACT_SETTINGS_RECORD.contact_email,
   phoneNumber: DEFAULT_CONTACT_SETTINGS_RECORD.phone_number,
-  whatsappNumber: DEFAULT_CONTACT_SETTINGS_RECORD.whatsapp_number,
+  whatsappNumber: "",
   publicAddress: DEFAULT_CONTACT_SETTINGS_RECORD.public_address,
-  businessHours: DEFAULT_CONTACT_SETTINGS_RECORD.business_hours,
   contactPageHeading: DEFAULT_CONTACT_SETTINGS_RECORD.contact_page_heading,
   contactPageDescription: DEFAULT_CONTACT_SETTINGS_RECORD.contact_page_description,
   footerText: DEFAULT_CONTACT_SETTINGS_RECORD.footer_text,
@@ -95,13 +86,19 @@ export const DEFAULT_CONTACT_SETTINGS: ContactSettings = {
   facebookUrl: DEFAULT_CONTACT_SETTINGS_RECORD.facebook_url,
   instagramUrl: DEFAULT_CONTACT_SETTINGS_RECORD.instagram_url,
   linkedinUrl: DEFAULT_CONTACT_SETTINGS_RECORD.linkedin_url,
-  bookingEnquiryEmail: DEFAULT_CONTACT_SETTINGS_RECORD.booking_enquiry_email,
-  corporateEnquiryEmail: DEFAULT_CONTACT_SETTINGS_RECORD.corporate_enquiry_email,
   contactPublished: true,
   publicAddressVisible: true,
 };
 
 const stringValue = (value: unknown, fallback: string) => typeof value === "string" && value.trim() ? value.trim() : fallback;
+export const resolveContactEmail = (value: unknown) => {
+  const email = stringValue(value, DEFAULT_CONTACT_SETTINGS_RECORD.contact_email);
+  return email.toLowerCase() === "bookings@serenitystays.com.au" ? DEFAULT_CONTACT_SETTINGS_RECORD.contact_email : email;
+};
+export const resolveContactPhone = (value: unknown) => {
+  const phone = stringValue(value, DEFAULT_CONTACT_SETTINGS_RECORD.phone_number);
+  return formatAustralianContactPhone(phone === "+61 3 9000 0000" ? DEFAULT_CONTACT_SETTINGS_RECORD.phone_number : phone);
+};
 const booleanValue = (value: unknown, fallback: boolean) => {
   if (typeof value === "boolean") return value;
   if (typeof value === "string") return value !== "false";
@@ -116,11 +113,10 @@ export function normalizeContactSettings(value: unknown): ContactSettings {
 
   return {
     businessName: stringValue(raw.business_name, DEFAULT_CONTACT_SETTINGS.businessName),
-    contactEmail: stringValue(raw.contact_email, DEFAULT_CONTACT_SETTINGS.contactEmail),
-    phoneNumber: stringValue(raw.phone_number, DEFAULT_CONTACT_SETTINGS.phoneNumber),
-    whatsappNumber: stringValue(raw.whatsapp_number, DEFAULT_CONTACT_SETTINGS.whatsappNumber),
+    contactEmail: resolveContactEmail(raw.contact_email),
+    phoneNumber: resolveContactPhone(raw.phone_number),
+    whatsappNumber: "",
     publicAddress: publicAddressVisible ? stringValue(raw.public_address, DEFAULT_CONTACT_SETTINGS.publicAddress) : "",
-    businessHours: stringValue(raw.business_hours, DEFAULT_CONTACT_SETTINGS.businessHours),
     contactPageHeading: stringValue(raw.contact_page_heading, DEFAULT_CONTACT_SETTINGS.contactPageHeading),
     contactPageDescription: stringValue(raw.contact_page_description, DEFAULT_CONTACT_SETTINGS.contactPageDescription),
     footerText: stringValue(raw.footer_text, DEFAULT_CONTACT_SETTINGS.footerText),
@@ -129,8 +125,6 @@ export function normalizeContactSettings(value: unknown): ContactSettings {
     facebookUrl: stringValue(raw.facebook_url, DEFAULT_CONTACT_SETTINGS.facebookUrl),
     instagramUrl: stringValue(raw.instagram_url, DEFAULT_CONTACT_SETTINGS.instagramUrl),
     linkedinUrl: stringValue(raw.linkedin_url, DEFAULT_CONTACT_SETTINGS.linkedinUrl),
-    bookingEnquiryEmail: stringValue(raw.booking_enquiry_email, DEFAULT_CONTACT_SETTINGS.bookingEnquiryEmail),
-    corporateEnquiryEmail: stringValue(raw.corporate_enquiry_email, DEFAULT_CONTACT_SETTINGS.corporateEnquiryEmail),
     contactPublished: true,
     publicAddressVisible,
   };

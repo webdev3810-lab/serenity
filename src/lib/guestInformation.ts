@@ -1,5 +1,5 @@
 export const GUEST_INFORMATION_PAGE_KEY = "guest-information";
-export const GUEST_IMAGE_SLOTS = ["hero", "checkIn", "houseRules"] as const;
+export const GUEST_IMAGE_SLOTS = ["hero", "checkIn", "houseRules", "homeCare"] as const;
 export type GuestImageSlot = typeof GUEST_IMAGE_SLOTS[number];
 export type GuestPageImage = { mode: "automatic" | "custom" | "hidden"; src: string; storagePath: string; alt: string };
 export type GuestInformationCard = { id: string; title: string; eyebrow: string; items: string[] };
@@ -12,6 +12,7 @@ export type GuestInformationContent = {
 };
 
 const automaticImage = (): GuestPageImage => ({ mode: "automatic", src: "", storagePath: "", alt: "" });
+const hiddenImage = (): GuestPageImage => ({ mode: "hidden", src: "", storagePath: "", alt: "" });
 export const DEFAULT_GUEST_INFORMATION: GuestInformationContent = {
   heroKicker: "The Serenity stay guide",
   title: "Guest Information", titleAccent: "& Stay Policies",
@@ -21,7 +22,7 @@ export const DEFAULT_GUEST_INFORMATION: GuestInformationContent = {
   introKicker: "At a glance", introTitle: "Feel at home, from arrival to departure.",
   introText: "This guide covers the essentials. Your booking confirmation and the details for your specific home provide the terms that apply to your stay.",
   homeCareCaption: "A brighter tomorrow begins at home.",
-  images: { hero: automaticImage(), checkIn: automaticImage(), houseRules: automaticImage() },
+  images: { hero: automaticImage(), checkIn: automaticImage(), houseRules: automaticImage(), homeCare: hiddenImage() },
   cards: [
     { id: "terms", title: "Terms & Conditions", eyebrow: "Important information for your stay", items: [
       "All reservations are subject to confirmation and acceptance.",
@@ -101,8 +102,9 @@ export function normalizeGuestInformation(value: unknown): GuestInformationConte
   const images = record(source.images);
   for (const slot of GUEST_IMAGE_SLOTS) {
     const image = record(images[slot]);
+    const fallback = result.images[slot];
     result.images[slot] = {
-      mode: image.mode === "custom" || image.mode === "hidden" ? image.mode : "automatic",
+      mode: image.mode === "custom" || image.mode === "hidden" || image.mode === "automatic" ? image.mode : fallback.mode,
       src: typeof image.src === "string" ? image.src : "",
       storagePath: typeof image.storagePath === "string" ? image.storagePath : "",
       alt: typeof image.alt === "string" ? image.alt : "",

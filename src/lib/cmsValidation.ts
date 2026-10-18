@@ -28,16 +28,12 @@ export const CMS_LIMITS = {
   phone_number: 30,
   email_address: 120,
   business_name: 80,
-  whatsapp_number: 30,
   public_address: 180,
-  business_hours: 180,
   contact_page_heading: 100,
   contact_page_description: 300,
   directions_url: 300,
   map_url: 300,
   social_url: 300,
-  booking_enquiry_email: 120,
-  corporate_enquiry_email: 120,
   footer_text: 220,
   review_text: 1000,
   admin_notes: 1000,
@@ -229,9 +225,7 @@ export function validateSiteSettings(payload: CmsPayload) {
   addTextError(errors, "Business name", payload.business_name, CMS_LIMITS.business_name);
   addTextError(errors, "Contact email", payload.contact_email, CMS_LIMITS.email_address);
   addTextError(errors, "Phone number", payload.phone_number, CMS_LIMITS.phone_number);
-  addTextError(errors, "WhatsApp number", payload.whatsapp_number, CMS_LIMITS.whatsapp_number);
   addTextError(errors, "Public address", payload.public_address, CMS_LIMITS.public_address);
-  addTextError(errors, "Business hours", payload.business_hours, CMS_LIMITS.business_hours);
   addTextError(errors, "Contact page heading", payload.contact_page_heading, CMS_LIMITS.contact_page_heading);
   addTextError(errors, "Contact page description", payload.contact_page_description, CMS_LIMITS.contact_page_description);
   addTextError(errors, "Directions URL", payload.directions_url, CMS_LIMITS.directions_url);
@@ -239,21 +233,16 @@ export function validateSiteSettings(payload: CmsPayload) {
   addTextError(errors, "Facebook URL", payload.facebook_url, CMS_LIMITS.social_url);
   addTextError(errors, "Instagram URL", payload.instagram_url, CMS_LIMITS.social_url);
   addTextError(errors, "LinkedIn URL", payload.linkedin_url, CMS_LIMITS.social_url);
-  addTextError(errors, "Booking enquiry email", payload.booking_enquiry_email, CMS_LIMITS.booking_enquiry_email);
-  addTextError(errors, "Corporate enquiry email", payload.corporate_enquiry_email, CMS_LIMITS.corporate_enquiry_email);
   addTextError(errors, "Address", payload.address, CMS_LIMITS.nearby_location);
   addTextError(errors, "Footer text", payload.footer_text, CMS_LIMITS.footer_text);
   addEmailError(errors, "Contact email", payload.contact_email, true);
-  addEmailError(errors, "Booking enquiry email", payload.booking_enquiry_email, true);
-  addEmailError(errors, "Corporate enquiry email", payload.corporate_enquiry_email, true);
   addPhoneError(errors, "Phone number", payload.phone_number, true);
-  addPhoneError(errors, "WhatsApp number", payload.whatsapp_number);
   addHrefError(errors, "Directions URL", payload.directions_url);
   addHrefError(errors, "Map URL", payload.map_url);
   addExternalUrlError(errors, "Facebook URL", payload.facebook_url);
   addExternalUrlError(errors, "Instagram URL", payload.instagram_url);
   addExternalUrlError(errors, "LinkedIn URL", payload.linkedin_url);
-  for (const [label, value] of [["Business name", payload.business_name], ["Business hours", payload.business_hours], ["Contact page heading", payload.contact_page_heading], ["Contact page description", payload.contact_page_description], ["Footer text", payload.footer_text]] as const) {
+  for (const [label, value] of [["Business name", payload.business_name], ["Contact page heading", payload.contact_page_heading], ["Contact page description", payload.contact_page_description], ["Footer text", payload.footer_text]] as const) {
     if (!text(value)) errors.push(`${label} is required.`);
   }
   return errors;

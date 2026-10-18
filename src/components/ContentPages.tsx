@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
-import { ArrowUpRight, Building2, CheckCircle2, Clock3, ExternalLink, Home, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { ArrowUpRight, Building2, CheckCircle2, ExternalLink, Home, Mail, MapPin, Phone } from "lucide-react";
 import { GsapFadeIn } from "@/src/components/GsapAnimations";
 import ScrollWipeText from "@/src/components/homepage/ScrollWipeText";
 import { FormInput, TextArea } from "@/src/components/UI";
@@ -122,8 +122,6 @@ export function ContactPage() {
   const contact = useContactSettings() ?? DEFAULT_CONTACT_SETTINGS;
   const phoneHref = `tel:${contact.phoneNumber.replace(/[^+\d]/g, "")}`;
   const emailHref = `mailto:${contact.contactEmail}`;
-  const whatsappDigits = contact.whatsappNumber.replace(/\D/g, "");
-  const whatsappHref = whatsappDigits ? `https://wa.me/${whatsappDigits.startsWith("0") ? `61${whatsappDigits.slice(1)}` : whatsappDigits}` : "";
   const socialLinks = [
     ["Facebook", contact.facebookUrl],
     ["Instagram", contact.instagramUrl],
@@ -198,9 +196,7 @@ export function ContactPage() {
             </div>
           </div>
 
-          <div className="mt-8 grid border-y border-[#D8CCC4] md:grid-cols-2 lg:grid-cols-4">
-            <div className="border-b border-[#D8CCC4] px-1 py-7 md:border-r md:px-6 lg:border-b-0"><span className="flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#8B6B55]"><Clock3 size={14} /> Hours</span><span className="mt-4 block break-words text-base font-semibold leading-snug text-[#2D2622]">{contact.businessHours}</span></div>
-            {whatsappHref && <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="group border-b border-[#D8CCC4] px-1 py-7 md:border-r md:px-6 lg:border-b-0"><span className="flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#8B6B55]"><MessageCircle size={14} /> WhatsApp</span><span className="mt-4 block break-words text-base font-semibold text-[#2D2622] transition-colors group-hover:text-[#8B6B55]">{contact.whatsappNumber}</span></a>}
+          <div className="mt-8 grid border-y border-[#D8CCC4] md:grid-cols-2 lg:grid-cols-3">
             <a href={contact.directionsUrl} target="_blank" rel="noopener noreferrer" className="group border-b border-[#D8CCC4] px-1 py-7 md:border-r md:px-6 lg:border-b-0"><span className="flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#8B6B55]"><ExternalLink size={14} /> Directions</span><span className="mt-4 block text-base font-semibold text-[#2D2622] transition-colors group-hover:text-[#8B6B55]">Open saved directions</span></a>
             <div className="px-1 py-7 md:px-6"><span className="flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#8B6B55]"><ArrowUpRight size={14} /> Social</span><div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-base font-semibold text-[#2D2622]">{socialLinks.length ? socialLinks.map(([label, href]) => <a key={label} href={href} target="_blank" rel="noopener noreferrer" className="hover:text-[#8B6B55]">{label}</a>) : <span className="text-[#6F5A4D]">Follow updates soon</span>}</div></div>
           </div>

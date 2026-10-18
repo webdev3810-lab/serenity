@@ -21,9 +21,7 @@ export function ContactEditorialPage({ properties }: { properties: Property[] })
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const homeImage = properties.find((property) => property.slug === "serenity-7")?.featuredImage ?? properties[0]?.featuredImage ?? "";
-  const phoneHref = `tel:${contact.phoneNumber.replace(/[^+\d]/g, "")}`;
-  const whatsappDigits = contact.whatsappNumber.replace(/\D/g, "");
-  const whatsappHref = whatsappDigits ? `https://wa.me/${whatsappDigits.startsWith("0") ? `61${whatsappDigits.slice(1)}` : whatsappDigits}` : "";
+  const phoneHref = `tel:${(contact.phoneNumber || DEFAULT_CONTACT_SETTINGS.phoneNumber).replace(/[^+\d]/g, "")}`;
   const socialLinks = [
     ["Facebook", contact.facebookUrl],
     ["Instagram", contact.instagramUrl],
@@ -79,7 +77,7 @@ export function ContactEditorialPage({ properties }: { properties: Property[] })
           <span>Stay close.<br />Settle in.</span>
         </div>
         <div className="contact-story-hero__copy">
-          <span className="contact-story-eyebrow">A local conversation starts here</span>
+          <span className="contact-story-eyebrow">{contact.businessName}</span>
           <h2 id="contact-story-title">{contact.contactPageHeading}</h2>
           <p>{contact.contactPageDescription}</p>
           <div className="contact-story-links">
@@ -89,7 +87,7 @@ export function ContactEditorialPage({ properties }: { properties: Property[] })
         </div>
       </section>
 
-      <section className="contact-story-methods" aria-label="Ways to contact Serenity">
+      {contact.contactPublished && <section className="contact-story-methods" aria-label="Ways to contact Serenity">
         <a href={phoneHref}>
           <small>01 / Call us</small>
           <strong>{contact.phoneNumber}</strong>
@@ -100,12 +98,12 @@ export function ContactEditorialPage({ properties }: { properties: Property[] })
           <strong>{contact.contactEmail}</strong>
           <span>Send the details of your stay <ArrowUpRight size={17} aria-hidden="true" /></span>
         </a>
-        <div>
+        {contact.publicAddress && <div>
           <small>03 / Find us</small>
-          <strong>{contact.publicAddress || "Pakenham, Victoria"}</strong>
+          <strong>{contact.publicAddress}</strong>
           <span>We&apos;re here 24/7 — message us anytime, any day.</span>
-        </div>
-      </section>
+        </div>}
+      </section>}
 
       <section id="contact-form" className="contact-story-enquiry" aria-labelledby="contact-story-form-title">
         <div className="contact-story-enquiry__intro">
@@ -174,7 +172,6 @@ export function ContactEditorialPage({ properties }: { properties: Property[] })
           <h2>We&apos;re here when you need us.</h2>
         </div>
         <div className="contact-story-closing__links">
-          {whatsappHref && <a href={whatsappHref} target="_blank" rel="noopener noreferrer">WhatsApp <ArrowUpRight size={17} aria-hidden="true" /></a>}
           {socialLinks.map(([label, href]) => <a key={label} href={href} target="_blank" rel="noopener noreferrer">{label} <ArrowUpRight size={17} aria-hidden="true" /></a>)}
           <Link href="/houses">View all houses <ArrowUpRight size={17} aria-hidden="true" /></Link>
         </div>
