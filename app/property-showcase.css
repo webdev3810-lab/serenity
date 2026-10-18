@@ -19,6 +19,12 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
 }
 .public-site .property-theme:has(.property-showcase) .stay-body { margin-top: 2.25rem; }
 .public-site .property-theme:has(.property-showcase) .stay-section { scroll-margin-top: 7rem; }
+@media (min-width: 768px) {
+  .public-site .property-theme:has(.property-showcase) .stay-location-map {
+    width: min(100%, 64rem);
+    margin-inline: auto;
+  }
+}
 .public-site .property-theme:has(.property-showcase) .stay-related-homes > h2,
 .public-site .property-theme:has(.property-showcase) .related-houses-preview {
   max-width: none;

@@ -493,7 +493,7 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .serenity-editorial-photo-preview {
-  padding: 0 var(--guest-gutter) clamp(2.5rem, 4vw, 4rem);
+  padding: 0 0 clamp(2.5rem, 4vw, 4rem);
   border-radius: 0;
 }
 
@@ -856,11 +856,38 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .houses-editorial-list__caption {
-  padding: 1.3rem var(--house-card-inset) 1rem;
+  padding: 1.2rem var(--house-card-inset) 0.95rem;
 }
 
 .public-site .houses-editorial-list__title {
-  font-size: clamp(1.6rem, 2.15vw, 2.2rem);
+  color: #002844;
+  font-family: var(--font-brand-serif), Georgia, serif !important;
+  font-size: clamp(1.55rem, 1.9vw, 1.95rem);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.15;
+}
+
+.public-site .houses-editorial-list__details li {
+  color: #456071;
+  font-size: clamp(0.75rem, 0.85vw, 0.84rem);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.public-site .houses-editorial-list__details svg {
+  color: #ad8650;
+}
+
+.public-site .houses-editorial-list__cta {
+  color: #002844;
+  font-size: 0.69rem;
+  font-weight: 650;
+  letter-spacing: 0.085em;
+}
+
+.public-site .houses-editorial-list__cta svg {
+  color: #ad8650;
 }
 
 .public-site .houses-editorial-comfort {
@@ -1174,7 +1201,7 @@ body:has(.corporate-editorial-page) .public-site > main,
   }
 
   .public-site .houses-editorial-list__title {
-    font-size: clamp(1.5rem, 4.8vw, 1.9rem);
+    font-size: clamp(1.5rem, 5vw, 1.8rem);
   }
 
   .public-site .property-photo-tour .property-photo-tour-browser-heading h3 {

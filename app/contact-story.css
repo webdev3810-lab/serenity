@@ -390,7 +390,10 @@ body:has(.contact-story-page) .public-site > main {
 }
 
 .contact-story-location__map {
+  width: 100%;
+  max-width: 58rem;
   height: clamp(24rem, 47vw, 50rem);
+  margin-inline: auto;
   overflow: hidden;
   border-radius: 1.25rem;
   background: #d8e4d2;
