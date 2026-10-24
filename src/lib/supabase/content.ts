@@ -156,7 +156,7 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
     bookingRequestRequired: row.booking_request_required === true,
     petsAllowed: row.pets_allowed !== false,
     corporateBookingAllowed: row.corporate_booking_allowed !== false,
-    minimumCorporateStay: Number(row.minimum_corporate_stay ?? 7),
+    minimumCorporateStay: Number(row.minimum_corporate_stay ?? 2),
     minimumCorporateHouses: Number(row.minimum_corporate_houses ?? 1),
     maximumCorporateHouses: Number(row.maximum_corporate_houses ?? 3),
     adjacentHousesAllowed: row.adjacent_houses_allowed !== false,

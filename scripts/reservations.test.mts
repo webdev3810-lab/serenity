@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { canBookCorporateDirectly, hasBlockedDate, rangesOverlap } from "../src/lib/reservationRules.ts";
+import { allocateCorporateGuests, canBookCorporateDirectly, hasBlockedDate, rangesOverlap } from "../src/lib/reservationRules.ts";
 
 test("reservation ranges use checkout-exclusive overlap semantics", () => {
   assert.equal(rangesOverlap("2026-09-10", "2026-09-14", "2026-09-14", "2026-09-18"), false);
@@ -18,6 +18,21 @@ test("direct corporate booking requires every selected house to allow it", () =>
   assert.equal(canBookCorporateDirectly([enabled, enabled]), true);
   assert.equal(canBookCorporateDirectly([enabled, { ...enabled, corporateApprovalRequired: true }]), false);
   assert.equal(canBookCorporateDirectly([]), false);
+});
+
+test("corporate guest allocation charges for the exact team size", () => {
+  const houses = [
+    { slug: "serenity-7", minimumGuests: 1, maxGuests: 6, maximumAdults: 6 },
+    { slug: "serenity-9", minimumGuests: 1, maxGuests: 8, maximumAdults: 8 },
+  ];
+  const fiveGuests = allocateCorporateGuests(5, houses);
+  assert.ok(fiveGuests);
+  assert.equal(fiveGuests.reduce((sum, count) => sum + count, 0), 5);
+  assert.deepEqual(allocateCorporateGuests(14, houses), [6, 8]);
+  assert.equal(allocateCorporateGuests(15, houses), null);
+  assert.equal(allocateCorporateGuests(1, houses), null);
+  assert.equal(allocateCorporateGuests(5.5, houses), null);
+  assert.deepEqual(allocateCorporateGuests(5, [...houses].reverse()), [...fiveGuests].reverse());
 });
 
 test("the unified reservation migration guards both sides of the booking calendar race", async () => {

@@ -13,6 +13,7 @@ type Receipt = {
   companyName: string;
   guestEmail: string;
   homes: string[];
+  stays: Array<{ home: string; checkIn: string; checkout: string; total: number }>;
   checkIn: string;
   checkout: string;
   total: number;
@@ -24,13 +25,27 @@ type Receipt = {
 function receiptPng(receipt: Receipt): Promise<Blob> {
   const canvas = document.createElement("canvas");
   canvas.width = 1200;
-  canvas.height = 1750;
+  const stayFields: Array<[string, string]> = receipt.type === "corporate" && receipt.stays?.length
+    ? receipt.stays.map((stay, index) => [`House ${index + 1}`, `${stay.home}: ${stay.checkIn} to ${stay.checkout}`])
+    : [["Homes", receipt.homes.join(", ")], ["Check-in", receipt.checkIn], ["Checkout", receipt.checkout]];
+  const fields: Array<[string, string]> = [
+    ["Booking reference", receipt.reference],
+    ["Booking type", receipt.type === "corporate" ? "Corporate partner stay" : "Direct guest stay"],
+    ["Contact", receipt.guestName],
+    ...(receipt.companyName ? [["Company", receipt.companyName] as [string, string]] : []),
+    ["Email", receipt.guestEmail],
+    ...stayFields,
+    ["Paid", `${formatMelbourneReceiptDate(receipt.paidAt)} Melbourne time`],
+    ["Stripe payment", receipt.stripePaymentIntentId ?? "Recorded in Stripe"],
+  ];
+  const totalTop = Math.max(1470, 605 + fields.length * 76 + 30);
+  canvas.height = totalTop + 280;
   const ctx = canvas.getContext("2d");
   if (!ctx) return Promise.reject(new Error("Image export is not supported in this browser."));
   ctx.fillStyle = "#edf3f7";
   ctx.fillRect(0, 0, 1200, 1750);
   ctx.fillStyle = "#ffffff";
-  ctx.fillRect(72, 72, 1056, 1606);
+  ctx.fillRect(72, 72, 1056, canvas.height - 144);
   ctx.fillStyle = "#062b45";
   ctx.fillRect(72, 72, 1056, 280);
   ctx.fillStyle = "#e6c37a";
@@ -48,18 +63,6 @@ function receiptPng(receipt: Receipt): Promise<Blob> {
   draw(receipt.code, 130, 485, "bold 39px Arial", "#062b45");
   draw("Keep this code as proof of your confirmed booking.", 130, 528, "21px Arial", "#526171");
 
-  const fields: Array<[string, string]> = [
-    ["Booking reference", receipt.reference],
-    ["Booking type", receipt.type === "corporate" ? "Corporate partner stay" : "Direct guest stay"],
-    ["Contact", receipt.guestName],
-    ...(receipt.companyName ? [["Company", receipt.companyName] as [string, string]] : []),
-    ["Email", receipt.guestEmail],
-    ["Homes", receipt.homes.join(", ")],
-    ["Check-in", receipt.checkIn],
-    ["Checkout", receipt.checkout],
-    ["Paid", `${formatMelbourneReceiptDate(receipt.paidAt)} Melbourne time`],
-    ["Stripe payment", receipt.stripePaymentIntentId ?? "Recorded in Stripe"],
-  ];
   let y = 605;
   for (const [label, value] of fields) {
     draw(label.toUpperCase(), 130, y, "bold 17px Arial", "#657684");
@@ -69,10 +72,10 @@ function receiptPng(receipt: Receipt): Promise<Blob> {
     y += 76;
   }
   ctx.fillStyle = "#f1f5f8";
-  ctx.fillRect(112, 1470, 976, 120);
-  draw("TOTAL PAID", 142, 1514, "bold 19px Arial", "#526171");
-  draw(receipt.currency === "AUD" ? formatAud(receipt.total) : `${receipt.total} ${receipt.currency}`, 142, 1562, "bold 43px Arial", "#062b45");
-  draw("Confirmation only · Not a tax invoice", 130, 1650, "20px Arial", "#657684");
+  ctx.fillRect(112, totalTop, 976, 120);
+  draw("TOTAL PAID", 142, totalTop + 44, "bold 19px Arial", "#526171");
+  draw(receipt.currency === "AUD" ? formatAud(receipt.total) : `${receipt.total} ${receipt.currency}`, 142, totalTop + 92, "bold 43px Arial", "#062b45");
+  draw("Confirmation only · Not a tax invoice", 130, totalTop + 180, "20px Arial", "#657684");
   return new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("Could not create the receipt image.")), "image/png"));
 }
 
@@ -165,8 +168,10 @@ export function AdminReceipts() {
             {[
               ["Booking reference", selected.reference], ["Contact", selected.guestName],
               ...(selected.companyName ? [["Company", selected.companyName]] : []),
-              ["Email", selected.guestEmail], ["Homes", selected.homes.join(", ")],
-              ["Check-in", selected.checkIn], ["Checkout", selected.checkout],
+              ["Email", selected.guestEmail],
+              ...(selected.type === "corporate" && selected.stays?.length
+                ? selected.stays.map((stay, index) => [`House ${index + 1}`, `${stay.home}: ${stay.checkIn} to ${stay.checkout} · ${selected.currency === "AUD" ? formatAud(stay.total) : `${stay.total} ${selected.currency}`}`])
+                : [["Homes", selected.homes.join(", ")], ["Check-in", selected.checkIn], ["Checkout", selected.checkout]]),
               ["Paid", `${formatMelbourneReceiptDate(selected.paidAt)} Melbourne time`],
               ["Stripe payment", selected.stripePaymentIntentId ?? "Recorded in Stripe"],
             ].map(([label, value]) => <div key={label}><dt className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-muted)]">{label}</dt><dd className="mt-1 break-words font-medium">{value}</dd></div>)}

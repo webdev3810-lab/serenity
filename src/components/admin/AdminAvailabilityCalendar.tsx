@@ -174,7 +174,7 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
     setBlockPicking(false); setBlockStart(null); setHoverTarget(null); setPickerError("");
   };
   const previewEnd = blockStart && hoverTarget?.propertyId === blockStart.propertyId && hoverTarget.date >= blockStart.date ? hoverTarget.date : blockStart?.date;
-  const minimumBookingNights = Math.max(1, Number(selectedProperty?.minimum_stay ?? 1), corporate ? Number(selectedProperty?.minimum_corporate_stay ?? 1) : 1);
+  const minimumBookingNights = Math.max(corporate ? 2 : 1, corporate ? Number(selectedProperty?.minimum_corporate_stay ?? 2) : Number(selectedProperty?.minimum_stay ?? 1));
   const minimumCheckout = selection ? addDays(selection.date, minimumBookingNights) : "";
   let rangeConflictDate = "";
   if (selection && selectedProperty && endDate > selection.date) {
@@ -263,7 +263,7 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
             <div className="admin-calendar-section-heading"><span className="admin-calendar-step">02</span><div><h4>Stay details</h4><p>Check-in is {displayDate(selection.date)}.</p></div></div>
             <div className="admin-calendar-fields">
               <label>Checkout<input className="admin-field" type="date" min={minimumCheckout} value={endDate} onChange={(event) => setEndDate(event.target.value)} required /></label>
-              <label className="admin-calendar-checkbox"><input type="checkbox" checked={corporate} onChange={(event) => { const next = event.target.checked; setCorporate(next); const nights = Math.max(1, Number(selectedProperty.minimum_stay ?? 1), next ? Number(selectedProperty.minimum_corporate_stay ?? 1) : 1); const earliest = addDays(selection.date, nights); if (endDate < earliest) setEndDate(earliest); }} disabled={selectedProperty.corporate_booking_allowed === false} /><span><strong>Corporate reservation</strong><small>{selectedProperty.corporate_booking_allowed === false ? "Unavailable for this house" : "Book this stay for a company"}</small></span></label>
+              <label className="admin-calendar-checkbox"><input type="checkbox" checked={corporate} onChange={(event) => { const next = event.target.checked; setCorporate(next); const nights = Math.max(next ? 2 : 1, next ? Number(selectedProperty.minimum_corporate_stay ?? 2) : Number(selectedProperty.minimum_stay ?? 1)); const earliest = addDays(selection.date, nights); if (endDate < earliest) setEndDate(earliest); }} disabled={selectedProperty.corporate_booking_allowed === false} /><span><strong>Corporate reservation</strong><small>{selectedProperty.corporate_booking_allowed === false ? "Unavailable for this house" : "Book this stay for a company"}</small></span></label>
             </div>
             {corporate && <label className="admin-calendar-full-field">Partner ID <span className="admin-calendar-optional">required for corporate reservations</span><input className="admin-field" value={partnerId} onChange={(event) => setPartnerId(event.target.value.toUpperCase())} placeholder="SER-XXXXXXXXXXXX" maxLength={24} autoCapitalize="characters" spellCheck={false} required /><small className="admin-calendar-optional">The company name is taken from the active Partner ID.</small></label>}
           </section>

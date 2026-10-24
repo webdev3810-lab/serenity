@@ -170,7 +170,7 @@ export function validatePropertyContent(payload: CmsPayload) {
   if (Number.isFinite(minimumStay) && minimumStay < 1) errors.push("Minimum stay must be at least 1 night.");
   if (Number.isFinite(minimumStay) && Number.isFinite(maximumStay) && maximumStay < minimumStay) errors.push("Maximum stay must be at least the minimum stay.");
   if (Number.isFinite(minimumGuests) && Number.isFinite(maximumGuests) && minimumGuests > maximumGuests) errors.push("Minimum guests cannot exceed maximum guests.");
-  if (Number.isFinite(minimumStay) && Number.isFinite(minimumCorporateStay) && minimumCorporateStay < minimumStay) errors.push("Minimum corporate stay cannot be shorter than the minimum stay.");
+  if (Number.isFinite(minimumCorporateStay) && minimumCorporateStay < 2) errors.push("Minimum corporate stay must be at least 2 nights.");
   if (Number.isFinite(minimumCorporateHouses) && Number.isFinite(maximumCorporateHouses) && minimumCorporateHouses > maximumCorporateHouses) errors.push("Minimum corporate houses cannot exceed the maximum.");
   if (Number.isFinite(minimumCorporateHouses) && Number.isFinite(availableProperties) && minimumCorporateHouses > availableProperties) errors.push("Minimum corporate houses cannot exceed the number of available houses.");
   if (Number.isFinite(maximumCorporateHouses) && maximumCorporateHouses > 3) errors.push("Maximum corporate houses cannot exceed 3.");

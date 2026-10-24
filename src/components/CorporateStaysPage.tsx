@@ -22,11 +22,13 @@ import { MiniCalendar } from "@/src/components/BookingWidgets";
 import { FormInput, Modal, TextArea } from "@/src/components/UI";
 import { useContactSettings } from "@/src/context/ContactSettingsContext";
 import type { Property } from "@/src/data/properties";
-import { calculatePrice, datesInRange, defaultGuests, formatAud, formatDateAu, nightsBetween } from "@/src/lib/booking";
+import { calculatePrice, defaultGuests, formatAud, formatDateAu, nightsBetween } from "@/src/lib/booking";
 import { DEFAULT_CONTACT_SETTINGS } from "@/src/lib/siteSettings";
 import { canBookCorporateDirectly } from "@/src/lib/reservationRules";
 
 type AvailabilityState = "checking" | "available" | "unavailable" | "error";
+type HouseStay = { arrival: string; departure: string; guests: number };
+type CalendarAvailability = { slug: string; status: "loading" | "ready" | "error"; blockedDates: string[] };
 
 const CORPORATE_STAY_FEATURES = [
   { title: "Whole-home privacy", description: "More personal space than traditional hotel accommodation." },
@@ -43,13 +45,17 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
   const [formError, setFormError] = useState("");
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [availability, setAvailability] = useState<Record<string, AvailabilityState>>({});
-  const [submissionKey, setSubmissionKey] = useState("");
+  const [availabilityConflict, setAvailabilityConflict] = useState<Record<string, string>>({});
+  const [calendarAvailability, setCalendarAvailability] = useState<CalendarAvailability | null>(null);
+  const [calendarFetchKey, setCalendarFetchKey] = useState(0);
+  const submission = useRef<{ fingerprint: string; key: string } | null>(null);
   const [partnerCompany, setPartnerCompany] = useState("");
   const [partnerLookupError, setPartnerLookupError] = useState("");
   const [partnerChecking, setPartnerChecking] = useState(false);
   const partnerLookupVersion = useRef(0);
-  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarSlug, setCalendarSlug] = useState<string | null>(null);
   const [calendarResetKey, setCalendarResetKey] = useState(0);
+  const [houseStays, setHouseStays] = useState<Record<string, HouseStay>>({});
   const [enquirySubmitted, setEnquirySubmitted] = useState(false);
   const [enquirySubmitting, setEnquirySubmitting] = useState(false);
   const [enquiryError, setEnquiryError] = useState("");
@@ -67,25 +73,61 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
   });
   const [formData, setFormData] = useState({
     customerId: "",
-    arrival: "",
-    departure: "",
-    guests: "4",
-    housesNeeded: "1",
     propertySlugs: [properties[0]?.slug ?? "serenity-7"],
     purpose: "Contractor project crew",
     notes: "",
   });
 
   const selectedProperties = properties.filter((property) => formData.propertySlugs.includes(property.slug));
-  const corporateGuestCount = Number(formData.guests) || 1;
-  const guestsPerHouse = { ...defaultGuests, adults: Math.max(1, Math.ceil(corporateGuestCount / Math.max(1, selectedProperties.length))) };
-  const estimatedCorporateTotal = selectedProperties.reduce((total, property) => total + calculatePrice(property, formData.arrival, formData.departure, guestsPerHouse).total, 0);
-  const corporateNights = nightsBetween(formData.arrival, formData.departure);
-  const selectedDates = formData.arrival && formData.departure > formData.arrival ? datesInRange(formData.arrival, formData.departure) : [];
-  const availabilityReady = selectedDates.length > 0 && selectedProperties.every((property) => Boolean(availability[property.slug]) && availability[property.slug] !== "checking");
+  const stayFor = (property: Property): HouseStay => houseStays[property.slug] ?? { arrival: "", departure: "", guests: Math.max(1, property.minimumGuests) };
+  const datesReady = selectedProperties.length > 0 && selectedProperties.every((property) => {
+    const stay = stayFor(property);
+    return stay.arrival && stay.departure > stay.arrival && nightsBetween(stay.arrival, stay.departure) >= property.minimumCorporateStay;
+  });
+  const estimatedCorporateTotal = datesReady
+    ? selectedProperties.reduce((total, property) => {
+        const stay = stayFor(property);
+        return total + calculatePrice(property, stay.arrival, stay.departure, { ...defaultGuests, adults: stay.guests }).total;
+      }, 0)
+    : 0;
+  const availabilityFailed = datesReady && selectedProperties.some((property) => availability[property.slug] === "error");
+  const availabilityReady = datesReady && selectedProperties.every((property) => availability[property.slug] === "available" || availability[property.slug] === "unavailable");
   const allSelectedAvailable = availabilityReady && selectedProperties.every((property) => availability[property.slug] === "available");
   const directBookingEnabled = canBookCorporateDirectly(selectedProperties);
-  const calendarProperty = selectedProperties[0] ?? properties[0];
+  const calendarProperty = properties.find((property) => property.slug === calendarSlug);
+  const calendarStay = calendarProperty ? stayFor(calendarProperty) : null;
+  const calendarConflictDate = calendarStay && calendarStay.arrival && calendarStay.departure && calendarAvailability?.status === "ready"
+    ? calendarAvailability.blockedDates.find((date) => date >= calendarStay.arrival && date < calendarStay.departure)
+    : "";
+
+  const openCalendar = (slug: string) => {
+    setCalendarAvailability({ slug, status: "loading", blockedDates: [] });
+    setCalendarSlug(slug);
+  };
+
+  const retryCalendar = () => {
+    if (!calendarSlug) return;
+    setCalendarAvailability({ slug: calendarSlug, status: "loading", blockedDates: [] });
+    setCalendarFetchKey((value) => value + 1);
+  };
+
+  useEffect(() => {
+    if (!calendarSlug) return;
+    const controller = new AbortController();
+    fetch(`/api/properties/${encodeURIComponent(calendarSlug)}/availability`, { signal: controller.signal, cache: "no-store" })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok || result.warning || result.source !== "supabase" || !Array.isArray(result.blockedDates)) throw new Error("Live availability is unavailable.");
+        return result.blockedDates as string[];
+      })
+      .then((blockedDates) => {
+        if (!controller.signal.aborted) setCalendarAvailability({ slug: calendarSlug, status: "ready", blockedDates });
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted && (error as Error).name !== "AbortError") setCalendarAvailability({ slug: calendarSlug, status: "error", blockedDates: [] });
+      });
+    return () => controller.abort();
+  }, [calendarSlug, calendarFetchKey]);
 
   const verifyPartner = async () => {
     const version = ++partnerLookupVersion.current;
@@ -106,45 +148,48 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
   };
 
   useEffect(() => {
-    if (!formData.arrival || formData.departure <= formData.arrival || !properties.length) {
-      return;
-    }
     const controller = new AbortController();
-    const propertySlugs = properties.map((property) => property.slug);
+    const stays = properties.filter((property) => formData.propertySlugs.includes(property.slug))
+      .map((property) => ({ slug: property.slug, ...(houseStays[property.slug] ?? { arrival: "", departure: "", guests: Math.max(1, property.minimumGuests) }) }))
+      .filter((stay) => stay.arrival && stay.departure > stay.arrival);
+    if (!stays.length) return () => controller.abort();
     const timer = window.setTimeout(async () => {
-      setAvailability((current) => ({ ...current, ...Object.fromEntries(propertySlugs.map((slug) => [slug, "checking" as const])) }));
-      const results = await Promise.all(propertySlugs.map(async (slug) => {
+      setAvailability((current) => ({ ...current, ...Object.fromEntries(stays.map((stay) => [stay.slug, "checking" as const])) }));
+      const results = await Promise.all(stays.map(async (stay) => {
         try {
-          const response = await fetch(`/api/properties/${encodeURIComponent(slug)}/availability?start=${formData.arrival}&end=${formData.departure}`, { signal: controller.signal, cache: "no-store" });
+          const response = await fetch(`/api/properties/${encodeURIComponent(stay.slug)}/availability?start=${stay.arrival}&end=${stay.departure}`, { signal: controller.signal, cache: "no-store" });
           const result = await response.json();
-          if (!response.ok) return [slug, "error"] as const;
-          return [slug, Array.isArray(result.blockedDates) && result.blockedDates.length ? "unavailable" : "available"] as const;
+          if (!response.ok || result.warning || result.source !== "supabase" || !Array.isArray(result.blockedDates)) return [stay.slug, "error", ""] as const;
+          return [stay.slug, result.blockedDates.length ? "unavailable" : "available", String(result.blockedDates[0] ?? "")] as const;
         } catch (error) {
-          if ((error as Error).name === "AbortError") return [slug, "checking"] as const;
-          return [slug, "error"] as const;
+          if ((error as Error).name === "AbortError") return [stay.slug, "checking", ""] as const;
+          return [stay.slug, "error", ""] as const;
         }
       }));
-      if (!controller.signal.aborted) setAvailability((current) => ({ ...current, ...Object.fromEntries(results) }));
+      if (!controller.signal.aborted) {
+        setAvailability((current) => ({ ...current, ...Object.fromEntries(results.map(([slug, state]) => [slug, state])) }));
+        setAvailabilityConflict((current) => ({ ...current, ...Object.fromEntries(results.map(([slug, , date]) => [slug, date])) }));
+      }
     }, 220);
     return () => { controller.abort(); window.clearTimeout(timer); };
-  }, [formData.arrival, formData.departure, properties]);
-
-  const updateHouseCount = (value: string) => {
-    const count = Number(value);
-    const nextSlugs = formData.propertySlugs.filter((slug) => properties.some((property) => property.slug === slug)).slice(0, count);
-    for (const property of properties) {
-      if (nextSlugs.length >= count) break;
-      if (!nextSlugs.includes(property.slug)) nextSlugs.push(property.slug);
-    }
-    setFormData({ ...formData, housesNeeded: value, propertySlugs: nextSlugs });
-  };
+  }, [houseStays, formData.propertySlugs, properties]);
 
   const updateHouseSelection = (slug: string, checked: boolean) => {
     const nextSlugs = checked
       ? [...formData.propertySlugs, slug]
       : formData.propertySlugs.filter((selectedSlug) => selectedSlug !== slug);
     if (!nextSlugs.length) return;
-    setFormData({ ...formData, propertySlugs: nextSlugs, housesNeeded: String(nextSlugs.length) });
+    setFormData({ ...formData, propertySlugs: nextSlugs });
+    setAvailability((current) => { const next = { ...current }; delete next[slug]; return next; });
+    setAvailabilityConflict((current) => { const next = { ...current }; delete next[slug]; return next; });
+  };
+
+  const updateHouseStay = (slug: string, patch: Partial<HouseStay>) => {
+    const property = properties.find((item) => item.slug === slug);
+    if (!property) return;
+    setHouseStays((current) => ({ ...current, [slug]: { ...(current[slug] ?? { arrival: "", departure: "", guests: Math.max(1, property.minimumGuests) }), ...patch } }));
+    setAvailability((current) => { const next = { ...current }; delete next[slug]; return next; });
+    setAvailabilityConflict((current) => { const next = { ...current }; delete next[slug]; return next; });
   };
 
   const submitCorporateBooking = async () => {
@@ -157,16 +202,12 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
       setFormError("Verify your Partner ID before booking.");
       return;
     }
-    if (!formData.arrival || !formData.departure || formData.departure <= formData.arrival) {
-      setFormError("Please choose a departure date after the expected arrival date.");
+    if (!selectedProperties.length || !datesReady) {
+      setFormError("Select at least one house and choose valid dates for every selected house.");
       return;
     }
-    if (formData.propertySlugs.length !== Number(formData.housesNeeded)) {
-      setFormError(`Please select exactly ${formData.housesNeeded} house${formData.housesNeeded === "1" ? "" : "s"} for this enquiry.`);
-      return;
-    }
-    if (corporateGuestCount < formData.propertySlugs.length) {
-      setFormError("Select at least one guest for each house.");
+    if (availabilityFailed) {
+      setFormError("Live availability could not be checked. Please choose dates again and retry.");
       return;
     }
     if (!availabilityReady) {
@@ -174,7 +215,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
       return;
     }
     if (!allSelectedAvailable) {
-      setFormError("One or more selected houses are unavailable for these dates. Choose another house or date range.");
+      setFormError("One or more selected houses are unavailable for their chosen dates. Choose another date range.");
       return;
     }
     if (!directBookingEnabled) {
@@ -184,18 +225,17 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
 
     setFormSubmitting(true);
     try {
-      const key = submissionKey || crypto.randomUUID();
-      setSubmissionKey(key);
+      const payload = {
+        ...formData,
+        houses: selectedProperties.map((property) => ({ propertySlug: property.slug, checkIn: stayFor(property).arrival, checkout: stayFor(property).departure, guestCount: stayFor(property).guests })),
+      };
+      const fingerprint = JSON.stringify(payload);
+      const key = submission.current?.fingerprint === fingerprint ? submission.current.key : crypto.randomUUID();
+      submission.current = { fingerprint, key };
       const response = await fetch("/api/corporate-bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Idempotency-Key": key },
-        body: JSON.stringify({
-          ...formData,
-          checkIn: formData.arrival,
-          checkout: formData.departure,
-          guestCount: corporateGuestCount,
-          idempotencyKey: key,
-        }),
+        body: JSON.stringify(payload),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not start secure checkout.");
@@ -273,12 +313,12 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
     ["Can I request temporary accommodation while my home is being repaired?", "Yes. Tell us your preferred dates, household size and bedroom needs through the insurance accommodation enquiry. We can discuss suitable furnished homes and provide a written quote, subject to availability."],
     ["Do insurance accommodation enquiries need a Partner ID?", "No. A Partner ID is only needed for registered corporate partners booking and paying online. Insurance accommodation is arranged by enquiry and confirmed separately."],
     ["Do you offer corporate accommodation in Pakenham?", "Yes. Serenity Stays provides direct accommodation in Pakenham for project teams, contractor crews, executive relocations, and extended business stays."],
-    ["Can our company book multiple houses for work crews?", "Yes. Serenity 7, Serenity 9, and Serenity 11 sit beside each other, so companies can hold two or all three houses together."],
+    ["Can our company book multiple houses for work crews?", "Yes. Registered corporate partners can book one or more available houses, with separate dates and guest counts for each house, in one payment."],
     ["Are the houses furnished with utilities and Wi-Fi included?", "Every house is turn-key furnished with Wi-Fi, electricity, gas, water, a full kitchen, laundry facilities, and linen included."],
     ["Can we enquire about weekly or monthly stays?", "Yes. Tell us the dates and number of houses you need, and the team will confirm the rate and arrangements in your enquiry."],
     ["Can our company request GST tax invoices and ABN billing?", "Yes. We can provide tax invoices with ABN details and support purchase order processing for company bookings."],
     ["Is parking available for work vans and utility trucks?", "Each house has off-street driveway parking plus street parking out front for commercial vehicles, utility trucks, and team cars."],
-    ["Are pets allowed for relocating employees?", "Yes. All three Serenity properties welcome declared family pets and have enclosed yards."],
+    ["Are pets allowed for relocating employees?", "Some Serenity homes welcome declared family pets. Check the house details or ask us before booking."],
   ];
 
   const combinedGuestCapacity = properties.reduce((total, property) => total + property.maxGuests, 0);
@@ -338,7 +378,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
               <ul>
                 <li>Private bedrooms, kitchen, laundry and Wi-Fi</li>
                 <li>Flexible dates and extensions, subject to availability</li>
-                {properties.length > 0 && <li>{properties.length} neighbouring homes with capacity for up to {combinedGuestCapacity} guests in total</li>}
+                {properties.length > 0 && <li>{properties.length} furnished homes with capacity for up to {combinedGuestCapacity} guests in total</li>}
                 <li>Multiple-home team bookings can be requested</li>
                 <li>GST invoices and purchase order details on request</li>
               </ul>
@@ -463,8 +503,8 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
             </div>
             <ol className="corporate-partner-direct__steps" aria-label="Corporate booking steps">
               <li><span>01</span> Verify Partner ID</li>
-              <li><span>02</span> Choose dates</li>
-              <li><span>03</span> Select property</li>
+              <li><span>02</span> Select houses</li>
+              <li><span>03</span> Set dates and guests</li>
               <li><span>04</span> Secure payment</li>
             </ol>
           </div>
@@ -490,98 +530,72 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                   </div>
 
                   <div className="space-y-5 pt-4">
-                    <h4 className="text-xl text-stone-900 border-b border-stone-200 pb-3">2. Stay Dates & Team</h4>
-                    <div className="relative">
-                      <div className="grid gap-5 sm:grid-cols-2">
-                        <button
-                          type="button"
-                          className={`field min-h-[4.55rem] text-left ${calendarOpen ? "border-stone-900 bg-white ring-1 ring-stone-900" : "bg-white hover:border-stone-400"}`}
-                          onClick={() => setCalendarOpen(true)}
-                          aria-haspopup="dialog"
-                          aria-expanded={calendarOpen}
-                        >
-                          <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-neutral-600"><CalendarCheck size={14} /> Expected arrival *</span>
-                          <strong className="mt-1.5 block text-sm font-semibold text-stone-900">{formData.arrival ? formatDateAu(formData.arrival) : "Add date"}</strong>
-                        </button>
-                        <button
-                          type="button"
-                          className={`field min-h-[4.55rem] text-left ${calendarOpen ? "border-stone-900 bg-white ring-1 ring-stone-900" : "bg-white hover:border-stone-400"}`}
-                          onClick={() => setCalendarOpen(true)}
-                          aria-haspopup="dialog"
-                          aria-expanded={calendarOpen}
-                        >
-                          <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-neutral-600"><CalendarCheck size={14} /> Expected departure *</span>
-                          <strong className="mt-1.5 block text-sm font-semibold text-stone-900">{formData.departure ? formatDateAu(formData.departure) : "Add date"}</strong>
-                        </button>
-                      </div>
-
-                      <Modal title="Select dates" open={calendarOpen && Boolean(calendarProperty)} onClose={() => setCalendarOpen(false)}>
-                        {calendarProperty && <>
-                          <MiniCalendar
-                            key={`corporate-${calendarResetKey}`}
-                            property={calendarProperty}
-                            today={today}
-                            checkIn={formData.arrival}
-                            checkout={formData.departure}
-                            blockedDates={calendarProperty.unavailableDates}
-                            onCheckInSelect={(nextArrival) => setFormData((current) => ({ ...current, arrival: nextArrival, departure: "" }))}
-                            onSelect={(nextArrival, nextDeparture) => {
-                              setFormData((current) => ({ ...current, arrival: nextArrival, departure: nextDeparture }));
-                              setFormError("");
-                              setCalendarOpen(false);
-                            }}
-                          />
-                          <button type="button" className="stay-button mt-4" onClick={() => { setFormData((current) => ({ ...current, arrival: "", departure: "" })); setCalendarResetKey((value) => value + 1); }}>Clear dates</button>
-                        </>}
-                      </Modal>
-                    </div>
-                    
-                    <div className="grid gap-5 sm:grid-cols-3">
-                      <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor="corp-guests">Guests / employees *</label><select id="corp-guests" className="field bg-white text-sm font-medium" value={formData.guests} onChange={(event) => setFormData({ ...formData, guests: event.target.value })}>{Array.from({ length: 21 }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1} guest{index === 0 ? "" : "s"}</option>)}</select></div>
-                      <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor="corp-houses">Houses needed *</label><select id="corp-houses" className="field bg-white text-sm font-medium" value={formData.housesNeeded} onChange={(event) => updateHouseCount(event.target.value)}><option value="1">1 house</option><option value="2">2 houses beside each other</option><option value="3">All 3 houses beside each other</option></select></div>
-                      <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor="corp-purpose">Stay purpose</label><select id="corp-purpose" className="field bg-white text-sm font-medium" value={formData.purpose} onChange={(event) => setFormData({ ...formData, purpose: event.target.value })}><option>Contractor project crew</option><option>Employee relocation</option><option>Business travel</option><option>Training or event</option><option>Other</option></select></div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-5 pt-4">
                     <div className="flex items-end justify-between gap-4 border-b border-stone-200 pb-3">
-                      <h4 className="text-xl text-stone-900">3. Select Adjacent Houses</h4>
+                      <h4 className="text-xl text-stone-900">2. Select houses</h4>
                       <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black">{selectedProperties.length} selected</span>
                     </div>
-                    <p className="text-sm text-stone-600">The required house count updates automatically as you select properties.</p>
-                    <div className="grid gap-4 sm:grid-cols-3 mt-4">
+                    <p className="text-sm text-stone-600">Choose one house or as many as your team needs. Each house can have different dates and guests.</p>
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 mt-4">
                       {properties.map((property) => {
                         const checked = formData.propertySlugs.includes(property.slug);
-                        const state = availability[property.slug];
-                        const unavailable = selectedDates.length > 0 && state === "unavailable";
-                        const disabled = !checked && unavailable;
                         return (
-                          <label key={property.slug} className={`corporate-house-choice relative flex flex-col overflow-hidden transition-all ${disabled ? "cursor-not-allowed opacity-60" : checked ? "is-selected cursor-pointer" : "cursor-pointer"}`}>
+                          <label key={property.slug} className={`corporate-house-choice relative flex flex-col overflow-hidden transition-all cursor-pointer ${checked ? "is-selected" : ""}`}>
                             <div className="relative aspect-[4/3] w-full bg-stone-200">
                               {property.featuredImage && <Image src={property.featuredImage} alt={property.name} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" />}
-                              <input type="checkbox" checked={checked} disabled={disabled} onChange={(event) => updateHouseSelection(property.slug, event.target.checked)} className="sr-only" aria-label={`Select ${property.name.replace(" - Whole", "")}`} />
+                              <input type="checkbox" checked={checked} onChange={(event) => updateHouseSelection(property.slug, event.target.checked)} className="sr-only" aria-label={`Select ${property.name.replace(" - Whole", "")}`} />
                               <span className="corporate-house-choice__check" aria-hidden="true">{checked && <Check size={20} strokeWidth={3} />}</span>
                             </div>
                             <div className="corporate-house-choice-caption p-4 bg-white flex flex-col flex-1">
                               <span className="corporate-house-choice__title-row"><span className="font-bold text-sm text-stone-900">{property.name.replace(" - Whole", "")}</span>{checked && <span className="corporate-house-choice__selected">Selected</span>}</span>
-                              <span className="text-xs text-neutral-600 mt-1">Beside other houses</span>
-                              {selectedDates.length > 0 && (
-                                <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between">
-                                  <span className={`text-[10px] uppercase tracking-[0.15em] font-bold ${state === "available" ? "text-[#002844]" : state === "unavailable" ? "text-red-700" : "text-neutral-600"}`}>{state === "available" ? "Available" : state === "unavailable" ? "Unavailable" : state === "error" ? "Retry" : "Checking..."}</span>
-                                </div>
-                              )}
+                              <span className="text-xs text-neutral-600 mt-1">Up to {Math.min(property.maxGuests, property.maximumAdults)} guests</span>
                             </div>
                           </label>
                         );
                       })}
                     </div>
-                    {selectedDates.length > 0 && <div className={`mt-4 p-4 text-sm font-medium ${allSelectedAvailable ? "bg-[#e8eef2] text-[#002844] border border-[#b9cbd7]" : availabilityReady ? "bg-red-50 text-red-800 border border-red-200" : "bg-stone-50 text-stone-600 border border-stone-200"}`} aria-live="polite">{allSelectedAvailable ? "All selected houses are available in the shared Serenity calendar." : availabilityReady ? "At least one selected house is unavailable. Choose another house or date range." : "Checking bookings, manual blocks, and connected calendars…"}</div>}
-                    
-                    {corporateNights > 0 && selectedProperties.length > 0 && (
+                  </div>
+
+                  <div className="space-y-5 pt-4">
+                    <h4 className="text-xl text-stone-900 border-b border-stone-200 pb-3">3. Dates and guests for each house</h4>
+                    {selectedProperties.map((property) => {
+                      const stay = stayFor(property);
+                      const state = availability[property.slug];
+                      const nights = nightsBetween(stay.arrival, stay.departure);
+                      return <div key={property.slug} className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+                        <div className="flex flex-wrap items-center justify-between gap-2"><h5 className="font-semibold text-[#002844]">{property.name}</h5><span className={`text-xs font-semibold ${state === "available" ? "text-emerald-700" : state === "unavailable" ? "text-red-700" : "text-slate-600"}`}>{!stay.arrival || !stay.departure ? "Choose dates" : state === "available" ? "Available" : state === "unavailable" ? "Dates unavailable" : state === "error" ? "Could not check availability" : "Checking availability…"}</span></div>
+                        <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_10rem]">
+                          <button type="button" className="field min-h-[4.55rem] bg-white text-left" onClick={() => openCalendar(property.slug)} aria-haspopup="dialog"><span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-neutral-600"><CalendarCheck size={14} /> Check-in *</span><strong className="mt-1.5 block text-sm font-semibold text-stone-900">{stay.arrival ? formatDateAu(stay.arrival) : "Add date"}</strong></button>
+                          <button type="button" className="field min-h-[4.55rem] bg-white text-left" onClick={() => openCalendar(property.slug)} aria-haspopup="dialog"><span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-neutral-600"><CalendarCheck size={14} /> Checkout *</span><strong className="mt-1.5 block text-sm font-semibold text-stone-900">{stay.departure ? formatDateAu(stay.departure) : "Add date"}</strong></button>
+                          <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor={`corp-guests-${property.slug}`}>Guests *</label><select id={`corp-guests-${property.slug}`} className="field bg-white text-sm font-medium" value={stay.guests} onChange={(event) => updateHouseStay(property.slug, { guests: Number(event.target.value) })}>{Array.from({ length: Math.min(property.maxGuests, property.maximumAdults) - Math.max(1, property.minimumGuests) + 1 }, (_, index) => { const count = Math.max(1, property.minimumGuests) + index; return <option key={count} value={count}>{count} guest{count === 1 ? "" : "s"}</option>; })}</select></div>
+                        </div>
+                        {nights > 0 && <p className="mt-3 text-sm text-stone-600">{nights} night{nights === 1 ? "" : "s"} · {formatAud(calculatePrice(property, stay.arrival, stay.departure, { ...defaultGuests, adults: stay.guests }).total)}</p>}
+                        {nights > 0 && nights < property.minimumCorporateStay && <p className="mt-2 text-sm text-red-700">Minimum corporate stay: {property.minimumCorporateStay} night{property.minimumCorporateStay === 1 ? "" : "s"}.</p>}
+                        {state === "unavailable" && <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-medium text-red-700"><p>{availabilityConflict[property.slug] ? `${formatDateAu(availabilityConflict[property.slug])} is booked or blocked.` : "These dates overlap a booking or blocked night."}</p><button type="button" className="font-bold underline underline-offset-2" onClick={() => openCalendar(property.slug)}>Change dates</button></div>}
+                        {state === "error" && <p className="mt-2 text-sm font-medium text-red-700">We could not check live availability. Open the calendar to retry.</p>}
+                      </div>;
+                    })}
+                    <Modal title="Choose stay dates" className="corporate-date-dialog" open={Boolean(calendarProperty)} onClose={() => setCalendarSlug(null)}>
+                      {calendarProperty && <>
+                        <div className="corporate-date-dialog__intro">
+                          <p className="corporate-date-dialog__property">{calendarProperty.name.replace(/\s*-\s*Whole$/i, "")} <span>· Minimum {calendarProperty.minimumCorporateStay} night{calendarProperty.minimumCorporateStay === 1 ? "" : "s"}</span></p>
+                          <div className="corporate-date-dialog__steps" aria-live="polite">
+                            <div className={`corporate-date-dialog__step ${!stayFor(calendarProperty).arrival ? "is-current" : "is-complete"}`}><span>1 · Check-in</span><strong>{stayFor(calendarProperty).arrival ? formatDateAu(stayFor(calendarProperty).arrival) : "Select a date"}</strong></div>
+                            <div className={`corporate-date-dialog__step ${stayFor(calendarProperty).arrival && !stayFor(calendarProperty).departure ? "is-current" : stayFor(calendarProperty).departure ? "is-complete" : ""}`}><span>2 · Checkout</span><strong>{stayFor(calendarProperty).departure ? formatDateAu(stayFor(calendarProperty).departure) : "Select a date"}</strong></div>
+                          </div>
+                          <p className="corporate-date-dialog__guidance" role="status">{!stayFor(calendarProperty).arrival ? "Choose the day your team arrives." : !stayFor(calendarProperty).departure ? "Now choose the day your team leaves." : "Dates selected. Choose a new check-in date to change them."}</p>
+                        </div>
+                        {calendarConflictDate && <p className="mb-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-800" role="alert">{formatDateAu(calendarConflictDate)} is booked or blocked. Choose another date range.</p>}
+                        {!calendarAvailability || calendarAvailability.slug !== calendarProperty.slug || calendarAvailability.status === "loading" ? <p className="corporate-date-dialog__guidance" role="status">Checking bookings and blocked dates for this house…</p> : calendarAvailability.status === "error" ? <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert"><p>Live availability could not be loaded. Please retry before choosing dates.</p><button type="button" className="corporate-date-dialog__clear" onClick={retryCalendar}>Retry availability</button></div> : <MiniCalendar key={`corporate-${calendarProperty.slug}-${calendarResetKey}`} property={calendarProperty} today={today} checkIn={stayFor(calendarProperty).arrival} checkout={stayFor(calendarProperty).departure} blockedDates={calendarAvailability.blockedDates} singleMonth showSelectionHeader={false} showHint={false} corporate onCheckInSelect={(arrival) => updateHouseStay(calendarProperty.slug, { arrival, departure: "" })} onSelect={(arrival, departure) => { updateHouseStay(calendarProperty.slug, { arrival, departure }); setFormError(""); setCalendarSlug(null); }} />}
+                        {(stayFor(calendarProperty).arrival || stayFor(calendarProperty).departure) && <button type="button" className="corporate-date-dialog__clear" onClick={() => { updateHouseStay(calendarProperty.slug, { arrival: "", departure: "" }); setCalendarResetKey((value) => value + 1); }}>Clear dates</button>}
+                      </>}
+                    </Modal>
+                    <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor="corp-purpose">Stay purpose</label><select id="corp-purpose" className="field bg-white text-sm font-medium" value={formData.purpose} onChange={(event) => setFormData({ ...formData, purpose: event.target.value })}><option>Contractor project crew</option><option>Employee relocation</option><option>Business travel</option><option>Training or event</option><option>Other</option></select></div>
+                    {datesReady && <div className={`mt-4 rounded-xl p-4 text-sm font-medium ${allSelectedAvailable ? "bg-[#e8eef2] text-[#002844] border border-[#b9cbd7]" : availabilityReady || availabilityFailed ? "bg-red-50 text-red-800 border border-red-200" : "bg-stone-50 text-stone-600 border border-stone-200"}`} aria-live="polite">{allSelectedAvailable ? "All selected houses are available for their chosen dates." : availabilityFailed ? "Live availability could not be checked. Open the house calendar to retry." : availabilityReady ? "One or more houses overlap a booking or blocked night. Choose different dates." : "Checking bookings, manual blocks, and connected calendars…"}</div>}
+                    {allSelectedAvailable && (
                       <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border border-stone-300 bg-white p-6 shadow-sm">
                         <div>
                           <p className="corporate-editorial-serif text-lg text-stone-900">Indicative estimate</p>
-                          <p className="mt-1 text-sm text-stone-600">{selectedProperties.length} house{selectedProperties.length === 1 ? "" : "s"} · {corporateNights} night{corporateNights === 1 ? "" : "s"}</p>
+                          <p className="mt-1 text-sm text-stone-600">{selectedProperties.length} house{selectedProperties.length === 1 ? "" : "s"} · one payment</p>
                         </div>
                         <p className="text-2xl sm:text-3xl font-bold text-stone-900">{formatAud(estimatedCorporateTotal)}</p>
                       </div>

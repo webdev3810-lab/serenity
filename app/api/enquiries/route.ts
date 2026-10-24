@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       if (propertyRows.some((property) => property.corporate_booking_allowed === false || property.adjacent_houses_allowed === false)) return NextResponse.json({ error: "One or more selected houses are not enabled for corporate bookings." }, { status: 409 });
       if (housesNeeded < Number(firstRule.minimum_corporate_houses ?? 1) || housesNeeded > Number(firstRule.maximum_corporate_houses ?? 3)) return NextResponse.json({ error: `Corporate enquiries for these houses must include between ${firstRule.minimum_corporate_houses} and ${firstRule.maximum_corporate_houses} houses.` }, { status: 400 });
       const nights = Math.round((new Date(`${departure}T00:00:00Z`).getTime() - new Date(`${arrival}T00:00:00Z`).getTime()) / 86400000);
-      if (nights < Number(firstRule.minimum_corporate_stay ?? 1)) return NextResponse.json({ error: `Corporate stays require at least ${firstRule.minimum_corporate_stay} nights.` }, { status: 400 });
+      if (nights < Number(firstRule.minimum_corporate_stay ?? 2)) return NextResponse.json({ error: `Corporate stays require at least ${firstRule.minimum_corporate_stay} nights.` }, { status: 400 });
 
       propertyIds = propertyRows.map((property) => property.id);
       const selectedDates = new Set(datesInRange(arrival, departure));

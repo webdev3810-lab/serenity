@@ -19,7 +19,7 @@ export async function markCorporateGroupPaid(session: Stripe.Checkout.Session) {
     .select("id, reference, group_reference, total, currency, booking_status, payment_status, stripe_checkout_session_id")
     .eq("group_reference", groupReference);
   if (readError) throw readError;
-  if (!bookings?.length || bookings.length > 3 || bookings.some((booking) => booking.stripe_checkout_session_id !== session.id || booking.currency.toUpperCase() !== "AUD" || !["pending_payment", "confirmed", "checked_in", "checked_out"].includes(booking.booking_status))) {
+  if (!bookings?.length || bookings.some((booking) => booking.stripe_checkout_session_id !== session.id || booking.currency.toUpperCase() !== "AUD" || !["pending_payment", "confirmed", "checked_in", "checked_out"].includes(booking.booking_status))) {
     throw new Error("Corporate booking group does not match this Stripe session.");
   }
   const totalCents = bookings.reduce((sum, booking) => sum + Math.round(Number(booking.total) * 100), 0);
@@ -35,7 +35,7 @@ export async function markCorporateGroupPaid(session: Stripe.Checkout.Session) {
     .select("id, reference, group_reference, payment_status, booking_status");
   if (error) throw error;
   const { data: confirmed, error: confirmationError } = await supabase.from("bookings")
-    .select("id, reference, payment_status, booking_status")
+    .select("id, reference, property_id, check_in, checkout, adults, total, payment_status, booking_status")
     .eq("group_reference", groupReference).eq("stripe_checkout_session_id", session.id);
   if (confirmationError) throw confirmationError;
   if (confirmed?.length !== bookings.length || confirmed.some((booking) => booking.payment_status !== "paid" || !["confirmed", "checked_in", "checked_out"].includes(booking.booking_status))) {
@@ -44,7 +44,9 @@ export async function markCorporateGroupPaid(session: Stripe.Checkout.Session) {
   if (updated?.length) {
     try { await sendCorporateBookingEmails(groupReference); } catch (emailError) { console.error("Corporate booking email failed", emailError); }
   }
-  return { reference: groupReference, total: totalCents / 100, currency: "AUD", bookings: confirmed };
+  const { data: properties } = await supabase.from("properties").select("id, name").in("id", confirmed.map((booking) => booking.property_id));
+  const names = new Map((properties ?? []).map((property) => [property.id, property.name]));
+  return { reference: groupReference, total: totalCents / 100, currency: "AUD", bookings: confirmed.map((booking) => ({ ...booking, home: names.get(booking.property_id) ?? booking.reference })) };
 }
 
 export async function markCorporateGroupClosed(groupReference: string, failed = false) {

@@ -305,8 +305,10 @@ export function PriceBreakdownView({ property, checkIn, checkout, guests, price:
   );
 }
 
-export function MiniCalendar({ property, checkIn, checkout, today, onSelect, onCheckInSelect, blockedDates = [], availabilityLoading = false, singleMonth = false, showSelectionHeader = true, showHint = true }: { property: Property; checkIn?: string; checkout?: string; today: string; onSelect: (checkIn: string, checkout: string) => void; onCheckInSelect?: (checkIn: string) => void; blockedDates?: string[]; availabilityLoading?: boolean; singleMonth?: boolean; showSelectionHeader?: boolean; showHint?: boolean }) {
-  const [monthOffset, setMonthOffset] = useState(0);
+export function MiniCalendar({ property, checkIn, checkout, today, onSelect, onCheckInSelect, blockedDates = [], availabilityLoading = false, singleMonth = false, showSelectionHeader = true, showHint = true, corporate = false, propertyCalendar = false }: { property: Property; checkIn?: string; checkout?: string; today: string; onSelect: (checkIn: string, checkout: string) => void; onCheckInSelect?: (checkIn: string) => void; blockedDates?: string[]; availabilityLoading?: boolean; singleMonth?: boolean; showSelectionHeader?: boolean; showHint?: boolean; corporate?: boolean; propertyCalendar?: boolean }) {
+  const [monthOffset, setMonthOffset] = useState(() => (singleMonth || propertyCalendar) && checkIn
+    ? Math.max(0, (Number(checkIn.slice(0, 4)) - Number(today.slice(0, 4))) * 12 + Number(checkIn.slice(5, 7)) - Number(today.slice(5, 7)))
+    : 0);
   const todayDate = new Date(`${today}T00:00:00Z`);
   const base = new Date(Date.UTC(todayDate.getUTCFullYear(), todayDate.getUTCMonth() + monthOffset, 1));
   const months = singleMonth ? [base] : [base, new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth() + 1, 1))];
@@ -328,7 +330,7 @@ export function MiniCalendar({ property, checkIn, checkout, today, onSelect, onC
       onCheckInSelect?.(iso);
       return;
     }
-    const error = validateDateRange(property, pendingStart, iso, today, blockedDates);
+    const error = validateDateRange(property, pendingStart, iso, today, blockedDates, corporate);
     if (error) {
       setMessage(error);
       return;
@@ -339,29 +341,39 @@ export function MiniCalendar({ property, checkIn, checkout, today, onSelect, onC
   };
 
   return (
-    <div className={`booking-calendar rounded-none border border-stone-200 bg-white shadow-sm ${singleMonth ? "p-4" : "p-5"}`}>
+    <div className={`booking-calendar rounded-none border border-stone-200 bg-white shadow-sm ${singleMonth ? "p-4" : "p-5"} ${propertyCalendar ? "property-date-calendar" : ""}`}>
+      {propertyCalendar && <div className="property-date-calendar__steps" aria-live="polite">
+        <div className={`property-date-calendar__step ${pendingStart || checkIn ? "is-complete" : "is-current"}`}>
+          <span>Check-in</span>
+          <strong>{pendingStart || checkIn ? formatDateAu(pendingStart || checkIn || "") : "Select date"}</strong>
+        </div>
+        <div className={`property-date-calendar__step ${pendingStart || checkIn ? checkout ? "is-complete" : "is-current" : ""}`}>
+          <span>Checkout</span>
+          <strong>{checkout ? formatDateAu(checkout) : "Select date"}</strong>
+        </div>
+      </div>}
       <div className="booking-calendar-header mb-4 flex items-center justify-between">
-        <button className="icon-button" type="button" aria-label="Previous month" onClick={() => setMonthOffset((value) => Math.max(0, value - 1))}>
+        <button className="icon-button" type="button" aria-label="Previous month" disabled={monthOffset === 0} onClick={() => setMonthOffset((value) => Math.max(0, value - 1))}>
           <ChevronLeft size={18} />
         </button>
-        {showSelectionHeader ? <span className="text-center font-bold text-stone-900">Select check-in & checkout dates</span> : <span className="sr-only">Select check-in and checkout dates</span>}
+        {showSelectionHeader ? <span className="text-center font-bold text-stone-900">Select check-in & checkout dates</span> : singleMonth ? <span className="booking-calendar-current-month" aria-live="polite">{base.toLocaleDateString(AU_LOCALE, { month: "long", year: "numeric", timeZone: AU_TIME_ZONE })}</span> : propertyCalendar ? <span className="booking-calendar-current-month">Browse available dates</span> : <span className="sr-only">Select check-in and checkout dates</span>}
         <button className="icon-button" type="button" aria-label="Next month" onClick={() => setMonthOffset((value) => value + 1)}>
           <ChevronRight size={18} />
         </button>
       </div>
       <div className={`booking-calendar-months grid gap-6 ${singleMonth ? "" : "md:grid-cols-2"}`}>
         {months.map((month) => (
-          <Month key={month.toISOString()} month={month} property={property} today={today} checkIn={pendingStart || checkIn} checkout={checkout} blockedDates={blockedDates} onPick={pick} />
+          <Month key={month.toISOString()} month={month} property={property} today={today} checkIn={pendingStart || checkIn} checkout={checkout} blockedDates={blockedDates} corporate={corporate} propertyCalendar={propertyCalendar} onPick={pick} />
         ))}
       </div>
       {availabilityLoading && <p className="booking-calendar-status mt-4 text-sm font-semibold text-stone-600" role="status">Checking live availability…</p>}
       {message && <p className="booking-calendar-error mt-4 rounded-none border border-[#E7BDB4] bg-[#FFF6F3] px-3 py-2 text-sm font-semibold text-[#8A3325]" role="alert">{message}</p>}
-      {showHint && <p className="booking-calendar-hint mt-4 text-xs text-stone-500">Unavailable nights are disabled. Select a check-in date, then a checkout date.</p>}
+      {showHint && <p className="booking-calendar-hint mt-4 text-xs text-stone-500">Select check-in, then checkout. Grey dates are unavailable.</p>}
     </div>
   );
 }
 
-function Month({ month, property, today, checkIn, checkout, blockedDates, onPick }: { month: Date; property: Property; today: string; checkIn?: string; checkout?: string; blockedDates: string[]; onPick: (iso: string) => void }) {
+function Month({ month, property, today, checkIn, checkout, blockedDates, corporate, propertyCalendar, onPick }: { month: Date; property: Property; today: string; checkIn?: string; checkout?: string; blockedDates: string[]; corporate: boolean; propertyCalendar: boolean; onPick: (iso: string) => void }) {
   const days = useMemo(() => {
     const result: (string | null)[] = Array(month.getUTCDay()).fill(null);
     const count = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + 1, 0)).getUTCDate();
@@ -381,20 +393,21 @@ function Month({ month, property, today, checkIn, checkout, blockedDates, onPick
       <div className="booking-calendar-days mt-2 grid grid-cols-7 gap-1">
         {days.map((iso, index) => {
           const choosingCheckout = Boolean(iso && checkIn && checkIn >= today && !checkout && iso > checkIn);
-          const dateValidation = choosingCheckout ? validateDateRange(property, checkIn, iso!, today, blockedDates) : "";
+          const dateValidation = choosingCheckout ? validateDateRange(property, checkIn, iso!, today, blockedDates, corporate) : "";
           const disabled = !iso || iso < today || iso > addDays(today, property.maximumAdvanceBookingDays) || (blocked.has(iso) && !choosingCheckout) || (!property.sameDayBookingAllowed && iso === today) || Boolean(dateValidation);
           const selected = iso && (iso === checkIn || iso === checkout);
           const inRange = Boolean(iso && checkIn && checkout && iso > checkIn && iso < checkout);
           const rangeStart = Boolean(checkIn && checkout && iso === checkIn);
           const rangeEnd = Boolean(checkIn && checkout && iso === checkout);
-          const minimumStayNotMet = Boolean(checkIn && !checkout && iso && iso > checkIn && nightsBetween(checkIn, iso) < property.minimumStay);
+          const minimumNights = corporate ? property.minimumCorporateStay : property.minimumStay;
+          const minimumStayNotMet = Boolean(checkIn && !checkout && iso && iso > checkIn && nightsBetween(checkIn, iso) < minimumNights);
           const unavailable = disabled && !minimumStayNotMet;
-          const dayLabel = blocked.has(iso ?? "") ? (choosingCheckout && !disabled ? ", checkout only" : ", unavailable") : minimumStayNotMet ? `, minimum stay is ${property.minimumStay} nights` : `, ${formatAud(getNightlyPrice(property, iso ?? undefined))} per night`;
+          const dayLabel = blocked.has(iso ?? "") ? (choosingCheckout && !disabled ? ", checkout only" : ", unavailable") : minimumStayNotMet ? `, minimum stay is ${minimumNights} nights` : `, ${formatAud(getNightlyPrice(property, iso ?? undefined))} per night`;
           return iso ? (
             <span key={iso} className={`calendar-day-cell ${inRange ? "in-range" : ""} ${rangeStart ? "range-start" : ""} ${rangeEnd ? "range-end" : ""}`}>
-              <button type="button" disabled={disabled} aria-label={`${formatDateAu(iso)}${dayLabel}`} title={blocked.has(iso) ? "Unavailable" : minimumStayNotMet ? `${property.minimumStay}-night minimum stay` : dateValidation || formatAud(getNightlyPrice(property, iso))} onClick={() => onPick(iso)} className={`calendar-day ${selected ? "selected" : ""} ${unavailable ? "disabled" : ""} ${minimumStayNotMet ? "minimum-stay" : ""}`}>
+              <button type="button" disabled={disabled} aria-label={`${formatDateAu(iso)}${dayLabel}`} title={blocked.has(iso) ? choosingCheckout && !disabled ? "Checkout only" : "Unavailable" : minimumStayNotMet ? `${minimumNights}-night minimum stay` : dateValidation || formatAud(getNightlyPrice(property, iso))} onClick={() => onPick(iso)} className={`calendar-day ${selected ? "selected" : ""} ${unavailable ? "disabled" : ""} ${minimumStayNotMet ? "minimum-stay" : ""}`}>
                 <span>{formatAuNumber(Number(iso.slice(-2)))}</span>
-                {!blocked.has(iso) && <span className="calendar-day-price">{formatAud(getNightlyPrice(property, iso))}</span>}
+                {!blocked.has(iso) && <span className="calendar-day-price">{propertyCalendar ? formatAud(getNightlyPrice(property, iso)).replace(/^AUD\s*/, "") : formatAud(getNightlyPrice(property, iso))}</span>}
               </button>
             </span>
           ) : (
@@ -406,15 +419,41 @@ function Month({ month, property, today, checkIn, checkout, blockedDates, onPick
   );
 }
 
-export function BookingCard({ property,today,blockedDates=[],availabilityLoading=false }:{property:Property;today:string;blockedDates?:string[];availabilityLoading?:boolean}) {
- const router=useRouter(),{booking,setBooking}=useBooking(),[calendarOpen,setCalendarOpen]=useState(false),[guestsOpen,setGuestsOpen]=useState(false);
- const guests=booking.guests??defaultGuests,checkIn=booking.checkIn??"",checkout=booking.checkout??"",price=calculatePrice(property,checkIn,checkout,guests);
- const dateError=validateDateRange(property,checkIn,checkout,today,blockedDates),guestError=validateGuestCapacity(property,guests);
- const reserve=()=>{if(dateError||guestError||availabilityLoading)return;setBooking({propertySlug:property.slug,checkIn,checkout,guests});router.push("/booking");};
- return <aside className="stay-booking-card"><div className="stay-booking-price"><strong>{formatAud(price.nights?price.nightlySubtotal/price.nights:property.nightlyPrice)}</strong><span>{price.nights?"average / night":"default / night"}</span><small>AUD · Direct booking</small></div><div className="stay-booking-dates"><button type="button" aria-haspopup="dialog" onClick={()=>setCalendarOpen(true)}><span>Check-in</span><strong>{checkIn?formatDateAu(checkIn):"Add date"}</strong></button><button type="button" aria-haspopup="dialog" onClick={()=>setCalendarOpen(true)}><span>Checkout</span><strong>{checkout?formatDateAu(checkout):"Add date"}</strong></button></div><button type="button" className="stay-guest-trigger" aria-haspopup="dialog" onClick={()=>setGuestsOpen(true)}><span>Guests<strong>{totalStayingGuests(guests)} staying guests{guests.infants?", "+guests.infants+" infants":""}{guests.pets?", "+guests.pets+" pets":""}</strong></span><ChevronDown size={20}/></button>
- <Modal title="Select dates" open={calendarOpen} onClose={()=>setCalendarOpen(false)}><MiniCalendar property={property} today={today} checkIn={checkIn} checkout={checkout} blockedDates={blockedDates} availabilityLoading={availabilityLoading} onCheckInSelect={next=>setBooking({propertySlug:property.slug,checkIn:next,checkout:""})} onSelect={(a,b)=>{setBooking({propertySlug:property.slug,checkIn:a,checkout:b});setCalendarOpen(false);}}/><button type="button" className="stay-button" onClick={()=>setBooking({propertySlug:property.slug,checkIn:"",checkout:""})}>Clear dates</button></Modal>
- <Modal title="Select guests" open={guestsOpen} onClose={()=>setGuestsOpen(false)}><GuestSelector value={guests} onChange={value=>setBooking({propertySlug:property.slug,guests:value})} maxGuests={property.maxGuests} property={property} embedded/><p className="stay-helper">{property.minimumGuests}–{property.maxGuests} staying guests. Infants are excluded from this total (maximum {property.maximumInfants}). {property.petsAllowed?"Up to "+property.maximumPets+" pets allowed.":"Pets are not allowed."}</p>{guestError&&<p role="alert">{guestError}</p>}<button type="button" className="stay-button" onClick={()=>setGuestsOpen(false)}>Done</button></Modal>
- <div className="stay-booking-breakdown"><PriceBreakdownView property={property} checkIn={checkIn} checkout={checkout} guests={guests}/></div>{(guestError||(checkIn&&checkout&&dateError))&&<p className="stay-error" role="alert">{guestError||dateError}</p>}<button type="button" className={`stay-reserve-button${availabilityLoading?" is-loading":""}`} disabled={!!dateError||!!guestError||availabilityLoading} aria-busy={availabilityLoading} onClick={reserve}>{availabilityLoading?<span className="stay-reserve-button__loading" role="status"><LoaderCircle size={18} aria-hidden="true"/>Checking availability…</span>:"Continue to booking"}</button><p className="stay-helper">You can review your stay before payment.</p></aside>;
+export function BookingCard({ property, today, blockedDates = [], availabilityStatus, onRefreshAvailability }: { property: Property; today: string; blockedDates?: string[]; availabilityStatus: "loading" | "ready" | "error"; onRefreshAvailability: () => void }) {
+  const router = useRouter();
+  const { booking, setBooking } = useBooking();
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [guestsOpen, setGuestsOpen] = useState(false);
+  const guests = booking.guests ?? defaultGuests;
+  const checkIn = booking.checkIn ?? "";
+  const checkout = booking.checkout ?? "";
+  const price = calculatePrice(property, checkIn, checkout, guests);
+  const dateError = validateDateRange(property, checkIn, checkout, today, blockedDates);
+  const guestError = validateGuestCapacity(property, guests);
+  const conflictDate = checkIn && checkout ? blockedDates.find((date) => date >= checkIn && date < checkout) : "";
+  const openCalendar = () => { setCalendarOpen(true); onRefreshAvailability(); };
+  const reserve = () => {
+    if (dateError || guestError || availabilityStatus !== "ready") return;
+    setBooking({ propertySlug: property.slug, checkIn, checkout, guests });
+    router.push("/booking");
+  };
+
+  return <aside className="stay-booking-card">
+    <div className="stay-booking-price"><strong>{formatAud(price.nights ? price.nightlySubtotal / price.nights : property.nightlyPrice)}</strong><span>{price.nights ? "average / night" : "default / night"}</span><small>AUD · Direct booking</small></div>
+    <div className="stay-booking-dates"><button type="button" aria-haspopup="dialog" onClick={openCalendar}><span>Check-in</span><strong>{checkIn ? formatDateAu(checkIn) : "Add date"}</strong></button><button type="button" aria-haspopup="dialog" onClick={openCalendar}><span>Checkout</span><strong>{checkout ? formatDateAu(checkout) : "Add date"}</strong></button></div>
+    <button type="button" className="stay-guest-trigger" aria-haspopup="dialog" onClick={() => setGuestsOpen(true)}><span>Guests<strong>{totalStayingGuests(guests)} staying guests{guests.infants ? ", " + guests.infants + " infants" : ""}{guests.pets ? ", " + guests.pets + " pets" : ""}</strong></span><ChevronDown size={20} /></button>
+    <Modal title="Choose your dates" open={calendarOpen} onClose={() => setCalendarOpen(false)} className={`property-date-dialog${availabilityStatus === "ready" ? "" : " property-date-dialog--pending"}`}>
+      {availabilityStatus === "ready" ? <MiniCalendar property={property} today={today} checkIn={checkIn} checkout={checkout} blockedDates={blockedDates} showSelectionHeader={false} propertyCalendar onCheckInSelect={(next) => setBooking({ propertySlug: property.slug, checkIn: next, checkout: "" })} onSelect={(arrival, departure) => { setBooking({ propertySlug: property.slug, checkIn: arrival, checkout: departure }); setCalendarOpen(false); }} /> : <div className="property-date-dialog__status" role={availabilityStatus === "error" ? "alert" : "status"}>{availabilityStatus === "loading" ? <><LoaderCircle size={22} className="property-date-dialog__spinner" aria-hidden="true" /><div><strong>Checking availability</strong><p>Confirming the latest dates for this home…</p></div></> : <div><strong>Availability could not be loaded</strong><p>Please try again before choosing your dates.</p><button type="button" className="property-date-dialog__retry" onClick={onRefreshAvailability}>Try again</button></div>}</div>}
+      {availabilityStatus === "ready" && conflictDate && <p className="stay-error" role="alert">{formatDateAu(conflictDate)} is booked or blocked. Choose another date range.</p>}
+      {availabilityStatus === "ready" && (checkIn || checkout) && <button type="button" className="property-date-dialog__clear" onClick={() => setBooking({ propertySlug: property.slug, checkIn: "", checkout: "" })}>Clear dates</button>}
+    </Modal>
+    <Modal title="Select guests" open={guestsOpen} onClose={() => setGuestsOpen(false)}><GuestSelector value={guests} onChange={(value) => setBooking({ propertySlug: property.slug, guests: value })} maxGuests={property.maxGuests} property={property} embedded /><p className="stay-helper">{property.minimumGuests}–{property.maxGuests} staying guests. Infants are excluded from this total (maximum {property.maximumInfants}). {property.petsAllowed ? "Up to " + property.maximumPets + " pets allowed." : "Pets are not allowed."}</p>{guestError && <p role="alert">{guestError}</p>}<button type="button" className="stay-button" onClick={() => setGuestsOpen(false)}>Done</button></Modal>
+    <div className="stay-booking-breakdown"><PriceBreakdownView property={property} checkIn={checkIn} checkout={checkout} guests={guests} /></div>
+    {(guestError || (availabilityStatus === "ready" && checkIn && checkout && dateError)) && <p className="stay-error" role="alert">{guestError || (conflictDate ? `${formatDateAu(conflictDate)} is booked or blocked. Choose another date range.` : dateError)}</p>}
+    {availabilityStatus === "error" && <p className="stay-error" role="alert">Live availability could not be checked. <button type="button" className="font-semibold underline underline-offset-2" onClick={onRefreshAvailability}>Retry</button></p>}
+    <button type="button" className={`stay-reserve-button${availabilityStatus === "loading" ? " is-loading" : ""}`} disabled={!!dateError || !!guestError || availabilityStatus !== "ready"} aria-busy={availabilityStatus === "loading"} onClick={reserve}>{availabilityStatus === "loading" ? <span className="stay-reserve-button__loading" role="status"><LoaderCircle size={18} aria-hidden="true" />Checking availability…</span> : availabilityStatus === "error" ? "Availability unavailable" : "Continue to booking"}</button>
+    <p className="stay-helper">You can review your stay before payment.</p>
+  </aside>;
 }
 
 export function RelatedHouses({ currentSlug, properties: relatedProperties = properties }: { currentSlug: string; properties?: Property[] }) {

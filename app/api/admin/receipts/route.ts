@@ -51,6 +51,7 @@ export async function GET() {
       companyName: first.group_reference ? String(guest.companyName ?? "") : "",
       guestEmail: String(guest.email ?? ""),
       homes: rows.map((row) => propertyNames.get(row.property_id) ?? "Serenity home"),
+      stays: rows.map((row) => ({ home: propertyNames.get(row.property_id) ?? "Serenity home", checkIn: row.check_in, checkout: row.checkout, total: Number(row.total) })),
       checkIn: first.check_in,
       checkout: first.checkout,
       total: Math.round(rows.reduce((sum, row) => sum + Number(row.total), 0) * 100) / 100,

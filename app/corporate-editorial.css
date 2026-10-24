@@ -651,7 +651,7 @@ body:has(.corporate-editorial-page) .public-site > main {
   margin-top: clamp(3rem, 5vw, 5rem);
   padding: clamp(2rem, 3vw, 3.5rem);
   border-radius: 1rem;
-  background: #f7f5f1;
+  background: #eaf3f9;
   color: var(--corp-green);
   text-align: center;
 }
@@ -680,6 +680,7 @@ body:has(.corporate-editorial-page) .public-site > main {
   gap: 0.9rem;
   padding: 1.25rem;
   border-radius: 0.45rem;
+  border: 1px solid #d3e4ee;
   background: #fff;
 }
 
@@ -1212,181 +1213,288 @@ body:has(.corporate-editorial-page) .public-site > main {
   }
 }
 
-/* Keep the corporate date picker in step with the house booking calendar. */
-body:has(.corporate-stays-page) .serenity-modal:has(.booking-calendar) {
-  border: 0;
-  border-radius: 2rem !important;
+/* Corporate booking date picker: a compact, single-month flow for each house. */
+.serenity-modal.corporate-date-dialog {
+  width: min(42rem, calc(100vw - 2rem));
+  max-width: none;
+  max-height: calc(100dvh - 2rem);
+  padding: clamp(1rem, 3vw, 1.75rem);
+  border: 1px solid #d8e3e9;
+  border-radius: 1.25rem !important;
   background: #fff;
   color: #002844;
-  box-shadow: 0 1.25rem 3.5rem rgba(0, 40, 68, 0.14);
+  box-shadow: 0 1.5rem 4rem rgba(0, 30, 53, 0.18);
+  font-family: var(--font-sans);
 }
 
-body:has(.corporate-stays-page) .serenity-modal:has(.booking-calendar) .serenity-modal-heading {
+.serenity-modal.corporate-date-dialog .serenity-modal-heading {
+  gap: 1rem;
   margin-bottom: 1rem;
-  border-bottom-color: #e5eae8;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5ebef;
 }
 
-body:has(.corporate-stays-page) .serenity-modal:has(.booking-calendar) .serenity-modal-heading h2 {
+.serenity-modal.corporate-date-dialog .serenity-modal-heading h2 {
+  margin: 0;
   color: #002844;
-  font-family: var(--font-brand-serif), Georgia, serif;
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  font-weight: 400;
-  letter-spacing: -0.045em;
+  font-family: var(--font-sans);
+  font-size: clamp(1.25rem, 3vw, 1.55rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.25;
 }
 
-body:has(.corporate-stays-page) .serenity-modal:has(.booking-calendar) .serenity-modal-close {
-  border: 1px solid #002844;
+.serenity-modal.corporate-date-dialog .serenity-modal-close {
+  width: 2.5rem;
+  height: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0;
+  border: 1px solid #d4e0e7;
   border-radius: 50% !important;
+  background: #fff;
   color: #002844;
 }
 
-body:has(.corporate-stays-page) .serenity-modal .booking-calendar {
+.serenity-modal.corporate-date-dialog .serenity-modal-close:is(:hover, :focus-visible) {
+  border-color: #002844;
+  background: #f1f6f8;
+}
+
+.corporate-date-dialog__property {
+  margin: 0 0 0.85rem;
+  color: #002844;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.corporate-date-dialog__property span {
+  color: #617583;
+  font-weight: 500;
+}
+
+.corporate-date-dialog__steps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.corporate-date-dialog__step {
+  min-width: 0;
+  min-height: 4.3rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #dce5ea;
+  border-radius: 0.8rem;
+  background: #f8fafb;
+}
+
+.corporate-date-dialog__step.is-current {
+  border-color: #8aafc2;
+  background: #eef5f8;
+  box-shadow: inset 0 0 0 1px #8aafc2;
+}
+
+.corporate-date-dialog__step.is-complete {
+  border-color: #c8d9e1;
+  background: #fff;
+}
+
+.corporate-date-dialog__step span,
+.corporate-date-dialog__step strong {
+  display: block;
+}
+
+.corporate-date-dialog__step span {
+  color: #607583;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.corporate-date-dialog__step strong {
+  margin-top: 0.2rem;
+  color: #002844;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.corporate-date-dialog__guidance {
+  margin: 0.75rem 0 1.15rem;
+  color: #526b79;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.serenity-modal.corporate-date-dialog .booking-calendar {
   overflow: hidden;
   padding: 0 !important;
-  border: 0 !important;
-  border-radius: 1.5rem !important;
+  border: 1px solid #e2e9ed !important;
+  border-radius: 1rem !important;
   background: #fff !important;
   box-shadow: none !important;
 }
 
-body:has(.corporate-stays-page) .serenity-modal .booking-calendar-header {
-  min-height: 4rem;
+.serenity-modal.corporate-date-dialog .booking-calendar-header {
+  min-height: 3.5rem;
   margin: 0 !important;
-  padding: 1rem clamp(1rem, 2vw, 1.75rem);
-  border: 0;
-  border-radius: 1.5rem 1.5rem 0 0;
-  background: #002844;
-  color: #fff;
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid #e8eef1;
+  background: #fff;
 }
 
-body:has(.corporate-stays-page) .serenity-modal .booking-calendar-header > span:not(.sr-only) {
-  color: #fff !important;
-  font-family: var(--font-brand-serif), Georgia, serif;
-  font-size: clamp(1.15rem, 1.7vw, 1.5rem);
-  font-weight: 400;
-  letter-spacing: -0.025em;
+.serenity-modal.corporate-date-dialog .booking-calendar-current-month {
+  color: #002844;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
-body:has(.corporate-stays-page) .serenity-modal .booking-calendar-header .icon-button {
-  width: 2.75rem;
-  height: 2.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.72);
+.serenity-modal.corporate-date-dialog .booking-calendar-header .icon-button {
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 1px solid #d4e0e7;
   border-radius: 50%;
-  background: transparent;
-  color: #fff;
-}
-
-body:has(.corporate-stays-page) .serenity-modal .booking-calendar-header .icon-button:is(:hover, :focus-visible) {
-  border-color: #fff;
   background: #fff;
   color: #002844;
 }
 
-body:has(.corporate-stays-page) .serenity-modal .booking-calendar-months {
-  gap: clamp(1.25rem, 2.5vw, 2.25rem);
-  padding: clamp(1.25rem, 2.5vw, 2rem);
-  border-radius: 1.15rem;
+.serenity-modal.corporate-date-dialog .booking-calendar-header .icon-button:is(:hover, :focus-visible) {
+  border-color: #002844;
+  background: #eef5f8;
+  color: #002844;
+}
+
+.serenity-modal.corporate-date-dialog .booking-calendar-header .icon-button:disabled {
+  border-color: #e8eef1;
+  color: #a8b6be;
+  cursor: not-allowed;
+}
+
+.serenity-modal.corporate-date-dialog .booking-calendar-months {
+  padding: 0.85rem 1rem 1rem;
   background: #fff;
 }
 
-body:has(.corporate-stays-page) .serenity-modal .booking-calendar-month-title {
-  margin-bottom: 1rem;
-  color: #002844 !important;
-  font-family: var(--font-brand-serif), Georgia, serif;
-  font-size: clamp(1.5rem, 2vw, 2rem);
-  font-weight: 400;
-  letter-spacing: -0.04em;
+.serenity-modal.corporate-date-dialog .booking-calendar-month-title {
+  display: none;
 }
 
-body:has(.corporate-stays-page) .serenity-modal .booking-calendar-weekdays {
-  color: #555550 !important;
-  font-size: 0.58rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+.serenity-modal.corporate-date-dialog .booking-calendar-weekdays {
+  color: #607583 !important;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }
 
-body:has(.corporate-stays-page) .serenity-modal .booking-calendar-days {
-  gap: 0.25rem;
+.serenity-modal.corporate-date-dialog .booking-calendar-days {
+  gap: 0.15rem;
+  margin-top: 0.45rem;
 }
 
-body:has(.corporate-stays-page) .serenity-modal .calendar-day {
-  aspect-ratio: 1;
-  min-height: 3rem;
+.serenity-modal.corporate-date-dialog .calendar-day {
+  height: 3.15rem;
+  min-height: 3.15rem;
+  aspect-ratio: auto;
   border: 1px solid transparent;
-  border-radius: 0.7rem !important;
-  background: #fff;
+  border-radius: 0.65rem !important;
+  background: transparent;
   color: #002844;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 600;
+  text-decoration: none;
   transform: none;
 }
 
-body:has(.corporate-stays-page) .serenity-modal .calendar-day-price {
-  color: currentColor;
-  font-size: 0.58rem;
-  font-weight: 600;
-  opacity: 0.8;
+.serenity-modal.corporate-date-dialog .calendar-day-price {
+  display: none;
 }
 
-body:has(.corporate-stays-page) .serenity-modal .calendar-day:not(:disabled):is(:hover, :focus-visible) {
-  border-color: #002844;
-  background: #eef3f6;
+.serenity-modal.corporate-date-dialog .calendar-day-cell.in-range::before,
+.serenity-modal.corporate-date-dialog .calendar-day-cell.range-start::after,
+.serenity-modal.corporate-date-dialog .calendar-day-cell.range-end::after {
+  height: 2.45rem;
+  background: #e9f2f6;
+}
+
+.serenity-modal.corporate-date-dialog .calendar-day-cell.in-range .calendar-day {
+  background: #e9f2f6;
+}
+
+.serenity-modal.corporate-date-dialog .calendar-day:not(:disabled):is(:hover, :focus-visible) {
+  border-color: #83a9bc;
+  background: #f0f6f8;
   color: #002844;
   box-shadow: none;
 }
 
-body:has(.corporate-stays-page) .serenity-modal .calendar-day.selected,
-body:has(.corporate-stays-page) .serenity-modal .calendar-day.selected:is(:hover, :focus-visible) {
+.serenity-modal.corporate-date-dialog .calendar-day.selected,
+.serenity-modal.corporate-date-dialog .calendar-day.selected:is(:hover, :focus-visible) {
   border-color: #002844;
+  border-radius: 0.65rem !important;
   background: #002844;
   color: #fff;
-}
-
-body:has(.corporate-stays-page) .serenity-modal .calendar-day-cell.in-range::before,
-body:has(.corporate-stays-page) .serenity-modal .calendar-day-cell.range-start::after,
-body:has(.corporate-stays-page) .serenity-modal .calendar-day-cell.range-end::after {
-  background: #e3edf2;
-}
-
-body:has(.corporate-stays-page) .serenity-modal .calendar-day.minimum-stay,
-body:has(.corporate-stays-page) .serenity-modal .calendar-day.minimum-stay:is(:hover, :focus-visible) {
-  border-color: #d7e1e5;
-  background: #f1f4f5;
-  color: #526b79;
   box-shadow: none;
 }
 
-body:has(.corporate-stays-page) .serenity-modal .calendar-day.disabled,
-body:has(.corporate-stays-page) .serenity-modal .calendar-day.disabled:is(:hover, :focus-visible) {
+.serenity-modal.corporate-date-dialog .calendar-day.minimum-stay,
+.serenity-modal.corporate-date-dialog .calendar-day.minimum-stay:is(:hover, :focus-visible) {
   border-color: transparent;
-  background: #f5f7f7;
-  color: #83939d;
-  opacity: 0.7;
+  background: #fff8e9;
+  color: #8b7451;
+  box-shadow: none;
+}
+
+.serenity-modal.corporate-date-dialog .calendar-day.disabled,
+.serenity-modal.corporate-date-dialog .calendar-day.disabled:is(:hover, :focus-visible) {
+  border-color: transparent;
+  background: #f5f7f8;
+  color: #91a0a8;
+  opacity: 1;
+  text-decoration: none;
   box-shadow: none;
   transform: none;
 }
 
-body:has(.corporate-stays-page) .serenity-modal .booking-calendar-hint,
-body:has(.corporate-stays-page) .serenity-modal .booking-calendar-status {
-  margin: 0 !important;
-  padding: 1rem clamp(1rem, 2vw, 1.75rem);
-  border-top: 1px solid #e5eae8;
-  background: #fff;
-  color: #526b79 !important;
-  font-size: 0.8rem;
+.serenity-modal.corporate-date-dialog .booking-calendar-error {
+  margin: 0.75rem 1rem 1rem;
+  border-radius: 0.6rem;
 }
 
-body:has(.corporate-stays-page) .serenity-modal:has(.booking-calendar) .stay-button {
-  margin-top: 1rem;
-  border-color: #d7e1e5;
-  border-radius: 999px !important;
+.serenity-modal.corporate-date-dialog .corporate-date-dialog__clear {
+  display: block;
+  margin: 0.85rem 0 0 auto;
+  padding: 0.4rem 0.1rem;
+  border: 0;
+  background: transparent;
   color: #002844;
   font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+  cursor: pointer;
 }
 
-body:has(.corporate-stays-page) .serenity-modal:has(.booking-calendar) .stay-button:hover {
-  background: #f6f8f9;
+@media (max-width: 520px) {
+  .serenity-modal.corporate-date-dialog {
+    width: calc(100vw - 1rem);
+    max-height: calc(100dvh - 1rem);
+    padding: 1rem;
+  }
+
+  .serenity-modal.corporate-date-dialog .booking-calendar-months {
+    padding-inline: 0.55rem;
+  }
+
+  .serenity-modal.corporate-date-dialog .calendar-day {
+    height: 2.65rem;
+    min-height: 2.65rem;
+    font-size: 0.8rem;
+  }
+
+  .serenity-modal.corporate-date-dialog .calendar-day-cell.in-range::before,
+  .serenity-modal.corporate-date-dialog .calendar-day-cell.range-start::after,
+  .serenity-modal.corporate-date-dialog .calendar-day-cell.range-end::after {
+    height: 2.1rem;
+  }
 }

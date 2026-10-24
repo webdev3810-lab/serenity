@@ -61,7 +61,7 @@ export const emptyProperty = (): Row => ({
   booking_request_required: false,
   pets_allowed: true,
   corporate_booking_allowed: true,
-  minimum_corporate_stay: 7,
+  minimum_corporate_stay: 2,
   minimum_corporate_houses: 1,
   maximum_corporate_houses: 3,
   adjacent_houses_allowed: true,

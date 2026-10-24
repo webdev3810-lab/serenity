@@ -3227,3 +3227,350 @@ body:has(.property-theme) .serenity-modal:has(.booking-calendar) .stay-button:ho
     font-size: 0.5rem;
   }
 }
+
+/* The property page and its booking dialog share one clear date picker. */
+.property-theme #availability .booking-calendar.property-date-calendar {
+  width: 100%;
+}
+
+dialog.serenity-modal.property-date-dialog {
+  width: min(58rem, calc(100vw - 2rem));
+  max-width: none;
+  max-height: calc(100dvh - 2rem);
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid #dbe6ec;
+  border-radius: 1.25rem !important;
+  background: #fff;
+  color: #002844;
+  font-family: var(--font-sans);
+  box-shadow: 0 1.5rem 4rem rgba(0, 40, 68, 0.17);
+}
+
+dialog.serenity-modal.property-date-dialog .serenity-modal-heading {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5edf1;
+}
+
+dialog.serenity-modal.property-date-dialog .serenity-modal-heading h2 {
+  color: #002844;
+  font-family: var(--font-sans) !important;
+  font-size: clamp(1.25rem, 3vw, 1.55rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.25;
+}
+
+dialog.serenity-modal.property-date-dialog--pending {
+  width: min(31rem, calc(100vw - 2rem));
+}
+
+.property-date-dialog__status {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid #dbe6ec;
+  border-radius: 0.85rem;
+  background: #f7fafb;
+  color: #002844;
+  font-family: var(--font-sans);
+}
+
+.property-date-dialog__status strong {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.property-date-dialog__status p {
+  margin: 0.3rem 0 0;
+  color: #5e7481;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.property-date-dialog__spinner {
+  flex: none;
+  margin-top: 0.1rem;
+  color: #002844;
+  animation: stay-availability-spin 1s linear infinite;
+}
+
+.property-date-dialog__retry {
+  margin-top: 0.85rem;
+  padding: 0.65rem 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: #002844;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.property-date-dialog__retry:is(:hover, :focus-visible) {
+  background: #174760;
+}
+
+.property-date-dialog__clear {
+  display: block;
+  margin: 0.75rem 0 0 auto;
+  padding: 0.35rem 0;
+  border: 0;
+  background: transparent;
+  color: #002844;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.property-date-dialog__clear:is(:hover, :focus-visible) {
+  color: #27617e;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .booking-calendar.property-date-calendar {
+  overflow: hidden;
+  container-type: inline-size;
+  padding: 0 !important;
+  border: 1px solid #dbe6ec !important;
+  border-radius: 1rem !important;
+  background: #fff !important;
+  color: #002844;
+  font-family: var(--font-sans);
+  box-shadow: 0 0.75rem 2rem rgba(0, 40, 68, 0.055) !important;
+}
+
+.property-date-calendar__steps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  padding: clamp(0.9rem, 2.5vw, 1.25rem);
+  border-bottom: 1px solid #e5edf1;
+  background: #f7fafb;
+}
+
+.property-date-calendar__step {
+  min-width: 0;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #dce7ec;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.property-date-calendar__step.is-current {
+  border-color: #88aabd;
+  box-shadow: inset 0 0 0 1px #88aabd;
+}
+
+.property-date-calendar__step span,
+.property-date-calendar__step strong {
+  display: block;
+}
+
+.property-date-calendar__step span {
+  color: #5c7482;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.property-date-calendar__step strong {
+  margin-top: 0.25rem;
+  color: #002844;
+  font-size: clamp(0.8rem, 2.4vw, 0.9rem);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .booking-calendar-header {
+  min-height: 3.8rem;
+  margin: 0 !important;
+  padding: 0.65rem clamp(0.9rem, 2.5vw, 1.25rem);
+  border-bottom: 1px solid #e5edf1;
+  background: #fff;
+  color: #002844;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .booking-calendar-header > span {
+  color: #002844 !important;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .booking-calendar-header .icon-button {
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 1px solid #d4e1e8;
+  border-radius: 50%;
+  background: #fff;
+  color: #002844;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .booking-calendar-header .icon-button:is(:hover, :focus-visible) {
+  border-color: #002844;
+  background: #edf5f8;
+  color: #002844;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .booking-calendar-header .icon-button:disabled {
+  border-color: #e6edf1;
+  color: #a9b9c2;
+  background: #fff;
+  cursor: not-allowed;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .booking-calendar-months {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  padding: clamp(0.85rem, 2.5vw, 1.25rem);
+  background: #fff;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .booking-calendar-month-title {
+  display: block;
+  margin-bottom: 0.65rem;
+  color: #002844 !important;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .booking-calendar-weekdays {
+  color: #657b89 !important;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .booking-calendar-days {
+  gap: 0.2rem;
+  margin-top: 0.45rem;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .calendar-day {
+  height: 2.7rem;
+  min-height: 2.7rem;
+  aspect-ratio: auto;
+  border: 1px solid transparent;
+  border-radius: 0.65rem !important;
+  background: transparent;
+  color: #002844;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transform: none;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .calendar-day-price {
+  color: currentColor;
+  font-size: 0.56rem;
+  font-weight: 500;
+  opacity: 0.75;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .calendar-day-cell.in-range::before,
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .calendar-day-cell.range-start::after,
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .calendar-day-cell.range-end::after {
+  height: 2rem;
+  background: #e8f2f7;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .calendar-day-cell.in-range .calendar-day {
+  background: #e8f2f7;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .calendar-day:not(:disabled):is(:hover, :focus-visible) {
+  border-color: #82a9bd;
+  background: #eff6f9;
+  color: #002844;
+  box-shadow: none;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .calendar-day.selected,
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .calendar-day.selected:is(:hover, :focus-visible) {
+  border-color: #002844;
+  background: #002844;
+  color: #fff;
+  box-shadow: none;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .calendar-day.selected .calendar-day-price {
+  color: #fff;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .calendar-day.minimum-stay,
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .calendar-day.minimum-stay:is(:hover, :focus-visible) {
+  border-color: transparent;
+  background: #fff8e9;
+  color: #8b7451;
+  box-shadow: none;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .calendar-day.disabled,
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .calendar-day.disabled:is(:hover, :focus-visible) {
+  border-color: transparent;
+  background: #f2f5f7;
+  color: #95a4ad;
+  opacity: 1;
+  text-decoration: none;
+  box-shadow: none;
+  transform: none;
+}
+
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .booking-calendar-hint,
+:is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .booking-calendar-status {
+  padding: 0.8rem clamp(0.9rem, 2.5vw, 1.25rem);
+  border-top: 1px solid #e5edf1;
+  color: #607786 !important;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 520px) {
+  dialog.serenity-modal.property-date-dialog {
+    width: calc(100vw - 1rem);
+    max-height: calc(100dvh - 1rem);
+    padding: 1rem;
+  }
+
+  :is(.property-theme #availability, body:has(.property-theme) .serenity-modal.property-date-dialog) .property-date-calendar .booking-calendar-months {
+    padding-inline: 0.55rem;
+  }
+}
+
+@container (max-width: 520px) {
+  .property-date-calendar .booking-calendar-months {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .property-date-calendar .booking-calendar-month:nth-child(2) {
+    display: none;
+  }
+
+  .property-date-calendar .calendar-day {
+    height: 3.15rem !important;
+    min-height: 3.15rem !important;
+  }
+
+  .property-date-calendar .calendar-day-price {
+    font-size: 0.6rem !important;
+  }
+}
+
+@container (max-width: 380px) {
+  .property-date-calendar .calendar-day {
+    height: 2.8rem !important;
+    min-height: 2.8rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  .property-date-calendar .calendar-day-price {
+    font-size: 0.5rem !important;
+  }
+}

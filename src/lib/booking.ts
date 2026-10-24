@@ -115,14 +115,14 @@ export const validateDateRange = (property: Property, checkIn?: string, checkout
   if (checkIn > latestAllowed) return `This house can be booked up to ${property.maximumAdvanceBookingDays} days ahead.`;
   if (checkout <= checkIn) return "Checkout must be after check-in.";
   const nights = nightsBetween(checkIn, checkout);
-  if (nights < property.minimumStay) return `${property.name} has a ${property.minimumStay}-night minimum stay.`;
+  if (!corporate && nights < property.minimumStay) return `${property.name} has a ${property.minimumStay}-night minimum stay.`;
   if (nights > property.maximumStay) return `${property.name} allows stays of up to ${property.maximumStay} nights.`;
   if (!property.weekendBookingAllowed) {
     const hasWeekend = datesInRange(checkIn, checkout).some((date) => [0, 6].includes(new Date(`${date}T00:00:00Z`).getUTCDay()));
     if (hasWeekend) return "Weekend nights are not available for this house.";
   }
   if (corporate && !property.corporateBookingAllowed) return "Corporate bookings are not available for this house.";
-  if (corporate && nights < property.minimumCorporateStay) return `Corporate stays require at least ${property.minimumCorporateStay} nights.`;
+  if (corporate && nights < property.minimumCorporateStay) return `Corporate stays require at least ${property.minimumCorporateStay} night${property.minimumCorporateStay === 1 ? "" : "s"}.`;
   if (hasUnavailableConflict(property, checkIn, checkout, blockedDates)) return "Those dates overlap unavailable or already booked nights.";
   return "";
 };
