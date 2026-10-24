@@ -28,7 +28,7 @@ const isActivePath = (activeHref: string | undefined, href: string, activeHash =
   const currentPath = activeHref.replace(/\/+$/, "") || "/";
   const targetPath = targetPathValue.replace(/\/+$/, "") || "/";
   if (targetHashValue) return currentPath === targetPath && activeHash === `#${targetHashValue}`;
-  if (targetPath === "/houses" && currentPath.startsWith("/properties/")) return true;
+  if (targetPath === "/homes" && currentPath.startsWith("/properties/")) return true;
   return targetPath === "/" ? currentPath === "/" : currentPath === targetPath || currentPath.startsWith(`${targetPath}/`);
 };
 
@@ -37,7 +37,7 @@ export default function PillNav({
   activeHref,
   className = "",
   ctaLabel = "Book now",
-  ctaHref = "/houses",
+  ctaHref = "/homes",
 }: PillNavProps) {
   const pathname = usePathname();
   const [currentHash, setCurrentHash] = useState("");

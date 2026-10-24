@@ -41,134 +41,158 @@ body:has(.corporate-editorial-page) .public-site > main {
   outline-offset: 3px;
 }
 
-.corporate-editorial-masthead {
-  display: flex;
-  min-height: clamp(6.3rem, 8vw, 7.8rem);
-  align-items: end;
-  justify-content: space-between;
-  gap: 2rem;
-  padding: clamp(1.5rem, 2.5vw, 2.5rem) clamp(1rem, 2.5vw, 2.5rem) clamp(0.85rem, 1.2vw, 1.2rem);
-  border-radius: 0 0 1.25rem 1.25rem;
-  background: var(--corp-green);
-  color: var(--corp-cream);
-}
-
-.corporate-editorial-masthead h1 {
-  margin: 0;
-  font-size: clamp(2.4rem, 5vw, 5.5rem);
-  letter-spacing: -0.065em;
-  line-height: 0.92;
-  text-transform: uppercase;
-}
-
-.public-site .corporate-editorial-page .corporate-editorial-masthead h1 {
-  font-size: clamp(2.4rem, 5vw, 5.5rem);
-}
-
-.corporate-editorial-masthead > span {
-  flex: none;
-  padding-bottom: 0.25rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
 .corporate-editorial-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.38fr) minmax(0, 1fr);
-  gap: 2px;
-  min-height: clamp(35rem, calc(100svh - 11.9rem), 52rem);
-  background: var(--corp-ink);
+  grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
+  min-height: clamp(34rem, 47vw, 47rem);
+  overflow: hidden;
+  border-radius: 1.5rem;
+  background: #fff;
 }
 
 .corporate-editorial-hero__image,
 .corporate-editorial-hero__copy {
   min-width: 0;
   overflow: hidden;
-  border-radius: 1.25rem;
 }
 
 .corporate-editorial-hero__image {
   position: relative;
-  min-height: 35rem;
-  background: #c9c9bf;
+  min-height: 100%;
+  background: #e7e6df;
 }
 
 .corporate-editorial-hero__image img {
   object-fit: cover;
+  object-position: center;
 }
 
-.corporate-editorial-hero__image::after {
+.corporate-editorial-hero__image-note {
   position: absolute;
-  inset: 50% 0 0;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.56));
-  content: "";
-  pointer-events: none;
-}
-
-.corporate-editorial-hero__image > span {
-  position: absolute;
-  z-index: 1;
-  bottom: clamp(1.5rem, 3vw, 3rem);
-  left: clamp(1.5rem, 3vw, 3rem);
-  color: #fff;
-  font-family: var(--corp-serif);
-  font-size: clamp(1.7rem, 3vw, 3.4rem);
-  letter-spacing: -0.04em;
-  line-height: 1.02;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  border-radius: 999px;
+  padding: 0.5rem 0.8rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #082d46;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .corporate-editorial-hero__copy {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  gap: clamp(1.5rem, 3vw, 3rem);
-  padding: clamp(2rem, 4vw, 5rem);
-  background: var(--corp-paper);
+  gap: clamp(1.2rem, 1.8vw, 2rem);
+  padding: clamp(2.5rem, 5vw, 5.5rem);
+  background: #002844;
+  color: #fff;
 }
 
-.corporate-editorial-eyebrow {
-  font-family: var(--corp-serif);
-  font-size: 1rem;
+.corporate-editorial-hero__copy::before {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: min(42%, 24rem);
+  background: url('/corporate-botanical-pattern-v2.png') right center / auto 102% no-repeat;
+  opacity: 0.48;
+  content: "";
+  pointer-events: none;
 }
 
-.corporate-editorial-hero__copy h2 {
-  max-width: 12ch;
+.corporate-editorial-hero__copy > * {
+  position: relative;
+  z-index: 1;
+}
+
+.public-site .corporate-editorial-page .corporate-editorial-hero__copy h1 {
+  max-width: 15ch;
   margin: 0;
-  font-size: clamp(3.2rem, 4.7vw, 6rem);
-  line-height: 0.88;
+  font-size: clamp(3.1rem, 4.5vw, 5.3rem);
+  line-height: 0.96;
+}
+
+.corporate-editorial-hero__copy h1 span {
+  display: block;
+  color: #d2af71;
 }
 
 .corporate-editorial-hero__copy p {
-  max-width: 32rem;
+  max-width: 34rem;
   margin: 0;
-  font-family: var(--corp-serif);
-  font-size: clamp(1.25rem, 1.6vw, 1.7rem);
-  line-height: 1.3;
+  color: #dfebf1;
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
+  line-height: 1.65;
 }
 
 .corporate-editorial-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem 2rem;
+  gap: 0.65rem;
+  width: 100%;
 }
 
-.corporate-editorial-links a {
+.corporate-editorial-page .corporate-editorial-links a {
   display: inline-flex;
+  min-height: 3.4rem;
   align-items: center;
-  gap: 0.4rem;
-  padding-bottom: 0.25rem;
-  border-bottom: 1px solid currentColor;
-  color: inherit;
-  font-family: var(--corp-serif);
-  font-size: 1.15rem;
+  justify-content: center;
+  gap: 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.7rem !important;
+  padding: 0.8rem 1.1rem;
+  background: #d7b36f;
+  color: #002844;
+  font-size: 0.9rem;
+  font-weight: 700;
   text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.18s, border-color 0.18s, transform 0.18s;
 }
 
-.corporate-editorial-links a:hover {
-  opacity: 0.65;
+.corporate-editorial-page .corporate-editorial-links a:nth-child(2) {
+  border-color: rgba(255, 255, 255, 0.85);
+  background: transparent;
+  color: #fff;
+}
+
+.corporate-editorial-page .corporate-editorial-links a:hover {
+  transform: translateY(-2px);
+  background: #e3c98d;
+}
+
+.corporate-editorial-page .corporate-editorial-links a:nth-child(2):hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.public-site .corporate-editorial-page .corporate-editorial-hero {
+  gap: clamp(0.75rem, 1.2vw, 1.25rem);
+  margin-top: clamp(0.75rem, 2.5vw, 2rem);
+  padding: 0;
+  background: #fff;
+  box-shadow: none;
+}
+
+.public-site .corporate-editorial-page .corporate-editorial-hero__copy {
+  padding: clamp(2rem, 4vw, 4.5rem);
+}
+
+.public-site .corporate-editorial-page .corporate-editorial-hero__copy p {
+  font-size: clamp(1rem, 1.2vw, 1.15rem);
+  line-height: 1.65;
+}
+
+.public-site .corporate-editorial-page .corporate-editorial-hero__image-note {
+  font-family: inherit;
+  font-size: 0.65rem;
+}
+
+.public-site .corporate-editorial-page :is(.corporate-editorial-hero__copy, .corporate-editorial-hero__image) {
+  border-radius: 1.5rem;
+  box-shadow: 0 0.75rem 2.25rem rgba(0, 40, 68, 0.09);
 }
 
 .corporate-editorial-page > .corporate-insurance {
@@ -213,86 +237,133 @@ body:has(.corporate-editorial-page) .public-site > main {
 .corporate-insurance__path {
   display: flex;
   min-width: 0;
-  min-height: 28rem;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 1.6rem;
-  border-radius: 1.25rem;
-  padding: clamp(1.5rem, 3vw, 3rem);
-}
-
-.corporate-insurance__path--insurance {
-  background: var(--corp-green);
-  color: #fff;
-}
-
-.corporate-insurance__path--corporate {
+  overflow: hidden;
   border: 1px solid #dbe4e9;
-  background: #f6f9fa;
+  border-radius: 1.25rem;
+  background: #fff;
   color: var(--corp-green);
 }
 
+.corporate-insurance__path-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.85;
+  overflow: hidden;
+  background: #e8eff2;
+}
+
+.corporate-insurance__path-media img {
+  object-fit: cover;
+}
+
+.corporate-insurance__image-note {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 1;
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  background: rgba(0, 40, 68, 0.78);
+  color: #fff;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.corporate-insurance__path-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(1rem, 1.5vw, 1.35rem);
+  padding: clamp(1.5rem, 2.5vw, 2.5rem);
+}
+
 .corporate-insurance__number {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 999px;
+  padding: 0.5rem 0.8rem;
+  background: #eaf1f5;
+  color: #002844;
   font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .corporate-editorial-page .corporate-insurance__path h3 {
-  max-width: 18ch;
-  margin: 0 0 1rem;
-  font-size: clamp(2.4rem, 3.4vw, 4rem);
-  line-height: 0.98;
+  max-width: 19ch;
+  margin: 0;
+  font-size: clamp(2.1rem, 3vw, 3.25rem);
+  line-height: 1.05;
 }
 
 .corporate-insurance__path p {
-  max-width: 35rem;
+  max-width: 32rem;
   margin: 0;
-  font-family: var(--corp-serif);
-  font-size: clamp(1.15rem, 1.4vw, 1.5rem);
-  line-height: 1.3;
+  font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+  line-height: 1.55;
 }
 
 .corporate-insurance__path ul {
   display: grid;
-  gap: 0.7rem;
-  margin: 0;
-  padding: 0;
+  width: 100%;
+  gap: 0.8rem;
+  margin: 0.25rem 0 0;
+  padding: 1.25rem 0 0;
+  border-top: 1px solid #dce6eb;
   list-style: none;
-  font-size: 0.88rem;
+  font-size: clamp(0.82rem, 0.9vw, 0.94rem);
   line-height: 1.5;
 }
 
 .corporate-insurance__path li {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 0.75rem;
 }
 
 .corporate-insurance__path li::before {
-  color: #c9a967;
+  display: grid;
+  width: 1.2rem;
+  height: 1.2rem;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: #e4eff4;
+  color: #002844;
+  font-size: 0.7rem;
   content: "✓";
 }
 
 .corporate-insurance__path a {
   display: inline-flex;
+  min-height: 3rem;
   align-items: center;
+  justify-content: space-between;
   gap: 0.6rem;
   margin-top: auto;
-  border-bottom: 1px solid currentColor;
-  border-radius: 0 !important;
-  padding-bottom: 0.35rem;
-  color: inherit;
-  font-size: 0.82rem;
+  border: 1px solid #002844;
+  border-radius: 0.75rem !important;
+  padding: 0.75rem 1rem;
+  background: #002844;
+  color: #fff;
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   text-decoration: none;
-  text-transform: uppercase;
 }
 
-.corporate-insurance__path a:hover {
-  opacity: 0.7;
+.corporate-insurance__path--corporate a {
+  background: #fff;
+  color: #002844;
+}
+
+.corporate-insurance__path a:is(:hover, :focus-visible) {
+  background: #0b4869;
+  color: #fff;
 }
 
 .corporate-insurance__homes {
@@ -324,17 +395,27 @@ body:has(.corporate-editorial-page) .public-site > main {
 .corporate-insurance__homes-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(0.75rem, 1.2vw, 1.25rem);
+  gap: clamp(1rem, 1.5vw, 1.5rem);
 }
 
 .corporate-insurance__home {
-  display: block;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   overflow: hidden;
+  border: 1px solid #dce6eb;
   border-radius: 1.25rem;
-  background: #f6f9fa;
+  background: #fff;
   color: var(--corp-green);
   text-decoration: none;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 40, 68, 0.06);
+  transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+}
+
+.corporate-insurance__home:is(:hover, :focus-visible) {
+  transform: translateY(-3px);
+  border-color: #a9c2d0;
+  box-shadow: 0 1rem 2rem rgba(0, 40, 68, 0.12);
 }
 
 .corporate-insurance__home-image {
@@ -342,6 +423,8 @@ body:has(.corporate-editorial-page) .public-site > main {
   display: block;
   aspect-ratio: 1.55;
   overflow: hidden;
+  margin: 0.65rem 0.65rem 0;
+  border-radius: 0.85rem;
   background: #dbe4e9;
 }
 
@@ -356,9 +439,11 @@ body:has(.corporate-editorial-page) .public-site > main {
 }
 
 .corporate-insurance__home-details {
-  display: grid;
-  gap: 0.6rem;
-  padding: clamp(1.2rem, 2vw, 2rem);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: clamp(1.2rem, 1.7vw, 1.65rem);
 }
 
 .corporate-insurance__home-details strong {
@@ -369,22 +454,30 @@ body:has(.corporate-editorial-page) .public-site > main {
 }
 
 .corporate-insurance__home-details small {
-  font-size: 0.82rem;
+  color: #526a78;
+  font-size: 0.88rem;
 }
 
-.corporate-insurance__home-details > span {
-  display: flex;
+.corporate-insurance__home-details .corporate-insurance__home-action {
+  display: inline-flex;
+  min-height: 3.4rem;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  margin-top: 0.8rem;
-  border-top: 1px solid #bdccd5;
-  border-radius: 0 !important;
-  padding-top: 1rem;
-  font-size: 0.72rem;
+  gap: 0.75rem;
+  margin-top: 1.1rem;
+  border-radius: 0.55rem;
+  padding: 0.8rem 1rem;
+  background: #002844;
+  color: #fff;
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.055em;
   text-transform: uppercase;
+  transition: background 200ms ease;
+}
+
+.corporate-insurance__home:is(:hover, :focus-visible) .corporate-insurance__home-action {
+  background: #0b4869;
 }
 
 .corporate-insurance__homes-note {
@@ -422,7 +515,7 @@ body:has(.corporate-editorial-page) .public-site > main {
 
 /* A single border is a divider, so keep it straight. Rounded corners remain
    on the page sections and full container surfaces. */
-.corporate-editorial-page :is(.corporate-editorial-links a, .border-t:not(section), .border-b:not(section)) {
+.corporate-editorial-page :is(.border-t:not(section), .border-b:not(section)) {
   border-radius: 0 !important;
 }
 
@@ -552,6 +645,52 @@ body:has(.corporate-editorial-page) .public-site > main {
   font-family: var(--font-poppins), Arial, sans-serif;
   font-size: clamp(0.85rem, 0.95vw, 1rem);
   line-height: 1.5;
+}
+
+.corporate-insurance .corporate-coordinators {
+  margin-top: clamp(3rem, 5vw, 5rem);
+  padding: clamp(2rem, 3vw, 3.5rem);
+  border-radius: 1rem;
+  background: #f7f5f1;
+  color: var(--corp-green);
+  text-align: center;
+}
+
+.corporate-editorial-page .corporate-coordinators h2 {
+  margin: 0 0 clamp(1.5rem, 2.6vw, 2.5rem);
+  font-size: clamp(2rem, 3.2vw, 3.5rem);
+  line-height: 1.12;
+}
+
+.corporate-coordinators__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.4vw, 1.25rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.corporate-coordinators__grid li {
+  display: flex;
+  min-height: 10rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  padding: 1.25rem;
+  border-radius: 0.45rem;
+  background: #fff;
+}
+
+.corporate-coordinators__grid svg {
+  flex: none;
+}
+
+.corporate-coordinators__grid span {
+  font-family: var(--corp-serif);
+  font-size: clamp(1rem, 1.35vw, 1.3rem);
+  line-height: 1.25;
 }
 
 .corporate-partner-direct {
@@ -896,7 +1035,7 @@ body:has(.corporate-editorial-page) .public-site > main {
 
 .corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking) button[type="submit"] {
   min-height: 3.75rem;
-  border-radius: 0 !important;
+  border-radius: 0.85rem !important;
   background: var(--corp-green);
   color: #fff;
   box-shadow: none;
@@ -959,6 +1098,10 @@ body:has(.corporate-editorial-page) .public-site > main {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .corporate-coordinators__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .corporate-editorial-hero {
     grid-template-columns: 1fr 1fr;
   }
@@ -967,9 +1110,6 @@ body:has(.corporate-editorial-page) .public-site > main {
     padding: 2rem;
   }
 
-  .corporate-editorial-hero__copy h2 {
-    font-size: clamp(2.8rem, 5vw, 4.5rem);
-  }
 }
 
 @media (max-width: 760px) {
@@ -1011,23 +1151,6 @@ body:has(.corporate-editorial-page) .public-site > main {
     border-bottom: 1px solid rgba(255, 255, 255, 0.25);
   }
 
-  .corporate-editorial-masthead {
-    min-height: 8rem;
-    flex-direction: column-reverse;
-    align-items: flex-start;
-    justify-content: end;
-    gap: 0.8rem;
-    padding: 1.1rem 1.25rem;
-  }
-
-  .corporate-editorial-masthead h1 {
-    font-size: clamp(2.2rem, 8vw, 3.5rem);
-  }
-
-  .public-site .corporate-editorial-page .corporate-editorial-masthead h1 {
-    font-size: clamp(2.2rem, 8vw, 3.5rem);
-  }
-
   .corporate-editorial-hero {
     grid-template-columns: 1fr;
     min-height: 0;
@@ -1035,16 +1158,21 @@ body:has(.corporate-editorial-page) .public-site > main {
 
   .corporate-editorial-hero__image {
     min-height: 0;
-    height: min(65svh, 36rem);
+    height: min(62svh, 27rem);
   }
 
   .corporate-editorial-hero__copy {
-    min-height: 28rem;
-    padding: 2rem;
+    min-height: 0;
+    padding: clamp(2rem, 6vw, 3rem);
   }
 
-  .corporate-editorial-hero__copy h2 {
-    font-size: clamp(3.2rem, 10vw, 5.5rem);
+  .corporate-editorial-hero__copy::before {
+    width: 52%;
+    opacity: 0.34;
+  }
+
+  .public-site .corporate-editorial-page .corporate-editorial-hero__copy h1 {
+    font-size: clamp(2.5rem, 7.5vw, 3.7rem);
   }
 
   .corporate-editorial-benefits .corporate-benefits-grid {
@@ -1073,4 +1201,192 @@ body:has(.corporate-editorial-page) .public-site > main {
   .corporate-stay-features__item {
     min-height: 12rem;
   }
+
+  .corporate-coordinators__grid li {
+    min-height: 9rem;
+    padding: 1rem;
+  }
+
+  .corporate-coordinators__grid span {
+    font-size: 0.95rem;
+  }
+}
+
+/* Keep the corporate date picker in step with the house booking calendar. */
+body:has(.corporate-stays-page) .serenity-modal:has(.booking-calendar) {
+  border: 0;
+  border-radius: 2rem !important;
+  background: #fff;
+  color: #002844;
+  box-shadow: 0 1.25rem 3.5rem rgba(0, 40, 68, 0.14);
+}
+
+body:has(.corporate-stays-page) .serenity-modal:has(.booking-calendar) .serenity-modal-heading {
+  margin-bottom: 1rem;
+  border-bottom-color: #e5eae8;
+}
+
+body:has(.corporate-stays-page) .serenity-modal:has(.booking-calendar) .serenity-modal-heading h2 {
+  color: #002844;
+  font-family: var(--font-brand-serif), Georgia, serif;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+}
+
+body:has(.corporate-stays-page) .serenity-modal:has(.booking-calendar) .serenity-modal-close {
+  border: 1px solid #002844;
+  border-radius: 50% !important;
+  color: #002844;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .booking-calendar {
+  overflow: hidden;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 1.5rem !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .booking-calendar-header {
+  min-height: 4rem;
+  margin: 0 !important;
+  padding: 1rem clamp(1rem, 2vw, 1.75rem);
+  border: 0;
+  border-radius: 1.5rem 1.5rem 0 0;
+  background: #002844;
+  color: #fff;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .booking-calendar-header > span:not(.sr-only) {
+  color: #fff !important;
+  font-family: var(--font-brand-serif), Georgia, serif;
+  font-size: clamp(1.15rem, 1.7vw, 1.5rem);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .booking-calendar-header .icon-button {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .booking-calendar-header .icon-button:is(:hover, :focus-visible) {
+  border-color: #fff;
+  background: #fff;
+  color: #002844;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .booking-calendar-months {
+  gap: clamp(1.25rem, 2.5vw, 2.25rem);
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  border-radius: 1.15rem;
+  background: #fff;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .booking-calendar-month-title {
+  margin-bottom: 1rem;
+  color: #002844 !important;
+  font-family: var(--font-brand-serif), Georgia, serif;
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .booking-calendar-weekdays {
+  color: #555550 !important;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .booking-calendar-days {
+  gap: 0.25rem;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .calendar-day {
+  aspect-ratio: 1;
+  min-height: 3rem;
+  border: 1px solid transparent;
+  border-radius: 0.7rem !important;
+  background: #fff;
+  color: #002844;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transform: none;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .calendar-day-price {
+  color: currentColor;
+  font-size: 0.58rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .calendar-day:not(:disabled):is(:hover, :focus-visible) {
+  border-color: #002844;
+  background: #eef3f6;
+  color: #002844;
+  box-shadow: none;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .calendar-day.selected,
+body:has(.corporate-stays-page) .serenity-modal .calendar-day.selected:is(:hover, :focus-visible) {
+  border-color: #002844;
+  background: #002844;
+  color: #fff;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .calendar-day-cell.in-range::before,
+body:has(.corporate-stays-page) .serenity-modal .calendar-day-cell.range-start::after,
+body:has(.corporate-stays-page) .serenity-modal .calendar-day-cell.range-end::after {
+  background: #e3edf2;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .calendar-day.minimum-stay,
+body:has(.corporate-stays-page) .serenity-modal .calendar-day.minimum-stay:is(:hover, :focus-visible) {
+  border-color: #d7e1e5;
+  background: #f1f4f5;
+  color: #526b79;
+  box-shadow: none;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .calendar-day.disabled,
+body:has(.corporate-stays-page) .serenity-modal .calendar-day.disabled:is(:hover, :focus-visible) {
+  border-color: transparent;
+  background: #f5f7f7;
+  color: #83939d;
+  opacity: 0.7;
+  box-shadow: none;
+  transform: none;
+}
+
+body:has(.corporate-stays-page) .serenity-modal .booking-calendar-hint,
+body:has(.corporate-stays-page) .serenity-modal .booking-calendar-status {
+  margin: 0 !important;
+  padding: 1rem clamp(1rem, 2vw, 1.75rem);
+  border-top: 1px solid #e5eae8;
+  background: #fff;
+  color: #526b79 !important;
+  font-size: 0.8rem;
+}
+
+body:has(.corporate-stays-page) .serenity-modal:has(.booking-calendar) .stay-button {
+  margin-top: 1rem;
+  border-color: #d7e1e5;
+  border-radius: 999px !important;
+  color: #002844;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body:has(.corporate-stays-page) .serenity-modal:has(.booking-calendar) .stay-button:hover {
+  background: #f6f8f9;
 }

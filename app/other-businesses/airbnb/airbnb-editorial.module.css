@@ -1,0 +1,119 @@
+.page { --ink: #002844; --muted: #526a7c; --cream: #fff; --sage: #f1f5f8; --line: #d9e2e8; overflow-x: clip; background: var(--cream); color: var(--ink); font-family: var(--font-sans); }
+.shell { width: min(100%, 1600px); margin: 0 auto; padding: 1.1rem var(--public-card-gutter, 1rem) clamp(4rem, 7vw, 7rem); }
+.eyebrow { margin: 0; color: #937544; font-size: .68rem; font-weight: 700; letter-spacing: .18em; line-height: 1.5; text-transform: uppercase; }
+.backLink { display: inline-flex; align-items: center; gap: .5rem; color: var(--ink); font-size: .78rem; font-weight: 600; text-decoration: none; }
+.backLink:hover { color: #9b7840; }
+.intro { padding: clamp(1.4rem, 2.8vw, 3rem) clamp(1.5rem, 4vw, 4.5rem) clamp(3rem, 5vw, 5rem); border: 1px solid var(--line); border-radius: 1.3rem; background: #fff; }
+.introGrid { display: grid; grid-template-columns: 1.15fr .85fr; align-items: end; gap: clamp(2rem, 5vw, 5rem); margin-top: clamp(2.5rem, 5vw, 5rem); }
+.intro h1, .feature h2, .sectionHeading h2, .plan h2 { font-family: var(--font-sans); font-weight: 500; letter-spacing: -.045em; }
+.intro h1 { margin: .5rem 0 0; font-size: clamp(3rem, 5.4vw, 6.2rem); line-height: 1.02; }
+.intro h1 em, .feature h2 em { font-style: normal; font-weight: inherit; }
+.introAside { max-width: 30rem; padding-bottom: .3rem; }
+.introAside p { margin: 0 0 1.6rem; color: var(--muted); font-size: clamp(1.04rem, 1.4vw, 1.35rem); line-height: 1.55; }
+.actions { display: flex; flex-wrap: wrap; gap: .7rem; }
+.solidButton, .outlineButton { display: inline-flex; min-height: 3.25rem; align-items: center; justify-content: center; gap: 1.5rem; padding: .8rem 1.2rem; border: 1px solid var(--ink); border-radius: .15rem; font: inherit; font-size: .78rem; font-weight: 700; line-height: 1.3; text-decoration: none; cursor: pointer; transition: transform .2s ease, background-color .2s ease, color .2s ease; }
+.solidButton { background: var(--ink); color: #fff; }
+.outlineButton { background: transparent; color: var(--ink); }
+.solidButton:hover, .outlineButton:hover { transform: translateY(-2px); }
+.solidButton:hover { background: #174766; }
+.outlineButton:hover { background: #edf3f6; }
+.solidButton:focus-visible, .outlineButton:focus-visible, .backLink:focus-visible, .placeList a:focus-visible { outline: 3px solid #c4a86d; outline-offset: 3px; }
+.feature { display: grid; grid-template-columns: 1fr 1fr; align-items: stretch; gap: clamp(2rem, 5vw, 5rem); padding: clamp(4rem, 7vw, 7rem) clamp(1.5rem, 4vw, 4.5rem); scroll-margin-top: 6rem; }
+.featureCopy { align-self: center; }
+.feature h2 { margin: .6rem 0 1.6rem; font-size: clamp(3rem, 4.8vw, 5.8rem); line-height: 1.02; }
+.featureCopy > p:not(.eyebrow):not(.location) { max-width: 39rem; margin: 0 0 1rem; color: var(--muted); font-size: clamp(.98rem, 1.1vw, 1.12rem); line-height: 1.7; }
+.featureCopy > .featureLead { color: var(--ink) !important; font-size: clamp(1.2rem, 1.6vw, 1.55rem) !important; font-weight: 600; }
+.featureCopy > .featureSignoff { color: var(--ink) !important; font-weight: 600; }
+.feature .actions { margin-top: 1.8rem; }
+.location { display: flex; align-items: center; gap: .5rem; margin: 1.7rem 0 0; color: var(--muted); font-size: .82rem; }
+.location svg { color: #a88951; }
+.featureMedia { position: relative; min-height: clamp(28rem, 45vw, 43rem); overflow: hidden; border-radius: 5rem 1rem 1rem 1rem; background: #e6ecf0; }
+.featureMedia img, .roomImage img, .exploreImage img { object-fit: cover; }
+.feature .featureLandscapeMedia { min-height: 0; align-self: center; aspect-ratio: 16 / 9; border-radius: 1.5rem; }
+.enhancedPhotoNote { position: absolute; right: 1rem; bottom: 1rem; left: 1rem; width: fit-content; padding: .55rem .75rem; border-radius: .5rem; background: rgba(0, 40, 68, .88); color: #fff; font-size: .7rem; font-weight: 600; }
+.imageDisclosure { margin: 1.25rem 0 0; color: var(--muted); font-size: .75rem; line-height: 1.5; }
+.factBand { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; padding: 0 clamp(1.5rem, 4vw, 4.5rem); border-radius: .4rem; background: var(--ink); color: #fff; }
+.factBand > span { display: grid; grid-template-columns: 1.5rem 1fr; align-content: center; column-gap: .8rem; min-height: 6rem; padding: 1rem 1.5rem; border-right: 1px solid rgba(255,255,255,.22); }
+.factBand > span:last-child { border-right: 0; }
+.factBand svg { grid-row: span 2; color: #d4be90; }
+.factBand strong { font-size: .91rem; font-weight: 600; }
+.factBand small { margin-top: .2rem; color: #d4e0e7; font-size: .75rem; }
+.rooms, .explore, .enquiry { padding: clamp(4rem, 7vw, 7rem) clamp(1.5rem, 4vw, 4.5rem); }
+.sectionHeading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin-bottom: 2.5rem; }
+.sectionHeading h2 { margin: .4rem 0 0; font-size: clamp(2.5rem, 4vw, 4.5rem); line-height: 1.08; }
+.sectionHeading > p { max-width: 29rem; margin: 0; color: var(--muted); font-size: .95rem; line-height: 1.65; }
+.roomGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; }
+.roomGrid figure { min-width: 0; margin: 0; }
+.roomImage { position: relative; height: clamp(14rem, 20vw, 21rem); overflow: hidden; background: #e6ecf0; }
+.roomGrid figcaption { padding: .85rem .1rem 0; border-top: 1px solid var(--line); color: var(--muted); font-size: .78rem; }
+.amenities { display: flex; flex-wrap: wrap; gap: 1rem 2rem; margin-top: 2.5rem; padding-top: 1.4rem; border-top: 1px solid var(--line); }
+.amenities span { display: inline-flex; align-items: center; gap: .55rem; color: var(--ink); font-size: .85rem; }
+.amenities svg { color: #9a7d49; }
+.explore { border-radius: 1.3rem; background: var(--sage); }
+.exploreGrid { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(2rem, 5vw, 5rem); }
+.exploreImage { position: relative; min-height: 33rem; overflow: hidden; background: #dce6ec; }
+.exploreImage::after { position: absolute; inset: 55% 0 0; background: linear-gradient(transparent, rgba(0,40,68,.75)); content: ""; }
+.exploreImage > span { position: absolute; z-index: 1; right: 2rem; bottom: 2rem; left: 2rem; max-width: 17ch; color: #fff; font-family: var(--font-sans); font-size: clamp(1.6rem, 2.4vw, 2.6rem); font-weight: 500; line-height: 1.15; }
+.placeList { align-self: center; }
+.placeList > div { display: grid; grid-template-columns: 2rem 1fr auto; gap: 1rem; align-items: baseline; padding: .95rem 0; border-bottom: 1px solid #cfdae1; }
+.placeList > div:first-child { border-top: 1px solid #cfdae1; }
+.placeList span { color: #a28550; font-family: var(--font-sans); font-size: 1.2rem; }
+.placeList strong { font-size: .91rem; font-weight: 600; }
+.placeList small { color: var(--muted); font-size: .72rem; text-align: right; }
+.placeList a { display: inline-flex; align-items: center; gap: .5rem; margin-top: 1.5rem; color: var(--ink); font-size: .8rem; font-weight: 700; text-decoration: none; }
+.plan { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 8vw, 8rem); margin-top: .8rem; padding: clamp(3rem, 5vw, 5rem) clamp(1.5rem, 4vw, 4.5rem); border-radius: 1.3rem; background: #edf3f7; }
+.plan h2 { margin: .5rem 0 1rem; font-size: clamp(2.5rem, 4vw, 4.4rem); line-height: 1.08; }
+.plan p:not(.eyebrow) { max-width: 32rem; color: var(--muted); font-size: .95rem; line-height: 1.6; }
+.plan .solidButton { margin-top: 1rem; }
+.planDetails { align-self: center; display: grid; gap: .45rem; padding-left: clamp(1rem, 4vw, 4rem); border-left: 1px solid #c8d7e1; }
+.planDetails strong { font-family: var(--font-sans); font-size: clamp(1.7rem, 2.5vw, 2.5rem); font-weight: 500; }
+.planDetails span { color: var(--muted); font-size: .9rem; }
+.enquiry { scroll-margin-top: 6rem; }
+.enquiryForm { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem 1.5rem; }
+.enquiryForm label { display: grid; gap: .45rem; font-size: .77rem; font-weight: 600; }
+.enquiryForm .fieldLabel em { color: #a06e51; font-style: normal; }
+.enquiryForm input, .enquiryForm select, .enquiryForm textarea { width: 100%; min-width: 0; min-height: 3.2rem; padding: .85rem 1rem; border: 1px solid #b8cbd7; border-radius: .15rem; background: #fff; color: var(--ink); font: inherit; font-size: .95rem; font-weight: 400; }
+.enquiryForm textarea { resize: vertical; }
+.enquiryForm :is(input, select, textarea):focus-visible { outline: 3px solid #c4a86d; outline-offset: 2px; }
+.messageField, .formFooter { grid-column: 1 / -1; }
+.formFooter { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.5rem; }
+.formFooter small { color: var(--muted); font-size: .73rem; }
+.formFooter .success, .formFooter .error { width: 100%; margin: 0; padding: .85rem 1rem; font-size: .85rem; }
+.formFooter .success { background: #e8f2f8; color: #002844; }
+.formFooter .error { background: #fff0eb; color: #8d2b24; }
+.formFooter button:disabled { cursor: wait; opacity: .6; transform: none; }
+
+@media (max-width: 900px) {
+  .introGrid, .feature, .exploreGrid, .plan { grid-template-columns: 1fr; }
+  .introGrid { gap: 1.5rem; margin-top: 4rem; }
+  .featureMedia { min-height: 25rem; }
+  .planDetails { padding: 1.8rem 0 0; border-top: 1px solid #c8d7e1; border-left: 0; }
+}
+
+@media (max-width: 650px) {
+  .shell { padding-inline: .5rem; }
+  .intro, .feature, .rooms, .explore, .plan, .enquiry { padding-right: 1.25rem; padding-left: 1.25rem; }
+  .intro { padding-top: 1.25rem; padding-bottom: 3rem; }
+  .intro h1 { font-size: clamp(2.75rem, 10vw, 4.5rem); }
+  .feature { padding-top: 4rem; padding-bottom: 4rem; }
+  .feature h2 { font-size: clamp(2.7rem, 10vw, 4.4rem); }
+  .featureMedia { min-height: 22rem; border-top-left-radius: 3rem; }
+  .actions { align-items: stretch; flex-direction: column; }
+  .actions a { justify-content: space-between; }
+  .factBand { grid-template-columns: 1fr; padding: .5rem 1.25rem; }
+  .factBand > span { min-height: 4.8rem; padding: .85rem 0; border-right: 0; border-bottom: 1px solid rgba(255,255,255,.22); }
+  .factBand > span:last-child { border-bottom: 0; }
+  .sectionHeading { display: block; }
+  .sectionHeading > p { margin-top: 1rem; }
+  .roomGrid { grid-template-columns: 1fr; gap: 1.5rem; }
+  .roomImage { height: 16rem; }
+  .exploreImage { min-height: 22rem; }
+  .placeList > div { grid-template-columns: 1.5rem 1fr; gap: .5rem; }
+  .placeList small { grid-column: 2; text-align: left; }
+  .enquiryForm { grid-template-columns: 1fr; }
+  .messageField, .formFooter { grid-column: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .solidButton, .outlineButton { transition: none; }
+}

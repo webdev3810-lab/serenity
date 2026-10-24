@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { createPortal } from "react-dom";
 import { useCallback, useEffect, useRef, useSyncExternalStore, type CSSProperties } from "react";
 
@@ -10,6 +10,7 @@ type StaggeredMenuItem = {
   href: string;
   ariaLabel: string;
   active?: boolean;
+  children?: Array<{ label: string; href: string; active?: boolean }>;
 };
 
 type StaggeredMobileMenuProps = {
@@ -71,7 +72,7 @@ export default function StaggeredMobileMenu({
       if (event.key !== "Tab" || !panelRef.current) return;
 
       const focusable = Array.from(
-        panelRef.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled])"),
+        panelRef.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled]), summary"),
       );
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
@@ -136,6 +137,20 @@ export default function StaggeredMobileMenu({
                 <ul className="serenity-staggered-menu__list" data-numbering="true">
                   {items.map((item, index) => (
                     <li className="serenity-staggered-menu__item-wrap" key={`${item.href}-${item.label}`}>
+                      {item.children ? (
+                        <details className="serenity-staggered-menu__subnav">
+                          <summary className="serenity-staggered-menu__item" style={{ "--sm-item-delay": `${180 + index * 55}ms` } as CSSProperties}>
+                            <span className="serenity-staggered-menu__item-label">{item.label}</span>
+                            <ChevronDown size={19} aria-hidden="true" />
+                          </summary>
+                          <div className="serenity-staggered-menu__subnav-links">
+                            <Link href={item.href} aria-current={item.active ? "page" : undefined} onClick={onClose}>About Serenity</Link>
+                            {item.children.map((child) => (
+                              <Link key={child.href} href={child.href} aria-current={child.active ? "page" : undefined} onClick={onClose}>{child.label}</Link>
+                            ))}
+                          </div>
+                        </details>
+                      ) : (
                       <Link
                         className="serenity-staggered-menu__item"
                         href={item.href}
@@ -147,6 +162,7 @@ export default function StaggeredMobileMenu({
                       >
                         <span className="serenity-staggered-menu__item-label">{item.label}</span>
                       </Link>
+                      )}
                     </li>
                   ))}
                 </ul>

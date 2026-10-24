@@ -1859,3 +1859,38 @@
     transform: none;
   }
 }
+
+@media print {
+  .public-site:has(.booking-confirmation-card) > .serenity-editorial-nav,
+  .public-site:has(.booking-confirmation-card) > .serenity-editorial-footer,
+  .public-site .booking-confirmation-card .booking-confirmation-actions,
+  .public-site .booking-flow-page .booking-progress {
+    display: none !important;
+  }
+
+  .public-site:has(.booking-confirmation-card) > main,
+  .public-site .booking-flow-page {
+    min-height: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  .public-site .booking-flow-page > .container {
+    width: 100% !important;
+  }
+
+  .public-site .booking-confirmation-card {
+    max-width: none !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .public-site .booking-confirmation-card h1 {
+    font-size: 2rem !important;
+    overflow-wrap: anywhere;
+  }
+}

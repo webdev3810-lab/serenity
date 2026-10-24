@@ -5,16 +5,21 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowUpRight,
+  BriefcaseBusiness,
   CalendarCheck,
+  CalendarDays,
   Car,
   Check,
   CheckCircle2,
+  ChevronRight,
+  CreditCard,
+  FileText,
   Mail,
   Phone,
   ShieldCheck,
 } from "lucide-react";
 import { MiniCalendar } from "@/src/components/BookingWidgets";
-import { FormInput, TextArea } from "@/src/components/UI";
+import { FormInput, Modal, TextArea } from "@/src/components/UI";
 import { useContactSettings } from "@/src/context/ContactSettingsContext";
 import type { Property } from "@/src/data/properties";
 import { calculatePrice, datesInRange, defaultGuests, formatAud, formatDateAu, nightsBetween } from "@/src/lib/booking";
@@ -33,7 +38,7 @@ const CORPORATE_STAY_FEATURES = [
   { title: "One point of contact", description: "One Serenity contact throughout the booking and stay." },
 ] as const;
 
-export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { today: string; properties: Property[]; heroImage?: string; heroAlt?: string }) {
+export function CorporateStaysPage({ today, properties }: { today: string; properties: Property[] }) {
   const contact = useContactSettings() ?? DEFAULT_CONTACT_SETTINGS;
   const [formError, setFormError] = useState("");
   const [formSubmitting, setFormSubmitting] = useState(false);
@@ -45,7 +50,6 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
   const partnerLookupVersion = useRef(0);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarResetKey, setCalendarResetKey] = useState(0);
-  const corporateDatePickerRef = useRef<HTMLDivElement>(null);
   const [enquirySubmitted, setEnquirySubmitted] = useState(false);
   const [enquirySubmitting, setEnquirySubmitting] = useState(false);
   const [enquiryError, setEnquiryError] = useState("");
@@ -100,24 +104,6 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
       if (version === partnerLookupVersion.current) setPartnerChecking(false);
     }
   };
-
-  useEffect(() => {
-    if (!calendarOpen) return;
-
-    const closeOnOutsideClick = (event: MouseEvent) => {
-      if (!corporateDatePickerRef.current?.contains(event.target as Node)) setCalendarOpen(false);
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setCalendarOpen(false);
-    };
-
-    document.addEventListener("mousedown", closeOnOutsideClick);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("mousedown", closeOnOutsideClick);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [calendarOpen]);
 
   useEffect(() => {
     if (!formData.arrival || formData.departure <= formData.arrival || !properties.length) {
@@ -295,37 +281,22 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
     ["Are pets allowed for relocating employees?", "Yes. All three Serenity properties welcome declared family pets and have enclosed yards."],
   ];
 
-  const featuredHome = properties.find((property) => property.slug === "serenity-7") ?? properties[0];
+  const combinedGuestCapacity = properties.reduce((total, property) => total + property.maxGuests, 0);
 
   return (
     <main className="corporate-stays-page corporate-editorial-page homepage-theme">
-      <header className="corporate-editorial-masthead">
-        <h1>Insurance &amp; corporate stays</h1>
-        <span>Pakenham · Victoria</span>
-      </header>
-
       <section className="corporate-editorial-hero" aria-labelledby="corporate-hero-title">
-        <div className="corporate-editorial-hero__image">
-          {(heroImage || featuredHome?.featuredImage) ? (
-            <Image
-              src={heroImage || featuredHome.featuredImage}
-              alt={heroImage ? heroAlt || "Serenity furnished homes in Pakenham" : "Serenity house in Pakenham"}
-              fill
-              priority
-              sizes="(max-width: 760px) 100vw, 58vw"
-              unoptimized={(heroImage || featuredHome.featuredImage).startsWith("http")}
-            />
-          ) : null}
-          <span>Three private homes.<br />One point of contact.</span>
-        </div>
         <div className="corporate-editorial-hero__copy">
-          <span className="corporate-editorial-eyebrow">A private place to settle in</span>
-          <h2 id="corporate-hero-title">A home while life moves forward.</h2>
-          <p>Furnished whole-home stays for families needing temporary accommodation, relocating employees and project teams. One local contact from enquiry to checkout.</p>
+          <h1 id="corporate-hero-title">Insurance &amp; Corporate Accommodation <span>in Pakenham</span></h1>
+          <p>Fully furnished private homes for temporary relocation, employee stays and project teams.</p>
           <div className="corporate-editorial-links">
-            <Link href="#corporate-question" onClick={() => openEnquiryType("insurance")}>Request an insurance quote <ArrowUpRight size={17} aria-hidden="true" /></Link>
-            <Link href="#corporate-booking">Book a corporate stay <ArrowUpRight size={17} aria-hidden="true" /></Link>
+            <Link href="#corporate-question" onClick={() => openEnquiryType("insurance")} aria-label="Request an insurance accommodation quote"><ShieldCheck size={18} aria-hidden="true" /> Insurance quote <ChevronRight size={16} aria-hidden="true" /></Link>
+            <Link href="#corporate-question" onClick={() => openEnquiryType("corporate")} aria-label="Request a corporate stay quote"><BriefcaseBusiness size={18} aria-hidden="true" /> Corporate quote <ChevronRight size={16} aria-hidden="true" /></Link>
           </div>
+        </div>
+        <div className="corporate-editorial-hero__image">
+          <Image src="/corporate-hero-interior.jpg" alt="Illustrative furnished home interior with lounge, kitchen and garden patio" fill priority sizes="(max-width: 760px) 100vw, 52vw" />
+          <span className="corporate-editorial-hero__image-note illustrative-photo-label">Illustrative image</span>
         </div>
       </section>
 
@@ -337,32 +308,53 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
         </div>
         <div className="corporate-insurance__paths">
           <article className="corporate-insurance__path corporate-insurance__path--insurance">
-            <span className="corporate-insurance__number">01 / Insurance stays</span>
-            <div>
-              <h3>Insurance &amp; temporary relocation.</h3>
-              <p>A private, furnished base for families who need somewhere to stay while home repairs or a claim are being resolved.</p>
+            <div className="corporate-insurance__path-media">
+              <Image src="/corporate-insurance-illustration.jpg" alt="Illustrative scene of a family arriving at temporary accommodation" fill sizes="(max-width: 760px) 100vw, 50vw" />
+              <span className="corporate-insurance__image-note illustrative-photo-label">Illustrative image</span>
             </div>
-            <ul>
-              <li>Household and bedroom needs reviewed with you</li>
-              <li>Written accommodation quote on request</li>
-              <li>Stay extensions subject to availability</li>
-            </ul>
-            <Link href="#corporate-question" onClick={() => openEnquiryType("insurance")}>Request an insurance quote <ArrowUpRight size={19} aria-hidden="true" /></Link>
+            <div className="corporate-insurance__path-content">
+              <span className="corporate-insurance__number"><ShieldCheck size={18} aria-hidden="true" /> 01 / Insurance accommodation</span>
+              <h3>A place to settle while home is on hold.</h3>
+              <p>Temporary, fully furnished housing for families who need to move out during repairs, a claim or a relocation.</p>
+              <ul>
+                <li>Private whole homes with kitchen and laundry facilities</li>
+                <li>Bedroom and household needs discussed before a quote</li>
+                <li>Shorter or extended stays, subject to availability</li>
+                <li>Written accommodation quote on request</li>
+                <li>Billing requirements can be discussed with your insurer</li>
+              </ul>
+              <Link href="#corporate-question" onClick={() => openEnquiryType("insurance")}>Request an insurance quote <ArrowUpRight size={19} aria-hidden="true" /></Link>
+            </div>
           </article>
           <article className="corporate-insurance__path corporate-insurance__path--corporate">
-            <span className="corporate-insurance__number">02 / Corporate stays</span>
-            <div>
-              <h3>Space for the people doing the work.</h3>
-              <p>Practical whole-home accommodation for project teams, contractors and employees working away from home.</p>
+            <div className="corporate-insurance__path-media">
+              <Image src="/corporate-stays-illustration.jpg" alt="Illustrative scene of a business traveller working in a furnished home" fill sizes="(max-width: 760px) 100vw, 50vw" />
+              <span className="corporate-insurance__image-note illustrative-photo-label">Illustrative image</span>
             </div>
-            <ul>
-              <li>Separate bedrooms and everyday facilities</li>
-              <li>Multiple adjacent homes can be requested</li>
-              <li>Billing and invoice requirements discussed upfront</li>
-            </ul>
-            <Link href="#corporate-question" onClick={() => openEnquiryType("corporate")}>Ask about a corporate stay <ArrowUpRight size={19} aria-hidden="true" /></Link>
+            <div className="corporate-insurance__path-content">
+              <span className="corporate-insurance__number"><BriefcaseBusiness size={18} aria-hidden="true" /> 02 / Corporate stays</span>
+              <h3>Room to work. Space to feel at home.</h3>
+              <p>Furnished accommodation for business travellers, project teams and employees staying in Pakenham.</p>
+              <ul>
+                <li>Private bedrooms, kitchen, laundry and Wi-Fi</li>
+                <li>Flexible dates and extensions, subject to availability</li>
+                {properties.length > 0 && <li>{properties.length} neighbouring homes with capacity for up to {combinedGuestCapacity} guests in total</li>}
+                <li>Multiple-home team bookings can be requested</li>
+                <li>GST invoices and purchase order details on request</li>
+              </ul>
+              <Link href="#corporate-question" onClick={() => openEnquiryType("corporate")}>Ask about a corporate stay <ArrowUpRight size={19} aria-hidden="true" /></Link>
+            </div>
           </article>
         </div>
+        <section className="corporate-coordinators" aria-labelledby="corporate-coordinators-title">
+          <h2 id="corporate-coordinators-title">Easy for booking coordinators</h2>
+          <ul className="corporate-coordinators__grid">
+            <li><FileText size={32} strokeWidth={1.7} aria-hidden="true" /><span>Property information<br />sheets</span></li>
+            <li><FileText size={32} strokeWidth={1.7} aria-hidden="true" /><span>Clear inclusions &amp; terms</span></li>
+            <li><CreditCard size={32} strokeWidth={1.7} aria-hidden="true" /><span>Billing requirements</span></li>
+            <li><CalendarDays size={32} strokeWidth={1.7} aria-hidden="true" /><span>Stay extension enquiries</span></li>
+          </ul>
+        </section>
         <div className="corporate-insurance__homes">
           <div className="corporate-insurance__homes-heading">
             <h3>Three homes. Flexible options.</h3>
@@ -377,7 +369,7 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
                 <span className="corporate-insurance__home-details">
                   <strong>{property.name.replace(" - Whole", "")}</strong>
                   <small>{property.bedrooms} bedrooms · Up to {property.maxGuests} guests</small>
-                  <span>View house &amp; bed layout <ArrowUpRight size={17} aria-hidden="true" /></span>
+                  <span className="corporate-insurance__home-action">View house &amp; bed layout <ArrowUpRight size={17} aria-hidden="true" /></span>
                 </span>
               </Link>
             ))}
@@ -448,7 +440,7 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
                     )}
                     <TextArea id="corp-enquiry-question" label={enquiryType === "insurance" ? "Accommodation needs *" : "Your question *"} required value={enquiryData.question} onChange={(event) => setEnquiryData({ ...enquiryData, question: event.target.value })} placeholder={enquiryType === "insurance" ? "Tell us what kind of home you need. You don’t need to share private claim details." : "What would you like to know about a corporate stay?"} rows={4} />
                     {enquiryError && <p className="border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700" role="alert" aria-live="polite">{enquiryError}</p>}
-                    <button type="submit" className="inline-flex w-full items-center justify-center gap-2 bg-[var(--hero-green)] text-white px-6 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] rounded-none transition-colors disabled:cursor-not-allowed disabled:opacity-60" disabled={enquirySubmitting}>{enquirySubmitting ? "Sending enquiry…" : enquiryType === "insurance" ? "Request accommodation quote" : "Send corporate question"}<ArrowUpRight size={15} /></button>
+                    <button type="submit" className="inline-flex w-full items-center justify-center gap-2 bg-[var(--hero-green)] text-white px-6 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-colors disabled:cursor-not-allowed disabled:opacity-60" disabled={enquirySubmitting}>{enquirySubmitting ? "Sending enquiry…" : enquiryType === "insurance" ? "Request accommodation quote" : "Send corporate question"}<ArrowUpRight size={15} /></button>
                   </form>
                 )}
               </div>
@@ -499,14 +491,14 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
 
                   <div className="space-y-5 pt-4">
                     <h4 className="text-xl text-stone-900 border-b border-stone-200 pb-3">2. Stay Dates & Team</h4>
-                    <div ref={corporateDatePickerRef} className={`relative ${calendarOpen ? "z-30" : "z-0"}`}>
+                    <div className="relative">
                       <div className="grid gap-5 sm:grid-cols-2">
                         <button
                           type="button"
                           className={`field min-h-[4.55rem] text-left ${calendarOpen ? "border-stone-900 bg-white ring-1 ring-stone-900" : "bg-white hover:border-stone-400"}`}
                           onClick={() => setCalendarOpen(true)}
+                          aria-haspopup="dialog"
                           aria-expanded={calendarOpen}
-                          aria-controls="corporate-date-calendar"
                         >
                           <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-neutral-600"><CalendarCheck size={14} /> Expected arrival *</span>
                           <strong className="mt-1.5 block text-sm font-semibold text-stone-900">{formData.arrival ? formatDateAu(formData.arrival) : "Add date"}</strong>
@@ -515,33 +507,16 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
                           type="button"
                           className={`field min-h-[4.55rem] text-left ${calendarOpen ? "border-stone-900 bg-white ring-1 ring-stone-900" : "bg-white hover:border-stone-400"}`}
                           onClick={() => setCalendarOpen(true)}
+                          aria-haspopup="dialog"
                           aria-expanded={calendarOpen}
-                          aria-controls="corporate-date-calendar"
                         >
                           <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-neutral-600"><CalendarCheck size={14} /> Expected departure *</span>
                           <strong className="mt-1.5 block text-sm font-semibold text-stone-900">{formData.departure ? formatDateAu(formData.departure) : "Add date"}</strong>
                         </button>
                       </div>
 
-                      {calendarOpen && calendarProperty && (
-                        <div id="corporate-date-calendar" className="corporate-calendar-popover absolute left-0 top-[calc(100%+0.75rem)] z-50 w-full max-w-[44rem] sm:left-auto sm:right-0" role="dialog" aria-label="Select corporate stay dates">
-                          <div className="booking-calendar-popover-header">
-                            <div>
-                              <h3 className="text-lg font-bold text-stone-900">Select check-in &amp; checkout dates</h3>
-                              <p className="mt-1 text-sm text-neutral-600">Choose the dates for your team stay.</p>
-                            </div>
-                            <div className="booking-calendar-tabs">
-                              <div className={`booking-calendar-tab ${!formData.arrival || formData.departure ? "is-active" : ""}`}>
-                                <span>Check-in</span>
-                                <strong>{formData.arrival ? formatDateAu(formData.arrival) : "Add date"}</strong>
-                              </div>
-                              <div className={`booking-calendar-tab ${formData.arrival && !formData.departure ? "is-active" : ""}`}>
-                                <span>Checkout</span>
-                                <strong>{formData.departure ? formatDateAu(formData.departure) : "Add date"}</strong>
-                              </div>
-                            </div>
-                          </div>
-
+                      <Modal title="Select dates" open={calendarOpen && Boolean(calendarProperty)} onClose={() => setCalendarOpen(false)}>
+                        {calendarProperty && <>
                           <MiniCalendar
                             key={`corporate-${calendarResetKey}`}
                             property={calendarProperty}
@@ -549,8 +524,6 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
                             checkIn={formData.arrival}
                             checkout={formData.departure}
                             blockedDates={calendarProperty.unavailableDates}
-                            showSelectionHeader={false}
-                            showHint={false}
                             onCheckInSelect={(nextArrival) => setFormData((current) => ({ ...current, arrival: nextArrival, departure: "" }))}
                             onSelect={(nextArrival, nextDeparture) => {
                               setFormData((current) => ({ ...current, arrival: nextArrival, departure: nextDeparture }));
@@ -558,13 +531,9 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
                               setCalendarOpen(false);
                             }}
                           />
-
-                          <div className="booking-calendar-popover-footer">
-                            <button type="button" className="text-sm font-semibold text-stone-700 underline-offset-4 hover:underline" onClick={() => { setFormData((current) => ({ ...current, arrival: "", departure: "" })); setCalendarResetKey((value) => value + 1); }}>Clear dates</button>
-                            <button type="button" className="btn-primary min-h-9 px-4 text-sm" onClick={() => setCalendarOpen(false)}>Close</button>
-                          </div>
-                        </div>
-                      )}
+                          <button type="button" className="stay-button mt-4" onClick={() => { setFormData((current) => ({ ...current, arrival: "", departure: "" })); setCalendarResetKey((value) => value + 1); }}>Clear dates</button>
+                        </>}
+                      </Modal>
                     </div>
                     
                     <div className="grid gap-5 sm:grid-cols-3">
@@ -626,7 +595,7 @@ export function CorporateStaysPage({ today, properties, heroImage, heroAlt }: { 
 
                   <div className="pt-4 border-t border-stone-200">
                     {formError && <p className="mb-5 border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-800" role="alert" aria-live="polite">{formError}</p>}
-                    <button type="submit" className="inline-flex w-full items-center justify-center gap-2 bg-[var(--hero-green)] text-white px-6 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] rounded-none transition-colors disabled:cursor-not-allowed disabled:opacity-60" disabled={formSubmitting || partnerChecking || !partnerCompany || !allSelectedAvailable || !directBookingEnabled}>
+                    <button type="submit" className="inline-flex w-full items-center justify-center gap-2 bg-[var(--hero-green)] text-white px-6 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-colors disabled:cursor-not-allowed disabled:opacity-60" disabled={formSubmitting || partnerChecking || !partnerCompany || !allSelectedAvailable || !directBookingEnabled}>
                       {formSubmitting ? "Opening checkout…" : directBookingEnabled ? "Continue to secure payment" : "Enquiry required"}<ArrowUpRight size={15} />
                     </button>
                     <p className="mt-3 text-xs text-stone-600">Prices are in AUD. Your booking is confirmed only after Stripe verifies successful payment.</p>

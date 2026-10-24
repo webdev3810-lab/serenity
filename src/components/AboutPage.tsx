@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import HomepageReviewsSection from "@/src/components/homepage/HomepageReviewsSection";
+import { SerenityLocationMap } from "@/src/components/SerenityLocationMap";
 import type { Property } from "@/src/data/properties";
 
 const STATS = [
@@ -28,23 +29,7 @@ const PRINCIPLES = [
   },
 ] as const;
 
-function HouseImage({ src, alt, priority = false }: { src: string; alt: string; priority?: boolean }) {
-  if (!src) return <span className="about-story-image-fallback">Serenity on the Rocks</span>;
-
-  return (
-    <Image
-      src={src}
-      alt={alt}
-      fill
-      priority={priority}
-      sizes={priority ? "(max-width: 760px) 100vw, 58vw" : "(max-width: 760px) 100vw, 33vw"}
-      unoptimized={src.startsWith("http")}
-    />
-  );
-}
-
-export function AboutPage({ properties }: { properties: Property[] }) {
-  const heroHome = properties.find((property) => property.slug === "serenity-7") ?? properties[0];
+export function AboutPage({ properties, mapUrl }: { properties: Property[]; mapUrl: string }) {
   const reviews = properties.flatMap((property) =>
     (property.reviews ?? []).map((review) => ({
       id: review.id,
@@ -60,30 +45,28 @@ export function AboutPage({ properties }: { properties: Property[] }) {
 
   return (
     <div className="about-story-page homepage-theme">
-      <header className="about-story-heading">
-        <h1>About Serenity</h1>
-        <span>Pakenham · Victoria</span>
-      </header>
-
-      <section className="about-story-hero" aria-labelledby="about-story-hero-title">
-        <div className="about-story-hero__media">
-          <HouseImage
-            src={heroHome?.featuredImage ?? ""}
-            alt={heroHome ? `${heroHome.name.replace(" - Whole", "")} exterior in Pakenham` : ""}
-            priority
-          />
-          <span className="about-story-hero__media-label">Three homes, side by side in Pakenham.</span>
-        </div>
+      <header className="about-story-hero" aria-labelledby="about-story-title">
         <div className="about-story-hero__copy">
-          <p className="about-story-eyebrow">A more personal way to stay</p>
-          <h2 id="about-story-hero-title">Stay comfortably.<br />Feel at home.</h2>
-          <p>Serenity on the Rocks offers private furnished homes for families, work trips, relocations and longer visits. Settle in with the everyday details taken care of and one responsive local contact throughout your stay.</p>
+          <p className="about-story-hero__location">Pakenham · Victoria</p>
+          <h1 id="about-story-title">About Serenity<span>.</span></h1>
+          <h2>Stay comfortably.<br />Feel at home.</h2>
+          <p>Serenity Corporate Stays offers private furnished homes for families, work trips, relocations and longer visits. Settle in with the everyday details taken care of and one responsive local contact throughout your stay.</p>
           <div className="about-story-hero__links">
-            <Link href="/houses">Explore the houses <ArrowUpRight size={17} aria-hidden="true" /></Link>
+            <Link href="/homes">Explore our homes <ArrowUpRight size={17} aria-hidden="true" /></Link>
             <Link href="/contact">Get in touch <ArrowUpRight size={17} aria-hidden="true" /></Link>
           </div>
         </div>
-      </section>
+        <div className="about-story-hero__media">
+          <Image
+            src="/about-serenity-interior-v1.jpg"
+            alt="Illustrative sunlit dining and living area in a furnished home"
+            fill
+            priority
+            sizes="(max-width: 760px) 100vw, 52vw"
+          />
+          <span className="about-story-hero__media-label illustrative-photo-label">Illustrative interior</span>
+        </div>
+      </header>
 
       <section className="about-story-stats" aria-label="Serenity at a glance">
         {STATS.map((stat) => (
@@ -108,6 +91,13 @@ export function AboutPage({ properties }: { properties: Property[] }) {
           <p>Each home is furnished for the routines that make a longer visit work: cooking, working, resting and spending time together.</p>
           <p>Shops, restaurants, transport and Pakenham Industrial Park are close by, with Gippsland and Phillip Island further afield.</p>
           <p>From the first question to checkout, you have one local contact for the details of your stay.</p>
+        </div>
+        <div className="about-story-intro__map" aria-label="Map of the Serenity homes and nearby places in Pakenham">
+          <SerenityLocationMap />
+        </div>
+        <div className="about-story-intro__map-footer">
+          <span>Pakenham · Victoria 3810</span>
+          <a href={mapUrl} target="_blank" rel="noopener noreferrer">Open map <ArrowUpRight size={17} aria-hidden="true" /></a>
         </div>
       </section>
 
@@ -168,8 +158,8 @@ export function AboutPage({ properties }: { properties: Property[] }) {
           description="Notes from guests who stayed in the Serenity homes."
           reviews={reviews}
           maxReviews={reviews.length}
-          allReviewsHref="/houses"
-          allReviewsLabel="Explore the houses"
+          allReviewsHref="/homes"
+          allReviewsLabel="Explore our homes"
         />
       ) : null}
     </div>

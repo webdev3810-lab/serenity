@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, ChevronUp, ExternalLink, Globe2, ImageIcon, Leaf, LoaderCircle, Plus, RotateCcw, Trash2, Upload } from "lucide-react";
+import { ChevronDown, ChevronUp, ExternalLink, Globe2, ImageIcon, LoaderCircle, Plus, RotateCcw, Trash2, Upload } from "lucide-react";
 import { DEFAULT_GUEST_INFORMATION, GUEST_IMAGE_SLOTS, GUEST_TEXT_LIMITS, isGuestImageSource, normalizeGuestInformation, validateGuestInformation, type GuestImageSlot, type GuestInformationContent, type GuestPageImage } from "@/src/lib/guestInformation";
 import { HERO_IMAGE_MAX_BYTES, HERO_IMAGE_TYPES, HERO_MEDIA_BUCKET } from "@/src/lib/heroMedia";
 import { createSupabaseBrowserClient } from "@/src/lib/supabase/client";
@@ -15,10 +15,7 @@ import { useAdminWorkspace, useDirtyGuard } from "./AdminUI";
 const imageLabels: Record<GuestImageSlot, string> = { hero: "Page header image", checkIn: "Self check-in card image", houseRules: "House rules card image", homeCare: "Home care card image" };
 const copyFields: Array<{ key: keyof typeof GUEST_TEXT_LIMITS; label: string; textarea?: boolean }> = [
   { key: "heroKicker", label: "Small heading" }, { key: "title", label: "Page title" }, { key: "titleAccent", label: "Second title line" },
-  { key: "description", label: "Page introduction", textarea: true }, { key: "promiseText", label: "Stay promise", textarea: true },
-  { key: "jumpLabel", label: "Guide navigation label" }, { key: "introKicker", label: "Introduction small heading" },
-  { key: "introTitle", label: "Introduction heading" }, { key: "introText", label: "Introduction text", textarea: true },
-  { key: "homeCareCaption", label: "Home care illustration caption" },
+  { key: "description", label: "Header description", textarea: true }, { key: "promiseText", label: "Stay promise", textarea: true },
 ];
 
 export function GuestInformationEditor({ images, properties }: { images: Row[]; properties: Row[] }) {
@@ -111,7 +108,7 @@ export function GuestInformationEditor({ images, properties }: { images: Row[]; 
     await load();
   };
 
-  const sections = [{ id: "headings", title: "Headings & introduction" }, ...DEFAULT_GUEST_INFORMATION.cards.map((card) => ({ id: card.id, title: card.title })), { id: "images", title: "Page images" }];
+  const sections = [{ id: "headings", title: "Header" }, ...DEFAULT_GUEST_INFORMATION.cards.map((card) => ({ id: card.id, title: card.title })), { id: "images", title: "Page images" }];
   const selectedCard = draft.cards.find((card) => card.id === active);
 
   return <div className="space-y-5">
@@ -125,26 +122,27 @@ export function GuestInformationEditor({ images, properties }: { images: Row[]; 
           <fieldset disabled={saving || Boolean(uploading)} className={`mt-6 grid min-w-0 gap-5 ${active === "images" ? "guest-admin-images" : ""}`}>
             {active === "headings" && <>
               <div className="grid gap-5 sm:grid-cols-2">{copyFields.map(({ key, label, textarea }) => <CharacterField key={key} label={label} value={draft[key]} onChange={(value) => update(key, value)} limit={GUEST_TEXT_LIMITS[key]} textarea={textarea} />)}</div>
-              <FormGroup title="Stay promise labels" description="These three labels appear alongside the page introduction.">{draft.promiseLabels.map((label, index) => <CharacterField key={index} label={`Promise label ${index + 1}`} value={label} limit={60} onChange={(value) => update("promiseLabels", draft.promiseLabels.map((item, i) => i === index ? value : item))} />)}</FormGroup>
+              <FormGroup title="Stay promise labels" description="These three labels appear in the page header.">{draft.promiseLabels.map((label, index) => <CharacterField key={index} label={`Promise label ${index + 1}`} value={label} limit={60} onChange={(value) => update("promiseLabels", draft.promiseLabels.map((item, i) => i === index ? value : item))} />)}</FormGroup>
             </>}
             {selectedCard && <>
               <div className="grid gap-4 sm:grid-cols-2"><CharacterField label="Card heading" value={selectedCard.title} limit={100} onChange={(title) => updateCard(selectedCard.id, { title })} /><CharacterField label="Card subtitle" value={selectedCard.eyebrow} limit={160} onChange={(eyebrow) => updateCard(selectedCard.id, { eyebrow })} /></div>
               <div className="flex flex-wrap items-center justify-between gap-3"><div><h4 className="font-semibold">Guide points</h4><p className="mt-1 text-sm text-[var(--admin-muted)]">Edit, add or reorder the points in this card.</p></div><button type="button" className="admin-button" disabled={selectedCard.items.length >= 20} onClick={() => updateCard(selectedCard.id, { items: [...selectedCard.items, ""] })}><Plus size={16} /> Add point</button></div>
               {selectedCard.items.map((item, index) => <div key={index} className="rounded-xl border border-[var(--admin-border)] p-4"><div className="mb-2 flex justify-end gap-1">{[-1, 1].map((direction) => <button key={direction} type="button" className="admin-icon-button" aria-label={`Move point ${index + 1} ${direction < 0 ? "up" : "down"}`} disabled={index + direction < 0 || index + direction >= selectedCard.items.length} onClick={() => { const items = [...selectedCard.items]; [items[index], items[index + direction]] = [items[index + direction], items[index]]; updateCard(selectedCard.id, { items }); }}>{direction < 0 ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</button>)}<button type="button" className="admin-icon-button" aria-label={`Remove point ${index + 1}`} disabled={selectedCard.items.length === 1} onClick={() => updateCard(selectedCard.id, { items: selectedCard.items.filter((_, i) => i !== index) })}><Trash2 size={16} /></button></div><CharacterField label={`Point ${index + 1}`} value={item} limit={600} textarea onChange={(value) => updateCard(selectedCard.id, { items: selectedCard.items.map((point, i) => i === index ? value : point) })} /></div>)}
+              {selectedCard.id === "home-care" && <CharacterField label="Image caption" value={draft.homeCareCaption} limit={GUEST_TEXT_LIMITS.homeCareCaption} onChange={(value) => update("homeCareCaption", value)} />}
               {(selectedCard.id === "self-check-in" || selectedCard.id === "house-rules" || selectedCard.id === "home-care") && <button type="button" className="admin-button justify-self-start" onClick={() => setActive("images")}><ImageIcon size={16} /> Change this card’s image</button>}
             </>}
-            {active === "images" && <><p className="text-sm text-[var(--admin-muted)]">Choose one page header and three card images. Home Care keeps its current artwork until you select a photo. Images update after Save and publish.</p>{GUEST_IMAGE_SLOTS.map((slot) => {
+            {active === "images" && <><p className="text-sm text-[var(--admin-muted)]">Choose one page header and three card images. Home Care uses its default image until you select a photo. Images update after Save and publish.</p>{GUEST_IMAGE_SLOTS.map((slot) => {
               const image = draft.images[slot] ?? DEFAULT_GUEST_INFORMATION.images[slot];
               const src = image.mode === "hidden" ? "" : image.mode === "automatic" ? automaticImages[slot]?.src : image.storagePath ? previews[slot] : image.src;
               const selectedGallerySource = image.mode === "custom" && image.src ? image.src : "";
               return <section key={slot} className="grid min-w-0 gap-4 rounded-xl border border-[var(--admin-border)] p-4 sm:p-5">
                 <h4 className="font-semibold">{imageLabels[slot]}</h4>
                 <div className="relative h-52 overflow-hidden rounded-lg bg-[var(--admin-surface-alt)] sm:h-64">
-                  {src ? <Image src={src} alt={image.alt || imageLabels[slot]} fill className="object-cover" sizes={slot === "hero" ? "(max-width: 768px) 100vw, 1100px" : "(max-width: 768px) 100vw, 400px"} unoptimized /> : slot === "homeCare" ? <div className="guest-admin-home-care-art"><Leaf size={48} strokeWidth={1.1} aria-hidden="true" /><span>{draft.homeCareCaption}</span></div> : <div className="flex h-full items-center justify-center gap-2 text-sm text-[var(--admin-muted)]"><ImageIcon size={20} /> {image.mode === "hidden" ? "Image hidden" : "No image selected"}</div>}
+                  {src ? <Image src={src} alt={image.alt || imageLabels[slot]} fill className="object-cover" sizes={slot === "hero" ? "(max-width: 768px) 100vw, 1100px" : "(max-width: 768px) 100vw, 400px"} unoptimized /> : slot === "homeCare" ? <Image src="/guest-home-care-photo.jpg" alt="Default home care card image" fill className="object-cover" sizes="(max-width: 768px) 100vw, 400px" /> : <div className="flex h-full items-center justify-center gap-2 text-sm text-[var(--admin-muted)]"><ImageIcon size={20} /> {image.mode === "hidden" ? "Image hidden" : "No image selected"}</div>}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <label className="admin-button admin-button-primary cursor-pointer"><Upload size={16} /> {uploading === slot ? "Uploading…" : "Upload / replace image"}<input type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="sr-only" onChange={(event) => void upload(slot, event)} disabled={Boolean(uploading) || saving} /></label>
-                  <button type="button" className="admin-button" onClick={() => updateImage(slot, { mode: "hidden", src: "", storagePath: "", alt: image.alt })}><Trash2 size={16} /> {slot === "homeCare" ? "Use current artwork" : "Hide image"}</button>
+                  <button type="button" className="admin-button" onClick={() => updateImage(slot, { mode: "hidden", src: "", storagePath: "", alt: image.alt })}><Trash2 size={16} /> {slot === "homeCare" ? "Use default image" : "Hide image"}</button>
                 </div>
                 <p className="text-sm text-[var(--admin-muted)]">JPG, PNG, WebP or AVIF · up to 5 MB</p>
                 <label className="text-sm font-medium">Choose a house photo<select className="admin-field mt-1" value={selectedGallerySource} onChange={(event) => { if (event.target.value) updateImage(slot, { mode: "custom", src: event.target.value, storagePath: "", alt: image.alt }); }}><option value="">Select a published house photo…</option>{selectedGallerySource && !gallery.some((photo) => photo.src === selectedGallerySource) && <option value={selectedGallerySource}>Current saved photo</option>}{gallery.map((photo, index) => <option value={photo.src} key={`${photo.src}-${index}`}>{photo.label}</option>)}</select></label>

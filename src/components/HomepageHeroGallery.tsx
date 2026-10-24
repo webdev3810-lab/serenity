@@ -64,7 +64,7 @@ export default function HomepageHeroGallery({
   }, [activeIndex, images, reducedMotion]);
 
   const heroStats = [
-    { value: "3", label: "ADJACENT HOMES", href: "/houses" },
+    { value: "3", label: "ADJACENT HOMES", href: "/homes" },
     { value: "9 min", label: "WALK TO PAKENHAM STATION", href: "/contact#location-map" },
     { value: "8+ yrs", label: "HOSTING EXPERIENCE", href: "/about#guest-reviews" },
     { value: "1 contact", label: "ENQUIRY TO CHECKOUT", href: "/contact" },

@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     }
 
     const booking = session.metadata?.groupReference ? await markCorporateGroupPaid(session) : await markBookingPaid(session);
-    return NextResponse.json({ paid: true, booking });
+    return NextResponse.json({ paid: true, booking, customerEmail: session.customer_email ?? session.customer_details?.email ?? null });
   } catch (error) {
     console.error("Stripe session verification failed", error);
     return NextResponse.json({ error: "We could not verify this payment yet. Please contact Serenity if you were charged." }, { status: 500 });

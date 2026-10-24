@@ -64,7 +64,7 @@ export default async function HowItWorksDraftPage() {
           <h1 id="draft-title">The art of<br /><em>arriving.</em></h1>
           <p className={styles.heroIntro}>Every memorable stay begins with a feeling of ease. From your first enquiry to the moment you settle in, here’s how we make room for what matters.</p>
           <div className={styles.heroActions}>
-            <Link href="/houses" className={styles.primaryAction}>Explore our homes <ArrowUpRight size={18} aria-hidden="true" /></Link>
+            <Link href="/homes" className={styles.primaryAction}>Explore our homes <ArrowUpRight size={18} aria-hidden="true" /></Link>
             <Link href="#journey" className={styles.textAction}>See how it works <ArrowDown size={17} aria-hidden="true" /></Link>
           </div>
           <div className={styles.heroFootnote}><span>Private furnished homes</span><span>Pakenham · Victoria</span></div>
@@ -119,7 +119,7 @@ export default async function HowItWorksDraftPage() {
           <div>
             <p>Discover the Serenity homes, or speak with us about a partner booking. We&apos;ll help you find the right way forward.</p>
             <div className={styles.closingActions}>
-              <Link href="/houses">Explore the homes <ArrowUpRight size={18} aria-hidden="true" /></Link>
+              <Link href="/homes">Explore the homes <ArrowUpRight size={18} aria-hidden="true" /></Link>
               <Link href="/corporate-stays#corporate-booking">Partner booking <ArrowUpRight size={18} aria-hidden="true" /></Link>
             </div>
           </div>

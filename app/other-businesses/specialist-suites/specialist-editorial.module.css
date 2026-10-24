@@ -1,0 +1,7 @@
+.introTitle { max-width: none; font-size: clamp(2.7rem, 4.3vw, 5rem) !important; }
+.hubTitle { max-width: none; font-size: clamp(2.5rem, 3.8vw, 5rem) !important; line-height: 1.08 !important; }
+
+@media (max-width: 650px) {
+  .introTitle { font-size: clamp(2.25rem, 9vw, 3.8rem) !important; }
+  .hubTitle { font-size: clamp(2.1rem, 8vw, 3.5rem) !important; }
+}

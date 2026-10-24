@@ -6,8 +6,8 @@ import { useState, type FormEvent } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { SerenityLocationMap } from "@/src/components/SerenityLocationMap";
 import { useContactSettings } from "@/src/context/ContactSettingsContext";
-import type { Property } from "@/src/data/properties";
 import { DEFAULT_CONTACT_SETTINGS } from "@/src/lib/siteSettings";
+import type { EditorialHomepageContent } from "@/src/lib/homepageEditorialContent";
 
 const nearby = [
   { number: "01", title: "Pakenham Station", detail: "About a 9-minute walk from the Serenity homes." },
@@ -15,12 +15,13 @@ const nearby = [
   { number: "03", title: "Work and travel", detail: "A practical base for Pakenham Industrial Park and the wider region." },
 ];
 
-export function ContactEditorialPage({ properties }: { properties: Property[] }) {
+type ContactFaqContent = Pick<EditorialHomepageContent, "editorial_faq_eyebrow" | "faq_heading" | "faq_description" | "faqs" | "editorial_faq_contact_prompt" | "editorial_faq_contact_label">;
+
+export function ContactEditorialPage({ faqContent }: { faqContent: ContactFaqContent; properties?: unknown[] }) {
   const contact = useContactSettings() ?? DEFAULT_CONTACT_SETTINGS;
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const homeImage = properties.find((property) => property.slug === "serenity-7")?.featuredImage ?? properties[0]?.featuredImage ?? "";
   const phoneHref = `tel:${(contact.phoneNumber || DEFAULT_CONTACT_SETTINGS.phoneNumber).replace(/[^+\d]/g, "")}`;
   const socialLinks = [
     ["Facebook", contact.facebookUrl],
@@ -66,25 +67,21 @@ export function ContactEditorialPage({ properties }: { properties: Property[] })
 
   return (
     <main className="contact-story-page homepage-theme">
-      <header className="contact-story-masthead">
-        <h1>Get in touch</h1>
-        <span>Pakenham · Victoria</span>
-      </header>
-
       <section className="contact-story-hero" aria-labelledby="contact-story-title">
-        <div className="contact-story-hero__media">
-          {homeImage ? <Image src={homeImage} alt="Serenity house in Pakenham" fill priority sizes="(max-width: 760px) 100vw, 58vw" unoptimized={homeImage.startsWith("http")} /> : null}
-          <span>Stay close.<br />Settle in.</span>
-        </div>
         <div className="contact-story-hero__copy">
-          <span className="contact-story-eyebrow">{contact.businessName}</span>
-          <h2 id="contact-story-title">{contact.contactPageHeading}</h2>
+          <span className="contact-story-hero__eyebrow">Pakenham · Victoria</span>
+          <h1 id="contact-story-title">Contact us<span>.</span></h1>
+          <h2>{contact.contactPageHeading}</h2>
           <p>{contact.contactPageDescription}</p>
           <div className="contact-story-links">
             <a href="#contact-form">Send a message <ArrowUpRight size={17} aria-hidden="true" /></a>
-            <Link href="/houses">Explore the houses <ArrowUpRight size={17} aria-hidden="true" /></Link>
+            <Link href="/homes">Explore our homes <ArrowUpRight size={17} aria-hidden="true" /></Link>
           </div>
         </div>
+        <figure className="contact-story-hero__media">
+          <Image src="/contact-welcome-interior.jpg" alt="Illustrative furnished living room with a cream sofa and warm natural light" fill priority sizes="(max-width: 760px) 100vw, 52vw" />
+          <figcaption className="illustrative-photo-label">Illustrative interior</figcaption>
+        </figure>
       </section>
 
       {contact.contactPublished && <section className="contact-story-methods" aria-label="Ways to contact Serenity">
@@ -151,6 +148,32 @@ export function ContactEditorialPage({ properties }: { properties: Property[] })
         </div>
       </section>
 
+      <section className="serenity-editorial-faq contact-story-faq" id="faqs" aria-labelledby="contact-story-faq-title">
+        <div className="serenity-editorial-faq__header">
+          <div className="serenity-editorial-faq__title">
+            <p>{faqContent.editorial_faq_eyebrow}</p>
+            <h2 id="contact-story-faq-title">{faqContent.faq_heading}</h2>
+          </div>
+          <p className="serenity-editorial-faq__intro">{faqContent.faq_description}</p>
+        </div>
+        <div className="serenity-editorial-faq__list" aria-label="Frequently asked questions">
+          {faqContent.faqs.map((faq, index) => (
+            <details className="serenity-editorial-faq__item" key={`${faq.question}-${index}`}>
+              <summary>
+                <span className="serenity-editorial-faq__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                <span className="serenity-editorial-faq__question">{faq.question}</span>
+                <span className="serenity-editorial-faq__toggle" aria-hidden="true">+</span>
+              </summary>
+              <div className="serenity-editorial-faq__answer">{faq.answer}</div>
+            </details>
+          ))}
+        </div>
+        <div className="serenity-editorial-faq__contact">
+          <p>{faqContent.editorial_faq_contact_prompt}</p>
+          <a href="#contact-form">{faqContent.editorial_faq_contact_label} <ArrowUpRight size={17} aria-hidden="true" /></a>
+        </div>
+      </section>
+
       <section className="contact-story-nearby" aria-labelledby="contact-story-nearby-title">
         <div className="contact-story-nearby__heading">
           <span className="contact-story-eyebrow">Around the neighbourhood</span>
@@ -173,7 +196,7 @@ export function ContactEditorialPage({ properties }: { properties: Property[] })
         </div>
         <div className="contact-story-closing__links">
           {socialLinks.map(([label, href]) => <a key={label} href={href} target="_blank" rel="noopener noreferrer">{label} <ArrowUpRight size={17} aria-hidden="true" /></a>)}
-          <Link href="/houses">View all houses <ArrowUpRight size={17} aria-hidden="true" /></Link>
+          <Link href="/homes">View all homes <ArrowUpRight size={17} aria-hidden="true" /></Link>
         </div>
       </section>
     </main>

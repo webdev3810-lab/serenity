@@ -47,7 +47,7 @@ export default function StaggeredMenu({
   displayItemNumbering = true,
   className = "",
   ctaLabel = "Book now",
-  ctaHref = "/houses",
+  ctaHref = "/homes",
   menuButtonColor = "#111111",
   openMenuButtonColor = "#111111",
   accentColor = "#002844",

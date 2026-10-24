@@ -57,7 +57,7 @@ export default function HomepageFinalCtaSection({
 
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
               <Link
-                href="/houses"
+                href="/homes"
                 className="group inline-flex items-center gap-3 border-b border-[#2D2622] pb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-[#2D2622] transition-colors hover:border-[#B88A5A] hover:text-[#B88A5A]"
               >
                 Explore the homes
@@ -114,7 +114,7 @@ export default function HomepageFinalCtaSection({
                   })}
                 </div>
               ) : (
-                <Link href="/houses" className="flex items-center justify-between px-7 py-6 text-sm font-bold sm:px-10">
+                <Link href="/homes" className="flex items-center justify-between px-7 py-6 text-sm font-bold sm:px-10">
                   Browse available homes <ArrowUpRight size={16} aria-hidden="true" />
                 </Link>
               )}

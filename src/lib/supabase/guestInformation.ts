@@ -15,9 +15,9 @@ export async function getGuestAutomaticImages(): Promise<Partial<Record<typeof G
   const find = (pattern: RegExp) => photos.find((image) => pattern.test(`${image.alt} ${image.category ?? ""} ${image.categoryLabel ?? ""}`));
   const homeHero = heroMedia.find((media) => media.media_type === "image" && isApprovedHomepageMediaSource(media.public_url));
   return {
-    hero: find(/living|lounge|family/i) ?? photos[1] ?? photos[0],
+    hero: { src: "/guest-information-hero.jpg", alt: "Illustrative furnished living room with a navy sofa and warm natural light" },
     checkIn: homeHero ? { src: homeHero.public_url, alt: homeHero.alt_text || "Serenity furnished homes in Pakenham" } : find(/exterior|entry|front/i) ?? photos[0],
-    houseRules: find(/bedroom/i) ?? photos[2],
+    houseRules: { src: "/guest-house-rules-photo.jpg", alt: "Illustrative twin-bedroom with neatly made beds and soft daylight" },
   };
 }
 

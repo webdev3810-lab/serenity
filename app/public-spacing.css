@@ -170,14 +170,11 @@ body:has(.public-site) .public-site > main,
 }
 
 .public-site .serenity-editorial-home :is(.serenity-editorial-intro, .serenity-editorial-faq),
-.public-site .serenity-editorial-hero,
-.public-site .serenity-editorial-hero__stats,
-.public-site .serenity-editorial-hero__stat {
+.public-site .serenity-editorial-hero {
   background: #ffffff;
 }
 
 .public-site .serenity-editorial-home :is(.serenity-editorial-intro, .serenity-editorial-faq),
-.public-site .serenity-editorial-hero__stats,
 .public-site .homepage-house-collection-card,
 .public-site :is(.page-frame, .booking-flow-page) {
   box-shadow: 0 0.75rem 2.25rem rgba(0, 40, 68, 0.09);
@@ -372,8 +369,10 @@ body:has(.corporate-editorial-page) .public-site > main,
 
 .public-site .serenity-editorial-social {
   margin-inline: var(--public-card-gutter, 1rem);
-  background: var(--hero-green, #002844);
-  color: #ffffff;
+  border: 1px solid #e2e9ed;
+  background: #ffffff;
+  color: #002844;
+  box-shadow: 0 0.75rem 1.8rem rgba(0, 40, 68, 0.06);
 }
 
 .public-site .serenity-editorial-social > h2 {
@@ -382,7 +381,7 @@ body:has(.corporate-editorial-page) .public-site > main,
 
 @media (min-width: 761px) {
   .public-site .serenity-editorial-social {
-    padding: clamp(3.5rem, 5vw, 5.5rem) var(--guest-gutter);
+    padding: clamp(4.5rem, 6vw, 6.5rem) var(--guest-gutter);
   }
 
   .public-site .serenity-editorial-social > h2 {
@@ -391,7 +390,7 @@ body:has(.corporate-editorial-page) .public-site > main,
     margin: 0 0 2rem;
     padding-top: 1.4rem;
     font-family: var(--font-brand-serif), Georgia, serif;
-    font-size: clamp(1.8rem, 2.4vw, 2.65rem);
+    font-size: clamp(2.6rem, 3.7vw, 4.4rem);
     letter-spacing: -0.045em;
     line-height: 1.15;
   }
@@ -401,7 +400,7 @@ body:has(.corporate-editorial-page) .public-site > main,
     top: 0;
     left: 0;
     width: 2.5rem;
-    border-top: 2px solid var(--hero-yellow, #e5ca8b);
+    border-top: 2px solid #b99151;
     content: "";
   }
 
@@ -409,7 +408,7 @@ body:has(.corporate-editorial-page) .public-site > main,
     display: grid;
     gap: 0;
     min-width: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-top: 1px solid #dce6ea;
     border-radius: 0 !important;
   }
 
@@ -419,11 +418,11 @@ body:has(.corporate-editorial-page) .public-site > main,
     align-items: center;
     gap: clamp(0.85rem, 1.5vw, 1.5rem);
     width: 100%;
-    padding: 1rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 1.4rem 0;
+    border-bottom: 1px solid #dce6ea;
     border-radius: 0 !important;
     font-family: var(--font-poppins), Arial, sans-serif;
-    font-size: clamp(1.35rem, 2.1vw, 2.15rem);
+    font-size: clamp(1.7rem, 2.5vw, 3rem);
     font-weight: 400;
     letter-spacing: -0.04em;
     line-height: 1.2;
@@ -431,19 +430,19 @@ body:has(.corporate-editorial-page) .public-site > main,
   }
 
   .public-site .serenity-editorial-social__number {
-    color: var(--hero-yellow, #e5ca8b);
+    color: #9c7540;
     font-size: 0.67rem;
     font-weight: 600;
     letter-spacing: 0.12em;
   }
 
   .public-site .serenity-editorial-social a svg {
-    color: var(--hero-yellow, #e5ca8b);
+    color: #9c7540;
     transition: transform 180ms ease;
   }
 
   .public-site .serenity-editorial-social a:is(:hover, :focus-visible) {
-    color: var(--hero-yellow, #e5ca8b);
+    color: #9c7540;
     border-bottom-color: currentColor;
   }
 
@@ -509,14 +508,12 @@ body:has(.corporate-editorial-page) .public-site > main,
 
 .public-site :is(
   .about-story-heading,
-  .about-story-stats,
   .corporate-editorial-masthead,
   .corporate-stay-features__intro,
   .corporate-partner-direct,
   .corporate-editorial-closing,
   .contact-story-masthead,
   .contact-story-methods > :first-child,
-  .contact-story-methods > :last-child,
   .contact-story-nearby__heading,
   .contact-story-closing,
   .houses-editorial-heading,
@@ -532,14 +529,12 @@ body:has(.corporate-editorial-page) .public-site > main,
 
 .public-site :is(
   .about-story-heading,
-  .about-story-stats,
   .corporate-editorial-masthead,
   .corporate-stay-features__intro,
   .corporate-partner-direct,
   .corporate-editorial-closing,
   .contact-story-masthead,
   .contact-story-methods > :first-child,
-  .contact-story-methods > :last-child,
   .contact-story-nearby__heading,
   .contact-story-closing,
   .houses-editorial-heading,
@@ -625,20 +620,82 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .serenity-editorial-hero__content {
-  width: min(58%, 48rem);
-  padding-inline: var(--guest-gutter);
-  transform: translateY(-2rem);
+  width: 100%;
+  padding-inline: clamp(2rem, 5.5vw, 7rem);
+  transform: none;
+}
+
+.public-site .serenity-editorial-hero__content::after {
+  position: absolute;
+  z-index: -1;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: clamp(12rem, 31vh, 17rem);
+  background: linear-gradient(to top, rgba(0, 32, 55, 0.72), rgba(0, 32, 55, 0.24) 65%, transparent);
+  content: "";
+  pointer-events: none;
 }
 
 .public-site .serenity-editorial-hero h1 {
-  font-size: clamp(2.5rem, 3.1vw, 3.75rem);
-  line-height: 1.02;
+  max-width: 56rem;
+  font-size: clamp(3rem, 4.5vw, 5.25rem);
+  line-height: 0.98;
 }
 
 .public-site .serenity-editorial-hero__description {
-  max-width: 31rem;
+  max-width: 43rem;
   margin-top: 1.25rem;
-  font-size: clamp(1rem, 1.05vw, 1.125rem);
+  font-size: clamp(1rem, 1.35vw, 1.25rem);
+}
+
+@media (min-width: 761px) {
+  .public-site .serenity-editorial-hero__content {
+    padding-top: clamp(9rem, 17vh, 11rem);
+    padding-bottom: clamp(3.5rem, 7vh, 5rem);
+  }
+
+  .public-site .serenity-editorial-hero__stats {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr) minmax(0, 0.9fr) minmax(0, 1.3fr);
+  }
+
+  .public-site .serenity-editorial-hero__stat {
+    grid-template-columns: 3.25rem minmax(0, 1fr);
+    gap: 0.15rem 0.9rem;
+    min-height: 4.5rem;
+  }
+
+  .public-site .serenity-editorial-hero__stat-icon {
+    width: 3.25rem;
+    height: 3.25rem;
+  }
+
+  .public-site .serenity-editorial-hero__stat-icon svg {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  .public-site .serenity-editorial-hero__stats strong {
+    font-size: clamp(0.98rem, 1.25vw, 1.2rem);
+  }
+
+  .public-site .serenity-editorial-hero__stat-label {
+    font-size: clamp(0.88rem, 1.08vw, 1rem);
+  }
+
+  .public-site .serenity-editorial-hero__actions a {
+    min-height: 4.1rem;
+    min-width: clamp(15rem, 20vw, 19rem);
+    justify-content: space-between;
+    border-radius: 0.8rem;
+    padding-inline: 1.5rem;
+    font-size: 1rem;
+  }
+
+  .public-site .serenity-editorial-hero__actions {
+    gap: 1rem;
+    margin-top: 1.35rem;
+  }
 }
 
 .public-site .serenity-editorial-intro__statement {
@@ -674,6 +731,94 @@ body:has(.corporate-editorial-page) .public-site > main,
 
 .public-site .serenity-editorial-intro__statement p:last-child span {
   font-family: var(--font-poppins), Arial, sans-serif !important;
+}
+
+.public-site .serenity-editorial-essentials {
+  padding: clamp(0.5rem, 1vw, 1rem) var(--public-card-gutter) clamp(1.5rem, 2.5vw, 2.5rem);
+  background: #ffffff;
+}
+
+.public-site .serenity-editorial-essentials__grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(0.6rem, 1vw, 1rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.public-site .serenity-editorial-essentials__card {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.9rem;
+  min-width: 0;
+  min-height: 11.5rem;
+  padding: 1.5rem 1rem;
+  border: 1px solid #dce5e9;
+  border-radius: 0.9rem;
+  background: #ffffff;
+  color: #002844;
+  box-shadow: 0 0.35rem 1.1rem rgba(0, 40, 68, 0.06);
+  text-align: center;
+}
+
+.public-site .serenity-editorial-essentials__card svg {
+  flex: none;
+  width: 4rem;
+  height: 4rem;
+  margin: 0;
+  padding: 0.85rem;
+  border: 1px solid #cbdde7;
+  border-radius: 50%;
+  background: #edf4f8;
+  color: #002844;
+}
+
+.public-site .serenity-editorial-essentials__card span {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  font-family: var(--font-poppins), Arial, sans-serif;
+}
+
+.public-site .serenity-editorial-essentials__card strong {
+  font-size: clamp(0.9rem, 1vw, 1rem);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.public-site .serenity-editorial-essentials__card small {
+  color: #607586;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 1100px) {
+  .public-site .serenity-editorial-essentials__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .public-site .serenity-editorial-essentials__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .public-site .serenity-editorial-essentials__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .public-site .serenity-editorial-essentials__card {
+    min-height: 10rem;
+    padding: 1.25rem 1rem;
+  }
 }
 
 .public-site .serenity-editorial-intro .scroll-wipe-text-reveal {
@@ -1032,12 +1177,12 @@ body:has(.corporate-editorial-page) .public-site > main,
 
   .public-site .serenity-editorial-hero__content {
     width: 100%;
-    min-height: 0;
+    min-height: max(100svh, 44rem);
     height: auto;
     justify-content: flex-start;
-    padding: 1.5rem 1.25rem 1.65rem;
+    padding: 6rem 1.25rem 2rem;
     transform: none;
-    background: #002844;
+    background: transparent;
   }
 
   .public-site .serenity-editorial-intro__statement p:first-child {
@@ -1054,11 +1199,11 @@ body:has(.corporate-editorial-page) .public-site > main,
   }
 
   .public-site .serenity-editorial-hero__media {
-    position: relative;
-    inset: auto;
-    z-index: 0;
+    position: absolute;
+    inset: 0;
+    z-index: -2;
     width: 100%;
-    height: clamp(16rem, 75vw, 24rem);
+    height: 100%;
     min-height: 0;
     aspect-ratio: auto;
   }
@@ -1069,35 +1214,35 @@ body:has(.corporate-editorial-page) .public-site > main,
   }
 
   .public-site .serenity-editorial-hero__content::before {
-    display: none;
+    display: block;
   }
 
   .public-site .serenity-editorial-hero__actions a:first-child {
-    border-color: #ffffff;
-    background: #ffffff;
-    color: #002844;
+    border-color: rgba(255, 255, 255, 0.65);
+    background: #002844;
+    color: #ffffff;
   }
 
   .public-site .serenity-editorial-hero__actions a:first-child:is(:hover, :focus-visible) {
-    border-color: #dfe9ee;
-    background: #dfe9ee;
-    color: #002844;
+    background: #0b4869;
+    color: #ffffff;
   }
 
   .public-site .serenity-editorial-hero__actions a:last-child {
-    border-color: rgba(255, 255, 255, 0.72);
+    border-color: #ffffff;
     background: transparent;
     color: #ffffff;
   }
 
   .public-site .serenity-editorial-hero__actions a:last-child:is(:hover, :focus-visible) {
-    background: rgba(255, 255, 255, 0.12);
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.14);
     color: #ffffff;
   }
 
   .public-site .serenity-editorial-hero h1 {
-    font-size: clamp(1.85rem, 7vw, 2.4rem);
-    line-height: 1.04;
+    font-size: clamp(1.65rem, 5.2vw, 2.2rem);
+    line-height: 1.02;
   }
 
   .public-site .serenity-editorial-hero__description {
@@ -1106,12 +1251,6 @@ body:has(.corporate-editorial-page) .public-site > main,
     font-size: clamp(0.8rem, 2.9vw, 0.93rem);
     font-weight: 500;
     line-height: 1.55;
-  }
-
-  .public-site .serenity-editorial-hero__eyebrow {
-    margin-bottom: 0.7rem;
-    font-size: 0.61rem;
-    line-height: 1.4;
   }
 
   .public-site .serenity-editorial-hero__actions {
@@ -1129,17 +1268,18 @@ body:has(.corporate-editorial-page) .public-site > main,
   }
 
   .public-site .serenity-editorial-home .serenity-editorial-hero__stats {
-    gap: 0.5rem;
-    padding: 0.65rem;
-    background: #f7f8f8;
+    gap: 0.9rem 0.6rem;
+    margin: 0.75rem 0 0;
+    padding: 1rem 0 0;
+    background: transparent;
   }
 
   .public-site .serenity-editorial-hero__stat {
-    min-height: 6.25rem;
-    padding: 0.75rem;
+    min-height: 3.5rem;
+    padding: 0;
     border: 0 !important;
-    border-radius: 0.65rem !important;
-    background: #fff;
+    border-radius: 0 !important;
+    background: transparent;
   }
 
   .public-site .serenity-editorial-hero__stat-label {
@@ -1325,7 +1465,7 @@ body:has(.corporate-editorial-page) .public-site > main,
   }
 
   .public-site .serenity-editorial-social {
-    padding: clamp(2.75rem, 8vw, 3.5rem) var(--guest-gutter);
+    padding: clamp(3.25rem, 9vw, 4.5rem) var(--guest-gutter);
   }
 
   .public-site .serenity-editorial-social > h2 {
@@ -1334,7 +1474,7 @@ body:has(.corporate-editorial-page) .public-site > main,
     margin-bottom: 1.75rem;
     padding-top: 1.3rem;
     font-family: var(--font-brand-serif), Georgia, serif;
-    font-size: clamp(1.6rem, 6vw, 2.25rem);
+    font-size: clamp(2rem, 7vw, 2.75rem);
     letter-spacing: -0.04em;
     line-height: 1.15;
   }
@@ -1344,14 +1484,14 @@ body:has(.corporate-editorial-page) .public-site > main,
     top: 0;
     left: 0;
     width: 2.5rem;
-    border-top: 2px solid var(--hero-yellow, #e5ca8b);
+    border-top: 2px solid #b99151;
     content: "";
   }
 
   .public-site .serenity-editorial-social > div {
     display: grid;
     gap: 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.35);
+    border-top: 1px solid #dce6ea;
     border-radius: 0 !important;
   }
 
@@ -1361,26 +1501,26 @@ body:has(.corporate-editorial-page) .public-site > main,
     align-items: center;
     gap: 0.75rem;
     width: 100%;
-    padding: 1rem 0;
+    padding: 1.2rem 0;
     border: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+    border-bottom: 1px solid #dce6ea;
     border-radius: 0 !important;
     font-family: var(--font-poppins), Arial, sans-serif;
-    font-size: clamp(1.15rem, 4.6vw, 1.5rem);
+    font-size: clamp(1.3rem, 5vw, 1.7rem);
     font-weight: 400;
     letter-spacing: -0.03em;
     line-height: 1.2;
   }
 
   .public-site .serenity-editorial-social__number {
-    color: var(--hero-yellow, #e5ca8b);
+    color: #9c7540;
     font-size: 0.65rem;
     font-weight: 600;
     letter-spacing: 0.1em;
   }
 
   .public-site .serenity-editorial-social a svg {
-    color: var(--hero-yellow, #e5ca8b);
+    color: #9c7540;
   }
 }
 
@@ -1651,7 +1791,7 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .about-story-hero__media-label {
-  font-size: clamp(1.45rem, 2.2vw, 2.3rem);
+  font-size: clamp(0.75rem, 0.9vw, 0.9rem);
 }
 
 .public-site .about-story-page :is(
@@ -1682,7 +1822,7 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .about-story-page :is(
-  .about-story-hero__copy > p:not(.about-story-eyebrow),
+  .about-story-hero__copy > p:not(.about-story-hero__location),
   .about-story-intro__statement p,
   .about-story-intro__details p,
   .about-story-principles__heading p,
@@ -1898,4 +2038,264 @@ body:has(.corporate-editorial-page) .public-site > main,
   .public-site .contact-story-nearby__grid article h3 {
     font-size: 1.8rem;
   }
+}
+
+/* Shared footer: a clear support area, brand-led directory, and quiet staff access. */
+.public-site .serenity-editorial-footer:not(.serenity-editorial-footer--draft) {
+  padding-top: 0.8rem;
+}
+
+.public-site .serenity-editorial-footer:not(.serenity-editorial-footer--draft) .serenity-editorial-footer__support {
+  grid-template-columns: 3.25rem minmax(0, 1fr) minmax(15rem, 0.72fr);
+  grid-template-rows: auto auto;
+  align-items: start;
+  gap: 0.7rem 1.6rem;
+  padding-block: clamp(2rem, 3.5vw, 3.4rem);
+}
+
+.public-site .serenity-editorial-footer:not(.serenity-editorial-footer--draft) .serenity-editorial-footer__support-icon {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  display: grid;
+  width: 3.25rem;
+  height: 3.25rem;
+  place-items: center;
+  border: 1px solid rgba(213, 178, 117, 0.5);
+  border-radius: 1rem;
+}
+
+.public-site .serenity-editorial-footer:not(.serenity-editorial-footer--draft) .serenity-editorial-footer__support-icon svg {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.public-site .serenity-editorial-footer:not(.serenity-editorial-footer--draft) .serenity-editorial-footer__support-heading {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.public-site .serenity-editorial-footer:not(.serenity-editorial-footer--draft) .serenity-editorial-footer__support-heading h2 {
+  max-width: 28rem;
+  font-size: clamp(1.75rem, 2.3vw, 2.65rem);
+  line-height: 1.1;
+}
+
+.public-site .serenity-editorial-footer:not(.serenity-editorial-footer--draft) .serenity-editorial-footer__support-copy {
+  grid-column: 2;
+  grid-row: 2;
+  max-width: 29rem;
+  padding: 0;
+  border: 0;
+  color: #d3e1e9;
+  font-size: 0.9rem;
+}
+
+.public-site .serenity-editorial-footer:not(.serenity-editorial-footer--draft) .serenity-editorial-footer__support-actions {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  align-self: center;
+  min-width: 0;
+}
+
+.public-site .serenity-editorial-footer__grid {
+  grid-template-columns: minmax(12rem, 1.3fr) repeat(4, minmax(0, 1fr));
+  gap: clamp(1rem, 2.5vw, 3rem);
+  margin: 0 var(--guest-gutter);
+  padding: clamp(2.5rem, 4vw, 4rem) 0 clamp(2.25rem, 3.5vw, 3.5rem);
+  border-top: 0;
+}
+
+.public-site .serenity-editorial-footer__grid > .serenity-editorial-footer__brand {
+  gap: 0;
+  max-width: 19rem;
+}
+
+.public-site .serenity-editorial-footer__brand-link {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 1.1rem;
+  color: #002844;
+  text-decoration: none;
+}
+
+.public-site .serenity-editorial-footer__brand-link img {
+  width: 3.5rem;
+  height: auto;
+  flex: 0 0 auto;
+}
+
+.public-site .serenity-editorial-footer__brand-link span {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.public-site .serenity-editorial-footer__brand-link strong {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  line-height: 1.1;
+}
+
+.public-site .serenity-editorial-footer__brand-link small {
+  color: #8a6c39;
+  font-size: 0.57rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.public-site .serenity-editorial-footer__grid .serenity-editorial-footer__brand > p {
+  max-width: 16rem;
+  color: #526b7c;
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.public-site .serenity-editorial-footer__grid .serenity-editorial-footer__brand-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  color: #002844;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: #d5b275;
+  text-underline-offset: 0.3em;
+}
+
+.public-site .serenity-editorial-footer__grid h2 {
+  color: #8a6c39;
+}
+
+.public-site .serenity-editorial-footer__grid > div:not(.serenity-editorial-footer__brand) a:hover,
+.public-site .serenity-editorial-footer__grid > div:not(.serenity-editorial-footer__brand) a:focus-visible {
+  color: #8a6c39;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.public-site .serenity-editorial-footer__values {
+  margin: 0 var(--guest-gutter);
+  padding: 1.2rem 0;
+  border-top: 1px solid #dce4e9;
+  border-bottom: 1px solid #dce4e9;
+  border-radius: 0;
+}
+
+.public-site .serenity-editorial-footer__legal {
+  align-items: center;
+  padding-top: 1.1rem;
+  border-top: 0;
+  text-transform: none;
+}
+
+@media (max-width: 1050px) {
+  .public-site .serenity-editorial-footer__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .public-site .serenity-editorial-footer__grid > .serenity-editorial-footer__brand {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .public-site .serenity-editorial-footer:not(.serenity-editorial-footer--draft) .serenity-editorial-footer__support {
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: 0.75rem 0.9rem;
+    padding: 1.6rem 1.3rem;
+  }
+
+  .public-site .serenity-editorial-footer:not(.serenity-editorial-footer--draft) .serenity-editorial-footer__support-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    grid-row: 1;
+  }
+
+  .public-site .serenity-editorial-footer:not(.serenity-editorial-footer--draft) .serenity-editorial-footer__support-heading {
+    grid-column: 2;
+  }
+
+  .public-site .serenity-editorial-footer:not(.serenity-editorial-footer--draft) .serenity-editorial-footer__support-copy {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .public-site .serenity-editorial-footer:not(.serenity-editorial-footer--draft) .serenity-editorial-footer__support-actions {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  .public-site .serenity-editorial-footer__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0 var(--guest-gutter);
+    padding: 2.2rem 0;
+    gap: 1.5rem 1rem;
+  }
+
+  .public-site .serenity-editorial-footer__grid > .serenity-editorial-footer__brand {
+    grid-column: 1 / -1;
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .public-site .serenity-editorial-footer__grid .serenity-editorial-footer__brand > p {
+    max-width: 24rem;
+  }
+
+  .public-site .serenity-editorial-footer__values {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0 var(--guest-gutter);
+    padding: 1.2rem 0;
+  }
+
+  .public-site .serenity-editorial-footer__legal {
+    align-items: center;
+  }
+
+}
+
+/* The Homes collection masthead keeps its gold highlights within the shared navy-header theme. */
+.public-site .houses-editorial-heading h1 {
+  font-size: clamp(3.75rem, 6vw, 6.5rem);
+}
+
+.public-site .houses-editorial-heading :is(.houses-editorial-heading__count strong, h1 em) {
+  color: #e5ca8b !important;
+}
+
+@media (max-width: 760px) {
+  .public-site .houses-editorial-heading h1 {
+    font-size: clamp(3rem, 11vw, 4.75rem);
+  }
+}
+
+/* A quiet, consistent disclosure on illustrative photography. */
+.public-site .illustrative-photo-label,
+.public-site .corporate-editorial-page .illustrative-photo-label {
+  position: absolute;
+  z-index: 2;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  left: auto;
+  display: inline-flex;
+  align-items: center;
+  max-width: calc(100% - 1.5rem);
+  margin: 0;
+  padding: 0.4rem 0.6rem;
+  border: 0;
+  border-radius: 0.3rem;
+  background: rgba(0, 31, 53, 0.78);
+  box-shadow: none;
+  color: #fff;
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.25;
+  text-shadow: none;
+  text-transform: none;
 }

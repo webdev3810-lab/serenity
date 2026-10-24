@@ -1,7 +1,7 @@
 import { AmenityIcon } from "@/src/components/AmenityIcon";
 import type { Property, PropertyImage } from "@/src/data/properties";
 import { normalizeAmenities } from "@/src/lib/amenities";
-import { Bath, BedDouble, CalendarDays, Camera, Car, Check, ChevronRight, ClipboardList, CookingPot, DoorOpen, KeyRound, Map, MapPin, Shield, Snowflake, Users, WashingMachine, Wifi } from "lucide-react";
+import { ArrowLeft, Bath, BedDouble, CalendarDays, Camera, Car, Check, ChevronRight, ClipboardList, CookingPot, DoorOpen, KeyRound, Map, MapPin, Shield, Snowflake, Users, WashingMachine, Wifi } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -40,7 +40,7 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
     <section className="property-showcase-hero" aria-labelledby="property-showcase-title">
       {images[0] && <div className="property-showcase-hero-media"><Photo image={images[0]} alt={images[0].alt || name} sizes="(max-width: 768px) 100vw, 1240px" priority /></div>}
       <div className="property-showcase-hero-content">
-        <Link href="/houses" className="property-showcase-back">All Serenity homes</Link>
+        <Link href="/homes" className="property-showcase-back"><ArrowLeft size={17} aria-hidden="true" />All Serenity homes</Link>
         <p className="property-showcase-eyebrow">Furnished private home · {locality}</p>
         <h1 id="property-showcase-title">{name}</h1>
         <p className="property-showcase-tagline">{tagline}</p>
@@ -56,9 +56,8 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
         </div>
       </div>
     </section>
-
     <nav className="property-showcase-nav" aria-label="House information">
-      {nav.map(({ id, label, Icon }) => <a key={id} href={`#${id}`}><Icon size={20} strokeWidth={1.75} aria-hidden="true" /><span>{label}</span></a>)}
+      {nav.map(({ id, label, Icon }) => <a key={id} href={`#${id}`}><Icon size={22} strokeWidth={1.75} aria-hidden="true" /><span>{label}</span></a>)}
     </nav>
 
     <section className="property-showcase-overview" id="house-overview">

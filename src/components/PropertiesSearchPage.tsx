@@ -284,7 +284,7 @@ function PropertiesSearchContent({ properties }: { properties: Property[] }) {
                 <div className="houses-empty-state">
                   <h2>No houses are available for those dates.</h2>
                   <p>Try different dates, fewer guests, or clear the search to see every Serenity house again.</p>
-                  <Link href="/houses" className="houses-view-link">View all houses <ArrowUpRight size={15} /></Link>
+                  <Link href="/homes" className="houses-view-link">View all homes <ArrowUpRight size={15} /></Link>
                 </div>
               )}
             </div>

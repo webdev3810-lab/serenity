@@ -7,7 +7,7 @@ import { useMemo, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import type { Property } from "@/src/data/properties";
 import type { GuestCounts } from "@/src/lib/booking";
 import { hasUnavailableConflict, validateGuestCapacity } from "@/src/lib/booking";
@@ -143,11 +143,15 @@ export function HousesEditorialPage({ properties }: { properties: Property[] }) 
   return (
     <div className="houses-editorial-page">
       <header className="houses-editorial-heading">
-        <div>
-          <h1 id="houses-editorial-title">Our houses</h1>
-          <p>Quality, fully furnished homes in Pakenham.</p>
+        <div className="houses-editorial-heading__main">
+          <h1 id="houses-editorial-title">Our <em>Homes</em></h1>
+          <p className="houses-editorial-heading__lead">Fully furnished private homes for work, family and longer stays. Find the space that feels right for you.</p>
         </div>
-        <p className="houses-editorial-heading__aside">Spacious. Comfortable. Move-in ready.<br />A private place to stay for family, work, or a change of scene.</p>
+        <div className="houses-editorial-heading__aside">
+          <div className="houses-editorial-heading__count"><strong>{String(properties.length).padStart(2, "0")}</strong><span>private {properties.length === 1 ? "home" : "homes"}<br />in Pakenham</span></div>
+          <p>Explore each home’s photos, features and room layout before you choose your stay.</p>
+          <a href="#houses-list">View the collection <ArrowDownRight size={18} aria-hidden="true" /></a>
+        </div>
       </header>
       <section className="houses-editorial-list" id="houses-list" aria-labelledby="houses-editorial-title">
         {results.length ? results.map((property) => {
@@ -163,13 +167,13 @@ export function HousesEditorialPage({ properties }: { properties: Property[] }) 
                   {image ? (
                     <Image
                       src={image}
-                      alt={`${name} furnished house in Pakenham`}
+                      alt={`${name} furnished home in Pakenham`}
                       fill
                       loading="eager"
                       sizes="(max-width: 760px) 100vw, (max-width: 1023px) 50vw, 33vw"
                       unoptimized={image.includes(".supabase.co/")}
                     />
-                  ) : <span className="houses-editorial-list__fallback">House photos coming soon</span>}
+                  ) : <span className="houses-editorial-list__fallback">Home photos coming soon</span>}
                 </span>
                 <div className="houses-editorial-list__content">
                   <div className="houses-editorial-list__caption">
@@ -180,16 +184,16 @@ export function HousesEditorialPage({ properties }: { properties: Property[] }) 
                       <li key={label}><Icon size={17} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span></li>
                     ))}
                   </ul>
-                  <span className="houses-editorial-list__cta">Explore house <ArrowUpRight size={17} aria-hidden="true" /></span>
+                  <span className="houses-editorial-list__cta">Explore home <ArrowUpRight size={17} aria-hidden="true" /></span>
                 </div>
               </Link>
             </article>
           );
         }) : (
           <div className="houses-editorial-empty">
-            <h2>No houses available for those dates.</h2>
+            <h2>No homes available for those dates.</h2>
             <p>Try different dates or guest numbers to see the full collection.</p>
-            <Link href="/houses">View all houses <ArrowUpRight size={17} aria-hidden="true" /></Link>
+            <Link href="/homes">View all homes <ArrowUpRight size={17} aria-hidden="true" /></Link>
           </div>
         )}
       </section>

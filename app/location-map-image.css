@@ -41,6 +41,6 @@
   .property-theme .stay-location-map:has(.location-illustrated-map),
   .contact-story-location__map:has(.location-illustrated-map) {
     aspect-ratio: auto;
-    height: clamp(19rem, 85vw, 28rem);
+    height: clamp(23rem, 100vw, 32rem);
   }
 }

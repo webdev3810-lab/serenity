@@ -106,7 +106,7 @@ export function SearchBar({
       guests: String(totalStayingGuests(guests)),
       pets: String(guests.pets),
     });
-    router.push(`/houses?${params.toString()}`);
+    router.push(`/homes?${params.toString()}`);
   };
 
   return (

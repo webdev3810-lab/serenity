@@ -73,6 +73,10 @@ export default async function Page() {
       <section className="guest-information-hero" aria-labelledby="guest-information-title">
         {heroPhoto && <PropertyPhoto image={heroPhoto} alt={heroPhoto.alt || "Furnished living space at a Serenity home"} className="guest-information-hero-photo" sizes="100vw" priority />}
         <div className="guest-information-hero-content">
+          <div className="guest-information-hero-brand" aria-label="Serenity Corporate Stays">
+            <Image className="guest-information-hero-logo" src="/LOGO.png" alt="" width={224} height={115} priority />
+            <span><strong>Serenity</strong><small>Corporate Stays</small></span>
+          </div>
           <p className="guest-information-kicker">{content.heroKicker}</p>
           <h1 id="guest-information-title">{content.title} <span>{content.titleAccent}</span></h1>
           <p>{content.description}</p>
@@ -84,21 +88,7 @@ export default async function Page() {
         </aside>
       </section>
 
-      <nav className="guest-information-jump" aria-label="On this page">
-        <span>{content.jumpLabel}</span>
-        <div>
-          {cards.map(({ id, title }) => <a key={id} href={`#${id}`}>{title}</a>)}
-        </div>
-      </nav>
-
       <section className="guest-information-content" aria-label="Guest information and stay policies">
-        <div className="guest-information-intro">
-          <div>
-            <p className="guest-information-kicker">{content.introKicker}</p>
-            <h2>{content.introTitle}</h2>
-          </div>
-          <p>{content.introText}</p>
-        </div>
         <div className="guest-information-grid">
           {cards.map(({ id, title, eyebrow, Icon, items, image }) => (
             <article className="guest-information-card" id={id} key={id}>
@@ -107,8 +97,11 @@ export default async function Page() {
                 <div><h3>{title}</h3><p>{eyebrow}</p></div>
               </div>
               <ul>{items.map((item, index) => <li key={index}><span aria-hidden="true"><Check size={12} strokeWidth={3} /></span>{item}</li>)}</ul>
-              {image ? <PropertyPhoto image={image} alt={image.alt || "Serenity furnished home"} className="guest-information-card-photo" sizes="(max-width: 700px) 100vw, 33vw" /> : id === "home-care" ? (
-                <div className="guest-information-card-art" aria-hidden="true"><Leaf size={56} strokeWidth={1.1} /><span>{content.homeCareCaption}</span></div>
+              {image ? <PropertyPhoto image={image} alt={image.alt || "Serenity furnished home"} className={`guest-information-card-photo${id === "self-check-in" ? " guest-information-card-photo--check-in" : ""}`} sizes="(max-width: 700px) 100vw, 33vw" /> : id === "home-care" ? (
+                <div className="guest-information-card-art">
+                  <Image src="/guest-home-care-photo.jpg" alt="" fill sizes="(max-width: 700px) 100vw, 33vw" />
+                  <div className="guest-information-card-art-caption"><Leaf size={36} strokeWidth={1.5} aria-hidden="true" /><span>{content.homeCareCaption}</span></div>
+                </div>
               ) : null}
             </article>
           ))}

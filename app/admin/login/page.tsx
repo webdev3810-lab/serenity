@@ -71,7 +71,7 @@ export default function AdminLoginPage() {
   };
 
   const title = mode === "login" ? "Admin sign in" : mode === "forgot" ? "Reset admin password" : "Create first admin";
-  const description = mode === "login" ? "Sign in to manage Serenity Stays." : mode === "forgot" ? "Enter your email and we’ll send recovery instructions if an admin account uses it." : "This secure setup option is available only until the first admin is created.";
+  const description = mode === "login" ? "Sign in to manage Serenity Corporate Stays." : mode === "forgot" ? "Enter your email and we’ll send recovery instructions if an admin account uses it." : "This secure setup option is available only until the first admin is created.";
 
   return (
     <main className={`admin-auth-shell admin-theme-${theme}`}>

@@ -181,7 +181,6 @@ export function validatePropertyContent(payload: CmsPayload) {
 export function validateHomepageContent(payload: CmsPayload) {
   const errors: string[] = [];
   const fields: Array<[string, string, number]> = [
-    ["Small hero heading", "editorial_hero_eyebrow", CMS_LIMITS.section_heading],
     ["Hero headline", "editorial_hero_heading", CMS_LIMITS.hero_heading],
     ["Hero description", "editorial_hero_description", CMS_LIMITS.hero_subtitle],
     ["Houses button", "editorial_hero_primary_label", CMS_LIMITS.button_label],

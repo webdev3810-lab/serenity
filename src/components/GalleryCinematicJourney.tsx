@@ -393,7 +393,7 @@ export default function GalleryCinematicJourney({ properties }: GalleryCinematic
         <h2 id="gallery-final-title" className="font-marcellus">Stay<br /><em>awhile.</em></h2>
         <div>
           <p>Choose the house that feels right, check your dates, and settle into Pakenham with room of your own.</p>
-          <Link href="/houses">Explore the houses <ArrowUpRight size={17} aria-hidden="true" /></Link>
+          <Link href="/homes">Explore the homes <ArrowUpRight size={17} aria-hidden="true" /></Link>
           <Link href="/contact">Ask a question <ArrowUpRight size={17} aria-hidden="true" /></Link>
         </div>
       </section>

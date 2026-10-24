@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, CreditCard, Loader2, Printer, ShieldCheck, Lock } from "lucide-react";
+import { CheckCircle2, CreditCard, Download, Image as ImageIcon, Loader2, ShieldCheck, Lock } from "lucide-react";
 import type { Property } from "@/src/data/properties";
 import { useBooking } from "@/src/context/BookingContext";
 import { calculatePrice, formatAud, formatDateAu, nightsBetween, reservationCode } from "@/src/lib/booking";
@@ -275,11 +275,17 @@ export function PaymentPage() {
 export function ConfirmationPage() {
   const { booking, setBooking } = useBooking();
   const property = useCurrentProperty();
+  const cardRef = useRef<HTMLElement>(null);
   const verificationStarted = useRef(false);
   const [verification, setVerification] = useState<"checking" | "paid" | "error">("checking");
   const [verificationError, setVerificationError] = useState("");
   const [verifiedReference, setVerifiedReference] = useState("");
   const [verifiedTotal, setVerifiedTotal] = useState<number | null>(null);
+  const [verifiedEmail, setVerifiedEmail] = useState("");
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
+  const [savingImage, setSavingImage] = useState(false);
+  const [imageError, setImageError] = useState("");
 
   useEffect(() => {
     if (verificationStarted.current) return;
@@ -299,6 +305,7 @@ export function ConfirmationPage() {
         if (!response.ok || !result.paid || typeof result.booking?.reference !== "string") throw new Error(result.error || "Payment could not be verified.");
         setVerifiedReference(result.booking.reference);
         setVerifiedTotal(Number.isFinite(Number(result.booking.total)) ? Number(result.booking.total) : null);
+        setVerifiedEmail(typeof result.customerEmail === "string" ? result.customerEmail : "");
         setBooking({ paymentStatus: "paid", reservationReference: result.booking?.reference });
         setVerification("paid");
       })
@@ -308,9 +315,6 @@ export function ConfirmationPage() {
       });
   }, [setBooking]);
 
-  if (!property || !booking.checkIn || !booking.checkout) return <MissingBooking />;
-
-  const price = calculatePrice(property, booking.checkIn, booking.checkout, booking.guests);
   const reference = verifiedReference;
 
   if (verification === "checking") {
@@ -337,44 +341,130 @@ export function ConfirmationPage() {
     );
   }
 
+  const price = property && booking.checkIn && booking.checkout
+    ? calculatePrice(property, booking.checkIn, booking.checkout, booking.guests)
+    : null;
+  const totalPaid = verifiedTotal ?? price?.total;
+  const emailAddress = verifiedEmail || (typeof booking.guestDetails?.email === "string" ? booking.guestDetails.email : "");
+
+  const downloadConfirmation = async () => {
+    if (downloading) return;
+    setDownloading(true);
+    setDownloadError("");
+    try {
+      const { createBookingConfirmationPdf } = await import("@/src/lib/bookingConfirmationPdf");
+      const guestName = [booking.guestDetails?.firstName, booking.guestDetails?.lastName]
+        .filter((part): part is string => typeof part === "string" && part.trim().length > 0)
+        .join(" ");
+      const pdfBytes = await createBookingConfirmationPdf({
+        reference,
+        property: property?.name,
+        dates: booking.checkIn && booking.checkout ? `${formatDateAu(booking.checkIn)} to ${formatDateAu(booking.checkout)}` : undefined,
+        guests: property && booking.checkIn && booking.checkout ? `${booking.guests.adults + booking.guests.children} guests, ${booking.guests.pets} pets` : undefined,
+        totalPaid: totalPaid === undefined ? undefined : formatAud(totalPaid),
+        guestName: guestName || undefined,
+        email: emailAddress || undefined,
+        receiptCode: receiptCode(reference),
+      });
+      const url = URL.createObjectURL(new Blob([Uint8Array.from(pdfBytes)], { type: "application/pdf" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Serenity-booking-${reference}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch {
+      setDownloadError("The confirmation could not be downloaded. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const saveConfirmationImage = async () => {
+    if (!cardRef.current || savingImage) return;
+    setSavingImage(true);
+    setImageError("");
+    try {
+      await document.fonts.ready;
+      const { toPng } = await import("html-to-image");
+      const card = cardRef.current;
+      const cardBounds = card.getBoundingClientRect();
+      const lastContent = card.querySelector<HTMLElement>("[data-image-content-end]");
+      const cardStyle = window.getComputedStyle(card);
+      const imageHeight = lastContent
+        ? Math.ceil(lastContent.getBoundingClientRect().bottom - cardBounds.top + parseFloat(cardStyle.paddingBottom) + parseFloat(cardStyle.borderBottomWidth))
+        : Math.ceil(cardBounds.height);
+      const dataUrl = await toPng(card, {
+        backgroundColor: "#ffffff",
+        width: Math.ceil(cardBounds.width),
+        height: imageHeight,
+        pixelRatio: 2,
+        cacheBust: true,
+        style: { margin: "0", marginInline: "0", maxWidth: "none" },
+        filter: (node) => !(node instanceof HTMLElement && node.dataset.imageExclude === "true"),
+      });
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = `Serenity-booking-${reference}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch {
+      setImageError("The image could not be saved. Please try again.");
+    } finally {
+      setSavingImage(false);
+    }
+  };
+
   return (
     <BookingFrame active={3}>
-      <section className="card mx-auto max-w-3xl p-8 bg-white text-center space-y-6">
+      <section ref={cardRef} className="booking-confirmation-card card mx-auto max-w-3xl p-8 bg-white text-center space-y-6">
         <div className="w-16 h-16 rounded-none bg-[#FAF5EF] border border-[#EADCCF] flex items-center justify-center mx-auto text-[#7A4E2D]">
           <CheckCircle2 size={40} />
         </div>
 
         <div>
           <span className="eyebrow">Reservation Confirmed</span>
-        <ScrollWipeText as="h1" className="text-4xl font-extrabold text-stone-900 mt-1">Booking Confirmation #{reference}</ScrollWipeText>
+          <ScrollWipeText as="h1" className="text-4xl font-extrabold text-stone-900 mt-1">Booking Confirmation #{reference}</ScrollWipeText>
           <p className="text-xs text-stone-500 mt-1">Keep your receipt code as proof of the confirmed booking and payment.</p>
         </div>
 
         <div className="grid gap-4 text-left sm:grid-cols-2 bg-white p-5 rounded-none border border-stone-200">
-          <Info label="Property" value={property.name} />
-          <Info label="Dates" value={`${formatDateAu(booking.checkIn)} to ${formatDateAu(booking.checkout)}`} />
-          <Info label="Guests" value={`${booking.guests.adults + booking.guests.children} guests, ${booking.guests.pets} pets`} />
-          <Info label="Total Paid" value={formatAud(verifiedTotal ?? price.total)} />
-          <Info label="Guest Name" value={`${booking.guestDetails?.firstName ?? "Guest"} ${booking.guestDetails?.lastName ?? ""}`} />
+          {property && booking.checkIn && booking.checkout && (
+            <>
+              <Info label="Property" value={property.name} />
+              <Info label="Dates" value={`${formatDateAu(booking.checkIn)} to ${formatDateAu(booking.checkout)}`} />
+              <Info label="Guests" value={`${booking.guests.adults + booking.guests.children} guests, ${booking.guests.pets} pets`} />
+            </>
+          )}
+          {totalPaid !== undefined && <Info label="Total Paid" value={formatAud(totalPaid)} />}
+          {booking.guestDetails && <Info label="Guest Name" value={`${booking.guestDetails.firstName} ${booking.guestDetails.lastName}`} />}
           <Info label="Reservation Ref" value={reference} />
           <Info label="Receipt Code" value={receiptCode(reference)} />
+          {emailAddress && <Info label="Email" value={emailAddress} />}
         </div>
 
-        <div className="rounded-none bg-stone-900 text-white p-4 text-left text-xs space-y-1">
+        <div data-image-content-end className="rounded-none bg-stone-900 text-white p-4 text-left text-xs space-y-1">
           <p className="font-bold text-[#B88A5A] flex items-center gap-1.5">
             <ShieldCheck size={15} /> Access & Check-In Information
           </p>
-          <p className="text-stone-300">Exact street address and keypad access codes for key safe will be dispatched to {booking.guestDetails?.email ?? "your email"} prior to check-in at 3:00 PM.</p>
+          <p className="text-stone-300">Exact street address and keypad access codes for key safe will be sent to your email before check-in at 3:00 PM.</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2">
+        <div data-image-exclude="true" className="booking-confirmation-actions flex flex-col sm:flex-row justify-center gap-3 pt-2">
           <Link className="btn-primary text-xs" href="/">
             Return to Homepage
           </Link>
-          <button className="btn-outline-dark text-xs" onClick={() => window.print()}>
-            <Printer size={15} /> Print Confirmation
+          <button type="button" className="btn-outline-dark text-xs" onClick={downloadConfirmation} disabled={downloading}>
+            <Download size={15} /> {downloading ? "Downloading…" : "Download"}
+          </button>
+          <button type="button" className="btn-outline-dark text-xs" onClick={saveConfirmationImage} disabled={savingImage}>
+            <ImageIcon size={15} /> {savingImage ? "Saving…" : "Save image"}
           </button>
         </div>
+        {downloadError && <p data-image-exclude="true" role="alert" className="text-sm text-red-700">{downloadError}</p>}
+        {imageError && <p data-image-exclude="true" role="alert" className="text-sm text-red-700">{imageError}</p>}
       </section>
     </BookingFrame>
   );
@@ -397,7 +487,7 @@ function MissingBooking() {
       <div className="card mx-auto max-w-xl p-8 bg-white text-center space-y-4">
         <ScrollWipeText as="h1" className="text-3xl font-bold text-stone-900">Please select a house and stay dates first.</ScrollWipeText>
         <p className="text-xs text-stone-600">Your reservation session requires a house selection, check-in, and checkout date.</p>
-        <Link className="btn-primary inline-flex text-xs" href="/houses">
+        <Link className="btn-primary inline-flex text-xs" href="/homes">
           Browse Serenity Houses
         </Link>
       </div>
@@ -413,7 +503,7 @@ function Info({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <span className="text-xs font-bold uppercase tracking-wider text-stone-600 block">{label}</span>
-      <span className="text-base font-bold text-stone-900">{value}</span>
+      <span className="text-base font-bold text-stone-900 break-words">{value}</span>
     </div>
   );
 }

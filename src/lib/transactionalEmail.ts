@@ -317,7 +317,7 @@ export async function sendUnsuccessfulBookingEmails(input: { reference: string; 
     ? "The checkout expired before payment was completed."
     : "The payment did not complete successfully.";
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.serenityhomesdirect.com").replace(/\/$/, "");
-  const restart = input.corporate ? `${siteUrl}/corporate-stays#corporate-booking` : `${siteUrl}/houses`;
+  const restart = input.corporate ? `${siteUrl}/corporate-stays#corporate-booking` : `${siteUrl}/homes`;
   const results = await Promise.allSettled([
     sendEmail({
       to: email,

@@ -664,6 +664,11 @@ body .admin-theme-context button.admin-availability-cell { border-radius: 0 !imp
 .admin-auth-header { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 1200px; margin: 0 auto 60px; }
 .admin-auth-shell form { width: 100%; max-width: 460px; padding: 36px; margin: auto; }
 .admin-auth-shell form > .brand-wordmark { margin-bottom: .5rem; color: var(--admin-text); }
+.admin-auth-shell .brand-wordmark--admin { display: inline-flex; align-items: center; gap: .8rem; min-width: 0; }
+.admin-auth-shell .brand-wordmark--admin img { display: block; width: 72px; height: 48px; flex: none; padding: 3px; border-radius: 9px; background: #fff; object-fit: contain; }
+.admin-auth-shell .brand-wordmark__admin-copy { display: grid; gap: .22rem; min-width: 0; font-family: var(--font-poppins), Arial, sans-serif; line-height: 1; }
+.admin-auth-shell .brand-wordmark__admin-copy strong { color: var(--admin-text); font-size: 1.15rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.admin-auth-shell .brand-wordmark__admin-copy small { color: var(--admin-accent); font-size: .58rem; font-weight: 700; letter-spacing: .21em; text-transform: uppercase; white-space: nowrap; }
 .admin-auth-shell h1 { font-size: 28px; letter-spacing: -.035em; }
 .admin-auth-shell .admin-auth-intro { font-size: 15px; line-height: 1.6; }
 .admin-password-input-wrap { position: relative; margin-top: 4px; }

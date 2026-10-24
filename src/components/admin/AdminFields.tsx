@@ -23,12 +23,12 @@ export function PageHeader({ eyebrow, title, description, action }: { eyebrow: s
 export function FormGroup({ title, description, children }: { title: string; description: string; children: React.ReactNode }) { return <fieldset className="grid gap-4 border-b border-[var(--admin-border)] pb-5 last:border-b-0 last:pb-0"><legend className="text-lg font-semibold">{title}</legend><p className="-mt-2 text-sm text-[var(--admin-muted)]">{description}</p>{children}</fieldset>; }
 const INTERNAL_LINK_OPTIONS = [
   { value: "/", label: "Homepage" },
-  { value: "/houses", label: "Houses" },
+  { value: "/homes", label: "Homes" },
   { value: "/corporate-stays", label: "Corporate stays" },
   { value: "/about", label: "About Serenity" },
   { value: "/long-term-stays", label: "Long-term stays" },
   { value: "/booking", label: "Booking" },
-  { value: "/#faqs", label: "FAQs" },
+  { value: "/contact#faqs", label: "FAQs" },
   { value: "/contact", label: "Contact" },
   { value: "/guest-information", label: "Guest information & stay policies" },
 ];
@@ -67,7 +67,7 @@ export function LinkSelect({ value, onChange }: { value: string; onChange: (valu
     ? INTERNAL_LINK_OPTIONS
     : [{ value, label: `Current saved link (${value})` }, ...INTERNAL_LINK_OPTIONS];
 
-  return <label className="block text-sm font-medium">Button destination<select className="admin-field mt-1" value={value || "/houses"} onChange={(event) => onChange(event.target.value)} aria-label="Button destination">{options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select><span className="mt-1 block text-sm font-normal text-[var(--admin-muted)]">Choose the page guests should visit when they select this button.</span></label>;
+  return <label className="block text-sm font-medium">Button destination<select className="admin-field mt-1" value={value || "/homes"} onChange={(event) => onChange(event.target.value)} aria-label="Button destination">{options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select><span className="mt-1 block text-sm font-normal text-[var(--admin-muted)]">Choose the page guests should visit when they select this button.</span></label>;
 }
 
 export function CharacterField({ label, value, onChange, limit, textarea = false, type = "text", placeholder, help }: { label: string; value: unknown; onChange: (value: string) => void; limit?: number; textarea?: boolean; type?: string; placeholder?: string; help?: string }) {

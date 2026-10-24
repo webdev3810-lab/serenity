@@ -3,8 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowUpRight, ChevronDown, ChevronRight } from "lucide-react";
 import { BookingProvider } from "@/src/context/BookingContext";
 import { ContactSettingsProvider } from "@/src/context/ContactSettingsContext";
 import type { ContactSettings } from "@/src/lib/siteSettings";
@@ -39,16 +39,20 @@ export function AppShell({ children, contactSettings }: { children: React.ReactN
 function Header({ pathname }: { pathname: string | null }) {
   const [hidden, setHidden] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [aboutMenuOpen, setAboutMenuOpen] = useState(false);
   const [currentHash, setCurrentHash] = useState("");
+  const aboutMenuRef = useRef<HTMLDivElement>(null);
   const links = [
     { label: "Home", href: "/" },
-    { label: "Our Homes", href: "/houses" },
-    { label: "How It Works", href: "/how-it-works" },
-    { label: "Corporate", href: "/corporate-stays" },
+    { label: "Our Homes", href: "/homes" },
+    { label: "Insurance & Corporate", href: "/corporate-stays" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
-    { label: "Guest Info", href: "/guest-information" },
     { label: "Other Businesses", href: "/other-businesses" },
+  ];
+  const aboutLinks = [
+    { label: "How It Works", href: "/how-it-works" },
+    { label: "Guest Info", href: "/guest-information" },
   ];
   const partnerBookingHref = "/corporate-stays#corporate-booking";
 
@@ -58,6 +62,15 @@ function Header({ pathname }: { pathname: string | null }) {
     window.addEventListener("hashchange", updateHash);
     return () => window.removeEventListener("hashchange", updateHash);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!aboutMenuOpen) return;
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!aboutMenuRef.current?.contains(event.target as Node)) setAboutMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    return () => document.removeEventListener("pointerdown", closeOnOutsideClick);
+  }, [aboutMenuOpen]);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -94,7 +107,7 @@ function Header({ pathname }: { pathname: string | null }) {
     const currentPath = pathname || "/";
     if (targetHash) return currentPath === targetPath && currentHash === `#${targetHash}`;
     if (targetPath === "/") return currentPath === "/" && !currentHash;
-    if (targetPath === "/houses" && currentPath.startsWith("/properties/")) return true;
+    if (targetPath === "/homes" && currentPath.startsWith("/properties/")) return true;
     return currentPath === targetPath || currentPath.startsWith(`${targetPath}/`);
   };
 
@@ -115,6 +128,52 @@ function Header({ pathname }: { pathname: string | null }) {
       <nav id="serenity-primary-navigation" className="serenity-editorial-nav__links" aria-label="Primary navigation">
         {links.map(({ label, href }, index) => {
           const active = isCurrent(href);
+          if (href === "/about") {
+            const groupActive = active || aboutLinks.some((item) => isCurrent(item.href));
+            return (
+              <div
+                key={href}
+                ref={aboutMenuRef}
+                className="serenity-editorial-nav__about"
+                data-open={aboutMenuOpen ? "true" : undefined}
+                onMouseEnter={() => setAboutMenuOpen(true)}
+                onMouseLeave={() => setAboutMenuOpen(false)}
+                onBlur={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget)) setAboutMenuOpen(false);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
+                    setAboutMenuOpen(false);
+                    aboutMenuRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+                  }
+                }}
+              >
+                <Link href={href} aria-current={active ? "page" : undefined} onClick={() => setAboutMenuOpen(false)}>
+                  <span className="serenity-editorial-nav__item-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                  <span>{label}</span>
+                </Link>
+                <button
+                  type="button"
+                  className="serenity-editorial-nav__about-toggle"
+                  aria-label="Show About links"
+                  aria-expanded={aboutMenuOpen}
+                  aria-controls="serenity-about-menu"
+                  data-active={groupActive ? "true" : undefined}
+                  onClick={() => setAboutMenuOpen(true)}
+                >
+                  <ChevronDown size={14} aria-hidden="true" />
+                </button>
+                <div id="serenity-about-menu" className="serenity-editorial-nav__about-menu" hidden={!aboutMenuOpen}>
+                  {aboutLinks.map((item) => (
+                    <Link key={item.href} href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined} onClick={() => setAboutMenuOpen(false)}>
+                      <span>{item.label}</span>
+                      <ChevronRight size={15} aria-hidden="true" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            );
+          }
           return (
             <Link
               key={href}
@@ -154,6 +213,7 @@ function Header({ pathname }: { pathname: string | null }) {
             href,
             ariaLabel: `Go to ${label}`,
             active: isCurrent(href),
+            children: href === "/about" ? aboutLinks.map((item) => ({ ...item, active: isCurrent(item.href) })) : undefined,
           }))}
           partnerBookingHref={partnerBookingHref}
           partnerBookingActive={isCurrent(partnerBookingHref)}

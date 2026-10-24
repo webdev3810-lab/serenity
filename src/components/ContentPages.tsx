@@ -192,7 +192,7 @@ export function ContactPage() {
             </a>
             <div className="px-1 py-7 md:px-6">
               <span className="flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#8B6B55]"><ArrowUpRight size={14} /> Direct booking</span>
-              <Link href="/houses" className="mt-4 block text-base font-semibold text-[#2D2622] transition-colors hover:text-[#8B6B55]">Browse the houses</Link>
+              <Link href="/homes" className="mt-4 block text-base font-semibold text-[#2D2622] transition-colors hover:text-[#8B6B55]">Browse the homes</Link>
             </div>
           </div>
 
@@ -336,7 +336,7 @@ function ContactLocationSection({ contact }: { contact: ContactSettings }) {
           <div className="location-editorial-actions">
             <p>Explore the houses and rooms, or ask us which setup fits your stay.</p>
             <div>
-              <Link href="/houses" className="location-editorial-button location-editorial-button-primary">
+              <Link href="/homes" className="location-editorial-button location-editorial-button-primary">
                 Explore the houses <ArrowUpRight size={15} aria-hidden="true" />
               </Link>
               <a href="#contact-form" className="location-editorial-button">

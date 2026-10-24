@@ -1,199 +1,258 @@
 .page {
   --navy: #002844;
+  --navy-deep: #001f35;
   --gold: #e5ca8b;
-  --canvas: #ffffff;
   --serif: var(--font-brand-serif), Georgia, serif;
   overflow: hidden;
-  padding-inline: var(--public-card-gutter, 1rem);
-  background: var(--canvas);
+  padding: clamp(0.75rem, 1.1vw, 1.25rem);
+  background: #f2f5f6;
   color: var(--navy);
 }
 
 .hero {
-  padding: clamp(2rem, 4vw, 4rem) var(--public-card-gutter, 1rem) clamp(4rem, 7vw, 7rem);
-  border-radius: 1.75rem;
-  background: var(--navy);
+  display: grid;
+  grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
+  gap: clamp(0.75rem, 1.1vw, 1.25rem);
+  min-height: clamp(34rem, 47vw, 47rem);
   color: #fff;
 }
 
-.heroTopline {
+.heroCopy {
+  position: relative;
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.28);
-  font-size: 0.69rem;
-  font-weight: 600;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(1.15rem, 1.7vw, 1.9rem);
+  min-width: 0;
+  overflow: hidden;
+  isolation: isolate;
+  padding: clamp(2.5rem, 5vw, 5.5rem);
+  border-radius: 1.5rem;
+  background: var(--navy);
 }
 
-.heroGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.55fr);
-  align-items: end;
-  gap: clamp(2rem, 6vw, 7rem);
-  padding-top: clamp(5rem, 11vw, 11rem);
+.heroCopy::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 0 auto;
+  width: min(42%, 24rem);
+  background: url('/corporate-botanical-pattern-v2.png') right center / auto 102% no-repeat;
+  content: '';
+  opacity: 0.48;
+  pointer-events: none;
 }
 
 .eyebrow,
 .sectionLabel {
   margin: 0;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.13em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .hero .eyebrow,
-.closingCopy .eyebrow {
-  color: #ffffff;
-}
+.closingCopy .eyebrow { color: var(--gold); }
 
 .hero h1 {
-  max-width: 10ch;
-  margin: 1.25rem 0 0;
-  font-family: var(--serif);
-  font-size: clamp(3rem, 4.5vw, 5rem);
-  font-weight: 400;
-  letter-spacing: -0.07em;
-  line-height: 0.86;
-}
-
-.hero h1 span {
-  color: #ffffff;
-}
-
-.heroIntro p {
-  max-width: 27rem;
+  max-width: 9ch;
   margin: 0;
   font-family: var(--serif);
-  font-size: clamp(1rem, 1.2vw, 1.2rem);
-  line-height: 1.35;
+  font-size: clamp(4rem, 6.4vw, 7rem);
+  font-weight: 400;
+  letter-spacing: -0.065em;
+  line-height: 0.9;
 }
 
-.heroLinks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1.5rem;
-  margin-top: 2.25rem;
+.hero h1 span { color: var(--gold); }
+
+.hero h2 {
+  max-width: 17ch;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(1.9rem, 2.8vw, 3rem);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.05;
 }
 
-.heroLinks a {
+.heroLead {
+  max-width: 32rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: clamp(0.95rem, 1.15vw, 1.1rem);
+  line-height: 1.55;
+}
+
+.heroActions { display: flex; flex-wrap: wrap; gap: 0.85rem; margin-top: 0.2rem; }
+
+.heroActions a,
+.closingCopy a {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  border-bottom: 1px solid currentColor;
-  padding-bottom: 0.25rem;
-  color: inherit;
-  font-size: 0.78rem;
-  font-weight: 600;
+  justify-content: center;
+  gap: 0.8rem;
+  min-height: 3.25rem;
+  padding: 0.8rem 1.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 700;
   text-decoration: none;
+  transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
 
-/* Keep decorative rules straight; only the larger surfaces stay rounded. */
-.heroTopline,
-.heroLinks a,
-.steps,
-.step {
-  border-radius: 0 !important;
+.heroActions a:hover,
+.closingCopy a:hover { transform: translateY(-2px); }
+
+.heroActions .primaryButton { background: var(--gold); color: var(--navy-deep); }
+.heroActions .primaryButton:hover { background: #f1daa5; }
+.heroActions .outlineButton { border-color: rgba(255, 255, 255, 0.75); color: #fff; }
+.heroActions .outlineButton:hover { background: rgba(255, 255, 255, 0.12); }
+
+.heroMedia,
+.processMedia {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  background: #ddd5c8;
+}
+
+.heroMedia img,
+.processMedia img,
+.closingMedia img { object-fit: cover; }
+.heroMedia img { object-position: 50% 50%; }
+.heroMedia { min-height: 32rem; border-radius: 1.5rem; }
+
+.heroMedia figcaption {
+  position: absolute;
+  bottom: clamp(1.25rem, 2vw, 2rem);
+  left: clamp(1.25rem, 2vw, 2rem);
+  color: #fff;
+  font-size: clamp(0.75rem, 0.9vw, 0.9rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 5px rgba(0, 31, 53, 0.65);
+}
+
+.processMedia figcaption {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(0, 31, 53, 0.76);
+  color: #fff;
+  font-size: 0.67rem;
+  letter-spacing: 0.04em;
 }
 
 .process {
   margin-block: clamp(0.75rem, 1.2vw, 1.25rem);
-  padding: clamp(4rem, 7vw, 7rem) var(--public-card-gutter, 1rem);
-  border-radius: 1.25rem;
-  background: #ffffff;
-  box-shadow: 0 0.75rem 2.25rem rgba(0, 40, 68, 0.09);
+  padding: clamp(3rem, 5vw, 5.5rem);
+  border-radius: 1.5rem;
+  background: #f7f8f8;
 }
 
 .sectionIntro {
-  display: grid;
-  grid-template-columns: minmax(10rem, 0.6fr) minmax(0, 1.4fr);
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
   gap: 2rem;
-  align-items: start;
-  padding-bottom: clamp(3rem, 5vw, 5rem);
+  margin-bottom: clamp(2rem, 4vw, 3.5rem);
 }
 
-.sectionLabel {
-  padding-top: 0.5rem;
-}
+.sectionLabel { margin-bottom: 1rem; color: #a57d3e; }
 
 .sectionIntro h2 {
-  max-width: 16ch;
+  max-width: 15ch;
   margin: 0;
   font-family: var(--serif);
-  font-size: clamp(2.65rem, 4vw, 4.5rem);
+  font-size: clamp(2.55rem, 4vw, 4.6rem);
   font-weight: 400;
   letter-spacing: -0.055em;
-  line-height: 0.98;
+  line-height: 1.02;
+}
+
+.sectionIntro > p {
+  max-width: 20rem;
+  margin: 0 0 0.3rem;
+  color: #506473;
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.processGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: stretch;
 }
 
 .steps {
-  max-width: none;
-  margin: 0 auto;
+  margin: 0;
   padding: 0;
+  border-top: 1px solid rgba(0, 40, 68, 0.17);
   list-style: none;
-  border-top: 1px solid rgba(0, 40, 68, 0.25);
 }
 
 .step {
   display: grid;
-  grid-template-columns: 3.5rem minmax(0, 1.2fr) minmax(16rem, 0.9fr);
-  gap: clamp(1rem, 2vw, 2rem);
-  align-items: center;
-  padding: clamp(1rem, 1.65vw, 1.6rem) 0;
-  border-bottom: 1px solid rgba(0, 40, 68, 0.25);
+  grid-template-columns: 2.35rem 3rem minmax(0, 1fr);
+  gap: clamp(0.7rem, 1.2vw, 1.25rem);
+  align-items: start;
+  padding: clamp(1rem, 1.8vw, 1.6rem) 0;
+  border-bottom: 1px solid rgba(0, 40, 68, 0.17);
 }
 
 .stepNumber {
-  color: #9a804c;
+  padding-top: 0.6rem;
+  color: #a57d3e;
   font-family: var(--serif);
-  font-size: clamp(1.7rem, 2.3vw, 2.35rem);
+  font-size: 1.45rem;
   line-height: 1;
-}
-
-.stepHeading {
-  display: flex;
-  align-items: center;
-  gap: clamp(0.75rem, 1.3vw, 1.1rem);
 }
 
 .stepIcon {
   display: grid;
-  flex: 0 0 auto;
-  width: 2.7rem;
-  height: 2.7rem;
+  width: 2.75rem;
+  height: 2.75rem;
   place-items: center;
-  border: 1px solid rgba(0, 40, 68, 0.22);
-  border-radius: 50%;
-  background: #fff;
+  border-radius: 0.8rem;
+  background: #e8edf0;
+  color: var(--navy);
 }
 
-.step h3 {
-  margin: 0;
+.stepCopy h3 {
+  margin: 0 0 0.4rem;
   font-family: var(--serif);
-  font-size: clamp(1.25rem, 1.5vw, 1.65rem);
+  font-size: clamp(1.25rem, 1.6vw, 1.75rem);
   font-weight: 400;
-  letter-spacing: -0.04em;
-  line-height: 1.08;
+  letter-spacing: -0.035em;
+  line-height: 1.18;
 }
 
-.step > p {
-  max-width: 28rem;
+.stepCopy p {
+  max-width: 34rem;
   margin: 0;
-  color: #425663;
-  font-size: clamp(0.88rem, 0.9vw, 1rem);
+  color: #506473;
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 
+.processMedia { min-height: 31rem; border-radius: 1.2rem; }
+.processMedia img { object-position: 50% 56%; }
+
 .closing {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  min-height: clamp(29rem, 46vw, 42rem);
-  margin-bottom: clamp(3rem, 5vw, 5rem);
+  grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
+  min-height: clamp(28rem, 38vw, 35rem);
+  margin-bottom: clamp(2rem, 4vw, 4rem);
   overflow: hidden;
-  border-radius: 1.5rem;
+  border-radius: 1.75rem;
   background: var(--navy);
   color: #fff;
 }
@@ -201,263 +260,119 @@
 .closingMedia {
   position: relative;
   min-height: 28rem;
+  margin: 0;
   background: #d7d3c8;
 }
 
-.closingMedia img {
-  object-fit: cover;
-}
-
-.closingMedia > span {
+.closingMedia figcaption {
   position: absolute;
-  bottom: 1.5rem;
-  left: 1.5rem;
-  color: var(--navy);
-  font-family: var(--serif);
-  font-size: 2rem;
+  right: 1rem;
+  bottom: 1rem;
+  border-radius: 999px;
+  padding: 0.45rem 0.7rem;
+  background: rgba(0, 31, 53, 0.76);
+  color: #fff;
+  font-size: 0.67rem;
+  letter-spacing: 0.04em;
 }
 
 .closingCopy {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  padding: clamp(2rem, 5vw, 6rem);
+  isolation: isolate;
+  padding: clamp(2.5rem, 5vw, 5.5rem);
+}
+
+.closingCopy::before {
+  position: absolute;
+  z-index: -1;
+  right: -12%;
+  bottom: -30%;
+  width: min(80%, 35rem);
+  aspect-ratio: 1;
+  background: url('/corporate-botanical-pattern-v2.png') center / contain no-repeat;
+  content: '';
+  opacity: 0.18;
+  pointer-events: none;
 }
 
 .closingCopy h2 {
-  margin: 1.2rem 0 1.5rem;
+  margin: 1.2rem 0 1.25rem;
   font-family: var(--serif);
-  font-size: clamp(2.65rem, 4vw, 4.5rem);
+  font-size: clamp(2.7rem, 4.2vw, 4.75rem);
   font-weight: 400;
   letter-spacing: -0.06em;
   line-height: 0.98;
 }
 
 .closingCopy > p:not(.eyebrow) {
-  max-width: 26rem;
+  max-width: 25rem;
   margin: 0;
   color: rgba(255, 255, 255, 0.8);
   font-size: 1rem;
   line-height: 1.6;
 }
 
-.closingCopy a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  min-height: 3.25rem;
+.closingActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   margin-top: 2rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: 999px;
-  background: #fff;
-  color: var(--navy);
-  font-size: 0.82rem;
-  font-weight: 600;
-  text-decoration: none;
 }
 
-.page a:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 4px;
-}
-
-.closingCopy a:hover {
+.closingActions a:first-child {
   background: var(--gold);
+  color: var(--navy-deep);
 }
 
-@media (max-width: 800px) {
-  .heroGrid,
-  .sectionIntro,
-  .closing {
-    grid-template-columns: 1fr;
-  }
+.closingActions a:first-child:hover { background: #f1daa5; }
 
-  .heroGrid {
-    gap: 2.5rem;
-    padding-top: 5rem;
-  }
-
-  .hero h1 {
-    font-size: clamp(2.5rem, 6vw, 4rem);
-  }
-
-  .sectionIntro {
-    gap: 1rem;
-  }
-
-  .step {
-    grid-template-columns: 3.2rem minmax(0, 1fr);
-    gap: 0.75rem 1rem;
-  }
-
-  .stepHeading {
-    gap: 0.75rem;
-  }
-
-  .step > p {
-    grid-column: 2;
-  }
-
-  .closingMedia {
-    min-height: clamp(16rem, 55vw, 27rem);
-  }
-
-  .closingCopy {
-    padding: clamp(2rem, 6vw, 4rem);
-  }
+.closingActions a:last-child {
+  border-color: rgba(255, 255, 255, 0.75);
+  color: #fff;
 }
 
-@media (max-width: 480px) {
-  .heroTopline span:last-child {
-    display: none;
-  }
+.closingActions a:last-child:hover { background: rgba(255, 255, 255, 0.12); }
+.page a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
 
-  .stepIcon {
-    width: 2.7rem;
-    height: 2.7rem;
-  }
-
-  .stepIcon svg {
-    width: 1.25rem;
-  }
-
-  .step h3 {
-    font-size: 1.55rem;
-  }
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr 0.85fr; }
+  .heroCopy { padding: clamp(2rem, 4vw, 3rem); }
+  .hero h1 { font-size: clamp(3.2rem, 6vw, 5rem); }
+  .processGrid { grid-template-columns: 1fr 0.8fr; gap: 2rem; }
 }
 
-@media (max-width: 600px) {
-  .hero {
-    padding: 1.35rem 1.25rem 2.4rem;
-  }
+@media (max-width: 700px) {
+  .hero, .processGrid, .closing { grid-template-columns: 1fr; }
+  .hero { min-height: 0; }
+  .heroCopy { padding: 2.5rem 1.5rem 2.25rem; }
+  .hero h1 { font-size: clamp(3.5rem, 12vw, 5rem); }
+  .heroMedia { min-height: clamp(15rem, 58vw, 24rem); }
+  .sectionIntro { display: block; }
+  .sectionIntro > p { max-width: 30rem; margin-top: 1.2rem; }
+  .process { padding: 2.75rem 1.4rem; }
+  .processMedia { min-height: clamp(17rem, 70vw, 26rem); }
+  .closing { min-height: 0; }
+  .closingMedia { min-height: clamp(16rem, 62vw, 25rem); }
+  .closingCopy { padding: 2.5rem 1.5rem 2.75rem; }
+  .closingCopy::before { width: 65%; bottom: -25%; }
+}
 
-  .heroTopline {
-    padding-bottom: 0.85rem;
-    font-size: 0.63rem;
-  }
-
-  .heroGrid {
-    gap: 1.4rem;
-    padding-top: 2.5rem;
-  }
-
-  .eyebrow,
-  .sectionLabel {
-    font-size: 0.63rem;
-    line-height: 1.4;
-  }
-
-  .hero h1 {
-    margin-top: 0.8rem;
-    font-size: clamp(2.25rem, 8vw, 3rem);
-    line-height: 0.96;
-  }
-
-  .heroIntro p {
-    font-size: 1rem;
-    line-height: 1.38;
-  }
-
-  .heroLinks {
-    display: grid;
-    gap: 0;
-    margin-top: 1.4rem;
-  }
-
-  .heroLinks a {
-    justify-content: space-between;
-    min-height: 2.75rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
-    border-bottom: 0;
-    padding: 0.7rem 0;
-    font-size: 0.82rem;
-  }
-
-  .heroLinks a:last-child {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  }
-
-  .process {
-    padding: 2.8rem var(--public-card-gutter, 0.5rem) 3rem;
-  }
-
-  .sectionIntro {
-    gap: 0.8rem;
-    padding-bottom: 1.7rem;
-  }
-
-  .sectionLabel {
-    padding-top: 0;
-  }
-
-  .sectionIntro h2 {
-    max-width: 18ch;
-    font-size: clamp(2rem, 7vw, 2.75rem);
-    line-height: 1.03;
-  }
-
-  .step {
-    grid-template-columns: 2.35rem minmax(0, 1fr);
-    gap: 0.3rem 0.65rem;
-    padding: 1.15rem 0;
-  }
-
-  .stepNumber {
-    font-size: 1.55rem;
-  }
-
-  .stepHeading {
-    gap: 0.65rem;
-  }
-
-  .stepIcon {
-    width: 2.25rem;
-    height: 2.25rem;
-  }
-
-  .stepIcon svg {
-    width: 1.05rem;
-    height: 1.05rem;
-  }
-
-  .step h3 {
-    font-size: clamp(1.15rem, 4.8vw, 1.4rem);
-    line-height: 1.12;
-  }
-
-  .step > p {
-    font-size: 0.84rem;
-    line-height: 1.45;
-  }
-
-  .closing {
-    min-height: 0;
-    margin-bottom: 2rem;
-  }
-
-  .closingMedia {
-    min-height: clamp(12rem, 55vw, 16rem);
-  }
-
-  .closingCopy {
-    padding: 1.75rem 1.25rem 2rem;
-  }
-
-  .closingCopy h2 {
-    margin: 0.8rem 0 1rem;
-    font-size: clamp(2rem, 7vw, 2.75rem);
-  }
-
-  .closingCopy > p:not(.eyebrow) {
-    font-size: 0.9rem;
-    line-height: 1.5;
-  }
-
-  .closingCopy a {
-    min-height: 2.75rem;
-    margin-top: 1.4rem;
-    padding: 0.7rem 1.1rem;
-  }
+@media (max-width: 430px) {
+  .heroCopy { padding: 2.2rem 1.2rem; }
+  .hero h1 { font-size: clamp(3.1rem, 13vw, 4rem); }
+  .heroActions { width: 100%; }
+  .heroActions a { width: 100%; justify-content: space-between; }
+  .closingActions { width: 100%; }
+  .closingActions a { width: 100%; justify-content: space-between; }
+  .process { padding: 2.5rem 1rem; }
+  .sectionIntro h2 { font-size: clamp(2.2rem, 10vw, 3rem); }
+  .step { grid-template-columns: 2rem 2.5rem minmax(0, 1fr); gap: 0.55rem; }
+  .stepIcon { width: 2.35rem; height: 2.35rem; }
+  .stepIcon svg { width: 1.15rem; height: 1.15rem; }
+  .stepNumber { font-size: 1.2rem; }
+  .stepCopy h3 { font-size: 1.23rem; }
 }

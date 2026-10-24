@@ -88,7 +88,6 @@ export const isEditorialHighlightIcon = (value: unknown): value is EditorialHigh
   typeof value === "string" && HOMEPAGE_HIGHLIGHT_ICON_OPTIONS.some((option) => option.id === value);
 
 export type EditorialHomepageContent = {
-  editorial_hero_eyebrow: string;
   editorial_hero_heading: string;
   editorial_hero_description: string;
   editorial_hero_primary_label: string;
@@ -114,16 +113,15 @@ export type EditorialHomepageContent = {
 };
 
 export const defaultEditorialHomepageContent: EditorialHomepageContent = {
-  editorial_hero_eyebrow: "Serenity on the Rocks · Pakenham",
-  editorial_hero_heading: "Whole-Home Stays.\nSimple Direct\nBooking.",
-  editorial_hero_description: "Fully furnished private homes for relocations, home renovations, business travel and partner-booked stays.",
-  editorial_hero_primary_label: "Check Availability",
-  editorial_hero_secondary_label: "Partner Booking",
+  editorial_hero_heading: "Premium Furnished Homes\nfor Corporate, Insurance\n& Extended Stays",
+  editorial_hero_description: "Three neighbouring private homes in Pakenham, Victoria, offering comfort and flexibility for displaced families, business travellers, relocations and project teams.",
+  editorial_hero_primary_label: "Corporate Enquiries",
+  editorial_hero_secondary_label: "Explore Our Homes",
   editorial_highlights: [
-    { icon: "house", title: "Move-in ready", description: "Furnished homes with the everyday essentials in place." },
-    { icon: "calendar-days", title: "Flexible stays", description: "Stay a few weeks or settle in for longer." },
-    { icon: "calendar-check", title: "Book direct", description: "Check available dates and arrange your stay with us." },
-    { icon: "contact", title: "Personal support", description: "One responsive team, from enquiry to checkout." },
+    { icon: "house", title: "3 Private Homes", description: "Up to 21 guests" },
+    { icon: "sofa", title: "Fully Furnished", description: "Equipped for everyday living" },
+    { icon: "calendar-days", title: "Flexible Stays", description: "Short or long term" },
+    { icon: "briefcase", title: "Corporate Bookings", description: "Direct enquiries and invoicing" },
   ],
   editorial_intro_heading: "The tailored stay",
   editorial_intro_link_label: "View all houses",
