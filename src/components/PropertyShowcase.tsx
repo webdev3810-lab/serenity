@@ -1,6 +1,7 @@
 import { AmenityIcon } from "@/src/components/AmenityIcon";
 import type { Property, PropertyImage } from "@/src/data/properties";
 import { normalizeAmenities } from "@/src/lib/amenities";
+import { corporateBookingWording } from "@/src/lib/publicPageCopy";
 import { ArrowLeft, Bath, BedDouble, CalendarDays, Camera, Car, Check, ChevronRight, ClipboardList, CookingPot, DoorOpen, KeyRound, Map, MapPin, Shield, Snowflake, Users, WashingMachine, Wifi } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -90,7 +91,7 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
     <div className="property-showcase-info-grid">
       {amenities.length > 0 && <section className="property-showcase-panel property-showcase-amenities" id="house-amenities">
         <h2>Amenities</h2>
-        <div className="property-showcase-amenity-list">{amenities.slice(0, 8).map((amenity) => <span key={`${amenity.id}-${amenity.label}`}><AmenityIcon icon={amenity.icon} />{amenity.label}</span>)}</div>
+        <div className="property-showcase-amenity-list">{amenities.slice(0, 8).map((amenity) => <span key={`${amenity.id}-${amenity.label}`}><AmenityIcon icon={amenity.icon} />{corporateBookingWording(amenity.label)}</span>)}</div>
         {amenities.length > 8 && <button type="button" className="property-showcase-text-action" onClick={onOpenAmenities}>View all {amenities.length} amenities <ChevronRight size={16} aria-hidden="true" /></button>}
       </section>}
       <section className="property-showcase-panel" id="house-checkin">
@@ -100,8 +101,8 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
         {property.checkout && <p className="property-showcase-panel-note">Checkout: {property.checkout}</p>}
       </section>
       {property.corporateBookingAllowed && <section className="property-showcase-panel">
-        <h2><DoorOpen size={24} aria-hidden="true" />Corporate stays</h2>
-        <p>{property.corporateInformation || property.corporateInstructions || "Corporate stays are available for approved partners."}</p>
+        <h2><DoorOpen size={24} aria-hidden="true" />Corporate bookings</h2>
+        <p>{corporateBookingWording(property.corporateInformation || property.corporateInstructions || "Corporate bookings are available for approved partners.")}</p>
         <ul>
           <li>Partner ID required for online corporate booking</li>
           {property.longTermStaysAllowed && <li>Longer stays available</li>}

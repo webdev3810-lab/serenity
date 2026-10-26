@@ -183,7 +183,7 @@ export async function POST(request: Request) {
         expires_at: Math.floor(Date.now() / 1000) + 1860,
         success_url: `${origin}/corporate-stays/confirmation?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${origin}/corporate-stays#corporate-booking`,
-        line_items: [{ price_data: { currency: "aud", product_data: { name: `Serenity corporate stay · ${propertySlugs.length} house${propertySlugs.length === 1 ? "" : "s"}`, description: "One payment for all selected houses. Individual stay dates are in your confirmation." }, unit_amount: totalCents }, quantity: 1 }],
+        line_items: [{ price_data: { currency: "aud", product_data: { name: `Serenity corporate booking · ${propertySlugs.length} house${propertySlugs.length === 1 ? "" : "s"}`, description: "One payment for all selected houses. Individual stay dates are in your confirmation." }, unit_amount: totalCents }, quantity: 1 }],
         metadata,
         payment_intent_data: { metadata, description: `Serenity corporate reservation ${resolvedReference}` },
       }, { idempotencyKey: `serenity-corporate-${resolvedReference}` });

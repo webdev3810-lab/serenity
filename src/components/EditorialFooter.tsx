@@ -23,9 +23,9 @@ export function EditorialFooter({ draft = false }: { draft?: boolean }) {
       </section>
       <div className="serenity-editorial-footer__grid">
         <div className="serenity-editorial-footer__brand">
-          <Link href="/" className="serenity-editorial-footer__brand-link" aria-label="Serenity Corporate Stays home">
+          <Link href="/" className="serenity-editorial-footer__brand-link" aria-label="Serenity Corporate Bookings home">
             <Image src="/LOGO.png" alt="" width={1248} height={642} sizes="72px" />
-            <span><strong>SERENITY</strong><small>CORPORATE STAYS</small></span>
+            <span><strong>SERENITY</strong><small>CORPORATE BOOKINGS</small></span>
           </Link>
           <p>Furnished homes for the moments that bring you to Pakenham.</p>
           <Link href="/homes" className="serenity-editorial-footer__brand-cta">Explore our homes <ArrowRight size={16} aria-hidden="true" /></Link>
@@ -40,7 +40,7 @@ export function EditorialFooter({ draft = false }: { draft?: boolean }) {
         <div>
           <h2>Discover</h2>
           <Link href="/about">About</Link>
-          <Link href="/corporate-stays">Corporate stays</Link>
+          <Link href="/corporate-stays">Corporate bookings</Link>
           <Link href="/long-term-stays">Long-term stays</Link>
           <Link href="/other-businesses">Other businesses</Link>
         </div>

@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { propertySlug, checkIn, checkout, guests: rawGuests, guestDetails, corporateDetails, notes } = body;
     if (corporateDetails?.corporate === true || guestDetails?.corporate === true) {
-      return NextResponse.json({ error: "Corporate bookings require a verified Partner ID. Please use the corporate stays booking form." }, { status: 403 });
+      return NextResponse.json({ error: "Corporate bookings require a verified Partner ID. Please use the corporate bookings form." }, { status: 403 });
     }
     const email = String(guestDetails?.email ?? "").trim();
     if (!propertySlug || !checkIn || !checkout || !email) {

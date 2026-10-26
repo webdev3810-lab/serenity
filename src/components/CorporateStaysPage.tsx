@@ -244,7 +244,7 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
       if (typeof result.checkoutUrl !== "string" || !result.checkoutUrl.startsWith("https://checkout.stripe.com/")) throw new Error("Secure checkout is unavailable. Please try again.");
       window.location.assign(result.checkoutUrl);
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Could not reserve the corporate stay.");
+      setFormError(error instanceof Error ? error.message : "Could not reserve the corporate booking.");
     } finally {
       setFormSubmitting(false);
     }
@@ -333,7 +333,7 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
           <p>{copy.corporateHeroLead}</p>
           <div className="corporate-editorial-links">
             <Link href="#corporate-question" onClick={() => openEnquiryType("insurance")} aria-label="Request an insurance accommodation quote"><ShieldCheck size={18} aria-hidden="true" /> Insurance quote <ChevronRight size={16} aria-hidden="true" /></Link>
-            <Link href="#corporate-question" onClick={() => openEnquiryType("corporate")} aria-label="Request a corporate stay quote"><BriefcaseBusiness size={18} aria-hidden="true" /> Corporate quote <ChevronRight size={16} aria-hidden="true" /></Link>
+            <Link href="#corporate-question" onClick={() => openEnquiryType("corporate")} aria-label="Ask about corporate bookings"><BriefcaseBusiness size={18} aria-hidden="true" /> Corporate bookings <ChevronRight size={16} aria-hidden="true" /></Link>
           </div>
         </div>
         <div className="corporate-editorial-hero__image">
@@ -374,7 +374,7 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
               {media.corporateWork.src === PUBLIC_PAGE_MEDIA.corporateWork.src && <span className="corporate-insurance__image-note illustrative-photo-label">Illustrative image</span>}
             </div>
             <div className="corporate-insurance__path-content">
-              <span className="corporate-insurance__number"><BriefcaseBusiness size={18} aria-hidden="true" /> 02 / Corporate stays</span>
+              <span className="corporate-insurance__number"><BriefcaseBusiness size={18} aria-hidden="true" /> 02 / Corporate bookings</span>
               <h3>{copy.corporateWorkTitle}</h3>
               <p>{copy.corporateWorkLead}</p>
               <ul>
@@ -384,7 +384,7 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
                 <li>{copy.corporateWorkPoint3}</li>
                 <li>{copy.corporateWorkPoint4}</li>
               </ul>
-              <Link href="#corporate-question" onClick={() => openEnquiryType("corporate")}>Ask about a corporate stay <ArrowUpRight size={19} aria-hidden="true" /></Link>
+              <Link href="#corporate-question" onClick={() => openEnquiryType("corporate")}>Ask about corporate bookings <ArrowUpRight size={19} aria-hidden="true" /></Link>
             </div>
           </article>
         </div>
@@ -443,7 +443,7 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-5 flex flex-col justify-center">
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black block mb-4">Enquiry</span>
-              <h2>{enquiryType === "insurance" ? "Request a place to stay." : "Ask about a corporate stay."}</h2>
+              <h2>{enquiryType === "insurance" ? "Request a place to stay." : "Ask about corporate bookings."}</h2>
               <p className="text-base text-stone-600 leading-relaxed max-w-md mb-8">{enquiryType === "insurance" ? "Tell us about the people, dates and type of home you need. We’ll respond with suitable options and a written quote; no stay is reserved by submitting this form." : "Use this short enquiry form for rates, invoices, longer stays, team arrangements, or anything you want to clarify before booking."}</p>
               <ul className="space-y-4 text-sm text-stone-600">
                 <li className="flex items-start gap-3"><CalendarCheck size={18} className="text-[var(--hero-green)] shrink-0 mt-0.5" /> Flexible dates discussed with you</li>
@@ -466,7 +466,7 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
                   <form onSubmit={handleEnquirySubmit} className="mt-6 space-y-5">
                     <div className="corporate-enquiry-type" role="group" aria-label="Enquiry type">
                       <button type="button" aria-pressed={enquiryType === "insurance"} onClick={() => selectEnquiryType("insurance")}>Insurance accommodation</button>
-                      <button type="button" aria-pressed={enquiryType === "corporate"} onClick={() => selectEnquiryType("corporate")}>Corporate stay</button>
+                      <button type="button" aria-pressed={enquiryType === "corporate"} onClick={() => selectEnquiryType("corporate")}>Corporate bookings</button>
                     </div>
                     <div className="grid gap-5 sm:grid-cols-2">
                       <FormInput id="corp-enquiry-company" label={enquiryType === "insurance" ? "Insurer / organisation (optional)" : "Company name *"} required={enquiryType === "corporate"} value={enquiryData.companyName} onChange={(event) => setEnquiryData({ ...enquiryData, companyName: event.target.value })} placeholder={enquiryType === "insurance" ? "If applicable" : "Your company"} />
@@ -480,7 +480,7 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
                         <FormInput id="insurance-needs" label="People / bedrooms needed (optional)" value={enquiryData.accommodationNeeds} onChange={(event) => setEnquiryData({ ...enquiryData, accommodationNeeds: event.target.value })} placeholder="e.g. 4 people, 3 bedrooms" />
                       </div>
                     )}
-                    <TextArea id="corp-enquiry-question" label={enquiryType === "insurance" ? "Accommodation needs *" : "Your question *"} required value={enquiryData.question} onChange={(event) => setEnquiryData({ ...enquiryData, question: event.target.value })} placeholder={enquiryType === "insurance" ? "Tell us what kind of home you need. You don’t need to share private claim details." : "What would you like to know about a corporate stay?"} rows={4} />
+                    <TextArea id="corp-enquiry-question" label={enquiryType === "insurance" ? "Accommodation needs *" : "Your question *"} required value={enquiryData.question} onChange={(event) => setEnquiryData({ ...enquiryData, question: event.target.value })} placeholder={enquiryType === "insurance" ? "Tell us what kind of home you need. You don’t need to share private claim details." : "What would you like to know about corporate bookings?"} rows={4} />
                     {enquiryError && <p className="border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700" role="alert" aria-live="polite">{enquiryError}</p>}
                     <button type="submit" className="inline-flex w-full items-center justify-center gap-2 bg-[var(--hero-green)] text-white px-6 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] rounded-xl transition-colors disabled:cursor-not-allowed disabled:opacity-60" disabled={enquirySubmitting}>{enquirySubmitting ? "Sending enquiry…" : enquiryType === "insurance" ? "Request accommodation quote" : "Send corporate question"}<ArrowUpRight size={15} /></button>
                   </form>
@@ -513,7 +513,7 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-16 items-start">
             <div className="lg:col-span-4 lg:sticky lg:top-32">
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black block mb-4">Partner booking</span>
-              <h2>Plan your corporate stay.</h2>
+              <h2>Plan your corporate booking.</h2>
               <p className="text-base text-stone-600 leading-relaxed mb-6 max-w-md">Have a Partner ID? Verify it here to check availability, select your houses, and pay securely. If you do not have an ID, send a corporate enquiry above.</p>
             </div>
             
@@ -572,7 +572,7 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
                         </div>
                         {nights > 0 && <p className="mt-3 text-sm text-stone-600">{nights} night{nights === 1 ? "" : "s"} · {formatAud(calculatePrice(property, stay.arrival, stay.departure, { ...defaultGuests, adults: stay.guests }).total)}</p>}
                         {stay.arrival && stay.departure && <p className="mt-2 text-sm leading-relaxed text-[#002844]">{freeCancellationText(stay.arrival, property.freeCancellationDays)} Contact Serenity to cancel; later refund requests are reviewed.</p>}
-                        {nights > 0 && nights < property.minimumCorporateStay && <p className="mt-2 text-sm text-red-700">Minimum corporate stay: {property.minimumCorporateStay} night{property.minimumCorporateStay === 1 ? "" : "s"}.</p>}
+                        {nights > 0 && nights < property.minimumCorporateStay && <p className="mt-2 text-sm text-red-700">Minimum stay for corporate bookings: {property.minimumCorporateStay} night{property.minimumCorporateStay === 1 ? "" : "s"}.</p>}
                         {state === "unavailable" && <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-medium text-red-700"><p>{availabilityConflict[property.slug] ? `${formatDateAu(availabilityConflict[property.slug])} is booked or blocked.` : "These dates overlap a booking or blocked night."}</p><button type="button" className="font-bold underline underline-offset-2" onClick={() => openCalendar(property.slug)}>Change dates</button></div>}
                         {state === "error" && <p className="mt-2 text-sm font-medium text-red-700">We could not check live availability. Open the calendar to retry.</p>}
                       </div>;
@@ -633,7 +633,7 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
               <h2>{copy.corporateFaqTitle}</h2>
             </div>
             <div className="lg:col-span-8">
-              <div className="serenity-editorial-faq__list" aria-label="Corporate stay frequently asked questions">
+              <div className="serenity-editorial-faq__list" aria-label="Corporate booking frequently asked questions">
                 {corporateFaqs.map(([question, answer], index) => (
                   <details key={question} className="serenity-editorial-faq__item">
                     <summary>

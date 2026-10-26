@@ -54,6 +54,10 @@ export default function SerenityEditorialHome({
   content,
 }: SerenityEditorialHomeProps) {
   const marqueeDuration = `${Math.max(photoPreviews.length * 6, 72)}s`;
+  const audienceItems = content.editorial_hero_audience.split("\n").map((item) => item.trim()).filter(Boolean);
+  const audienceText = audienceItems.length > 1
+    ? `${audienceItems.slice(0, -1).join(", ")} & ${audienceItems[audienceItems.length - 1]}`
+    : audienceItems[0] ?? "";
 
   return (
     <div className="serenity-editorial-home">
@@ -63,19 +67,20 @@ export default function SerenityEditorialHome({
           <h1 id="serenity-editorial-title">
             {content.editorial_hero_heading.split("\n").map((line, index) => <span key={index}>{line}</span>)}
           </h1>
+          {audienceText && <p className="serenity-editorial-hero__audience">For {audienceText}</p>}
           <p className="serenity-editorial-hero__description">
             {content.editorial_hero_description}
           </p>
+          <div className="serenity-editorial-hero__actions">
+            <Link href="/corporate-stays#corporate-question">{content.editorial_hero_primary_label}<ArrowRight size={18} aria-hidden="true" /></Link>
+            <Link href="/homes">{content.editorial_hero_secondary_label}<ArrowRight size={18} aria-hidden="true" /></Link>
+          </div>
           <div className="serenity-editorial-hero__stats" aria-label="Stay benefits">
             {content.editorial_highlights.map((highlight, index) => <div className="serenity-editorial-hero__stat" key={index}>
               <span className="serenity-editorial-hero__stat-icon" aria-hidden="true"><StayHighlightIcon icon={highlight.icon} /></span>
               <strong>{highlight.title}</strong>
               <span className="serenity-editorial-hero__stat-label">{highlight.description}</span>
             </div>)}
-          </div>
-          <div className="serenity-editorial-hero__actions">
-            <Link href="/corporate-stays#corporate-question">{content.editorial_hero_primary_label}<ArrowRight size={18} aria-hidden="true" /></Link>
-            <Link href="/homes">{content.editorial_hero_secondary_label}<ArrowRight size={18} aria-hidden="true" /></Link>
           </div>
         </div>
       </section>

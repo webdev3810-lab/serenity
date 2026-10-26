@@ -138,7 +138,7 @@ export function ContactEditorialPage({ faqContent, media, copy, properties }: { 
           <div className="contact-story-form__row">
             <div className="contact-story-form__choice">
               <label htmlFor="contact-stay-type">Stay type</label>
-              <span className="contact-story-form__select"><select id="contact-stay-type" name="projectType" value={stayType} onChange={(event) => setStayType(event.target.value)} className={!stayType ? "is-placeholder" : ""}><option value="">Choose your stay type</option><option>Family stay</option><option>Corporate or team stay</option><option>Relocation or insurance</option><option>Long-term stay</option><option>Other</option></select><ChevronDown size={19} aria-hidden="true" /></span>
+              <span className="contact-story-form__select"><select id="contact-stay-type" name="projectType" value={stayType} onChange={(event) => setStayType(event.target.value)} className={!stayType ? "is-placeholder" : ""}><option value="">Choose your stay type</option><option>Family stay</option><option>Corporate bookings</option><option>Relocation or insurance</option><option>Long-term stay</option><option>Other</option></select><ChevronDown size={19} aria-hidden="true" /></span>
               {stayType === "Other" && <label className="contact-story-form__other">Tell us your stay type<input name="projectTypeOther" required maxLength={73} placeholder="Describe your stay" /></label>}
             </div>
             <div className="contact-story-form__choice">

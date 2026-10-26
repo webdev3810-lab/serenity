@@ -366,7 +366,7 @@ useEffect(() => {
   const saveHomepageSection = async (section: HomepageSectionKey, published: boolean) => {
     setSaving(true);
     const sectionFields: Record<HomepageSectionKey, string[]> = {
-      hero: ["editorial_hero_heading", "editorial_hero_description", "editorial_hero_primary_label", "editorial_hero_secondary_label", "editorial_highlights"],
+      hero: ["editorial_hero_heading", "editorial_hero_audience", "editorial_hero_description", "editorial_hero_primary_label", "editorial_hero_secondary_label", "editorial_highlights"],
       houses: [],
       intro: ["editorial_intro_heading", "editorial_intro_link_label", "editorial_intro_statement_one", "editorial_intro_statement_two"],
       services: ["editorial_services_heading", "editorial_services_description", "editorial_services"],

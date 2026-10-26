@@ -3,6 +3,7 @@ import { isCalendarDate } from "@/src/lib/date-pricing";
 import { isEditorialHighlightIcon } from "@/src/lib/homepageEditorialContent";
 export const CMS_LIMITS = {
   hero_heading: 70,
+  hero_audience: 100,
   hero_subtitle: 180,
   hero_image_caption: 60,
   section_heading: 80,
@@ -185,6 +186,7 @@ export function validateHomepageContent(payload: CmsPayload) {
   const errors: string[] = [];
   const fields: Array<[string, string, number]> = [
     ["Hero headline", "editorial_hero_heading", CMS_LIMITS.hero_heading],
+    ["Hero audience", "editorial_hero_audience", CMS_LIMITS.hero_audience],
     ["Hero description", "editorial_hero_description", CMS_LIMITS.hero_subtitle],
     ["Houses button", "editorial_hero_primary_label", CMS_LIMITS.button_label],
     ["Partner button", "editorial_hero_secondary_label", CMS_LIMITS.button_label],

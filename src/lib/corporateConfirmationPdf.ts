@@ -48,7 +48,7 @@ function wrap(value: string, font: PDFFont, size: number, width: number) {
 export async function createCorporateConfirmationPdf({ reference, total, houses }: CorporateConfirmationPdfDetails) {
   const pdf = await PDFDocument.create();
   pdf.setTitle(`Corporate booking confirmation ${reference}`);
-  pdf.setAuthor("Serenity Corporate Stays");
+  pdf.setAuthor("Serenity Corporate Bookings");
   pdf.setSubject("Confirmed corporate booking and payment receipt");
 
   const regular = await pdf.embedFont(StandardFonts.Helvetica);
@@ -64,9 +64,9 @@ export async function createCorporateConfirmationPdf({ reference, total, houses 
 
   const addPage = (continued: boolean) => {
     const page = pdf.addPage([width, height]);
-    page.drawText("SERENITY CORPORATE STAYS", { x: margin, y: height - 65, font: bold, size: 12, color: navy });
+    page.drawText("SERENITY CORPORATE BOOKINGS", { x: margin, y: height - 65, font: bold, size: 12, color: navy });
     page.drawRectangle({ x: margin, y: height - 83, width: contentWidth, height: 2, color: gold });
-    page.drawText(continued ? "CORPORATE STAY CONFIRMED - CONTINUED" : "CORPORATE STAY CONFIRMED", { x: margin, y: height - 122, font: bold, size: 17, color: navy });
+    page.drawText(continued ? "CORPORATE BOOKING CONFIRMED - CONTINUED" : "CORPORATE BOOKING CONFIRMED", { x: margin, y: height - 122, font: bold, size: 17, color: navy });
     if (continued) {
       page.drawText(safeText(`Booking reference: ${reference}`, regular), { x: margin, y: height - 149, font: regular, size: 10, color: muted });
       return { page, y: height - 183 };
@@ -110,7 +110,7 @@ export async function createCorporateConfirmationPdf({ reference, total, houses 
   if (y < 85) ({ page, y } = addPage(true));
   page.drawRectangle({ x: margin, y: y - 9, width: contentWidth, height: 0.7, color: border });
   page.drawText("This confirms payment and your booking. It is not a tax invoice.", { x: margin, y: y - 30, font: regular, size: 9, color: muted });
-  page.drawText("Serenity Corporate Stays | Pakenham, Victoria", { x: margin, y: y - 48, font: regular, size: 9, color: muted });
+  page.drawText("Serenity Corporate Bookings | Pakenham, Victoria", { x: margin, y: y - 48, font: regular, size: 9, color: muted });
 
   return pdf.save();
 }

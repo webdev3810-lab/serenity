@@ -172,7 +172,7 @@ export function GuestDetailsPage() {
         </div>
 
         <div className="rounded-none border border-stone-200 bg-white p-5 text-sm text-stone-700">
-          Booking for a company? Corporate reservations require a Partner ID. <Link href="/corporate-stays#corporate-booking" className="font-semibold underline text-[#002844]">Book a corporate stay</Link> or send an enquiry to request an ID.
+          Booking for a company? Corporate reservations require a Partner ID. <Link href="/corporate-stays#corporate-booking" className="font-semibold underline text-[#002844]">Make a corporate booking</Link> or send an enquiry to request an ID.
         </div>
 
         <button type="submit" className="btn-primary w-full justify-center text-base">

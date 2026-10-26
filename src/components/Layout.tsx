@@ -119,7 +119,7 @@ function Header({ pathname }: { pathname: string | null }) {
           <span className="serenity-editorial-nav__wordmark-name">SERENITY</span>
           <span className="serenity-editorial-nav__wordmark-descriptor">
             <span />
-            CORPORATE STAYS
+            CORPORATE BOOKINGS
             <span />
           </span>
         </span>

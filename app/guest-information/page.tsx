@@ -16,7 +16,7 @@ import type { GuestImageSlot } from "@/src/lib/guestInformation";
 
 export const metadata = pageMetadata(
   "Guest Information & Stay Policies",
-  "Essential guest information, house rules, self check-in guidance, and stay policies for Serenity Corporate Stays.",
+  "Essential guest information, house rules, self check-in guidance, and stay policies for Serenity Corporate Bookings.",
 );
 
 type InformationCard = {
@@ -73,9 +73,9 @@ export default async function Page() {
       <section className="guest-information-hero" aria-labelledby="guest-information-title">
         {heroPhoto && <PropertyPhoto image={heroPhoto} alt={heroPhoto.alt || "Furnished living space at a Serenity home"} className="guest-information-hero-photo" sizes="100vw" priority />}
         <div className="guest-information-hero-content">
-          <div className="guest-information-hero-brand" aria-label="Serenity Corporate Stays">
+          <div className="guest-information-hero-brand" aria-label="Serenity Corporate Bookings">
             <Image className="guest-information-hero-logo" src="/LOGO.png" alt="" width={224} height={115} priority />
-            <span><strong>Serenity</strong><small>Corporate Stays</small></span>
+            <span><strong>Serenity</strong><small>Corporate Bookings</small></span>
           </div>
           <p className="guest-information-kicker">{content.heroKicker}</p>
           <h1 id="guest-information-title">{content.title} <span>{content.titleAccent}</span></h1>

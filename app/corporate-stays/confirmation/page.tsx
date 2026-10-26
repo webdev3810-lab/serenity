@@ -100,7 +100,7 @@ export default function CorporateConfirmationPage() {
     {state === "paid" && <>
       <div ref={receiptRef} className="flex w-full flex-col items-center gap-5 bg-white text-center">
         <CheckCircle2 size={44} aria-hidden="true" />
-        <h1 className="font-serif text-4xl">Corporate stay confirmed</h1>
+        <h1 className="font-serif text-4xl">Corporate booking confirmed</h1>
         <p>Payment succeeded. Your selected houses are now booked and will appear as reserved in the Serenity calendar.</p>
         <div className="w-full rounded-2xl border border-slate-200 bg-white p-6 text-left">
           <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Booking reference</p>
@@ -129,7 +129,7 @@ export default function CorporateConfirmationPage() {
       </div>
       {downloadError && <p role="alert" className="text-sm text-red-700">{downloadError}</p>}
       {imageError && <p role="alert" className="text-sm text-red-700">{imageError}</p>}
-      <Link href="/corporate-stays" className="rounded-full bg-[#002844] px-6 py-3 font-semibold text-white">Back to corporate stays</Link>
+      <Link href="/corporate-stays" className="rounded-full bg-[#002844] px-6 py-3 font-semibold text-white">Back to corporate bookings</Link>
     </>}
 
     {state === "error" && <>

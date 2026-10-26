@@ -122,7 +122,7 @@ export const validateDateRange = (property: Property, checkIn?: string, checkout
     if (hasWeekend) return "Weekend nights are not available for this house.";
   }
   if (corporate && !property.corporateBookingAllowed) return "Corporate bookings are not available for this house.";
-  if (corporate && nights < property.minimumCorporateStay) return `Corporate stays require at least ${property.minimumCorporateStay} night${property.minimumCorporateStay === 1 ? "" : "s"}.`;
+  if (corporate && nights < property.minimumCorporateStay) return `Corporate bookings require at least ${property.minimumCorporateStay} night${property.minimumCorporateStay === 1 ? "" : "s"}.`;
   if (hasUnavailableConflict(property, checkIn, checkout, blockedDates)) return "Those dates overlap unavailable or already booked nights.";
   return "";
 };

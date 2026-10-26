@@ -128,7 +128,7 @@ export default function StaggeredMobileMenu({
             <div className="serenity-staggered-menu__panel-inner">
               <div className="serenity-staggered-menu__panel-heading">
                 <div>
-                  <span className="serenity-staggered-menu__eyebrow">SERENITY CORPORATE STAYS</span>
+                  <span className="serenity-staggered-menu__eyebrow">SERENITY CORPORATE BOOKINGS</span>
                   <h2>Explore Serenity</h2>
                 </div>
               </div>

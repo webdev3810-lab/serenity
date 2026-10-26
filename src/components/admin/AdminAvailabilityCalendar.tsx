@@ -5,7 +5,8 @@ import { isWithinFreeCancellation } from "@/src/lib/cancellationPolicy";
 import { isAppManagedBookingSource } from "@/src/lib/booking-source";
 import { AdminDialog, useAdminWorkspace, useDirtyGuard } from "@/src/components/admin/AdminUI";
 import type { Row } from "@/src/components/admin/AdminModels";
-import { CalendarDays, ChevronLeft, ChevronRight, CircleAlert, LockKeyhole, LockKeyholeOpen, Plus, RefreshCw, Save, X } from "lucide-react";
+import { AdminCalendarPricingEditor } from "./AdminCalendarPricingEditor";
+import { CalendarDays, ChevronLeft, ChevronRight, CircleAlert, LockKeyhole, LockKeyholeOpen, Pencil, Plus, RefreshCw, Save, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
@@ -72,6 +73,8 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
   const scrollRef = useRef<HTMLDivElement>(null);
   const [month, setMonth] = useState(() => todayIso().slice(0, 7));
   const [selection, setSelection] = useState<Selection | null>(null);
+  const [pricingPicking, setPricingPicking] = useState(false);
+  const [pricingSelection, setPricingSelection] = useState<{ propertyId: string; date?: string } | null>(null);
   const [blockPicking, setBlockPicking] = useState(startBlockSelection);
   const [selectedBlockDates, setSelectedBlockDates] = useState<Selection[]>([]);
   const [rangeAnchor, setRangeAnchor] = useState<Selection | null>(null);
@@ -124,6 +127,7 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
     return null;
   })();
   const selectedProperty = houses.find((property) => property.id === selection?.propertyId);
+  const pricingProperty = houses.find((property) => String(property.id) === pricingSelection?.propertyId);
   const selectedStatus = selection && selectedProperty ? getDayStatus(selectedProperty, selection.date, bookings, calendarEvents) : null;
   const selectedRate = selection && selectedProperty ? nightlyRate(selectedProperty, selection.date) : null;
   const counts = { available: 0, booked: 0, blocked: 0 };
@@ -162,12 +166,14 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
     finally { setBusy(false); }
   };
   const toggleBlockPicking = () => {
+    setPricingPicking(false);
     setUnblockPicking(false);
     setBlockPicking((current) => !current);
     setRangeAnchor(null); setPickerError(""); setError(""); setNotice("");
     setSelection(null); setAction(null);
   };
   const toggleUnblockPicking = () => {
+    setPricingPicking(false);
     setBlockPicking(false);
     setUnblockPicking((current) => !current);
     setUnblockRangeAnchor(null); setPickerError(""); setError(""); setNotice("");
@@ -310,19 +316,21 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
       <div><p className="admin-eyebrow">Availability / daily operations</p><h2 className="admin-page-title">Calendar</h2><p className="admin-page-description">Nightly prices and availability across all homes. Select blocked nights to unblock several at once.</p></div>
       <div className="flex flex-wrap gap-2">
         <button type="button" className="admin-button inline-flex items-center gap-2" onClick={() => void reload()}><RefreshCw size={16} /> Refresh</button>
+        {houses.length > 0 && <button type="button" className={`admin-button inline-flex items-center gap-2 ${pricingPicking ? "admin-button-primary" : ""}`} aria-pressed={pricingPicking} onClick={() => { setPricingPicking((current) => !current); setBlockPicking(false); setUnblockPicking(false); setRangeAnchor(null); setUnblockRangeAnchor(null); setSelection(null); setAction(null); setPickerError(""); }}><Pencil size={16} /> {pricingPicking ? "Done editing prices" : "Edit prices"}</button>}
         {firstOpenDate && <button type="button" className={`admin-button inline-flex items-center gap-2 ${blockPicking ? "admin-button-primary" : ""}`} aria-pressed={blockPicking} aria-label={blockPicking ? "Exit block date selection" : "Block dates"} onClick={toggleBlockPicking}><LockKeyhole size={16} /> Block dates</button>}
         {houses.length > 0 && <button type="button" className={`admin-button inline-flex items-center gap-2 ${unblockPicking ? "admin-button-primary" : ""}`} aria-pressed={unblockPicking} aria-label={unblockPicking ? "Exit unblock date selection" : "Unblock dates"} onClick={toggleUnblockPicking}><LockKeyholeOpen size={16} /> Unblock dates</button>}
-        {firstOpenDate && <button type="button" className="admin-button admin-button-primary inline-flex items-center gap-2" onClick={() => { setMonth(firstOpenDate.date.slice(0, 7)); setBlockPicking(false); setUnblockPicking(false); setRangeAnchor(null); setUnblockRangeAnchor(null); openDate(firstOpenDate.propertyId, firstOpenDate.date, "booking"); }}><Plus size={16} /> Manual booking</button>}
+        {firstOpenDate && <button type="button" className="admin-button admin-button-primary inline-flex items-center gap-2" onClick={() => { setMonth(firstOpenDate.date.slice(0, 7)); setPricingPicking(false); setBlockPicking(false); setUnblockPicking(false); setRangeAnchor(null); setUnblockRangeAnchor(null); openDate(firstOpenDate.propertyId, firstOpenDate.date, "booking"); }}><Plus size={16} /> Manual booking</button>}
       </div>
     </header>
     {!houses.length ? <div className="admin-card p-8 text-sm text-[var(--admin-muted)]">No published houses are available to show on the calendar.</div> : <>
       <div className="admin-availability-summary"><div><span>Available nights</span><strong>{counts.available}</strong></div><div><span>Booked nights</span><strong>{counts.booked}</strong></div><div><span>Blocked nights</span><strong>{counts.blocked}</strong></div><p>Across {houses.length} {houses.length === 1 ? "house" : "houses"} in {monthLabel(month)}. Prices are nightly rates before fees and tax.</p></div>
+      {pricingPicking && <div className="admin-availability-pick-guide" role="status"><Pencil size={18} aria-hidden="true" /><div><strong>Choose a date to edit its price</strong><p>Set a price for one night or a range. Click a house’s default rate to change its usual price. Dates marked “Special rate” keep their own price.</p></div></div>}
       <section className="admin-card overflow-hidden" aria-label="House availability calendar">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--admin-border)] px-4 py-4 sm:px-6"><div className="flex items-center gap-3"><CalendarDays size={20} className="text-[var(--admin-accent)]" aria-hidden="true" /><div><h3 className="text-lg font-semibold">{monthLabel(month)}</h3><p className="text-xs text-[var(--admin-muted)]">Scroll sideways to see every date</p></div></div><div className="flex items-center gap-2"><button type="button" className="admin-button min-h-10 px-3" onClick={() => setMonth(shiftMonth(month, -1))} aria-label="Previous month"><ChevronLeft size={17} /></button><button type="button" className="admin-button min-h-10 px-3 text-sm" onClick={() => { if (month === today.slice(0, 7)) centerToday(); else setMonth(today.slice(0, 7)); }}>Today</button><button type="button" className="admin-button min-h-10 px-3" onClick={() => setMonth(shiftMonth(month, 1))} aria-label="Next month"><ChevronRight size={17} /></button></div></div>
         <div className="admin-availability-scroll" ref={scrollRef}><div className="admin-availability-grid" style={{ gridTemplateColumns: `190px repeat(${dates.length}, minmax(100px, 1fr))` }}>
           <div className="admin-availability-corner">Homes <span>· AUD / night</span></div>
           {dates.map((date) => <div key={date} data-calendar-date={date} className={`admin-availability-day-heading ${date === today ? "is-today" : ""}`}><span>{new Intl.DateTimeFormat("en-AU", { weekday: "short", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`))}</span><strong>{Number(date.slice(-2))}</strong></div>)}
-          {houses.map((property) => <div className="admin-availability-row" key={property.id} style={{ display: "contents" }}><div className="admin-availability-house"><strong>{String(property.name).replace(/\s+-\s+Whole$/, "")}</strong><span>Base {formatAud(Number(property.nightly_price ?? 0))}</span></div>{dates.map((date) => {
+          {houses.map((property) => <div className="admin-availability-row" key={property.id} style={{ display: "contents" }}><div className="admin-availability-house"><strong>{String(property.name).replace(/\s+-\s+Whole$/, "")}</strong><button type="button" className="admin-availability-default-rate" aria-label={`Edit default nightly rate for ${property.name}, currently ${formatAud(Number(property.nightly_price ?? 0))}`} onClick={() => setPricingSelection({ propertyId: String(property.id) })}>Default {formatAud(Number(property.nightly_price ?? 0))}<Pencil size={11} aria-hidden="true" /></button></div>{dates.map((date) => {
             const status = getDayStatus(property, date, bookings, calendarEvents);
             const rate = nightlyRate(property, date);
             const key = blockDateKey({ propertyId: String(property.id), date });
@@ -330,14 +338,15 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
             const selectedForUnblock = unblockPicking && selectedUnblockKeys.has(key);
             return <button type="button" key={`${property.id}:${date}`} className={`admin-availability-cell is-${status.kind} ${date === today ? "is-today" : ""} ${blockPicking ? "is-picking" : ""} ${unblockPicking ? "is-unblock-picking" : ""} ${selectedForBlock ? "is-range-preview" : ""} ${selectedForUnblock ? "is-unblock-selection" : ""}`} onClick={(event) => {
               const propertyId = String(property.id);
-              if (unblockPicking) pickUnblockDate(propertyId, date, event.shiftKey || Boolean(unblockRangeAnchor));
+              if (pricingPicking) setPricingSelection({ propertyId, date });
+              else if (unblockPicking) pickUnblockDate(propertyId, date, event.shiftKey || Boolean(unblockRangeAnchor));
               else if (blockPicking) pickBlockDate(propertyId, date, event.shiftKey || Boolean(rangeAnchor));
               else if (status.kind === "manual") { setUnblockPicking(true); setSelectedUnblockDates((current) => current.some((item) => blockDateKey(item) === key) ? current : [...current, { propertyId, date }]); setUnblockRangeAnchor(null); setPickerError(""); setSelection(null); }
               else openDate(propertyId, date);
-            }} aria-label={`${property.name}, ${displayDate(date)}: ${formatAud(rate.amount)} per night, ${status.label}${rate.override ? ", custom rate" : ""}${unblockPicking ? selectedForUnblock ? ", selected for unblocking" : ", select for unblocking" : blockPicking ? selectedForBlock ? ", selected for blocking" : ", select for blocking" : status.kind === "manual" ? ", select to unblock" : ""}`} aria-pressed={selectedForBlock || selectedForUnblock} title={`${property.name} · ${displayDate(date)} · ${formatAud(rate.amount)} · ${status.label}`}><strong>{formatAud(rate.amount)}</strong><span>{selectedForBlock ? "Selected for block" : selectedForUnblock ? "Selected to unblock" : status.label}</span>{rate.override && <small>Custom rate</small>}</button>;
+            }} aria-label={`${property.name}, ${displayDate(date)}: ${formatAud(rate.amount)} per night, ${status.label}${rate.override ? ", special rate" : ", default rate"}${pricingPicking ? ", edit price" : unblockPicking ? selectedForUnblock ? ", selected for unblocking" : ", select for unblocking" : blockPicking ? selectedForBlock ? ", selected for blocking" : ", select for blocking" : status.kind === "manual" ? ", select to unblock" : ""}`} aria-pressed={selectedForBlock || selectedForUnblock} title={`${property.name} · ${displayDate(date)} · ${formatAud(rate.amount)} · ${status.label}`}><strong>{formatAud(rate.amount)}</strong><span>{selectedForBlock ? "Selected for block" : selectedForUnblock ? "Selected to unblock" : status.label}</span>{rate.override && <small className="admin-availability-special-rate">Special rate</small>}</button>;
           })}</div>)}
         </div></div>
-        <div className="admin-availability-legend"><span><i className="is-available" /> Available</span><span><i className="is-booking" /> Booked</span><span><i className="is-external" /> Imported calendar</span><span><i className="is-manual" /> Manual block</span><span>{unblockPicking ? "Click manual blocks to add or remove them" : blockPicking ? "Click available dates to add or remove them" : "Click a manual block to select it for unblocking"}</span></div>
+        <div className="admin-availability-legend"><span><i className="is-available" /> Available</span><span><i className="is-booking" /> Booked</span><span><i className="is-external" /> Imported calendar</span><span><i className="is-manual" /> Manual block</span><span>{pricingPicking ? "Click any nightly price to edit it" : unblockPicking ? "Click manual blocks to add or remove them" : blockPicking ? "Click available dates to add or remove them" : "Use Edit prices to set individual nightly rates"}</span></div>
       </section>
     </>}
     {notice && <div className="admin-notice is-success" role="status">{notice}</div>}
@@ -350,6 +359,7 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
     {unblockPicking && selectedUnblockDates.length > 500 && <div className="admin-notice is-error" role="alert">Select 500 nights or fewer before saving.</div>}
     {unblockPicking && unblockConflictDate && <div className="admin-notice is-error" role="alert">{displayDate(unblockConflictDate)} is no longer manually blocked. Remove it from the selection before saving.</div>}
     {pickerError && <div className="admin-notice is-error" role="alert">{pickerError}</div>}
+    {pricingSelection && pricingProperty && <AdminCalendarPricingEditor key={`${pricingSelection.propertyId}:${pricingSelection.date ?? "default"}`} property={pricingProperty} date={pricingSelection.date} onClose={() => setPricingSelection(null)} onSaved={async (message) => { setPricingSelection(null); setNotice(message); await reload(); }} />}
     {selection && selectedProperty && <AdminDialog drawer className="admin-calendar-dialog" label={`${selectedProperty.name} on ${displayDate(selection.date)}`} busy={busy} onClose={() => void closeSelection()}><div className="admin-calendar-panel">
       <header className="admin-calendar-panel-header"><div><p className="admin-calendar-panel-kicker">{action === "booking" ? "New reservation" : "Calendar date"}</p><h3>{action === "booking" ? "Manual booking" : displayDate(selection.date)}</h3><p>{selectedProperty.name} · {displayDate(selection.date)}</p></div><button type="button" className="admin-icon-button" aria-label="Close date details" onClick={() => void closeSelection()} disabled={busy}><X size={18} /></button></header>
       <div className="admin-calendar-rate-strip"><span className={`admin-calendar-status is-${selectedStatus?.kind ?? "available"}`}>{selectedStatus?.label}</span><span>{selectedRate ? formatAud(selectedRate.amount) : "—"} <small>per night</small>{selectedRate?.override ? " · custom rate" : ""}</span></div>

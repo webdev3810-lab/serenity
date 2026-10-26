@@ -197,7 +197,7 @@ const localPropertyLibrary: Property[] = [
     corporateDepositRequired: false,
     corporateOnlinePayment: true,
     gstInvoiceAvailable: true,
-    corporateInstructions: "Corporate stays are welcome. Contact Serenity for multi-house availability, project-team arrangements.",
+    corporateInstructions: "Corporate bookings are welcome. Contact Serenity for multi-house availability, project-team arrangements.",
     images: [
       serenity7Image("hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODE2ODA3MjczNjQ5MzExODEy/original/b2cb970f-d33e-458e-837b-c742d80fbd84.jpeg", "exterior image 3"),
       serenity7Image("hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6ODE2ODA3MjczNjQ5MzExODEy/original/ee8a5173-6d16-4c98-98a4-6957a24a6c41.jpeg", "living room image 1"),
@@ -318,7 +318,7 @@ const localPropertyLibrary: Property[] = [
     corporateDepositRequired: false,
     corporateOnlinePayment: true,
     gstInvoiceAvailable: true,
-    corporateInstructions: "Corporate stays are welcome. Contact Serenity for multi-house availability, project-team arrangements.",
+    corporateInstructions: "Corporate bookings are welcome. Contact Serenity for multi-house availability, project-team arrangements.",
     images: [
       serenity9Image("hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MzA3NzY2NDI%3D/original/ed5ae8bf-3a99-41b4-b752-8256329baa2f.jpeg", "exterior image 1"),
       serenity9Image("hosting/Hosting-U3RheVN1cHBseUxpc3Rpbmc6MzA3NzY2NDI%3D/original/a0b924d2-328a-4b0a-93ca-46e5777e030a.jpeg", "living room image 1"),
@@ -477,7 +477,7 @@ const localPropertyLibrary: Property[] = [
     corporateDepositRequired: false,
     corporateOnlinePayment: true,
     gstInvoiceAvailable: true,
-    corporateInstructions: "Corporate stays are welcome. Contact Serenity for multi-house availability, project-team arrangements.",
+    corporateInstructions: "Corporate bookings are welcome. Contact Serenity for multi-house availability, project-team arrangements.",
     images: [
       airbnbImage("miso/Hosting-38935171/original/c8650de8-5536-4081-aac8-68e99d8c25e6.jpeg", "exterior view"),
       airbnbImage("miso/Hosting-38935171/original/29a6f04d-00ee-4e51-bf9c-f4f8e28b6778.jpeg", "second exterior view"),

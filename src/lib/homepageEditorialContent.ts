@@ -89,6 +89,7 @@ export const isEditorialHighlightIcon = (value: unknown): value is EditorialHigh
 
 export type EditorialHomepageContent = {
   editorial_hero_heading: string;
+  editorial_hero_audience: string;
   editorial_hero_description: string;
   editorial_hero_primary_label: string;
   editorial_hero_secondary_label: string;
@@ -113,7 +114,8 @@ export type EditorialHomepageContent = {
 };
 
 export const defaultEditorialHomepageContent: EditorialHomepageContent = {
-  editorial_hero_heading: "Premium Furnished Homes\nfor Corporate, Insurance\n& Extended Stays",
+  editorial_hero_heading: "Premium\nFurnished Homes",
+  editorial_hero_audience: "corporate\ninsurance\nextended stays",
   editorial_hero_description: "Three neighbouring private homes in Pakenham, Victoria, offering comfort and flexibility for displaced families, business travellers, relocations and project teams.",
   editorial_hero_primary_label: "Corporate Enquiries",
   editorial_hero_secondary_label: "Explore Our Homes",
@@ -131,7 +133,7 @@ export const defaultEditorialHomepageContent: EditorialHomepageContent = {
   editorial_services_description: "The finishing touches for an easy arrival and a settled stay.",
   editorial_services: [
     { title: "Private whole homes", description: "Space to cook, work, rest and live at your own pace." },
-    { title: "Corporate stays", description: "Flexible arrangements for project teams and relocations." },
+    { title: "Corporate bookings", description: "Flexible arrangements for project teams and relocations." },
     { title: "Local support", description: "One responsive point of contact from enquiry to checkout." },
   ],
   editorial_faq_eyebrow: "FAQs · Before you arrive",
@@ -154,6 +156,11 @@ export function normalizeEditorialHomepageContent(value: unknown): EditorialHome
     if (key === "editorial_highlights" || key === "editorial_services" || key === "faqs") continue;
     if (typeof source[key] === "string") (normalized as unknown as Record<string, unknown>)[key] = source[key];
   }
+  // The previous default put the audience inside the headline. Existing published
+  // homepage records should receive the new layout without overriding custom copy.
+  if (source.editorial_hero_heading === "Premium Furnished Homes\nfor Corporate, Insurance\n& Extended Stays") {
+    normalized.editorial_hero_heading = defaults.editorial_hero_heading;
+  }
   const storedHighlights = Array.isArray(source.editorial_highlights) ? source.editorial_highlights : [];
   normalized.editorial_highlights = defaults.editorial_highlights.map((fallback, index) => {
     const entry = storedHighlights[index];
@@ -169,7 +176,7 @@ export function normalizeEditorialHomepageContent(value: unknown): EditorialHome
       const entry = storedServices[index];
       const card = entry && typeof entry === "object" ? entry as Record<string, unknown> : {};
       return {
-        title: typeof card.title === "string" ? card.title : fallback.title,
+        title: typeof card.title === "string" ? (card.title === "Corporate stays" ? "Corporate bookings" : card.title) : fallback.title,
         description: typeof card.description === "string" ? card.description : fallback.description,
       };
     });

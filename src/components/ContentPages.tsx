@@ -23,7 +23,7 @@ const LOCATION_FACTS = [
 export function CorporatePage() {
   return (
     <PageFrame
-      eyebrow="Corporate & Team Stays"
+      eyebrow="Corporate Bookings"
       title="Adjacent Furnished Houses for Teams and Business Travellers"
       text="Accommodation for contractors, project crews, relocating employees, temporary assignments, training programs, and extended stays. Serenity 7, Serenity 9, and Serenity 11 are right next door to each other in Pakenham, allowing companies to request multiple nearby houses with unified billing."
     >
@@ -50,7 +50,7 @@ export function CorporatePage() {
         
         <div className="lg:col-span-6">
           <DemoForm
-            title="Corporate Stay Enquiry"
+            title="Corporate Booking Enquiry"
             fields={["Company name", "Contact person", "Business email", "Phone", "Number of guests", "Preferred property", "Arrival", "Departure", "Purpose of stay"]}
             textarea="Specific requirements, multi-house request, purchase order notes"
           />
@@ -227,7 +227,7 @@ export function ContactPage() {
                 <label className="contact-editorial-field">Phone number<input name="phone" type="tel" placeholder="+61" /></label>
               </div>
               <div className="grid gap-7 sm:grid-cols-2">
-                <label className="contact-editorial-field">Project type<select name="projectType" defaultValue=""><option value="" disabled>Select an option</option><option>Family stay</option><option>Corporate or team stay</option><option>Relocation or insurance</option><option>Long-term stay</option><option>Other</option></select></label>
+                <label className="contact-editorial-field">Project type<select name="projectType" defaultValue=""><option value="" disabled>Select an option</option><option>Family stay</option><option>Corporate bookings</option><option>Relocation or insurance</option><option>Long-term stay</option><option>Other</option></select></label>
                 <label className="contact-editorial-field">Preferred house<select name="house" defaultValue=""><option value="" disabled>Select an option</option><option>Serenity 7</option><option>Serenity 9</option><option>Serenity 11</option><option>Not sure yet</option></select></label>
               </div>
               <label className="contact-editorial-field">Message <span>*</span><textarea name="message" required rows={5} placeholder="Tell us a little about your stay" /></label>
@@ -372,7 +372,7 @@ export function PolicyPage({ type }: { type: "Terms and Conditions" | "Privacy P
         { heading: "Accurate booking details", text: "The lead guest must ensure all booking details are accurate." },
         { heading: "Registered guests", text: "Only registered guests may stay at the property unless approved in advance." },
         { heading: "House rules", text: "Guests are expected to comply with house rules and local regulations." },
-        { heading: "Booking compliance", text: "Serenity Corporate Stays reserves the right to refuse or cancel bookings that do not comply with property policies." },
+        { heading: "Booking compliance", text: "Serenity Corporate Bookings reserves the right to refuse or cancel bookings that do not comply with property policies." },
         { heading: "Check-in and check-out", text: "Check-in and check-out times must be observed unless arranged in advance." },
       ],
     },

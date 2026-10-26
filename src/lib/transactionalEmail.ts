@@ -157,7 +157,7 @@ export async function notifyCorporateEnquiry(input: {
   notes: string;
   kind: "question" | "stay" | "insurance";
 }) {
-  const enquiryLabel = input.kind === "insurance" ? "insurance accommodation quote request" : input.kind === "question" ? "corporate question" : "corporate stay enquiry";
+  const enquiryLabel = input.kind === "insurance" ? "insurance accommodation quote request" : input.kind === "question" ? "corporate question" : "corporate booking enquiry";
   await sendAdminNotification({
     replyTo: input.email,
     subject: `New Serenity ${enquiryLabel} · ${input.reference}`,
@@ -199,8 +199,8 @@ export async function acknowledgeCorporateEnquiry(input: {
       input.kind === "insurance"
         ? "Thanks for your insurance accommodation request. The Serenity team has received it and will review suitable options and quote details with you."
         : input.kind === "question"
-        ? "Thanks for your question about a corporate stay. The Serenity team has received it and will get back to you."
-        : "Thanks for your corporate stay enquiry. The Serenity team has received it and will review the details with you.",
+        ? "Thanks for your question about corporate bookings. The Serenity team has received it and will get back to you."
+        : "Thanks for your corporate booking enquiry. The Serenity team has received it and will review the details with you.",
       `Your reference: ${input.reference}`,
       "",
       "This is an enquiry receipt, not a booking confirmation. No stay has been reserved or charged.",
@@ -242,12 +242,12 @@ export async function sendCorporateBookingEmails(groupReference: string) {
     sendEmail({
       to: email,
       replyTo: notificationsInbox(),
-      subject: `Your Serenity corporate stay is confirmed · ${groupReference}`,
+      subject: `Your Serenity corporate booking is confirmed · ${groupReference}`,
       idempotencyKey: `corporate-booking-confirmation/${groupReference}`,
       text: [
         `Hello ${contact},`,
         "",
-        "Your payment succeeded and your corporate stay is confirmed.",
+        "Your payment succeeded and your corporate booking is confirmed.",
         `Reference: ${groupReference}`,
         `Receipt code: ${receipt}`,
         `Paid: ${paidAt} Melbourne time`,
@@ -263,7 +263,7 @@ export async function sendCorporateBookingEmails(groupReference: string) {
     }),
     sendAdminNotification({
       replyTo: email,
-      subject: `New paid corporate stay · ${groupReference}`,
+      subject: `New paid corporate booking · ${groupReference}`,
       idempotencyKey: `paid-corporate-booking/${groupReference}`,
       text: [
         `Paid corporate booking ${groupReference}`,
@@ -313,7 +313,7 @@ export async function sendUnsuccessfulBookingEmails(input: { reference: string; 
     sendEmail({
       to: email,
       replyTo: notificationsInbox(),
-      subject: `Your Serenity ${input.corporate ? "corporate stay" : "booking"} was not confirmed · ${input.reference}`,
+      subject: `Your Serenity ${input.corporate ? "corporate booking" : "booking"} was not confirmed · ${input.reference}`,
       idempotencyKey: `booking-not-completed/${input.reference}`,
       text: [
         `Hello ${contact},`, "", why,

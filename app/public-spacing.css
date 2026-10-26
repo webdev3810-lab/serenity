@@ -639,14 +639,14 @@ body:has(.corporate-editorial-page) .public-site > main,
 
 .public-site .serenity-editorial-hero h1 {
   max-width: 56rem;
-  font-size: clamp(3rem, 4.5vw, 5.25rem);
+  font-size: clamp(2.65rem, 4vw, 4.5rem);
   line-height: 0.98;
 }
 
 .public-site .serenity-editorial-hero__description {
   max-width: 43rem;
   margin-top: 1.25rem;
-  font-size: clamp(1rem, 1.35vw, 1.25rem);
+  font-size: clamp(0.94rem, 1.15vw, 1.1rem);
 }
 
 @media (min-width: 761px) {
@@ -676,11 +676,11 @@ body:has(.corporate-editorial-page) .public-site > main,
   }
 
   .public-site .serenity-editorial-hero__stats strong {
-    font-size: clamp(0.98rem, 1.25vw, 1.2rem);
+    font-size: clamp(0.9rem, 1.1vw, 1.05rem);
   }
 
   .public-site .serenity-editorial-hero__stat-label {
-    font-size: clamp(0.88rem, 1.08vw, 1rem);
+    font-size: clamp(0.8rem, 0.95vw, 0.9rem);
   }
 
   .public-site .serenity-editorial-hero__actions a {
@@ -689,12 +689,12 @@ body:has(.corporate-editorial-page) .public-site > main,
     justify-content: space-between;
     border-radius: 0.8rem;
     padding-inline: 1.5rem;
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .public-site .serenity-editorial-hero__actions {
     gap: 1rem;
-    margin-top: 1.35rem;
+    margin-top: auto;
   }
 }
 
@@ -1241,14 +1241,14 @@ body:has(.corporate-editorial-page) .public-site > main,
   }
 
   .public-site .serenity-editorial-hero h1 {
-    font-size: clamp(1.65rem, 5.2vw, 2.2rem);
+    font-size: clamp(1.55rem, 4.8vw, 2rem);
     line-height: 1.02;
   }
 
   .public-site .serenity-editorial-hero__description {
     max-width: 30rem;
     margin-top: 0.9rem;
-    font-size: clamp(0.8rem, 2.9vw, 0.93rem);
+    font-size: clamp(0.8rem, 2.7vw, 0.88rem);
     font-weight: 500;
     line-height: 1.55;
   }
@@ -1257,7 +1257,7 @@ body:has(.corporate-editorial-page) .public-site > main,
     display: grid;
     grid-template-columns: 1fr;
     gap: 0.55rem;
-    margin-top: 1.2rem;
+    margin-top: auto;
   }
 
   .public-site .serenity-editorial-hero__actions a {

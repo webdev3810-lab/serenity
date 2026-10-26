@@ -124,7 +124,7 @@ export default async function HowItWorksDraftPage() {
             </div>
           </div>
         </div>
-        <div className={styles.closingFoot}><span>Serenity Corporate Stays</span><span>Pakenham, Victoria</span></div>
+        <div className={styles.closingFoot}><span>Serenity Corporate Bookings</span><span>Pakenham, Victoria</span></div>
       </section>
     </div>
   );

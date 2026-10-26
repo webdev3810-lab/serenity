@@ -49,7 +49,7 @@ function wrapText(value: string, font: PDFFont, size: number, maxWidth: number) 
 export async function createBookingConfirmationPdf(details: BookingConfirmationPdfDetails) {
   const pdf = await PDFDocument.create();
   pdf.setTitle(`Booking confirmation ${details.reference}`);
-  pdf.setAuthor("Serenity Corporate Stays");
+  pdf.setAuthor("Serenity Corporate Bookings");
   pdf.setSubject("Confirmed reservation and payment receipt");
 
   const regular = await pdf.embedFont(StandardFonts.Helvetica);
@@ -61,7 +61,7 @@ export async function createBookingConfirmationPdf(details: BookingConfirmationP
   const margin = 48;
   const contentWidth = page.getWidth() - margin * 2;
 
-  page.drawText("SERENITY CORPORATE STAYS", { x: margin, y: 778, font: bold, size: 12, color: navy });
+  page.drawText("SERENITY CORPORATE BOOKINGS", { x: margin, y: 778, font: bold, size: 12, color: navy });
   page.drawRectangle({ x: margin, y: 758, width: contentWidth, height: 2, color: gold });
   page.drawText("RESERVATION CONFIRMED", { x: margin, y: 711, font: bold, size: 11, color: muted });
 
@@ -102,7 +102,7 @@ export async function createBookingConfirmationPdf(details: BookingConfirmationP
 
   page.drawRectangle({ x: margin, y: 116, width: contentWidth, height: 0.7, color: gold });
   page.drawText("This confirms your booking and payment. It is not a tax invoice.", { x: margin, y: 94, font: regular, size: 9, color: muted });
-  page.drawText("Serenity Corporate Stays  |  Pakenham, Victoria", { x: margin, y: 74, font: regular, size: 9, color: muted });
+  page.drawText("Serenity Corporate Bookings  |  Pakenham, Victoria", { x: margin, y: 74, font: regular, size: 9, color: muted });
 
   return pdf.save();
 }

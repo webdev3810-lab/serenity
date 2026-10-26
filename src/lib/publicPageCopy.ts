@@ -1,7 +1,7 @@
 export const PUBLIC_PAGE_COPY_FIELDS = [
   { page: "About", key: "aboutHeroTitle", label: "Hero title", value: "About Serenity" },
   { page: "About", key: "aboutHeroSubtitle", label: "Hero subtitle", value: "Stay comfortably.\nFeel at home." },
-  { page: "About", key: "aboutHeroLead", label: "Hero introduction", value: "Serenity Corporate Stays offers private furnished homes for families, work trips, relocations and longer visits. Settle in with the everyday details taken care of and one responsive local contact throughout your stay." },
+  { page: "About", key: "aboutHeroLead", label: "Hero introduction", value: "Serenity Corporate Bookings offers private furnished homes for families, work trips, relocations and longer visits. Settle in with the everyday details taken care of and one responsive local contact throughout your stay." },
   { page: "About", key: "aboutStat1Label", label: "Stat 1 label", value: "Furnished homes" },
   { page: "About", key: "aboutStat1Lead", label: "Stat 1 description", value: "Space to stay independently or together." },
   { page: "About", key: "aboutStat2Value", label: "Stat 2 value", value: "9 min" },
@@ -145,6 +145,14 @@ export const PUBLIC_PAGE_COPY_FIELDS = [
 export type PublicPageCopyKey = (typeof PUBLIC_PAGE_COPY_FIELDS)[number]["key"];
 export type PublicPageCopy = Record<PublicPageCopyKey, string>;
 
+export function corporateBookingWording(text: string): string {
+  return text.replace(/\bcorporate-stay friendly\b/gi, "Suitable for corporate bookings").replace(/\bcorporate (?:stays?|quotes?)\b/gi, (match) => {
+    const replacement = /s$/i.test(match) ? "bookings" : "booking";
+    if (match === match.toUpperCase()) return `CORPORATE ${replacement.toUpperCase()}`;
+    return `${match[0] === "C" ? "Corporate" : "corporate"} ${replacement}`;
+  });
+}
+
 export const defaultPublicPageCopy = (): PublicPageCopy => Object.fromEntries(PUBLIC_PAGE_COPY_FIELDS.map(({ key, value }) => [key, value])) as PublicPageCopy;
 
 export function normalizePublicPageCopy(value: unknown): PublicPageCopy {
@@ -153,7 +161,7 @@ export function normalizePublicPageCopy(value: unknown): PublicPageCopy {
   const raw = value as Record<string, unknown>;
   for (const field of PUBLIC_PAGE_COPY_FIELDS) {
     const text = raw[field.key];
-    if (typeof text === "string" && text.trim()) defaults[field.key] = text.trim().slice(0, 1000);
+    if (typeof text === "string" && text.trim()) defaults[field.key] = corporateBookingWording(text.trim().slice(0, 1000));
   }
   return defaults;
 }

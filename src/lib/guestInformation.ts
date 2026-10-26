@@ -1,3 +1,5 @@
+import { corporateBookingWording } from "@/src/lib/publicPageCopy";
+
 export const GUEST_INFORMATION_PAGE_KEY = "guest-information";
 export const GUEST_IMAGE_SLOTS = ["hero", "checkIn", "houseRules", "homeCare"] as const;
 export type GuestImageSlot = typeof GUEST_IMAGE_SLOTS[number];
@@ -29,7 +31,7 @@ export const DEFAULT_GUEST_INFORMATION: GuestInformationContent = {
       "The lead guest must ensure all booking details are accurate.",
       "Only registered guests may stay at the property unless approved in advance.",
       "Guests are expected to comply with house rules and local regulations.",
-      "Serenity Corporate Stays may refuse or cancel bookings that do not comply with property policies.",
+      "Serenity Corporate Bookings may refuse or cancel bookings that do not comply with property policies.",
       "Check-in and check-out times must be observed unless arranged in advance.",
     ] },
     { id: "privacy", title: "Privacy Policy", eyebrow: "Your privacy matters", items: [
@@ -96,7 +98,7 @@ export function normalizeGuestInformation(value: unknown): GuestInformationConte
       id: fallback.id,
       title: typeof saved.title === "string" ? saved.title : fallback.title,
       eyebrow: typeof saved.eyebrow === "string" ? saved.eyebrow : fallback.eyebrow,
-      items: Array.isArray(saved.items) ? saved.items.filter((item): item is string => typeof item === "string") : fallback.items,
+      items: Array.isArray(saved.items) ? saved.items.filter((item): item is string => typeof item === "string").map(corporateBookingWording) : fallback.items,
     } : fallback;
   });
   const images = record(source.images);
