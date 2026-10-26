@@ -15,7 +15,7 @@ BarChart3
 
 export type Row = Record<string, any>;
 export type AdminRole = "admin" | "editor" | "super_admin";
-export type AdminTab = "overview" | "homepage" | "other-businesses" | "guest-information" | "contact-page" | "houses" | "reviews" | "bookings" | "payments" | "earnings" | "receipts" | "calendar" | "partners" | "enquiries" | "contacts" | "email-notifications" | "users" | "settings";
+export type AdminTab = "overview" | "homepage" | "page-images" | "other-businesses" | "guest-information" | "contact-page" | "houses" | "reviews" | "bookings" | "payments" | "earnings" | "receipts" | "calendar" | "partners" | "enquiries" | "contacts" | "email-notifications" | "users" | "settings";
 export type Tab = AdminTab;
 export type HomepageSectionKey = "hero" | "houses" | "intro" | "services" | "faqs" | "social";
 export type AdminNavItem = { id: Tab; label: string; description: string; icon: typeof BarChart3 };
@@ -71,7 +71,8 @@ export const emptyProperty = (): Row => ({
   corporate_deposit_required: false,
   corporate_online_payment: true,
   gst_invoice_available: true,
-  corporate_instructions: "Corporate stays are welcome. Contact Serenity for multi-house availability, GST invoices, and project-team arrangements.",
+  free_cancellation_days: 7,
+  corporate_instructions: "Corporate stays are welcome. Contact Serenity for multi-house availability and project-team arrangements.",
   weekly_discount: 0,
   monthly_discount: 0,
   house_rules: [],

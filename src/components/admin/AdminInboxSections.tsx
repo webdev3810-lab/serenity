@@ -3,19 +3,21 @@
 /* The CMS reads flexible Supabase rows, so the boundary is intentionally defensive. */
 
 import { CMS_LIMITS } from "@/src/lib/cmsValidation";
-import { Mail,MessageSquare,Search,UsersRound,X } from "lucide-react";
+import { ChevronRight,Mail,MessageSquare,Search,UsersRound,X } from "lucide-react";
 import { useState } from "react";
 
-import { AdminBadge as StatusBadge,useAdminPagination,useAdminWorkspace } from "@/src/components/admin/AdminUI";
+import { AdminBadge as StatusBadge,AdminDialog,useAdminPagination,useAdminWorkspace } from "@/src/components/admin/AdminUI";
 
 import { EmptyState,PageHeader } from "./AdminFields";
 import { AdminPasswordField } from "./AdminPasswordField";
 import { AdminRole,AdminUser,formatDate,Row } from "./AdminModels";
 export { ReviewManager } from "./ReviewEditor";
 
-export function EnquiryManager({ enquiries, updateStatus, updateNotes, convert }: { enquiries: Row[]; updateStatus: (enquiry: Row, status: string) => void; updateNotes: (enquiry: Row, notes: string) => void; convert: (enquiry: Row) => void }) {
+export function EnquiryManager({ enquiries, updateStatus, updateNotes, convert }: { enquiries: Row[]; updateStatus: (enquiry: Row, status: string) => void; updateNotes: (enquiry: Row, notes: string) => Promise<boolean>; convert: (enquiry: Row) => void }) {
   const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const filtered = enquiries.filter((item) => `${item.company_name} ${item.contact_name} ${item.email}`.toLowerCase().includes(query.toLowerCase()));
+  const selected = enquiries.find((item) => String(item.id) === selectedId);
   const { visible, pagination } = useAdminPagination(filtered);
   return <>
     <PageHeader eyebrow="Enquiries" title="Corporate enquiries" description="Respond to companies and project teams with a clear view of each request." />
@@ -23,26 +25,29 @@ export function EnquiryManager({ enquiries, updateStatus, updateNotes, convert }
       <div className="relative w-full max-w-xl"><Search className="admin-search-icon" size={18} aria-hidden="true" /><input className="admin-field admin-search-input" aria-label="Search company, contact, or email" placeholder="Search company, contact, or email" value={query} onChange={(event) => setQuery(event.target.value)} /></div>
       <p className="text-sm text-[var(--admin-muted)]">{filtered.length} {filtered.length === 1 ? "enquiry" : "enquiries"}</p>
     </div>
-    <div className="admin-card admin-table-shell overflow-x-auto bg-[var(--admin-surface)]">
-      <table className="admin-responsive-table w-full min-w-[1040px] text-left text-sm">
-        <thead><tr className="border-b border-[var(--admin-border)] text-sm text-[var(--admin-muted)]"><th className="p-3">Company</th><th className="p-3">Contact</th><th className="p-3">Dates</th><th className="p-3">Status</th><th className="p-3">Internal notes</th><th className="p-3">Update</th></tr></thead>
-        <tbody>{visible.map((enquiry) => <tr key={String(enquiry.id)} className="border-b border-[var(--admin-border)] align-top">
-          <td data-label="Company" className="p-3 font-medium">{enquiry.company_name}<br /><span className="text-sm font-normal text-[var(--admin-muted)]">{enquiry.houses_needed || 1} house(s)</span></td>
-          <td data-label="Contact" className="p-3">{enquiry.contact_name}<br /><span className="break-all text-sm text-[var(--admin-muted)]">{enquiry.email}</span></td>
-          <td data-label="Dates" className="p-3">{formatDate(enquiry.arrival)} – {formatDate(enquiry.departure)}</td>
-          <td data-label="Status" className="p-3"><StatusBadge domain="enquiry" value={enquiry.status || "new"} /></td>
-          <td data-label="Internal notes" className="p-3"><textarea aria-label={`Internal notes for ${enquiry.company_name}`} className="admin-field min-h-20 min-w-52 text-sm" defaultValue={String(enquiry.internal_notes || "")} maxLength={CMS_LIMITS.admin_notes} placeholder="Add an internal note" onBlur={(event) => { if (event.target.value !== String(enquiry.internal_notes || "")) updateNotes(enquiry, event.target.value); }} /></td>
-          <td data-label="Update" className="p-3"><div className="flex min-w-44 flex-col gap-2"><select className="admin-field py-2 text-sm" aria-label={`Status for ${enquiry.company_name}`} value={String(enquiry.status || "new")} onChange={(event) => updateStatus(enquiry, event.target.value)}><option value="new">New</option><option value="contacted">Contacted</option><option value="pending_approval">Pending approval</option><option value="approved">Approved</option><option value="declined">Declined</option><option value="converted">Converted</option></select>{enquiry.status === "approved" && <button type="button" className="admin-button admin-button-primary min-h-9 px-3 text-sm" onClick={() => convert(enquiry)}>Convert to bookings</button>}</div></td>
+    <div className="admin-card admin-inbox-table-shell bg-[var(--admin-surface)]">
+      <table className="admin-inbox-table text-left text-sm">
+        <thead><tr><th>Company</th><th>Contact</th><th>Stay dates</th><th>Status</th><th>Details</th></tr></thead>
+        <tbody>{visible.map((enquiry) => <tr key={String(enquiry.id)}>
+          <td data-label="Company"><strong>{String(enquiry.company_name ?? "—")}</strong><small>{String(enquiry.houses_needed || 1)} {String(enquiry.houses_needed || 1) === "1" ? "house" : "houses"}</small></td>
+          <td data-label="Contact"><strong>{String(enquiry.contact_name ?? "—")}</strong><small>{String(enquiry.email ?? "")}</small></td>
+          <td data-label="Stay dates">{formatDate(enquiry.arrival)} – {formatDate(enquiry.departure)}</td>
+          <td data-label="Status"><StatusBadge domain="enquiry" value={enquiry.status || "new"} /></td>
+          <td data-label="Details"><button type="button" className="admin-sheet-open" onClick={() => setSelectedId(String(enquiry.id))}>View <ChevronRight size={14} aria-hidden="true" /></button></td>
         </tr>)}</tbody>
       </table>
       {!filtered.length && <EmptyState icon={MessageSquare} title="No enquiries found" description="New corporate enquiries will appear here." compact />}
     </div>
-  {pagination}</>;
+    {pagination}
+    {selected && <InboxPreview key={String(selected.id)} kind="enquiry" item={selected} onClose={() => setSelectedId(null)} updateStatus={updateStatus} updateNotes={updateNotes} convert={convert} />}
+  </>;
 }
 
-export function ContactManager({ contacts, unavailable, updateStatus, updateNotes }: { contacts: Row[]; unavailable: boolean; updateStatus: (contact: Row, status: string) => void; updateNotes: (contact: Row, notes: string) => void }) {
+export function ContactManager({ contacts, unavailable, updateStatus, updateNotes }: { contacts: Row[]; unavailable: boolean; updateStatus: (contact: Row, status: string) => void; updateNotes: (contact: Row, notes: string) => Promise<boolean> }) {
   const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const filtered = contacts.filter((item) => `${item.first_name} ${item.last_name} ${item.email} ${item.phone} ${item.message}`.toLowerCase().includes(query.toLowerCase()));
+  const selected = contacts.find((item) => String(item.id) === selectedId);
 
   const { visible, pagination } = useAdminPagination(filtered);
   return <>
@@ -52,23 +57,72 @@ export function ContactManager({ contacts, unavailable, updateStatus, updateNote
       <div className="relative w-full max-w-xl"><Search className="admin-search-icon" size={18} aria-hidden="true" /><input className="admin-field admin-search-input" aria-label="Search name, email, phone, or message" placeholder="Search name, email, phone, or message" value={query} onChange={(event) => setQuery(event.target.value)} /></div>
       <p className="text-sm text-[var(--admin-muted)]">{filtered.length} {filtered.length === 1 ? "message" : "messages"}</p>
     </div>
-    <div className="admin-card admin-table-shell overflow-x-auto bg-[var(--admin-surface)]">
-      <table className="admin-responsive-table w-full min-w-[1180px] text-left text-sm">
-        <thead><tr className="border-b border-[var(--admin-border)] text-sm text-[var(--admin-muted)]"><th className="p-3">Customer</th><th className="p-3">Message</th><th className="p-3">Request</th><th className="p-3">Received</th><th className="p-3">Status</th><th className="p-3">Internal notes</th><th className="p-3">Update</th></tr></thead>
-        <tbody>{visible.map((contact) => <tr key={String(contact.id)} className="border-b border-[var(--admin-border)] align-top">
-          <td data-label="Customer" className="p-3"><p className="font-medium">{contact.first_name} {contact.last_name}</p><a className="mt-1 block break-all text-sm text-[var(--admin-text)] hover:underline" href={`mailto:${contact.email}`}>{contact.email}</a>{contact.phone && <a className="mt-1 block text-sm text-[var(--admin-muted)] hover:underline" href={`tel:${contact.phone}`}>{contact.phone}</a>}</td>
-          <td data-label="Message" className="max-w-sm p-3"><p className="whitespace-pre-line break-words text-sm leading-relaxed text-[var(--admin-text)]">{contact.message}</p></td>
-          <td data-label="Request" className="p-3 text-[var(--admin-muted)]"><p>{contact.project_type || "Not specified"}</p><p className="mt-1 text-sm">{contact.preferred_house || "House not specified"}</p></td>
-          <td data-label="Received" className="whitespace-nowrap p-3 text-[var(--admin-muted)]">{formatDate(contact.created_at)}</td>
-          <td data-label="Status" className="p-3"><StatusBadge domain="enquiry" value={contact.status || "new"} /></td>
-          <td data-label="Internal notes" className="p-3"><textarea aria-label={`Internal notes for ${contact.first_name} ${contact.last_name}`} className="admin-field min-h-20 min-w-52 text-sm" defaultValue={String(contact.internal_notes || "")} maxLength={CMS_LIMITS.admin_notes} placeholder="Add an internal note" onBlur={(event) => { if (event.target.value !== String(contact.internal_notes || "")) updateNotes(contact, event.target.value); }} /></td>
-          <td data-label="Update" className="p-3"><select className="admin-field min-w-36 py-2 text-sm" aria-label={`Status for ${contact.first_name}`} value={String(contact.status || "new")} onChange={(event) => updateStatus(contact, event.target.value)}><option value="new">New</option><option value="contacted">Contacted</option><option value="closed">Closed</option><option value="spam">Spam</option></select></td>
+    <div className="admin-card admin-inbox-table-shell bg-[var(--admin-surface)]">
+      <table className="admin-inbox-table text-left text-sm">
+        <thead><tr><th>Customer</th><th>Request</th><th>Received</th><th>Status</th><th>Details</th></tr></thead>
+        <tbody>{visible.map((contact) => <tr key={String(contact.id)}>
+          <td data-label="Customer"><strong>{String(contact.first_name ?? "")} {String(contact.last_name ?? "")}</strong><small>{String(contact.email ?? "")}</small></td>
+          <td data-label="Request"><strong>{String(contact.project_type || "General enquiry")}</strong><small>{String(contact.preferred_house || "No preferred house")}</small></td>
+          <td data-label="Received">{formatDate(contact.created_at)}</td>
+          <td data-label="Status"><StatusBadge domain="enquiry" value={contact.status || "new"} /></td>
+          <td data-label="Details"><button type="button" className="admin-sheet-open" onClick={() => setSelectedId(String(contact.id))}>View <ChevronRight size={14} aria-hidden="true" /></button></td>
         </tr>)}</tbody>
       </table>
       {!unavailable && !filtered.length && <EmptyState icon={Mail} title={query ? "No messages found" : "No customer messages"} description={query ? "Try a different name, email address, or phrase." : "Messages sent from the public Contact page will appear here."} compact />}
     </div>
-  {pagination}</>;
+    {pagination}
+    {selected && <InboxPreview key={String(selected.id)} kind="contact" item={selected} onClose={() => setSelectedId(null)} updateStatus={updateStatus} updateNotes={updateNotes} />}
+  </>;
 }
+
+function InboxPreview({ kind, item, onClose, updateStatus, updateNotes, convert }: {
+  kind: "enquiry" | "contact";
+  item: Row;
+  onClose: () => void;
+  updateStatus: (item: Row, status: string) => void;
+  updateNotes: (item: Row, notes: string) => Promise<boolean>;
+  convert?: (item: Row) => void;
+}) {
+  const { confirm } = useAdminWorkspace();
+  const [notes, setNotes] = useState(String(item.internal_notes ?? ""));
+  const [savedNotes, setSavedNotes] = useState(String(item.internal_notes ?? ""));
+  const [saving, setSaving] = useState(false);
+  const [noteMessage, setNoteMessage] = useState("");
+  const isEnquiry = kind === "enquiry";
+  const name = isEnquiry ? String(item.company_name ?? "Corporate enquiry") : `${String(item.first_name ?? "")} ${String(item.last_name ?? "")}`.trim();
+  const close = async () => {
+    if (saving) return;
+    if (notes !== savedNotes && !await confirm({ title: "Discard internal note changes?", description: "Your unsaved note will be lost.", confirmLabel: "Discard changes", destructive: true })) return;
+    onClose();
+  };
+  const saveNotes = async () => {
+    if (saving || notes === savedNotes) return;
+    setSaving(true);
+    setNoteMessage("");
+    try {
+      if (await updateNotes(item, notes)) {
+        setSavedNotes(notes);
+        setNoteMessage("Internal note saved.");
+      } else setNoteMessage("Could not save the note. Try again.");
+    } catch { setNoteMessage("Could not save the note. Try again."); }
+    finally { setSaving(false); }
+  };
+  return <AdminDialog label={`${isEnquiry ? "Enquiry" : "Contact"} details`} className="admin-inbox-dialog" busy={saving} onClose={() => void close()}>
+    <article className="admin-inbox-dialog-content">
+      <header className="admin-inbox-dialog-header"><div><p>{isEnquiry ? "Corporate enquiry" : "Contact message"}</p><h2>{name}</h2><div className="admin-inbox-dialog-meta"><span>{String(item.reference ?? "")}</span><StatusBadge domain="enquiry" value={item.status || "new"} /></div></div><button type="button" className="admin-reservation-dialog-close" onClick={() => void close()} disabled={saving} aria-label="Close details"><X size={18} /></button></header>
+      <div className="admin-inbox-dialog-body">
+        <dl className="admin-inbox-dialog-details">
+          {isEnquiry ? <><InboxFact label="Contact" value={String(item.contact_name ?? "—")} /><InboxFact label="Email" value={String(item.email ?? "—")} /><InboxFact label="Phone" value={String(item.phone || "—")} /><InboxFact label="Stay dates" value={`${formatDate(item.arrival)} – ${formatDate(item.departure)}`} /><InboxFact label="Houses needed" value={String(item.houses_needed || "1")} /><InboxFact label="Guests" value={String(item.guests || "—")} /><InboxFact label="Purpose" value={String(item.purpose || "—")} /><InboxFact label="Received" value={formatDate(item.created_at)} /></> : <><InboxFact label="Email" value={String(item.email ?? "—")} /><InboxFact label="Phone" value={String(item.phone || "—")} /><InboxFact label="Stay type" value={String(item.project_type || "—")} /><InboxFact label="Preferred house" value={String(item.preferred_house || "—")} /><InboxFact label="Received" value={formatDate(item.created_at)} /></>}
+        </dl>
+        {(isEnquiry ? Boolean(item.notes) : true) && <section className="admin-inbox-message"><h3>{isEnquiry ? "Guest notes" : "Message"}</h3><p>{String(isEnquiry ? item.notes : item.message || "—")}</p></section>}
+        <section className="admin-inbox-update"><label>Status<select className="admin-field" value={String(item.status || "new")} onChange={(event) => updateStatus(item, event.target.value)}>{(isEnquiry ? ["new", "contacted", "pending_approval", "approved", "declined", "converted"] : ["new", "contacted", "closed", "spam"]).map((status) => <option key={status} value={status}>{status.replaceAll("_", " ")}</option>)}</select></label>{isEnquiry && item.status === "approved" && convert && <button type="button" className="admin-button admin-button-primary" onClick={() => convert(item)}>Convert to bookings</button>}</section>
+        <section className="admin-inbox-notes"><label htmlFor={`internal-note-${kind}-${item.id}`}>Internal notes <span>Only your team can see these.</span></label><textarea id={`internal-note-${kind}-${item.id}`} className="admin-field" maxLength={CMS_LIMITS.admin_notes} value={notes} onChange={(event) => { setNotes(event.target.value); setNoteMessage(""); }} placeholder="Add a private note" /><div><p role="status">{noteMessage}</p><button type="button" className="admin-button admin-button-primary" disabled={saving || notes === savedNotes} onClick={() => void saveNotes()}>{saving ? "Saving…" : "Save note"}</button></div></section>
+      </div>
+    </article>
+  </AdminDialog>;
+}
+
+function InboxFact({ label, value }: { label: string; value: string }) { return <div><dt>{label}</dt><dd>{value}</dd></div>; }
 
 export function AdminUserManager({ users, currentUserEmail, createUser, updateUser, deleteUser }: { users: AdminUser[]; currentUserEmail: string; createUser: (details: { email: string; username: string; password: string; role: AdminRole }) => Promise<void>; updateUser: (userId: string, changes: { role?: AdminRole; active?: boolean }) => Promise<void>; deleteUser: (userId: string) => Promise<void> }) {
   const { confirm } = useAdminWorkspace();

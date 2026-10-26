@@ -14,6 +14,8 @@ import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 import { HERO_MEDIA_BUCKET } from "@/src/lib/heroMedia";
 import { isApprovedHomepageMediaSource } from "@/src/lib/homepageMedia";
 import { getPromotionStatus, normalizePromotionRow } from "@/src/lib/promotions";
+import { defaultPublicPageMedia, normalizePublicPageMedia, type PublicPageMedia } from "@/src/lib/publicPageMedia";
+import { defaultPublicPageCopy, normalizePublicPageCopy, type PublicPageCopy } from "@/src/lib/publicPageCopy";
 
 type ContentRow = Record<string, any>;
 
@@ -142,6 +144,7 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
     extraGuestFee: Number(row.extra_guest_fee),
     extraGuestThreshold: row.extra_guest_threshold,
     minimumStay: row.minimum_stay,
+    freeCancellationDays: Number(row.free_cancellation_days ?? 7),
     maximumStay: Number(row.maximum_stay ?? 90),
     minimumGuests: Number(row.minimum_guests ?? 1),
     maximumAdults: Number(row.maximum_adults ?? row.max_guests),
@@ -242,6 +245,17 @@ export async function getPublicProperties(): Promise<Property[]> {
     logSupabaseLoadFailure("Unable to load public properties from Supabase", error);
     throw new Error("Current property information is unavailable. Please try again shortly.");
   }
+}
+
+export async function getPublicHouseOptions(): Promise<Array<{ id: string; name: string }>> {
+  if (isLocalContentPreview || !isSupabaseConfigured) {
+    return publicLocalProperties.map(({ id, name }) => ({ id, name }));
+  }
+  const result = await fetchAllAdminRows<{ id: string; name: string }>(() =>
+    createSupabasePublicClient().from("properties").select("id, name").eq("published", true).order("display_order").order("id")
+  );
+  if (result.error) throw new Error(result.error.message);
+  return result.data ?? [];
 }
 
 export async function getPublicPropertyBySlug(slug: string): Promise<Property | undefined> {
@@ -371,5 +385,29 @@ export async function getPublicContactSettings(): Promise<ContactSettings> {
     // mismatch, or a temporary public read failure should use the safe public
     // defaults without turning the shared root layout into a console error.
     return DEFAULT_CONTACT_SETTINGS;
+  }
+}
+
+export async function getPublicPageMedia(): Promise<PublicPageMedia> {
+  if (isLocalContentPreview || !isSupabaseConfigured) return defaultPublicPageMedia();
+  try {
+    const supabase = createSupabasePublicClient();
+    const { data, error } = await supabase.from("site_settings").select("value").eq("key", "public_page_media").eq("is_public", true).maybeSingle();
+    if (error) throw error;
+    return normalizePublicPageMedia(data?.value);
+  } catch {
+    return defaultPublicPageMedia();
+  }
+}
+
+export async function getPublicPageCopy(): Promise<PublicPageCopy> {
+  if (isLocalContentPreview || !isSupabaseConfigured) return defaultPublicPageCopy();
+  try {
+    const supabase = createSupabasePublicClient();
+    const { data, error } = await supabase.from("site_settings").select("value").eq("key", "public_page_copy").eq("is_public", true).maybeSingle();
+    if (error) throw error;
+    return normalizePublicPageCopy(data?.value);
+  } catch {
+    return defaultPublicPageCopy();
   }
 }

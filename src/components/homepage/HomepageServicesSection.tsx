@@ -7,7 +7,7 @@ const SERVICE_POINTS = [
   },
   {
     title: "Commercially straightforward",
-    description: "Transparent pricing, GST invoices and a direct contact for extensions or changes.",
+    description: "Transparent pricing and a direct contact for extensions or changes.",
   },
   {
     title: "Guest-ready homes",

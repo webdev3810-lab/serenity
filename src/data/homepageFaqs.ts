@@ -25,7 +25,7 @@ export const defaultHomepageFaqs: HomepageFaq[] = [
     answer: "Yes. Serenity Stays prices are shown and charged in Australian Dollars.",
   },
   {
-    question: "Can a company pay via tax invoice or PO?",
+    question: "Can a company use a purchase order?",
     answer: "Yes. Contact us with your company details and stay requirements so we can confirm the best direct-booking arrangement.",
   },
   {

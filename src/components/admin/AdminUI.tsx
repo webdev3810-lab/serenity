@@ -70,11 +70,11 @@ export function useDirtyGuard(dirty: boolean) {
   const id = useId(); const { register } = useAdminWorkspace();
   useEffect(() => { register(id, dirty); return () => register(id, false); }, [id, dirty, register]);
 }
-export function AdminPagination({ page, total, pageSize = 20, onPage }: { page: number; total: number; pageSize?: number; onPage: (page: number) => void }) {
+export function AdminPagination({ page, total, pageSize = 10, onPage }: { page: number; total: number; pageSize?: number; onPage: (page: number) => void }) {
   const pages = Math.max(1, Math.ceil(total / pageSize));
   return <nav className="admin-pagination" aria-label="Results pages"><span role="status">{total ? `${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, total)}` : "0"} of {total}</span><div><button type="button" className="admin-icon-button" aria-label="Previous page" disabled={page <= 1} onClick={() => onPage(page - 1)}><ChevronLeft size={18} /></button><span>Page {page} of {pages}</span><button type="button" className="admin-icon-button" aria-label="Next page" disabled={page >= pages} onClick={() => onPage(page + 1)}><ChevronRight size={18} /></button></div></nav>;
 }
-export function useAdminPagination<T>(items: T[], pageSize = 20) {
+export function useAdminPagination<T>(items: T[], pageSize = 10) {
   const [requested, setPage] = useState(1);
   const page = Math.min(requested, Math.max(1, Math.ceil(items.length / pageSize)));
   return { visible: items.slice((page - 1) * pageSize, page * pageSize), pagination: <AdminPagination page={page} total={items.length} pageSize={pageSize} onPage={setPage} />, page, pageSize, resetPage: () => setPage(1) };

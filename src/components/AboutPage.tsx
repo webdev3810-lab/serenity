@@ -4,32 +4,20 @@ import { ArrowUpRight } from "lucide-react";
 import HomepageReviewsSection from "@/src/components/homepage/HomepageReviewsSection";
 import { SerenityLocationMap } from "@/src/components/SerenityLocationMap";
 import type { Property } from "@/src/data/properties";
+import { PUBLIC_PAGE_MEDIA, type PublicPageMedia } from "@/src/lib/publicPageMedia";
+import type { PublicPageCopy } from "@/src/lib/publicPageCopy";
 
-const STATS = [
-  { value: "3", label: "Adjacent homes", detail: "Space to stay independently or together." },
-  { value: "9 min", label: "Walk to Pakenham station", detail: "Transport and everyday essentials close by." },
-  { value: "8+ yrs", label: "Hosting experience", detail: "Local support from enquiry to checkout." },
-] as const;
-
-const PRINCIPLES = [
-  {
-    number: "01",
-    title: "Room to settle in",
-    description: "Furnished private homes with space to cook, work, rest and live at your own pace.",
-  },
-  {
-    number: "02",
-    title: "A convenient base",
-    description: "Close to the station, shopping, restaurants and Pakenham Industrial Park.",
-  },
-  {
-    number: "03",
-    title: "A real point of contact",
-    description: "Responsive help for family visits, relocations, corporate bookings and longer stays.",
-  },
-] as const;
-
-export function AboutPage({ properties, mapUrl }: { properties: Property[]; mapUrl: string }) {
+export function AboutPage({ properties, mapUrl, media, copy }: { properties: Property[]; mapUrl: string; media: PublicPageMedia; copy: PublicPageCopy }) {
+  const stats = [
+    { value: String(properties.length), label: copy.aboutStat1Label, detail: copy.aboutStat1Lead },
+    { value: copy.aboutStat2Value, label: copy.aboutStat2Label, detail: copy.aboutStat2Lead },
+    { value: copy.aboutStat3Value, label: copy.aboutStat3Label, detail: copy.aboutStat3Lead },
+  ];
+  const principles = [
+    { number: "01", title: copy.aboutPrinciple1Title, description: copy.aboutPrinciple1Lead },
+    { number: "02", title: copy.aboutPrinciple2Title, description: copy.aboutPrinciple2Lead },
+    { number: "03", title: copy.aboutPrinciple3Title, description: copy.aboutPrinciple3Lead },
+  ];
   const reviews = properties.flatMap((property) =>
     (property.reviews ?? []).map((review) => ({
       id: review.id,
@@ -48,9 +36,9 @@ export function AboutPage({ properties, mapUrl }: { properties: Property[]; mapU
       <header className="about-story-hero" aria-labelledby="about-story-title">
         <div className="about-story-hero__copy">
           <p className="about-story-hero__location">Pakenham · Victoria</p>
-          <h1 id="about-story-title">About Serenity<span>.</span></h1>
-          <h2>Stay comfortably.<br />Feel at home.</h2>
-          <p>Serenity Corporate Stays offers private furnished homes for families, work trips, relocations and longer visits. Settle in with the everyday details taken care of and one responsive local contact throughout your stay.</p>
+          <h1 id="about-story-title">{copy.aboutHeroTitle}<span>.</span></h1>
+          <h2 style={{ whiteSpace: "pre-line" }}>{copy.aboutHeroSubtitle}</h2>
+          <p>{copy.aboutHeroLead}</p>
           <div className="about-story-hero__links">
             <Link href="/homes">Explore our homes <ArrowUpRight size={17} aria-hidden="true" /></Link>
             <Link href="/contact">Get in touch <ArrowUpRight size={17} aria-hidden="true" /></Link>
@@ -58,19 +46,19 @@ export function AboutPage({ properties, mapUrl }: { properties: Property[]; mapU
         </div>
         <div className="about-story-hero__media">
           <Image
-            src="/about-serenity-interior-v1.jpg"
-            alt="Illustrative sunlit dining and living area in a furnished home"
+            src={media.aboutHero.src}
+            alt={media.aboutHero.alt}
             fill
             priority
             sizes="(max-width: 760px) 100vw, 52vw"
           />
-          <span className="about-story-hero__media-label illustrative-photo-label">Illustrative interior</span>
+          {media.aboutHero.src === PUBLIC_PAGE_MEDIA.aboutHero.src && <span className="about-story-hero__media-label illustrative-photo-label">Illustrative interior</span>}
         </div>
       </header>
 
       <section className="about-story-stats" aria-label="Serenity at a glance">
-        {STATS.map((stat) => (
-          <div className="about-story-stat" key={stat.label}>
+        {stats.map((stat, index) => (
+          <div className="about-story-stat" key={index}>
             <strong>{stat.value}</strong>
             <span>{stat.label}</span>
             <p>{stat.detail}</p>
@@ -84,13 +72,13 @@ export function AboutPage({ properties, mapUrl }: { properties: Property[]; mapU
           <span>01 / Our approach</span>
         </div>
         <div className="about-story-intro__statement">
-          <h2 id="about-story-intro-title">A good place to land.</h2>
-          <p>A comfortable home, a convenient location, and a host you can count on. Stay independently or reserve the houses together.</p>
+          <h2 id="about-story-intro-title">{copy.aboutApproachTitle}</h2>
+          <p>{copy.aboutApproachLead}</p>
         </div>
         <div className="about-story-intro__details">
-          <p>Each home is furnished for the routines that make a longer visit work: cooking, working, resting and spending time together.</p>
-          <p>Shops, restaurants, transport and Pakenham Industrial Park are close by, with Gippsland and Phillip Island further afield.</p>
-          <p>From the first question to checkout, you have one local contact for the details of your stay.</p>
+          <p>{copy.aboutApproachDetail1}</p>
+          <p>{copy.aboutApproachDetail2}</p>
+          <p>{copy.aboutApproachDetail3}</p>
         </div>
         <div className="about-story-intro__map" aria-label="Map of the Serenity homes and nearby places in Pakenham">
           <SerenityLocationMap />
@@ -104,11 +92,11 @@ export function AboutPage({ properties, mapUrl }: { properties: Property[]; mapU
       <section className="about-story-principles" aria-labelledby="about-story-principles-title">
         <div className="about-story-principles__heading">
           <span>02 / What matters</span>
-          <h2 id="about-story-principles-title">The stay, considered.</h2>
-          <p>Practical comforts and attentive hosting make the difference, whether you are here for a few nights or much longer.</p>
+          <h2 id="about-story-principles-title">{copy.aboutPrinciplesTitle}</h2>
+          <p>{copy.aboutPrinciplesLead}</p>
         </div>
         <div className="about-story-principles__grid">
-          {PRINCIPLES.map((item) => (
+          {principles.map((item) => (
             <article className="about-story-principle" key={item.number}>
               <span>{item.number}</span>
               <div>
@@ -128,22 +116,22 @@ export function AboutPage({ properties, mapUrl }: { properties: Property[]; mapU
         <div className="about-story-host__content">
           <div className="about-story-host__intro">
             <p className="about-story-eyebrow">A local point of contact</p>
-            <h2 id="about-story-host-title">Meet Francis.</h2>
-            <p>Based in Melbourne, Francis brings eight years of hosting experience to every stay.</p>
+            <h2 id="about-story-host-title">{copy.aboutHostTitle}</h2>
+            <p>{copy.aboutHostLead}</p>
           </div>
           <div className="about-story-host__profile">
             <div className="about-story-host__name">
-              <strong>Francis</strong>
+              <strong>{copy.aboutHostName}</strong>
               <span>Host</span>
             </div>
             <dl className="about-story-host__metrics" aria-label="Francis’s hosting profile">
-              <div><dt>Reviews</dt><dd>79</dd></div>
-              <div><dt>Rating</dt><dd>4.62<span aria-label="stars">★</span></dd></div>
-              <div><dt>Years hosting</dt><dd>8</dd></div>
+              <div><dt>Reviews</dt><dd>{copy.aboutHostReviews}</dd></div>
+              <div><dt>Rating</dt><dd>{copy.aboutHostRating}<span aria-label="stars">★</span></dd></div>
+              <div><dt>Years hosting</dt><dd>{copy.aboutHostYears}</dd></div>
             </dl>
             <div className="about-story-host__details">
-              <p>Lives in Melbourne, Australia</p>
-              <p>Identity verified on Airbnb</p>
+              <p>{copy.aboutHostLocation}</p>
+              <p>{copy.aboutHostVerification}</p>
             </div>
           </div>
         </div>
@@ -154,8 +142,8 @@ export function AboutPage({ properties, mapUrl }: { properties: Property[]; mapU
           id="guest-reviews"
           className="about-story-reviews"
           eyebrow="Guestbook"
-          heading="A stay remembered in kind words."
-          description="Notes from guests who stayed in the Serenity homes."
+          heading={copy.aboutReviewsTitle}
+          description={copy.aboutReviewsLead}
           reviews={reviews}
           maxReviews={reviews.length}
           allReviewsHref="/homes"

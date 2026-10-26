@@ -15,7 +15,71 @@ const BLOCK_LABELS: Record<(typeof BLOCK_REASONS)[number], string> = {
 };
 
 function isDate(value: string) {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+function nextDate(value: string) {
+  const date = new Date(`${value}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().slice(0, 10);
+}
+
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!await getAdminUser()) return NextResponse.json({ error: "You must be signed in as an admin." }, { status: 401 });
+  const { id } = await params;
+  try {
+    const body = await request.json() as { date?: string } | null;
+    const date = typeof body?.date === "string" ? body.date.trim() : "";
+    if (!isDate(date)) return NextResponse.json({ error: "Choose a valid night to unblock." }, { status: 400 });
+    const supabase = createSupabaseAdminClient();
+    const { data: block, error: readError } = await supabase.from("calendar_events")
+      .select("id, property_id, start_date, end_date, summary, block_reason, internal_note")
+      .eq("id", id).eq("status", "active").eq("is_blocking", true).eq("source_platform", "direct")
+      .not("external_event_id", "like", "ical-upload:%").is("connection_id", null).maybeSingle();
+    if (readError) return NextResponse.json({ error: readError.message }, { status: 500 });
+    if (!block) return NextResponse.json({ error: "Manual block not found." }, { status: 404 });
+    const afterDate = nextDate(date);
+    if (date < block.start_date || date >= block.end_date) return NextResponse.json({ error: "That night is not part of this block." }, { status: 400 });
+
+    const guardedBlock = () => supabase.from("calendar_events").update(
+      block.start_date === date && block.end_date === afterDate ? { status: "stale", is_blocking: false } :
+      block.start_date === date ? { start_date: afterDate } : { end_date: date },
+    ).eq("id", id).eq("status", "active").eq("is_blocking", true).eq("start_date", block.start_date).eq("end_date", block.end_date)
+      .eq("source_platform", "direct").not("external_event_id", "like", "ical-upload:%").is("connection_id", null)
+      .select("id").maybeSingle();
+
+    if (block.start_date < date && afterDate < block.end_date) {
+      const { data: remainder, error: insertError } = await supabase.from("calendar_events").insert({
+        property_id: block.property_id,
+        connection_id: null,
+        source_platform: "direct",
+        external_event_id: `admin-block:${crypto.randomUUID()}`,
+        start_date: afterDate,
+        end_date: block.end_date,
+        status: "active",
+        summary: block.summary,
+        block_reason: block.block_reason,
+        internal_note: block.internal_note,
+        is_blocking: true,
+        last_seen_at: new Date().toISOString(),
+      }).select("id").single();
+      if (insertError || !remainder) return NextResponse.json({ error: insertError?.message ?? "Could not preserve the remaining blocked nights." }, { status: 500 });
+      const { data: updated, error: updateError } = await guardedBlock();
+      if (updateError || !updated) {
+        const { error: rollbackError } = await supabase.from("calendar_events").update({ status: "stale", is_blocking: false }).eq("id", remainder.id);
+        return NextResponse.json({ error: rollbackError ? "The block changed and the remaining range could not be cleaned up. Refresh the calendar before editing it again." : updateError?.message ?? "The block changed while you were editing it. Refresh and try again." }, { status: updateError || rollbackError ? 500 : 409 });
+      }
+    } else {
+      const { data: updated, error: updateError } = await guardedBlock();
+      if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
+      if (!updated) return NextResponse.json({ error: "The block changed while you were editing it. Refresh and try again." }, { status: 409 });
+    }
+    return NextResponse.json({ ok: true, unblockedDate: date });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Could not unblock this night." }, { status: 500 });
+  }
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {

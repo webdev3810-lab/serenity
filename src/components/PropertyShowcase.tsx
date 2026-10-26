@@ -21,7 +21,6 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
   const hasAmenity = (pattern: RegExp) => amenities.some((amenity) => pattern.test(amenity.label));
   const safetyAmenities = amenities.filter((amenity) => /smoke alarm|carbon monoxide|fire extinguisher|first.aid|security camera|deadbolt/i.test(amenity.label));
   const selfCheckIn = Boolean(property.selfCheckInDetails || hasAmenity(/self check.?in|key safe|lockbox/i));
-  const policyLink = /^(https:\/\/\S+|\/(?!\/)\S+)$/.test(property.cancellationPolicy?.trim() || "");
   const photoPriority = (image: PropertyImage) => /living|lounge|family/i.test(`${image.category || ""} ${image.categoryLabel || ""}`) ? 0 : /kitchen|dining/i.test(`${image.category || ""} ${image.categoryLabel || ""}`) ? 1 : /bedroom/i.test(`${image.category || ""} ${image.categoryLabel || ""}`) ? 2 : /outdoor|patio|garden/i.test(`${image.category || ""} ${image.categoryLabel || ""}`) ? 3 : 4;
   const previewImages = images.slice(1).map((image, index) => ({ image, index })).sort((a, b) => photoPriority(a.image) - photoPriority(b.image) || a.index - b.index).slice(0, 4).map(({ image }) => image);
   const nav = [
@@ -105,7 +104,6 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
         <p>{property.corporateInformation || property.corporateInstructions || "Corporate stays are available for approved partners."}</p>
         <ul>
           <li>Partner ID required for online corporate booking</li>
-          {property.gstInvoiceAvailable && <li>GST invoices available</li>}
           {property.longTermStaysAllowed && <li>Longer stays available</li>}
         </ul>
       </section>}
@@ -114,7 +112,7 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
     <div className="property-showcase-details-grid">
       {property.houseRules.length > 0 && <section className="property-showcase-panel" id="house-rules"><h2><ClipboardList size={23} aria-hidden="true" />House rules</h2><ul className="property-showcase-check-list">{property.houseRules.map((rule) => <li key={rule}><Check size={16} aria-hidden="true" />{rule}</li>)}</ul>{property.petPolicy && <p className="property-showcase-panel-note">{property.petPolicy}</p>}</section>}
       {(property.safetyInformation || safetyAmenities.length > 0) && <section className="property-showcase-panel" id="house-safety"><h2><Shield size={23} aria-hidden="true" />Guest safety</h2>{property.safetyInformation && <p>{property.safetyInformation}</p>}{safetyAmenities.length > 0 && <ul className="property-showcase-check-list">{safetyAmenities.map((amenity) => <li key={amenity.id}><Check size={16} aria-hidden="true" />{amenity.label}</li>)}</ul>}</section>}
-      <section className="property-showcase-panel" id="house-booking"><h2><CalendarDays size={23} aria-hidden="true" />Booking & cancellation</h2><ul><li>Minimum stay: {property.minimumStay} nights</li><li>Direct booking subject to availability</li>{property.longTermStaysAllowed && <li>Longer stays available</li>}</ul>{property.cancellationPolicy && <p className="property-showcase-panel-note">{policyLink ? <a href={property.cancellationPolicy}>Read cancellation policy</a> : property.cancellationPolicy}</p>}<a className="property-showcase-text-action" href="#availability">View dates and pricing <ChevronRight size={16} aria-hidden="true" /></a></section>
+      <section className="property-showcase-panel" id="house-booking"><h2><CalendarDays size={23} aria-hidden="true" />Booking & cancellation</h2><ul><li>Minimum stay: {property.minimumStay} nights</li><li>Free cancellation until 11:59 pm Melbourne time, {property.freeCancellationDays} day{property.freeCancellationDays === 1 ? "" : "s"} before check-in</li><li>Direct booking subject to availability</li>{property.longTermStaysAllowed && <li>Longer stays available</li>}</ul><p className="property-showcase-panel-note">Contact Serenity to cancel. The deadline for your dates is shown before payment.</p><a className="property-showcase-text-action" href="#availability">View dates and pricing <ChevronRight size={16} aria-hidden="true" /></a></section>
       <section className="property-showcase-panel" id="house-host"><h2><Users size={23} aria-hidden="true" />About your host</h2><p>{hostBio || "The Serenity team can help with questions about the house and your stay."}</p><Link className="property-showcase-text-action" href="/contact">Contact Serenity <ChevronRight size={16} aria-hidden="true" /></Link></section>
     </div>
     </div>

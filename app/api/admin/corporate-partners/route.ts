@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { getAdminUser } from "@/src/lib/supabase/auth";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
+import { fetchAllAdminRows } from "@/src/lib/admin-pagination";
 
 const fields = "id, partner_id, company_name, contact_name, email, phone, abn, purchase_order, invoice_requested, active, created_at";
 
 export async function GET() {
   if (!await getAdminUser()) return NextResponse.json({ error: "Not authorised." }, { status: 403 });
-  const { data, error } = await createSupabaseAdminClient().from("corporate_partners").select(fields).order("company_name");
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await fetchAllAdminRows(() => supabase.from("corporate_partners").select(fields).order("company_name").order("id"));
   if (error) return NextResponse.json({ error: "Could not load partners. Apply the latest database migration first." }, { status: 500 });
   return NextResponse.json({ partners: data ?? [] });
 }

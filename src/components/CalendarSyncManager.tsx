@@ -1,5 +1,5 @@
 "use client";
-import { AdminBadge,useAdminWorkspace,useDirtyGuard } from "@/src/components/admin/AdminUI";
+import { AdminBadge,useAdminPagination,useAdminWorkspace,useDirtyGuard } from "@/src/components/admin/AdminUI";
 
 import { todayIso } from "@/src/lib/booking";
 import { CALENDAR_PLATFORM_LABELS,CALENDAR_PLATFORMS,type CalendarPlatform } from "@/src/lib/calendar/types";
@@ -38,16 +38,16 @@ type CalendarProperty = {
   uploadedCalendar: { eventCount: number };
 };
 const BLOCK_REASONS: Array<{ value: BlockReason; label: string }> = [
+  { value: "other", label: "Unavailable" },
   { value: "maintenance", label: "Maintenance" },
   { value: "owner_use", label: "Owner use" },
   { value: "cleaning", label: "Cleaning" },
   { value: "preparation", label: "Preparation time" },
   { value: "renovation", label: "Renovation" },
   { value: "private_booking", label: "Private booking" },
-  { value: "other", label: "Other" },
 ];
 
-const emptyBlockDraft = (): BlockDraft => ({ startDate: "", endDate: "", blockReason: "maintenance", internalNote: "" });
+const emptyBlockDraft = (): BlockDraft => ({ startDate: "", endDate: "", blockReason: "other", internalNote: "" });
 
 function formatDate(value: string | null) {
   if (!value) return "Never";
@@ -103,6 +103,16 @@ function MonthlyBlockCalendar({ items }: { items: CalendarItem[] }) {
       {visibleSources.length === 0 ? <span>No blocked dates in this preview.</span> : visibleSources.map((source) => <span key={source} className="flex items-center gap-1.5"><span className={`h-2.5 w-2.5 rounded-full ${sourceTone[source] ?? "bg-[var(--admin-info-text)]"}`} />{source === "direct" ? "Serenity / manual" : source}</span>)}
     </div>
   </div>;
+}
+
+function ManualBlockList({ blocks, busy, onEdit, onRemove }: {
+  blocks: CalendarProperty["directBlocks"];
+  busy: string;
+  onEdit: (block: CalendarProperty["directBlocks"][number]) => void;
+  onRemove: (blockId: string) => void;
+}) {
+  const { visible, pagination } = useAdminPagination(blocks);
+  return <div className="mt-4 grid gap-2">{visible.map((block) => <div key={block.id} className="flex flex-wrap items-center justify-between gap-3 border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-3 text-sm"><div><p className="font-medium">{block.summary} · {formatCalendarDate(block.startDate)} to {formatCalendarDate(block.endDate)}</p><p className="text-sm text-[var(--admin-muted)]">Source: Manual Serenity{block.internalNote ? ` · Private note: ${block.internalNote}` : ""}</p></div><div className="flex gap-2"><button type="button" className="admin-button inline-flex min-h-9 items-center gap-1 text-sm" onClick={() => onEdit(block)}><Pencil size={14} /> Edit</button><button type="button" className="admin-button inline-flex min-h-9 items-center gap-1 text-sm text-[var(--admin-danger-text)]" onClick={() => onRemove(block.id)} disabled={busy === `remove-block:${block.id}`}><Trash2 size={14} /> Remove entire range</button></div></div>)}{pagination}</div>;
 }
 
 export default function CalendarSyncManager() {
@@ -265,7 +275,7 @@ export default function CalendarSyncManager() {
   };
 
   const removeBlock = async (blockId: string) => {
-    if (!await confirm("Remove these manually blocked dates?")) return;
+    if (!await confirm("Remove this entire manually blocked range? Every night in it will become available unless another booking or calendar feed blocks it.")) return;
     setBusy(`remove-block:${blockId}`);
     try {
       await request(`/api/admin/calendar/blocks/${blockId}`, { method: "DELETE" });
@@ -283,6 +293,7 @@ export default function CalendarSyncManager() {
 
   const providerLink = (propertyId: string, platform: CalendarPlatform) => links[propertyId] ? `${links[propertyId]}&source=${platform}` : "";
   const activeProperties = useMemo(() => properties.filter((property) => property.slug), [properties]);
+  const { visible: visibleProperties, pagination: settingsPagination } = useAdminPagination(activeProperties);
   const previewProperty = activeProperties.find((property) => property.id === previewPropertyId) ?? activeProperties[0];
 
   if (loading) return <div className="admin-card admin-loading-state" role="status"><LoaderCircle size={18} className="animate-spin" aria-hidden="true" /><span>Loading calendar connections…</span></div>;
@@ -315,7 +326,7 @@ export default function CalendarSyncManager() {
       </div>
     </details>
 
-    {activeProperties.map((property) => {
+    {visibleProperties.map((property) => {
       const direct = property.connections.find((connection) => connection.connection_type === "export");
       const importConnections = property.connections.filter((connection) => connection.connection_type === "import");
       const connectedCount = CALENDAR_PLATFORMS.filter((platform) => {
@@ -379,11 +390,12 @@ export default function CalendarSyncManager() {
         <div className="mt-6 border border-[var(--admin-border)] bg-[var(--admin-surface-alt)] p-4 sm:p-5">
           <div><h4 className="font-semibold text-[var(--admin-text)]">Manual availability blocks</h4><p className="mt-1 text-sm leading-relaxed text-[var(--admin-muted)]">Use Melbourne local dates. The end date is checkout-style and becomes available again. Internal notes stay admin-only and never enter iCal exports.</p></div>
           <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_1fr_1.1fr_1.5fr_auto]"><label className="text-sm font-medium">Start<input className="admin-field mt-1 min-h-11" type="date" value={blockDraft.startDate} onChange={(event) => updateBlockDraft(property.id, { startDate: event.target.value })} /></label><label className="text-sm font-medium">End<input className="admin-field mt-1 min-h-11" type="date" value={blockDraft.endDate} onChange={(event) => updateBlockDraft(property.id, { endDate: event.target.value })} /></label><label className="text-sm font-medium">Reason<select className="admin-field mt-1 min-h-11 text-sm normal-case tracking-normal" value={blockDraft.blockReason} onChange={(event) => updateBlockDraft(property.id, { blockReason: event.target.value as BlockReason })}>{BLOCK_REASONS.map((reason) => <option key={reason.value} value={reason.value}>{reason.label}</option>)}</select></label><label className="text-sm font-medium">Internal note<input className="admin-field mt-1 min-h-11 text-sm normal-case tracking-normal" maxLength={1000} value={blockDraft.internalNote} onChange={(event) => updateBlockDraft(property.id, { internalNote: event.target.value })} placeholder="Optional private note" /></label><div className="flex items-end gap-2"><button type="button" className="admin-button admin-button-primary inline-flex min-h-11 items-center justify-center gap-2" onClick={() => void saveBlock(property)} disabled={busy === `block:${property.id}`}><CalendarPlus size={15} />{editingBlockId ? "Save block" : "Add block"}</button>{editingBlockId && <button type="button" className="admin-button inline-flex min-h-11 items-center justify-center" aria-label="Cancel editing" onClick={() => { setEditingBlockId(""); setBlockDrafts((current) => ({ ...current, [property.id]: emptyBlockDraft() })); }}><X size={15} /></button>}</div></div>
-          {property.directBlocks.length > 0 && <div className="mt-4 grid gap-2">{property.directBlocks.map((block) => <div key={block.id} className="flex flex-wrap items-center justify-between gap-3 border border-[var(--admin-border)] bg-[var(--admin-surface)] px-3 py-3 text-sm"><div><p className="font-medium">{block.summary} · {formatCalendarDate(block.startDate)} to {formatCalendarDate(block.endDate)}</p><p className="text-sm text-[var(--admin-muted)]">Source: Manual Serenity{block.internalNote ? ` · Private note: ${block.internalNote}` : ""}</p></div><div className="flex gap-2"><button type="button" className="admin-button inline-flex min-h-9 items-center gap-1 text-sm" onClick={() => editBlock(property, block)}><Pencil size={14} /> Edit</button><button type="button" className="admin-button inline-flex min-h-9 items-center gap-1 text-sm text-[var(--admin-danger-text)]" onClick={() => void removeBlock(block.id)} disabled={busy === `remove-block:${block.id}`}><Trash2 size={14} /> Remove</button></div></div>)}</div>}
+          {property.directBlocks.length > 0 && <ManualBlockList blocks={property.directBlocks} busy={busy} onEdit={(block) => editBlock(property, block)} onRemove={(blockId) => void removeBlock(blockId)} />}
         </div>
         </details>
       </section>;
     })}
-    {!activeProperties.length && <div className="admin-card bg-[var(--admin-surface)] p-8 text-sm text-[var(--admin-muted)]">No target properties were found. Add serenity-7, serenity-9, or serenity-11 to Supabase before configuring feeds.</div>}
+    {settingsPagination}
+    {!activeProperties.length && <div className="admin-card bg-[var(--admin-surface)] p-8 text-sm text-[var(--admin-muted)]">No target properties were found. Add a house to Supabase before configuring feeds.</div>}
   </div>;
 }

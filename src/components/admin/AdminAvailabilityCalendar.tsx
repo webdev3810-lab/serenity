@@ -1,21 +1,25 @@
 "use client";
 
 import { addDays, formatAud, todayIso } from "@/src/lib/booking";
+import { isWithinFreeCancellation } from "@/src/lib/cancellationPolicy";
+import { isAppManagedBookingSource } from "@/src/lib/booking-source";
 import { AdminDialog, useAdminWorkspace, useDirtyGuard } from "@/src/components/admin/AdminUI";
 import type { Row } from "@/src/components/admin/AdminModels";
-import { CalendarDays, ChevronLeft, ChevronRight, CircleAlert, LockKeyhole, Plus, RefreshCw, Save, Trash2, X } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, CircleAlert, LockKeyhole, LockKeyholeOpen, Plus, RefreshCw, Save, X } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
-type CalendarAction = "block" | "booking" | null;
+type CalendarAction = "booking" | null;
 type Selection = { propertyId: string; date: string };
+type BlockRange = { propertyId: string; startDate: string; endDate: string };
 type DayStatus = { kind: "available" | "booking" | "manual" | "external" | "unavailable"; label: string; record?: Row };
 
 const activeBookingStatuses = new Set(["pending_payment", "confirmed", "corporate", "checked_in"]);
 const blockReasons = [
+  ["other", "Unavailable"],
   ["maintenance", "Maintenance"], ["owner_use", "Owner use"], ["cleaning", "Cleaning"],
   ["preparation", "Preparation"], ["renovation", "Renovation"],
-  ["private_booking", "Private booking"], ["other", "Other"],
+  ["private_booking", "Private booking"],
 ] as const;
 
 const displayDate = (date: string) => new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
@@ -25,10 +29,21 @@ const shiftMonth = (month: string, amount: number) => {
   date.setUTCMonth(date.getUTCMonth() + amount);
   return date.toISOString().slice(0, 7);
 };
+const blockDateKey = ({ propertyId, date }: Selection) => `${propertyId}:${date}`;
+function groupBlockDates(selections: Selection[]): BlockRange[] {
+  const sorted = [...selections].sort((a, b) => a.propertyId.localeCompare(b.propertyId) || a.date.localeCompare(b.date));
+  const ranges: BlockRange[] = [];
+  for (const selected of sorted) {
+    const last = ranges.at(-1);
+    if (last?.propertyId === selected.propertyId && last.endDate === selected.date) last.endDate = addDays(selected.date, 1);
+    else ranges.push({ propertyId: selected.propertyId, startDate: selected.date, endDate: addDays(selected.date, 1) });
+  }
+  return ranges;
+}
 
 function getDayStatus(property: Row, date: string, bookings: Row[], events: Row[]): DayStatus {
   const booking = bookings.find((item) => item.property_id === property.id && activeBookingStatuses.has(String(item.booking_status)) && item.check_in <= date && item.checkout > date);
-  if (booking) return { kind: "booking", label: booking.booking_source === "admin" ? "Manual booking" : booking.booking_type === "corporate" ? "Corporate booking" : "Booked", record: booking };
+  if (booking) return { kind: "booking", label: !isAppManagedBookingSource(booking.booking_source) ? `${String(booking.booking_source ?? "External")} reservation` : booking.booking_source === "admin" ? "Manual booking" : booking.booking_type === "corporate" ? "Corporate booking" : "Booked", record: booking };
   const event = events.find((item) => item.property_id === property.id && item.status === "active" && item.is_blocking === true && item.start_date <= date && item.end_date > date);
   if (event) {
     const manual = event.source_platform === "direct" && !event.connection_id && !String(event.external_event_id ?? "").startsWith("ical-upload:");
@@ -58,12 +73,15 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
   const [month, setMonth] = useState(() => todayIso().slice(0, 7));
   const [selection, setSelection] = useState<Selection | null>(null);
   const [blockPicking, setBlockPicking] = useState(startBlockSelection);
-  const [blockStart, setBlockStart] = useState<Selection | null>(null);
-  const [hoverTarget, setHoverTarget] = useState<Selection | null>(null);
+  const [selectedBlockDates, setSelectedBlockDates] = useState<Selection[]>([]);
+  const [rangeAnchor, setRangeAnchor] = useState<Selection | null>(null);
+  const [unblockPicking, setUnblockPicking] = useState(false);
+  const [selectedUnblockDates, setSelectedUnblockDates] = useState<Selection[]>([]);
+  const [unblockRangeAnchor, setUnblockRangeAnchor] = useState<Selection | null>(null);
   const [pickerError, setPickerError] = useState("");
   const [action, setAction] = useState<CalendarAction>(null);
   const [endDate, setEndDate] = useState("");
-  const [reason, setReason] = useState("maintenance");
+  const [reason, setReason] = useState("other");
   const [note, setNote] = useState("");
   const [contactName, setContactName] = useState("");
   const [email, setEmail] = useState("");
@@ -79,6 +97,7 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [bookingEditorDirty, setBookingEditorDirty] = useState(false);
+  useDirtyGuard(selectedBlockDates.length > 0 || selectedUnblockDates.length > 0);
   const houses = useMemo(() => properties.filter((property) => property.slug && property.published !== false), [properties]);
   const monthStart = new Date(`${month}-01T00:00:00Z`);
   const numberOfDays = new Date(Date.UTC(monthStart.getUTCFullYear(), monthStart.getUTCMonth() + 1, 0)).getUTCDate();
@@ -122,7 +141,7 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
     setSelection({ propertyId, date });
     setAction(resolvedAction);
     setEndDate(addDays(date, resolvedAction === "booking" ? Math.max(1, Number(property?.minimum_stay ?? 1)) : 1));
-    setReason("maintenance"); setNote(""); setContactName(""); setEmail(""); setPhone(""); setAdults(1); setChildren(0); setInfants(0); setPets(0); setCompanyName(""); setCorporate(false); setPartnerId("");
+    setReason("other"); setNote(""); setContactName(""); setEmail(""); setPhone(""); setAdults(1); setChildren(0); setInfants(0); setPets(0); setCompanyName(""); setCorporate(false); setPartnerId("");
     setError(""); setNotice("");
     setBookingEditorDirty(false);
   };
@@ -134,46 +153,98 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
   const updateBooking = async (bookingId: string, changes: Row) => {
     setBusy(true); setError("");
     try {
-      await jsonRequest(`/api/admin/bookings/${encodeURIComponent(bookingId)}`, { method: "PATCH", body: JSON.stringify(changes) });
+      const result = await jsonRequest(`/api/admin/bookings/${encodeURIComponent(bookingId)}`, { method: "PATCH", body: JSON.stringify(changes) });
       setBookingEditorDirty(false);
       setSelection(null); setAction(null);
-      setNotice(changes.paymentStatus === "paid" ? "Offline payment recorded. No Stripe charge was made." : "Booking updated.");
+      setNotice(result.refund ? `Booking cancelled. Stripe ${result.refund.status === "succeeded" ? "refunded" : "started a refund of"} ${formatAud(result.refund.amount / 100)} for this house${result.refund.status === "succeeded" ? "." : ` (status: ${result.refund.status}).`}` : changes.paymentStatus === "paid" ? "Offline payment recorded. No Stripe charge was made." : "Booking updated.");
       await reload();
     } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not update the booking."); }
     finally { setBusy(false); }
   };
   const toggleBlockPicking = () => {
+    setUnblockPicking(false);
     setBlockPicking((current) => !current);
-    setBlockStart(null); setHoverTarget(null); setPickerError("");
+    setRangeAnchor(null); setPickerError(""); setError(""); setNotice("");
     setSelection(null); setAction(null);
   };
-  const pickBlockDate = (propertyId: string, date: string) => {
+  const toggleUnblockPicking = () => {
+    setBlockPicking(false);
+    setUnblockPicking((current) => !current);
+    setUnblockRangeAnchor(null); setPickerError(""); setError(""); setNotice("");
+    setSelection(null); setAction(null);
+  };
+  const pickBlockDate = (propertyId: string, date: string, extendRange: boolean) => {
     const property = houses.find((house) => house.id === propertyId);
     if (!property || date < today || getDayStatus(property, date, bookings, calendarEvents).kind !== "available") {
       setPickerError("Choose an available future date to block.");
       return;
     }
-    if (!blockStart || blockStart.propertyId !== propertyId || date < blockStart.date) {
-      setBlockStart({ propertyId, date });
-      setPickerError("");
-      return;
-    }
-    const checkout = addDays(date, 1);
-    if (checkout > addDays(blockStart.date, 365)) {
-      setPickerError("Select a range of 365 nights or fewer.");
-      return;
-    }
-    for (let night = blockStart.date; night < checkout; night = addDays(night, 1)) {
-      if (getDayStatus(property, night, bookings, calendarEvents).kind !== "available") {
-        setPickerError(`${displayDate(night)} is already unavailable. Choose a different last night or start again.`);
-        return;
+    const anchor = extendRange ? rangeAnchor ?? selectedBlockDates.at(-1) : null;
+    if (anchor) {
+      if (anchor.propertyId !== propertyId) { setPickerError("Choose the last night on the same house as the range start."); return; }
+      const startDate = anchor.date < date ? anchor.date : date;
+      const endDate = anchor.date < date ? date : anchor.date;
+      if (addDays(endDate, 1) > addDays(startDate, 365)) { setPickerError("Select a range of 365 nights or fewer."); return; }
+      const added: Selection[] = [];
+      for (let night = startDate; night <= endDate; night = addDays(night, 1)) {
+        if (getDayStatus(property, night, bookings, calendarEvents).kind !== "available") { setPickerError(`${displayDate(night)} is already unavailable. Choose another range.`); return; }
+        added.push({ propertyId, date: night });
       }
+      setSelectedBlockDates((current) => {
+        const selected = new Map(current.map((item) => [blockDateKey(item), item]));
+        for (const item of added) selected.set(blockDateKey(item), item);
+        return [...selected.values()];
+      });
+      setRangeAnchor(null);
+    } else {
+      const chosen = { propertyId, date };
+      setSelectedBlockDates((current) => current.some((item) => blockDateKey(item) === blockDateKey(chosen)) ? current.filter((item) => blockDateKey(item) !== blockDateKey(chosen)) : [...current, chosen]);
     }
-    openDate(propertyId, blockStart.date, "block");
-    setEndDate(checkout);
-    setBlockPicking(false); setBlockStart(null); setHoverTarget(null); setPickerError("");
+    setPickerError("");
   };
-  const previewEnd = blockStart && hoverTarget?.propertyId === blockStart.propertyId && hoverTarget.date >= blockStart.date ? hoverTarget.date : blockStart?.date;
+  const pickUnblockDate = (propertyId: string, date: string, extendRange: boolean) => {
+    const property = houses.find((house) => String(house.id) === propertyId);
+    const chosen = { propertyId, date };
+    if (!property || getDayStatus(property, date, bookings, calendarEvents).kind !== "manual") {
+      setPickerError("Choose a manually blocked night to unblock. Bookings and imported dates cannot be changed here.");
+      return;
+    }
+    const anchor = extendRange ? unblockRangeAnchor ?? selectedUnblockDates.at(-1) : null;
+    if (anchor) {
+      if (anchor.propertyId !== propertyId) { setPickerError("Choose the last night on the same house as the range start."); return; }
+      const startDate = anchor.date < date ? anchor.date : date;
+      const endDate = anchor.date < date ? date : anchor.date;
+      if (addDays(endDate, 1) > addDays(startDate, 365)) { setPickerError("Select a range of 365 nights or fewer."); return; }
+      const added: Selection[] = [];
+      for (let night = startDate; night <= endDate; night = addDays(night, 1)) {
+        if (getDayStatus(property, night, bookings, calendarEvents).kind !== "manual") { setPickerError(`${displayDate(night)} is not manually blocked. Choose another range.`); return; }
+        added.push({ propertyId, date: night });
+      }
+      setSelectedUnblockDates((current) => {
+        const selected = new Map(current.map((item) => [blockDateKey(item), item]));
+        for (const item of added) selected.set(blockDateKey(item), item);
+        return [...selected.values()];
+      });
+      setUnblockRangeAnchor(null);
+    } else {
+      setSelectedUnblockDates((current) => current.some((item) => blockDateKey(item) === blockDateKey(chosen)) ? current.filter((item) => blockDateKey(item) !== blockDateKey(chosen)) : [...current, chosen]);
+    }
+    setPickerError("");
+  };
+  const selectedBlockKeys = new Set(selectedBlockDates.map(blockDateKey));
+  const selectedBlockRanges = groupBlockDates(selectedBlockDates);
+  const selectedBlockHouseCount = new Set(selectedBlockDates.map((item) => item.propertyId)).size;
+  const selectedUnblockKeys = new Set(selectedUnblockDates.map(blockDateKey));
+  const selectedUnblockRanges = groupBlockDates(selectedUnblockDates);
+  const selectedUnblockHouseCount = new Set(selectedUnblockDates.map((item) => item.propertyId)).size;
+  const blockConflictDate = selectedBlockDates.find(({ propertyId, date }) => {
+    const property = houses.find((house) => String(house.id) === propertyId);
+    return !property || date < today || getDayStatus(property, date, bookings, calendarEvents).kind !== "available";
+  })?.date ?? "";
+  const unblockConflictDate = selectedUnblockDates.find(({ propertyId, date }) => {
+    const property = houses.find((house) => String(house.id) === propertyId);
+    return !property || getDayStatus(property, date, bookings, calendarEvents).kind !== "manual";
+  })?.date ?? "";
   const minimumBookingNights = Math.max(corporate ? 2 : 1, corporate ? Number(selectedProperty?.minimum_corporate_stay ?? 2) : Number(selectedProperty?.minimum_stay ?? 1));
   const minimumCheckout = selection ? addDays(selection.date, minimumBookingNights) : "";
   let rangeConflictDate = "";
@@ -183,16 +254,40 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
     }
   }
 
-  const saveBlock = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!selection) return;
+  const saveBlock = async () => {
+    if (!selectedBlockDates.length || busy) return;
     setBusy(true); setError("");
     try {
-      if (rangeConflictDate) throw new Error(`${displayDate(rangeConflictDate)} is already unavailable. Choose a shorter range or another house.`);
-      await jsonRequest("/api/admin/calendar/blocks", { method: "POST", body: JSON.stringify({ propertyId: selection.propertyId, startDate: selection.date, endDate, blockReason: reason, internalNote: note }) });
-      setSelection(null); setAction(null); setNotice("Dates blocked. They are unavailable for new bookings and included in calendar exports.");
+      if (blockConflictDate) throw new Error(`${displayDate(blockConflictDate)} is already unavailable. Choose another range.`);
+      await jsonRequest("/api/admin/calendar/blocks", { method: "POST", body: JSON.stringify({ ranges: selectedBlockRanges, blockReason: reason, internalNote: note }) });
+      setBlockPicking(false); setSelectedBlockDates([]); setRangeAnchor(null); setPickerError(""); setReason("other"); setNote("");
+      setNotice(`${selectedBlockDates.length} ${selectedBlockDates.length === 1 ? "night" : "nights"} blocked. They are unavailable for new bookings and included in calendar exports.`);
       await reload();
-    } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not block dates."); }
+    } catch (failure) { setPickerError(failure instanceof Error ? failure.message : "Could not block dates."); }
+    finally { setBusy(false); }
+  };
+
+  const saveUnblockDates = async () => {
+    if (!selectedUnblockDates.length || busy) return;
+    setBusy(true); setPickerError("");
+    try {
+      if (unblockConflictDate) throw new Error(`${displayDate(unblockConflictDate)} is no longer manually blocked. Remove it from the selection.`);
+      const response = await fetch("/api/admin/calendar/blocks/unblock", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ dates: selectedUnblockDates }) });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        if (Array.isArray(result.completedDates) && result.completedDates.length) {
+          const completed = new Set((result.completedDates as Selection[]).map(blockDateKey));
+          setSelectedUnblockDates((current) => current.filter((item) => !completed.has(blockDateKey(item))));
+          setUnblockRangeAnchor(null);
+          await reload();
+        }
+        throw new Error(result.error || "Could not unblock the selected dates.");
+      }
+      const count = selectedUnblockDates.length;
+      setSelectedUnblockDates([]); setUnblockRangeAnchor(null); setUnblockPicking(false);
+      setNotice(`${count} manually blocked ${count === 1 ? "night" : "nights"} unblocked. Other reservations or imported calendars may still make a date unavailable.`);
+      await reload();
+    } catch (failure) { setPickerError(failure instanceof Error ? failure.message : "Could not unblock dates."); }
     finally { setBusy(false); }
   };
 
@@ -210,25 +305,16 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
     finally { setBusy(false); }
   };
 
-  const removeBlock = async () => {
-    if (!selectedStatus?.record?.id || !await confirm({ title: "Remove this date block?", description: "The blocked range will become available again unless another booking or calendar feed blocks it.", confirmLabel: "Remove block", destructive: true })) return;
-    setBusy(true); setError("");
-    try {
-      await jsonRequest(`/api/admin/calendar/blocks/${selectedStatus.record.id}`, { method: "DELETE" });
-      setSelection(null); setNotice("Manual block removed. Availability has been refreshed.");
-      await reload();
-    } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not remove the block."); }
-    finally { setBusy(false); }
-  };
-
   return <div className="space-y-5">
     <header className="admin-page-header flex flex-wrap items-end justify-between gap-4">
-      <div><p className="admin-eyebrow">Availability / daily operations</p><h2 className="admin-page-title">Calendar</h2><p className="admin-page-description">Nightly prices in AUD and current availability across all homes. Select a date to block it or add a manual booking.</p></div>
-      <div className="flex flex-wrap gap-2"><button type="button" className="admin-button inline-flex items-center gap-2" onClick={() => void reload()}><RefreshCw size={16} /> Refresh</button>{firstOpenDate && <><button type="button" className={`admin-button inline-flex items-center gap-2 ${blockPicking ? "admin-button-primary" : ""}`} aria-pressed={blockPicking} onClick={toggleBlockPicking}><LockKeyhole size={16} /> {blockPicking ? "Cancel selection" : "Block dates"}</button><button type="button" className="admin-button admin-button-primary inline-flex items-center gap-2" onClick={() => { setMonth(firstOpenDate.date.slice(0, 7)); setBlockPicking(false); setBlockStart(null); openDate(firstOpenDate.propertyId, firstOpenDate.date, "booking"); }}><Plus size={16} /> Manual booking</button></>}</div>
+      <div><p className="admin-eyebrow">Availability / daily operations</p><h2 className="admin-page-title">Calendar</h2><p className="admin-page-description">Nightly prices and availability across all homes. Select blocked nights to unblock several at once.</p></div>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className="admin-button inline-flex items-center gap-2" onClick={() => void reload()}><RefreshCw size={16} /> Refresh</button>
+        {firstOpenDate && <button type="button" className={`admin-button inline-flex items-center gap-2 ${blockPicking ? "admin-button-primary" : ""}`} aria-pressed={blockPicking} aria-label={blockPicking ? "Exit block date selection" : "Block dates"} onClick={toggleBlockPicking}><LockKeyhole size={16} /> Block dates</button>}
+        {houses.length > 0 && <button type="button" className={`admin-button inline-flex items-center gap-2 ${unblockPicking ? "admin-button-primary" : ""}`} aria-pressed={unblockPicking} aria-label={unblockPicking ? "Exit unblock date selection" : "Unblock dates"} onClick={toggleUnblockPicking}><LockKeyholeOpen size={16} /> Unblock dates</button>}
+        {firstOpenDate && <button type="button" className="admin-button admin-button-primary inline-flex items-center gap-2" onClick={() => { setMonth(firstOpenDate.date.slice(0, 7)); setBlockPicking(false); setUnblockPicking(false); setRangeAnchor(null); setUnblockRangeAnchor(null); openDate(firstOpenDate.propertyId, firstOpenDate.date, "booking"); }}><Plus size={16} /> Manual booking</button>}
+      </div>
     </header>
-    {notice && <div className="admin-notice is-success" role="status">{notice}</div>}
-    {blockPicking && <div className="admin-availability-pick-guide" role="status"><LockKeyhole size={18} aria-hidden="true" /><div><strong>{blockStart ? `First night: ${displayDate(blockStart.date)} · ${String(houses.find((house) => house.id === blockStart.propertyId)?.name ?? "House")}` : "Select the first night to block"}</strong><p>{blockStart ? "Now click the last night on the same house. Click the first night again to block just one night." : "Click an available date in the calendar, then click the last night. You can change months between clicks."}</p></div><button type="button" className="admin-button" onClick={toggleBlockPicking}>Cancel</button></div>}
-    {pickerError && <div className="admin-notice is-error" role="alert">{pickerError}</div>}
     {!houses.length ? <div className="admin-card p-8 text-sm text-[var(--admin-muted)]">No published houses are available to show on the calendar.</div> : <>
       <div className="admin-availability-summary"><div><span>Available nights</span><strong>{counts.available}</strong></div><div><span>Booked nights</span><strong>{counts.booked}</strong></div><div><span>Blocked nights</span><strong>{counts.blocked}</strong></div><p>Across {houses.length} {houses.length === 1 ? "house" : "houses"} in {monthLabel(month)}. Prices are nightly rates before fees and tax.</p></div>
       <section className="admin-card overflow-hidden" aria-label="House availability calendar">
@@ -239,25 +325,38 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
           {houses.map((property) => <div className="admin-availability-row" key={property.id} style={{ display: "contents" }}><div className="admin-availability-house"><strong>{String(property.name).replace(/\s+-\s+Whole$/, "")}</strong><span>Base {formatAud(Number(property.nightly_price ?? 0))}</span></div>{dates.map((date) => {
             const status = getDayStatus(property, date, bookings, calendarEvents);
             const rate = nightlyRate(property, date);
-            const selectedForBlock = blockPicking && blockStart?.propertyId === String(property.id) && date >= blockStart.date && date <= (previewEnd ?? blockStart.date) && status.kind === "available";
-            return <button type="button" key={`${property.id}:${date}`} className={`admin-availability-cell is-${status.kind} ${date === today ? "is-today" : ""} ${blockPicking ? "is-picking" : ""} ${selectedForBlock ? "is-range-preview" : ""} ${blockStart?.propertyId === String(property.id) && blockStart.date === date ? "is-range-start" : ""}`} onClick={() => blockPicking ? pickBlockDate(String(property.id), date) : openDate(String(property.id), date)} onMouseEnter={() => { if (blockPicking && blockStart) setHoverTarget({ propertyId: String(property.id), date }); }} aria-label={`${property.name}, ${displayDate(date)}: ${formatAud(rate.amount)} per night, ${status.label}${rate.override ? ", custom rate" : ""}${blockPicking ? ", select blocked date" : ""}`} aria-pressed={selectedForBlock} title={`${property.name} · ${displayDate(date)} · ${formatAud(rate.amount)} · ${status.label}`}><strong>{formatAud(rate.amount)}</strong><span>{selectedForBlock ? "Selected range" : status.label}</span>{rate.override && <small>Custom rate</small>}</button>;
+            const key = blockDateKey({ propertyId: String(property.id), date });
+            const selectedForBlock = blockPicking && selectedBlockKeys.has(key);
+            const selectedForUnblock = unblockPicking && selectedUnblockKeys.has(key);
+            return <button type="button" key={`${property.id}:${date}`} className={`admin-availability-cell is-${status.kind} ${date === today ? "is-today" : ""} ${blockPicking ? "is-picking" : ""} ${unblockPicking ? "is-unblock-picking" : ""} ${selectedForBlock ? "is-range-preview" : ""} ${selectedForUnblock ? "is-unblock-selection" : ""}`} onClick={(event) => {
+              const propertyId = String(property.id);
+              if (unblockPicking) pickUnblockDate(propertyId, date, event.shiftKey || Boolean(unblockRangeAnchor));
+              else if (blockPicking) pickBlockDate(propertyId, date, event.shiftKey || Boolean(rangeAnchor));
+              else if (status.kind === "manual") { setUnblockPicking(true); setSelectedUnblockDates((current) => current.some((item) => blockDateKey(item) === key) ? current : [...current, { propertyId, date }]); setUnblockRangeAnchor(null); setPickerError(""); setSelection(null); }
+              else openDate(propertyId, date);
+            }} aria-label={`${property.name}, ${displayDate(date)}: ${formatAud(rate.amount)} per night, ${status.label}${rate.override ? ", custom rate" : ""}${unblockPicking ? selectedForUnblock ? ", selected for unblocking" : ", select for unblocking" : blockPicking ? selectedForBlock ? ", selected for blocking" : ", select for blocking" : status.kind === "manual" ? ", select to unblock" : ""}`} aria-pressed={selectedForBlock || selectedForUnblock} title={`${property.name} · ${displayDate(date)} · ${formatAud(rate.amount)} · ${status.label}`}><strong>{formatAud(rate.amount)}</strong><span>{selectedForBlock ? "Selected for block" : selectedForUnblock ? "Selected to unblock" : status.label}</span>{rate.override && <small>Custom rate</small>}</button>;
           })}</div>)}
         </div></div>
-        <div className="admin-availability-legend"><span><i className="is-available" /> Available</span><span><i className="is-booking" /> Booked</span><span><i className="is-external" /> Imported calendar</span><span><i className="is-manual" /> Manual block</span><span>Click any date for details</span></div>
+        <div className="admin-availability-legend"><span><i className="is-available" /> Available</span><span><i className="is-booking" /> Booked</span><span><i className="is-external" /> Imported calendar</span><span><i className="is-manual" /> Manual block</span><span>{unblockPicking ? "Click manual blocks to add or remove them" : blockPicking ? "Click available dates to add or remove them" : "Click a manual block to select it for unblocking"}</span></div>
       </section>
     </>}
+    {notice && <div className="admin-notice is-success" role="status">{notice}</div>}
+    {blockPicking && <div className="admin-availability-pick-guide"><LockKeyhole size={18} aria-hidden="true" /><div><strong>{selectedBlockDates.length ? `${selectedBlockDates.length} ${selectedBlockDates.length === 1 ? "night" : "nights"} selected across ${selectedBlockHouseCount} ${selectedBlockHouseCount === 1 ? "house" : "houses"}` : "Choose dates to block"}</strong><p>{rangeAnchor ? `Choose the last night for the range starting ${displayDate(rangeAnchor.date)}.` : "Click available nights to add or remove them. Shift-click to select a range, or use Select range end. You can change months and houses before saving."}</p></div>{selectedBlockDates.length > 0 && <div className="flex flex-wrap gap-2"><button type="button" className="admin-button" onClick={() => { setRangeAnchor(rangeAnchor ? null : selectedBlockDates.at(-1) ?? null); setPickerError(""); }}>{rangeAnchor ? "Cancel range" : "Select range end"}</button><button type="button" className="admin-button" onClick={() => { setSelectedBlockDates([]); setRangeAnchor(null); setPickerError(""); }}>Clear all</button></div>}</div>}
+    {blockPicking && selectedBlockDates.length > 0 && <div className="admin-availability-block-controls"><div className="admin-availability-block-main"><div className="admin-availability-block-fields"><label>Reason<select className="admin-field" value={reason} onChange={(event) => setReason(event.target.value)}>{blockReasons.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><label>Private note <span>(optional)</span><input className="admin-field" maxLength={1000} value={note} onChange={(event) => setNote(event.target.value)} placeholder="Only admins can see this" /></label></div><div className="admin-availability-block-list" aria-label="Selected date ranges">{selectedBlockRanges.map((range) => { const name = String(houses.find((house) => String(house.id) === range.propertyId)?.name ?? "House"); const lastNight = addDays(range.endDate, -1); return <div key={`${range.propertyId}:${range.startDate}`}><span>{name} · {displayDate(range.startDate)}{lastNight !== range.startDate ? ` – ${displayDate(lastNight)}` : ""}</span><button type="button" aria-label={`Remove ${name} from ${displayDate(range.startDate)} to ${displayDate(lastNight)}`} onClick={() => { setSelectedBlockDates((current) => current.filter((item) => item.propertyId !== range.propertyId || item.date < range.startDate || item.date >= range.endDate)); setRangeAnchor(null); setPickerError(""); }}><X size={14} /></button></div>; })}</div></div><button type="button" className="admin-button admin-button-primary inline-flex items-center justify-center gap-2" disabled={busy || Boolean(blockConflictDate) || Boolean(pickerError) || Boolean(rangeAnchor) || selectedBlockRanges.length > 100} onClick={() => void saveBlock()}><Save size={16} /> {busy ? "Saving…" : `Save ${selectedBlockDates.length} ${selectedBlockDates.length === 1 ? "night" : "nights"}`}</button></div>}
+    {blockPicking && selectedBlockRanges.length > 100 && <div className="admin-notice is-error" role="alert">Select 100 separate ranges or fewer before saving.</div>}
+    {blockPicking && blockConflictDate && <div className="admin-notice is-error" role="alert">{displayDate(blockConflictDate)} is already unavailable. Remove it from the selection before saving.</div>}
+    {unblockPicking && <div className="admin-availability-pick-guide"><LockKeyholeOpen size={18} aria-hidden="true" /><div><strong>{selectedUnblockDates.length ? `${selectedUnblockDates.length} ${selectedUnblockDates.length === 1 ? "night" : "nights"} selected across ${selectedUnblockHouseCount} ${selectedUnblockHouseCount === 1 ? "house" : "houses"}` : "Choose dates to unblock"}</strong><p>{unblockRangeAnchor ? `Choose the last night for the range starting ${displayDate(unblockRangeAnchor.date)}.` : "Click manually blocked nights to add or remove them. Shift-click to select a range, or use Select range end. You can change months and houses before saving."}</p></div>{selectedUnblockDates.length > 0 && <div className="flex flex-wrap gap-2"><button type="button" className="admin-button" onClick={() => { setUnblockRangeAnchor(unblockRangeAnchor ? null : selectedUnblockDates.at(-1) ?? null); setPickerError(""); }}>{unblockRangeAnchor ? "Cancel range" : "Select range end"}</button><button type="button" className="admin-button" onClick={() => { setSelectedUnblockDates([]); setUnblockRangeAnchor(null); setPickerError(""); }}>Clear all</button></div>}</div>}
+    {unblockPicking && selectedUnblockDates.length > 0 && <div className="admin-availability-block-controls"><div className="admin-availability-block-main"><p className="text-xs text-[var(--admin-muted)]">Only the selected manual blocks will be removed.</p><div className="admin-availability-block-list" aria-label="Dates selected for unblocking">{selectedUnblockRanges.map((range) => { const name = String(houses.find((house) => String(house.id) === range.propertyId)?.name ?? "House"); const lastNight = addDays(range.endDate, -1); return <div key={`${range.propertyId}:${range.startDate}`}><span>{name} · {displayDate(range.startDate)}{lastNight !== range.startDate ? ` – ${displayDate(lastNight)}` : ""}</span><button type="button" aria-label={`Remove ${name} from ${displayDate(range.startDate)} to ${displayDate(lastNight)} from selection`} onClick={() => { setSelectedUnblockDates((current) => current.filter((item) => item.propertyId !== range.propertyId || item.date < range.startDate || item.date >= range.endDate)); setUnblockRangeAnchor(null); setPickerError(""); }}><X size={14} /></button></div>; })}</div></div><button type="button" className="admin-button admin-button-primary inline-flex items-center justify-center gap-2" disabled={busy || Boolean(unblockConflictDate) || Boolean(unblockRangeAnchor) || selectedUnblockDates.length > 500} onClick={() => void saveUnblockDates()}><Save size={16} /> {busy ? "Saving…" : `Save ${selectedUnblockDates.length} ${selectedUnblockDates.length === 1 ? "night" : "nights"}`}</button></div>}
+    {unblockPicking && selectedUnblockDates.length > 500 && <div className="admin-notice is-error" role="alert">Select 500 nights or fewer before saving.</div>}
+    {unblockPicking && unblockConflictDate && <div className="admin-notice is-error" role="alert">{displayDate(unblockConflictDate)} is no longer manually blocked. Remove it from the selection before saving.</div>}
+    {pickerError && <div className="admin-notice is-error" role="alert">{pickerError}</div>}
     {selection && selectedProperty && <AdminDialog drawer className="admin-calendar-dialog" label={`${selectedProperty.name} on ${displayDate(selection.date)}`} busy={busy} onClose={() => void closeSelection()}><div className="admin-calendar-panel">
-      <header className="admin-calendar-panel-header"><div><p className="admin-calendar-panel-kicker">{action === "booking" ? "New reservation" : action === "block" ? "Availability hold" : "Calendar date"}</p><h3>{action === "booking" ? "Manual booking" : action === "block" ? "Block dates" : displayDate(selection.date)}</h3><p>{selectedProperty.name} · {displayDate(selection.date)}</p></div><button type="button" className="admin-icon-button" aria-label="Close date details" onClick={() => void closeSelection()} disabled={busy}><X size={18} /></button></header>
+      <header className="admin-calendar-panel-header"><div><p className="admin-calendar-panel-kicker">{action === "booking" ? "New reservation" : "Calendar date"}</p><h3>{action === "booking" ? "Manual booking" : displayDate(selection.date)}</h3><p>{selectedProperty.name} · {displayDate(selection.date)}</p></div><button type="button" className="admin-icon-button" aria-label="Close date details" onClick={() => void closeSelection()} disabled={busy}><X size={18} /></button></header>
       <div className="admin-calendar-rate-strip"><span className={`admin-calendar-status is-${selectedStatus?.kind ?? "available"}`}>{selectedStatus?.label}</span><span>{selectedRate ? formatAud(selectedRate.amount) : "—"} <small>per night</small>{selectedRate?.override ? " · custom rate" : ""}</span></div>
-      <section className="admin-calendar-section" aria-label="House and starting date"><div className="admin-calendar-section-heading"><span className="admin-calendar-step">01</span><div><h4>House &amp; date</h4><p>Choose the house and first night.</p></div></div><div className="admin-calendar-fields"><label>House<select className="admin-field" value={selection.propertyId} disabled={bookingEditorDirty} onChange={(event) => openDate(event.target.value, selection.date, action)}>{houses.map((house) => <option key={house.id} value={house.id}>{house.name}</option>)}</select></label><label>{action === "booking" ? "Check-in" : action === "block" ? "First night" : "Date"}<input className="admin-field" type="date" value={selection.date} disabled={bookingEditorDirty} onChange={(event) => { if (event.target.value) { setMonth(event.target.value.slice(0, 7)); openDate(selection.propertyId, event.target.value, action); } }} /></label></div></section>
+      <section className="admin-calendar-section" aria-label="House and starting date"><div className="admin-calendar-section-heading"><span className="admin-calendar-step">01</span><div><h4>House &amp; date</h4><p>Choose the house and first night.</p></div></div><div className="admin-calendar-fields"><label>House<select className="admin-field" value={selection.propertyId} disabled={bookingEditorDirty} onChange={(event) => openDate(event.target.value, selection.date, action)}>{houses.map((house) => <option key={house.id} value={house.id}>{house.name}</option>)}</select></label><label>{action === "booking" ? "Check-in" : "Date"}<input className="admin-field" type="date" value={selection.date} disabled={bookingEditorDirty} onChange={(event) => { if (event.target.value) { setMonth(event.target.value.slice(0, 7)); openDate(selection.propertyId, event.target.value, action); } }} /></label></div></section>
       {error && <div className="admin-notice is-error" role="alert"><CircleAlert size={16} />{error}</div>}
-      {selectedStatus?.record && <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-alt)] p-4 text-sm"><p className="font-semibold">{selectedStatus.label}</p><p className="mt-1 text-[var(--admin-muted)]">{selectedStatus.kind === "booking" ? `Booking ${String(selectedStatus.record.reference ?? "")}` : `${selectedStatus.record.start_date} to ${selectedStatus.record.end_date} (checkout-style end date)`}</p>{selectedStatus.kind === "manual" && <button type="button" className="admin-button mt-3 inline-flex items-center gap-2 text-[var(--admin-danger-text)]" onClick={() => void removeBlock()} disabled={busy}><Trash2 size={15} /> Remove this block</button>}</div>}
-      {selectedStatus?.kind === "booking" && selectedStatus.record ? <CalendarBookingEditor key={String(selectedStatus.record.id)} booking={selectedStatus.record} busy={busy} onDirtyChange={setBookingEditorDirty} onSave={updateBooking} /> : selectedStatus?.kind !== "available" ? <p className="text-sm text-[var(--admin-muted)]">This date is occupied. Remove the existing manual block or update its connected calendar before making another reservation.</p> : selection.date < today ? <p className="text-sm text-[var(--admin-muted)]">Past dates cannot start a new booking or block here.</p> : <>
-        {action === "block" && <form className="admin-calendar-form" onSubmit={(event) => void saveBlock(event)}>
-          <section className="admin-calendar-section"><div className="admin-calendar-section-heading"><span className="admin-calendar-step">02</span><div><h4>Block details</h4><p>The end date is available again for check-in.</p></div></div><div className="admin-calendar-fields"><label>End date<input className="admin-field" type="date" min={addDays(selection.date, 1)} value={endDate} onChange={(event) => setEndDate(event.target.value)} required /></label><label>Reason<select className="admin-field" value={reason} onChange={(event) => setReason(event.target.value)}>{blockReasons.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label></div><label className="admin-calendar-full-field">Private note<textarea className="admin-field" maxLength={1000} value={note} onChange={(event) => setNote(event.target.value)} placeholder="e.g. Maintenance visit or owner use — admins only" /></label></section>
-          {rangeConflictDate && <p className="admin-calendar-inline-error" role="alert">{displayDate(rangeConflictDate)} is already unavailable. Choose a different end date.</p>}
-          <div className="admin-calendar-form-footer"><p>This range will be checked for conflicts before saving.</p><button type="submit" className="admin-button admin-button-primary" disabled={busy || Boolean(rangeConflictDate)}>{busy ? "Blocking…" : "Confirm block"}</button></div>
-        </form>}
+      {selectedStatus?.record && <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-alt)] p-4 text-sm"><p className="font-semibold">{selectedStatus.label}</p><p className="mt-1 text-[var(--admin-muted)]">{selectedStatus.kind === "booking" ? `Booking ${String(selectedStatus.record.reference ?? "")}` : `${selectedStatus.record.start_date} to ${selectedStatus.record.end_date} (checkout-style end date)`}</p></div>}
+      {selectedStatus?.kind === "booking" && selectedStatus.record ? isAppManagedBookingSource(selectedStatus.record.booking_source) ? <CalendarBookingEditor key={String(selectedStatus.record.id)} booking={selectedStatus.record} busy={busy} onDirtyChange={setBookingEditorDirty} onSave={updateBooking} /> : <p className="text-sm text-[var(--admin-muted)]">Read-only reservation from {String(selectedStatus.record.booking_source)}. Change or cancel it on the original platform; this booking record cannot be edited here.</p> : selectedStatus?.kind === "external" ? <p className="text-sm text-[var(--admin-muted)]">Read-only imported reservation. {selectedStatus.record?.source_platform === "direct" ? "Change the source calendar and upload it again." : "Change or cancel it on the original platform; the dates will update after the next sync."}</p> : selectedStatus?.kind === "manual" ? <p className="text-sm text-[var(--admin-muted)]">Use Unblock dates on the calendar to select one or more nights.</p> : selectedStatus?.kind !== "available" ? <p className="text-sm text-[var(--admin-muted)]">This date is unavailable.</p> : selection.date < today ? <p className="text-sm text-[var(--admin-muted)]">Past dates cannot start a new booking or block here.</p> : <>
         {action === "booking" && <form className="admin-calendar-form" onSubmit={(event) => void saveBooking(event)}>
           <section className="admin-calendar-section">
             <div className="admin-calendar-section-heading"><span className="admin-calendar-step">02</span><div><h4>Stay details</h4><p>Check-in is {displayDate(selection.date)}.</p></div></div>
@@ -302,13 +401,20 @@ function CalendarBookingEditor({ booking, busy, onDirtyChange, onSave }: {
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
     if (bookingStatus === "cancelled" && bookingStatus !== booking.booking_status && !cancellationReason.trim()) return;
+    if (bookingStatus === "cancelled" && bookingStatus !== booking.booking_status) {
+      const automaticRefund = stripeManaged && paymentStatus === "paid" && isWithinFreeCancellation(String(booking.free_cancellation_until ?? ""));
+      const description = automaticRefund
+        ? `This cancels ${String(booking.reference ?? "the booking")}, frees its dates, and automatically refunds ${formatAud(Number(booking.total ?? 0))} through Stripe. If this is one house in a corporate booking, the other houses stay booked. This cannot be undone.`
+        : `This cancels ${String(booking.reference ?? "the booking")} and frees its dates. ${paymentStatus === "paid" ? "No automatic refund will be made. Review this payment separately." : "No payment will be refunded."}`;
+      if (!await confirm({ title: automaticRefund ? "Cancel and refund booking?" : "Cancel booking?", description, confirmLabel: automaticRefund ? "Cancel and refund" : "Cancel booking", destructive: true })) return;
+    }
     if (!stripeManaged && paymentStatus !== booking.payment_status && !await confirm({ title: "Change payment record?", description: "Only set payment to paid when you have verified receipt outside Stripe. This action does not charge the guest.", confirmLabel: "Save payment status" })) return;
     await onSave(bookingId, { bookingStatus, paymentStatus: stripeManaged ? undefined : paymentStatus, internalNotes, cancellationReason });
   };
   return <form className="space-y-4 border-t border-[var(--admin-border)] pt-5" onSubmit={(event) => void save(event)}>
     <div><h4 className="text-lg font-semibold">Manage booking</h4><p className="mt-1 text-sm text-[var(--admin-muted)]">{String(guest.contactName ?? [guest.firstName, guest.lastName].filter(Boolean).join(" ") ?? "Guest")} · {String(guest.email ?? "No email")}</p><p className="mt-1 text-sm text-[var(--admin-muted)]">Total {formatAud(Number(booking.total ?? 0))} · {String(booking.booking_source ?? "website")}</p></div>
     <div className="grid gap-3 sm:grid-cols-2"><label className="text-sm font-medium">Booking status<select className="admin-field mt-1" value={bookingStatus} onChange={(event) => setBookingStatus(event.target.value)}>{["pending_payment", "confirmed", "corporate", "cancelled", "checked_in", "checked_out", "expired"].map((value) => <option key={value} value={value}>{value.replaceAll("_", " ")}</option>)}</select></label><label className="text-sm font-medium">Payment status<select className="admin-field mt-1" value={paymentStatus} disabled={stripeManaged} onChange={(event) => setPaymentStatus(event.target.value)}>{["pending", "paid", "failed", "refunded"].map((value) => <option key={value} value={value}>{value}</option>)}</select></label></div>
-    {stripeManaged && <p className="text-xs text-[var(--admin-muted)]">Stripe payment status is managed by verified webhooks. View the payment in Payments.</p>}
+    {stripeManaged && <p className="text-xs text-[var(--admin-muted)]">Paid Stripe bookings are automatically refunded only within their saved free cancellation window. For a corporate booking, only this house’s amount is refunded. Review later refunds in Payments.</p>}
     {booking.booking_source === "admin" && !stripeManaged && paymentStatus === "pending" && <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-alt)] p-4"><strong className="text-sm">Offline payment pending</strong><p className="mt-1 text-sm text-[var(--admin-muted)]">Dates are already reserved. Record payment only after receiving it in person or by bank transfer.</p><button type="button" className="admin-button mt-3" disabled={busy || dirty} onClick={() => void recordOfflinePayment()}>Mark as paid</button>{dirty && <p className="mt-2 text-xs text-[var(--admin-muted)]">Save or discard other edits first.</p>}</div>}
     <label className="block text-sm font-medium">Internal notes<textarea className="admin-field mt-1 min-h-28" maxLength={4000} value={internalNotes} onChange={(event) => setInternalNotes(event.target.value)} /></label>
     {bookingStatus === "cancelled" && <label className="block text-sm font-medium">Cancellation reason<input className="admin-field mt-1" maxLength={500} value={cancellationReason} onChange={(event) => setCancellationReason(event.target.value)} required={bookingStatus !== booking.booking_status} placeholder="Required for the audit trail" /></label>}

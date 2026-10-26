@@ -2,50 +2,34 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, CalendarDays, CircleCheck, House, KeyRound, Monitor } from "lucide-react";
 import { pageMetadata } from "@/src/lib/seo";
+import { getPublicPageCopy, getPublicPageMedia } from "@/src/lib/supabase/content";
+import { PUBLIC_PAGE_MEDIA } from "@/src/lib/publicPageMedia";
 import styles from "./how-it-works.module.css";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = pageMetadata(
   "How It Works | Booking a Serenity Stay",
   "A simple guide to finding, booking, and arriving at a Serenity furnished home in Pakenham.",
 );
 
-const steps = [
-  {
-    title: "Start with your enquiry",
-    description: "Enter your Partner ID for direct access, or tell us what you need through a general enquiry.",
-    Icon: Monitor,
-  },
-  {
-    title: "Explore the homes",
-    description: "Compare our furnished homes, room layouts and the details that matter to your stay.",
-    Icon: House,
-  },
-  {
-    title: "Choose your dates",
-    description: "Find the home and stay dates that work for you, your family or your team.",
-    Icon: CalendarDays,
-  },
-  {
-    title: "Finalise your booking",
-    description: "Review the arrangements and receive confirmation once your booking is complete.",
-    Icon: CircleCheck,
-  },
-  {
-    title: "Arrive with confidence",
-    description: "We’ll share the stay and arrival details you need before check-in.",
-    Icon: KeyRound,
-  },
-] as const;
-
-export default function HowItWorksPage() {
+export default async function HowItWorksPage() {
+  const [media, copy] = await Promise.all([getPublicPageMedia(), getPublicPageCopy()]);
+  const steps = [
+    { title: copy.howStep1Title, description: copy.howStep1Lead, Icon: Monitor },
+    { title: copy.howStep2Title, description: copy.howStep2Lead, Icon: House },
+    { title: copy.howStep3Title, description: copy.howStep3Lead, Icon: CalendarDays },
+    { title: copy.howStep4Title, description: copy.howStep4Lead, Icon: CircleCheck },
+    { title: copy.howStep5Title, description: copy.howStep5Lead, Icon: KeyRound },
+  ];
   return (
     <div className={styles.page}>
       <header className={styles.hero}>
         <div className={styles.heroCopy}>
           <p className={styles.eyebrow}>Pakenham · Victoria</p>
-          <h1>How it works<span>.</span></h1>
-          <h2>From enquiry to feeling at home.</h2>
-          <p className={styles.heroLead}>Finding a place to feel at home should be simple. From your first enquiry to the day you arrive, here’s what to expect.</p>
+          <h1>{copy.howHeroTitle}<span>.</span></h1>
+          <h2>{copy.howHeroSubtitle}</h2>
+          <p className={styles.heroLead}>{copy.howHeroLead}</p>
           <div className={styles.heroActions}>
             <Link className={styles.primaryButton} href="/homes">Explore our homes <ArrowRight size={18} aria-hidden="true" /></Link>
             <Link className={styles.outlineButton} href="/corporate-stays#corporate-booking">Partner booking <ArrowUpRight size={18} aria-hidden="true" /></Link>
@@ -53,13 +37,13 @@ export default function HowItWorksPage() {
         </div>
         <figure className={styles.heroMedia}>
           <Image
-            src="/how-it-works-hero.jpg"
-            alt="Illustrative sunlit furnished living and dining room"
+            src={media.howHero.src}
+            alt={media.howHero.alt}
             fill
             priority
             sizes="(max-width: 800px) 100vw, 52vw"
           />
-          <figcaption className="illustrative-photo-label">Illustrative image</figcaption>
+          {media.howHero.src === PUBLIC_PAGE_MEDIA.howHero.src && <figcaption className="illustrative-photo-label">Illustrative image</figcaption>}
         </figure>
       </header>
 
@@ -67,9 +51,9 @@ export default function HowItWorksPage() {
         <div className={styles.sectionIntro}>
           <div>
             <p className={styles.sectionLabel}>A simple path to your stay</p>
-            <h2 id="how-it-works-process-title">From first look to feeling at home.</h2>
+            <h2 id="how-it-works-process-title">{copy.howProcessTitle}</h2>
           </div>
-          <p>Five clear steps, with support along the way. Explore at your own pace and enquire when you’re ready.</p>
+          <p>{copy.howProcessLead}</p>
         </div>
         <div className={styles.processGrid}>
           <ol className={styles.steps}>
@@ -86,12 +70,12 @@ export default function HowItWorksPage() {
           </ol>
           <figure className={styles.processMedia}>
             <Image
-              src="/how-it-works-arrival.jpg"
-              alt="Illustrative furnished home entry with a suitcase ready for arrival"
+              src={media.howArrival.src}
+              alt={media.howArrival.alt}
               fill
               sizes="(max-width: 900px) 100vw, 37vw"
             />
-            <figcaption className="illustrative-photo-label">Illustrative image</figcaption>
+            {media.howArrival.src === PUBLIC_PAGE_MEDIA.howArrival.src && <figcaption className="illustrative-photo-label">Illustrative image</figcaption>}
           </figure>
         </div>
       </section>
@@ -99,16 +83,16 @@ export default function HowItWorksPage() {
       <section className={styles.closing} aria-labelledby="how-it-works-closing-title">
         <div className={styles.closingCopy}>
           <p className={styles.eyebrow}>The stay starts here</p>
-          <h2 id="how-it-works-closing-title">Move in.<br />Settle in.<br />Feel at home.</h2>
-          <p>Explore the real Serenity homes and find the right fit for work, family or life’s transitions.</p>
+          <h2 id="how-it-works-closing-title" style={{ whiteSpace: "pre-line" }}>{copy.howClosingTitle}</h2>
+          <p>{copy.howClosingLead}</p>
           <div className={styles.closingActions}>
             <Link href="/homes">View our homes <ArrowRight size={18} aria-hidden="true" /></Link>
             <Link href="/contact">Ask a question <ArrowUpRight size={18} aria-hidden="true" /></Link>
           </div>
         </div>
         <figure className={styles.closingMedia}>
-          <Image src="/how-it-works-settle-in-v1.jpg" alt="Illustrative furnished home entry opening into a living and dining area" fill sizes="(max-width: 700px) 100vw, 52vw" />
-          <figcaption className="illustrative-photo-label">Illustrative image</figcaption>
+          <Image src={media.howClosing.src} alt={media.howClosing.alt} fill sizes="(max-width: 700px) 100vw, 52vw" />
+          {media.howClosing.src === PUBLIC_PAGE_MEDIA.howClosing.src && <figcaption className="illustrative-photo-label">Illustrative image</figcaption>}
         </figure>
       </section>
     </div>

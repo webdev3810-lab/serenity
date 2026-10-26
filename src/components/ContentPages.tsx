@@ -8,7 +8,8 @@ import { GsapFadeIn } from "@/src/components/GsapAnimations";
 import ScrollWipeText from "@/src/components/homepage/ScrollWipeText";
 import { FormInput, TextArea } from "@/src/components/UI";
 import { SerenityLocationMap } from "@/src/components/SerenityLocationMap";
-import { properties } from "@/src/data/properties";
+import type { Property } from "@/src/data/properties";
+import type { PublicPageCopy } from "@/src/lib/publicPageCopy";
 import { useContactSettings } from "@/src/context/ContactSettingsContext";
 import { DEFAULT_CONTACT_SETTINGS, type ContactSettings } from "@/src/lib/siteSettings";
 
@@ -37,7 +38,7 @@ export function CorporatePage() {
             "Free on-site & street parking",
             "Flexible stay lengths & extensions",
             "Unified team coordination",
-            "GST tax invoices & ABN details",
+            "Clear billing details",
             "Flexible employee name updates",
           ].map((item) => (
             <div key={item} className="card p-4 font-bold text-xs text-stone-800 flex items-center gap-2 border border-stone-200">
@@ -51,7 +52,7 @@ export function CorporatePage() {
           <DemoForm
             title="Corporate Stay Enquiry"
             fields={["Company name", "Contact person", "Business email", "Phone", "Number of guests", "Preferred property", "Arrival", "Departure", "Purpose of stay"]}
-            textarea="Specific requirements, multi-house request, purchase order or GST invoice notes"
+            textarea="Specific requirements, multi-house request, purchase order notes"
           />
         </div>
       </div>
@@ -59,12 +60,12 @@ export function CorporatePage() {
   );
 }
 
-export function LongTermPage() {
+export function LongTermPage({ properties, copy }: { properties: Property[]; copy: PublicPageCopy }) {
   return (
     <PageFrame
       eyebrow="Long-Term Stays"
-      title="Weekly and Monthly Furnished Accommodation"
-      text="Serenity Stays offers furnished accommodation for relocation housing, long-term project teams, insurance replacement accommodation, and temporary family stays."
+      title={copy.longTermTitle}
+      text={copy.longTermLead}
     >
       <div className="grid gap-6 lg:grid-cols-3">
         {properties.map((property) => (
@@ -392,8 +393,8 @@ export function PolicyPage({ type }: { type: "Terms and Conditions" | "Privacy P
       eyebrow: "Flexible, fair and transparent.",
       intro: "How to request a change or cancellation, and what to expect.",
       items: [
-        { heading: "Request changes early", text: "Cancellation and amendment requests should be submitted as early as possible." },
-        { heading: "Refund eligibility", text: "Refunds, if applicable, depend on the booking terms, notice period, and booking channel." },
+        { heading: "Request changes early", text: "Contact Serenity to request cancellation or an amendment. Your house’s free cancellation deadline is shown before payment." },
+        { heading: "Refund eligibility", text: "Direct bookings can be cancelled for a full refund through 11:59 pm Melbourne time on the displayed deadline. This is seven days before check-in by default; the period may vary by house." },
         { heading: "Late cancellations and no-shows", text: "Late cancellations, no-shows, or shortened stays may incur charges." },
         { heading: "Corporate and partner bookings", text: "Approved corporate or partner bookings may be subject to separately agreed terms." },
         { heading: "How refunds are returned", text: "Any applicable refund is returned to the original payment method." },

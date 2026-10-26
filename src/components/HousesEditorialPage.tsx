@@ -13,33 +13,11 @@ import type { GuestCounts } from "@/src/lib/booking";
 import { hasUnavailableConflict, validateGuestCapacity } from "@/src/lib/booking";
 import { isApprovedHomepageMediaSource } from "@/src/lib/homepageMedia";
 import { editorialHouseDetails } from "@/src/lib/editorialHouseDetails";
+import type { PublicPageCopy } from "@/src/lib/publicPageCopy";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
-
-const comfortFeatures = [
-  {
-    number: "01",
-    title: "Private whole homes",
-    description: "Room to cook, work, rest and live at your own pace.",
-  },
-  {
-    number: "02",
-    title: "Flexible stays",
-    description: "A practical base for families, relocations and project teams.",
-  },
-  {
-    number: "03",
-    title: "Everyday essentials",
-    description: "Furnished spaces with kitchens, laundries and off-street parking.",
-  },
-  {
-    number: "04",
-    title: "Local support",
-    description: "One responsive point of contact from enquiry to checkout.",
-  },
-] as const;
 
 function ComfortGraphic({ variant }: { variant: number }) {
   if (variant === 1) {
@@ -92,7 +70,13 @@ function parseNonNegativeInteger(value: string | null) {
   return Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : null;
 }
 
-export function HousesEditorialPage({ properties }: { properties: Property[] }) {
+export function HousesEditorialPage({ properties, copy }: { properties: Property[]; copy: PublicPageCopy }) {
+  const comfortFeatures = [
+    { number: "01", title: copy.homesFeature1Title, description: copy.homesFeature1Lead },
+    { number: "02", title: copy.homesFeature2Title, description: copy.homesFeature2Lead },
+    { number: "03", title: copy.homesFeature3Title, description: copy.homesFeature3Lead },
+    { number: "04", title: copy.homesFeature4Title, description: copy.homesFeature4Lead },
+  ];
   const comfortGridRef = useRef<HTMLElement>(null);
   const searchParams = useSearchParams();
   const checkIn = searchParams.get("checkIn") || "";
@@ -144,12 +128,12 @@ export function HousesEditorialPage({ properties }: { properties: Property[] }) 
     <div className="houses-editorial-page">
       <header className="houses-editorial-heading">
         <div className="houses-editorial-heading__main">
-          <h1 id="houses-editorial-title">Our <em>Homes</em></h1>
-          <p className="houses-editorial-heading__lead">Fully furnished private homes for work, family and longer stays. Find the space that feels right for you.</p>
+          <h1 id="houses-editorial-title">{copy.homesHeroTitle} <em>{copy.homesHeroAccent}</em></h1>
+          <p className="houses-editorial-heading__lead">{copy.homesHeroLead}</p>
         </div>
         <div className="houses-editorial-heading__aside">
           <div className="houses-editorial-heading__count"><strong>{String(properties.length).padStart(2, "0")}</strong><span>private {properties.length === 1 ? "home" : "homes"}<br />in Pakenham</span></div>
-          <p>Explore each home’s photos, features and room layout before you choose your stay.</p>
+          <p>{copy.homesAsideLead}</p>
           <a href="#houses-list">View the collection <ArrowDownRight size={18} aria-hidden="true" /></a>
         </div>
       </header>
@@ -200,8 +184,8 @@ export function HousesEditorialPage({ properties }: { properties: Property[] }) 
 
       <section className="houses-editorial-comfort" aria-labelledby="houses-editorial-comfort-title">
         <div className="houses-editorial-comfort__heading">
-          <h2 id="houses-editorial-comfort-title">Stay in comfort.</h2>
-          <p>Everything you need to arrive easily and feel at home.</p>
+          <h2 id="houses-editorial-comfort-title">{copy.homesComfortTitle}</h2>
+          <p>{copy.homesComfortLead}</p>
         </div>
       </section>
       <section ref={comfortGridRef} className="houses-editorial-comfort__grid" aria-label="Stay in comfort details">

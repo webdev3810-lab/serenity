@@ -176,7 +176,7 @@ export async function POST(request: Request) {
             currency: "aud",
             product_data: {
               name: `${property.name} direct booking`,
-              description: `${price.nights} night stay from ${checkIn} to ${checkout}. Includes cleaning and GST.`,
+              description: `${price.nights} night stay from ${checkIn} to ${checkout}. Includes cleaning and taxes.`,
             },
             unit_amount: Math.round(price.total * 100),
           },

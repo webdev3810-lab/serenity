@@ -97,6 +97,7 @@ export type Database = {
           corporate_deposit_required: boolean;
           corporate_online_payment: boolean;
           gst_invoice_available: boolean;
+          free_cancellation_days: number;
           corporate_instructions: string;
           weekly_discount: number;
           monthly_discount: number;
@@ -217,6 +218,7 @@ export type Database = {
           reference: string;
           property_id: string;
           check_in: string;
+          free_cancellation_until: string | null;
           checkout: string;
           adults: number;
           children: number;
@@ -229,6 +231,7 @@ export type Database = {
           currency: string;
           payment_status: string;
           booking_status: string;
+          archived_at: string | null;
           stripe_checkout_session_id: string | null;
           stripe_payment_intent_id: string | null;
           promotion_id: string | null;

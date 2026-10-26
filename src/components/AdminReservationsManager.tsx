@@ -1,15 +1,17 @@
 "use client";
 
 import { addDays,formatAud } from "@/src/lib/booking";
-import { ArrowDown,ArrowUp,ArrowUpDown,ChevronRight,Search,X } from "lucide-react";
+import { isWithinFreeCancellation } from "@/src/lib/cancellationPolicy";
+import { Archive,ArrowDown,ArrowUp,ArrowUpDown,ChevronRight,LockKeyhole,RotateCcw,Search,X } from "lucide-react";
 import { useMemo,useState } from "react";
 
-import { AdminBadge,AdminDialog,useAdminPagination } from "@/src/components/admin/AdminUI";
+import { AdminBadge,AdminDialog,useAdminPagination,useAdminWorkspace } from "@/src/components/admin/AdminUI";
 import { statusPresentation } from "@/src/lib/admin-status";
 import { CALENDAR_PLATFORM_LABELS,CALENDAR_PLATFORMS,type CalendarPlatform } from "@/src/lib/calendar/types";
+import { isAppManagedBookingSource } from "@/src/lib/booking-source";
 type Row = Record<string, unknown>;
 type PropertyRow = Row & { id?: string; name?: string; slug?: string };
-type ReservationKind = "booking" | "block" | "enquiry";
+type ReservationKind = "booking" | "block";
 type BookingCategory = "standard" | "corporate";
 type BookingView = "all" | BookingCategory | CalendarPlatform;
 type ReservationItem = {
@@ -31,16 +33,14 @@ type ReservationItem = {
 
 type Props = {
   bookings: Row[];
-  enquiries: Row[];
   calendarEvents: Row[];
   calendarConnections: Row[];
   properties: PropertyRow[];
+  reload: () => Promise<void>;
 };
 
 
 const asObject = (value: unknown): Row => value && typeof value === "object" && !Array.isArray(value) ? value as Row : {};
-const asStringArray = (value: unknown) => Array.isArray(value) ? value.map(String) : [];
-const cleanLabel = (value: string) => value.replaceAll("_", " ");
 const formatDate = (value: string) => value ? new Intl.DateTimeFormat("en-AU", { dateStyle: "medium", timeZone: "Australia/Melbourne" }).format(new Date(`${value}T00:00:00Z`)) : "—";
 const formatSheetDate = (value: string) => value ? new Intl.DateTimeFormat("en-AU", { day: "2-digit", month: "short", year: "numeric", timeZone: "Australia/Melbourne" }).format(new Date(`${value}T00:00:00Z`)) : "—";
 const isTruthy = (value: unknown) => value === true || String(value ?? "").toLowerCase() === "true";
@@ -57,9 +57,10 @@ const getBookingCategory = (booking: Row): BookingCategory => {
     ? "corporate"
     : "standard";
 };
+const isReadOnlyReservation = (item: ReservationItem) => item.kind === "booking" ? !isAppManagedBookingSource(item.source) : item.source !== "admin";
 
 
-export default function AdminReservationsManager({ bookings, enquiries, calendarEvents, calendarConnections, properties }: Props) {
+export default function AdminReservationsManager({ bookings, calendarEvents, calendarConnections, properties, reload }: Props) {
   const [requestedBookingView, setBookingView] = useState<BookingView>("all");
   const [query, setQuery] = useState("");
   const [propertyId, setPropertyId] = useState("all");
@@ -70,6 +71,9 @@ export default function AdminReservationsManager({ bookings, enquiries, calendar
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [selected, setSelected] = useState<ReservationItem | null>(null);
+  const [archiveView, setArchiveView] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [actionError, setActionError] = useState("");
   const connectedPlatforms = CALENDAR_PLATFORMS.filter((platform) => calendarConnections.some((connection) => String(connection.platform).toLowerCase() === platform && connection.connection_type === "import" && isTruthy(connection.is_enabled)));
   const bookingView = CALENDAR_PLATFORMS.some((platform) => platform === requestedBookingView) && !connectedPlatforms.some((platform) => platform === requestedBookingView) ? "all" : requestedBookingView;
   const selectedPlatform = connectedPlatforms.find((platform) => platform === bookingView);
@@ -92,20 +96,12 @@ export default function AdminReservationsManager({ bookings, enquiries, calendar
       const property = String(event.property_id ?? "");
       return {
         id: String(event.id), kind: "block", reference: String(event.external_event_id ?? event.id ?? ""), propertyIds: [property], propertyLabel: propertyMap.get(property) ?? "House",
-        start: String(event.start_date ?? ""), end: String(event.end_date ?? ""), type: "blocked dates", source: event.connection_id ? String(event.source_platform ?? "external") : "admin",
+        start: String(event.start_date ?? ""), end: String(event.end_date ?? ""), type: "blocked dates", source: event.source_platform === "direct" && !event.connection_id && !String(event.external_event_id ?? "").startsWith("ical-upload:") ? "admin" : event.source_platform === "direct" ? "uploaded calendar" : String(event.source_platform ?? "external"),
         status: String(event.status ?? "active"), payment: "not applicable", title: String(event.summary ?? "Unavailable"), raw: event,
       };
     });
-    const enquiryItems = enquiries.map((enquiry): ReservationItem => {
-      const ids = asStringArray(enquiry.property_ids);
-      return {
-        id: String(enquiry.id), kind: "enquiry", reference: String(enquiry.reference ?? enquiry.id ?? ""), propertyIds: ids, propertyLabel: ids.map((id) => propertyMap.get(id) ?? "House").join(", ") || `${enquiry.houses_needed ?? 1} house(s)`,
-        start: String(enquiry.arrival ?? ""), end: String(enquiry.departure ?? ""), type: "corporate enquiry", source: String(enquiry.source ?? "corporate_page"), status: String(enquiry.status ?? "new"), payment: "not applicable",
-        title: String(enquiry.company_name ?? enquiry.contact_name ?? "Corporate enquiry"), raw: enquiry,
-      };
-    });
-    return [...bookingItems, ...blockItems, ...enquiryItems].sort((a, b) => a.start.localeCompare(b.start) || a.reference.localeCompare(b.reference));
-  }, [bookings, enquiries, calendarEvents, propertyMap]);
+    return [...bookingItems, ...blockItems].sort((a, b) => a.start.localeCompare(b.start) || a.reference.localeCompare(b.reference));
+  }, [bookings, calendarEvents, propertyMap]);
 
   const matchesFilters = (item: ReservationItem) => {
     const haystack = `${item.reference} ${item.title} ${item.propertyLabel} ${item.source} ${item.status}`.toLowerCase();
@@ -118,7 +114,7 @@ export default function AdminReservationsManager({ bookings, enquiries, calendar
       && (!fromDate || item.end > fromDate)
       && (!toDate || item.start < addDays(toDate, 1));
   };
-  const filteredBeforeBookingView = items.filter(matchesFilters);
+  const filteredBeforeBookingView = items.filter((item) => (archiveView ? item.kind === "booking" && Boolean(item.raw.archived_at) : item.kind !== "booking" || !item.raw.archived_at) && matchesFilters(item));
   const bookingViewCounts = {
     all: filteredBeforeBookingView.length,
     standard: filteredBeforeBookingView.filter((item) => item.kind === "booking" && item.bookingCategory === "standard").length,
@@ -129,11 +125,27 @@ export default function AdminReservationsManager({ bookings, enquiries, calendar
   };
   const filtered = filteredBeforeBookingView.filter((item) => bookingView === "all" || (bookingView === "standard" || bookingView === "corporate" ? item.kind === "booking" && item.bookingCategory === bookingView : item.kind === "block" && item.source.toLowerCase() === bookingView));
   const hasActiveFilters = Boolean(query || propertyId !== "all" || type !== "all" || source !== "all" || status !== "all" || payment !== "all" || fromDate || toDate || bookingView !== "all");
+  const changeBooking = async (item: ReservationItem, changes: Row) => {
+    setActionError(""); setNotice("");
+    const response = await fetch(`/api/admin/bookings/${encodeURIComponent(item.id)}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(changes) });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(String(result.error ?? "Could not update this booking."));
+    await reload();
+    setSelected(null);
+    setNotice(changes.archived === true ? "Booking archived. You can find it in Archived." : changes.archived === false ? "Booking restored to the main list." : changes.internalNotes !== undefined ? "Internal notes saved." : result.refund ? `Booking cancelled. Stripe ${result.refund.status === "succeeded" ? "refunded" : "started a refund of"} ${formatAud(result.refund.amount / 100)} for this house.` : "Booking cancelled. Its dates are available again.");
+  };
 
   return <>
     <header className="admin-page-header admin-bookings-header">
-      <div><p className="admin-section-kicker">Reservations</p><h2>Bookings &amp; reservations</h2><p>View direct and corporate stays, enquiries, and calendar blocks. Create and manage reservations in Calendar.</p></div>
+      <div><p className="admin-section-kicker">Reservations</p><h2>Bookings &amp; reservations</h2><p>See the important details at a glance. Open View for the full record and booking actions.</p></div>
     </header>
+
+    {notice && <p className="admin-notice is-success" role="status">{notice}</p>}
+    {actionError && <p className="admin-notice is-error" role="alert">{actionError}</p>}
+    <div className="admin-view-tabs" role="group" aria-label="Reservation archive">
+      <button type="button" className={`admin-view-tab ${!archiveView ? "is-active" : ""}`} aria-pressed={!archiveView} onClick={() => { setArchiveView(false); setSelected(null); }}>Current</button>
+      <button type="button" className={`admin-view-tab ${archiveView ? "is-active" : ""}`} aria-pressed={archiveView} onClick={() => { setArchiveView(true); setSelected(null); }}>Archived ({bookings.filter((booking) => Boolean(booking.archived_at)).length})</button>
+    </div>
 
     <section className="admin-filter-panel admin-booking-filters" aria-label="Filter reservations">
       <div className="admin-booking-filters-heading"><div><h3>Find a reservation</h3><p>{filtered.length} matching {filtered.length === 1 ? "record" : "records"}</p></div><button type="button" className="admin-booking-clear" disabled={!hasActiveFilters} onClick={() => { setQuery(""); setPropertyId("all"); setType("all"); setSource("all"); setStatus("all"); setPayment("all"); setFromDate(""); setToDate(""); setBookingView("all"); }}>Clear filters</button></div>
@@ -161,22 +173,16 @@ export default function AdminReservationsManager({ bookings, enquiries, calendar
     </div>
     {selectedPlatform && <p className="admin-booking-source-note">{CALENDAR_PLATFORM_LABELS[selectedPlatform]} iCal shows blocked dates only. Reservation and guest details stay in {CALENDAR_PLATFORM_LABELS[selectedPlatform]}.</p>}
     <div id="admin-booking-records" aria-label="Reservation results"><ReservationList items={filtered} onSelect={setSelected} /></div>
-
-    {selected && <ReservationPreview item={selected} onClose={() => setSelected(null)} />}
+    {selected && <ReservationPreview key={`${selected.kind}:${selected.id}`} item={selected} onClose={() => setSelected(null)} onChange={async (changes) => { try { await changeBooking(selected, changes); } catch (error) { const message = error instanceof Error ? error.message : "Could not update this booking."; setActionError(message); throw error; } }} />}
   </>;
 }
 
-type SheetSortKey = "reference" | "title" | "propertyLabel" | "start" | "end" | "type" | "source" | "status" | "payment";
+type SheetSortKey = "reference" | "propertyLabel" | "start" | "status";
 const sheetColumns: { key: SheetSortKey; label: string }[] = [
-  { key: "reference", label: "Reference" },
-  { key: "title", label: "Guest / event" },
+  { key: "reference", label: "Reservation" },
   { key: "propertyLabel", label: "House" },
-  { key: "start", label: "Check-in" },
-  { key: "end", label: "Checkout" },
-  { key: "type", label: "Type" },
-  { key: "source", label: "Source" },
+  { key: "start", label: "Stay" },
   { key: "status", label: "Status" },
-  { key: "payment", label: "Payment" },
 ];
 
 function ReservationList({ items, onSelect }: { items: ReservationItem[]; onSelect: (item: ReservationItem) => void }) {
@@ -185,53 +191,91 @@ function ReservationList({ items, onSelect }: { items: ReservationItem[]; onSele
     const comparison = String(a[sort.key] ?? "").localeCompare(String(b[sort.key] ?? ""), "en-AU", { numeric: true, sensitivity: "base" });
     return (sort.direction === "asc" ? comparison : -comparison) || a.reference.localeCompare(b.reference);
   }), [items, sort]);
-  const { visible, pagination, page, pageSize } = useAdminPagination(sorted);
+  const { visible, pagination } = useAdminPagination(sorted);
   const changeSort = (key: SheetSortKey) => setSort((current) => ({ key, direction: current.key === key && current.direction === "asc" ? "desc" : "asc" }));
 
-  return <section className="admin-booking-sheet" aria-label="Booking spreadsheet">
-    <div className="admin-booking-sheet-toolbar"><div><strong>Reservation sheet</strong><span>{items.length} matching {items.length === 1 ? "record" : "records"}</span></div><p>Choose a column to sort · Open a row for full details</p></div>
-    <div className="admin-booking-sheet-scroll" role="region" aria-label="Scrollable booking table" tabIndex={0}>
+  return <section className="admin-booking-sheet" aria-label="Reservations">
+    <div className="admin-booking-sheet-toolbar"><div><strong>Reservations</strong><span>{items.length} matching {items.length === 1 ? "record" : "records"}</span></div><p>Use View for more details</p></div>
+    <div className="admin-booking-sheet-scroll">
       <table className="admin-booking-sheet-table">
-        <colgroup><col className="admin-sheet-col-number" /><col className="admin-sheet-col-reference" /><col className="admin-sheet-col-guest" /><col className="admin-sheet-col-house" /><col className="admin-sheet-col-date" /><col className="admin-sheet-col-date" /><col className="admin-sheet-col-type" /><col className="admin-sheet-col-source" /><col className="admin-sheet-col-status" /><col className="admin-sheet-col-payment" /><col className="admin-sheet-col-action" /></colgroup>
-        <thead><tr><th scope="col" className="admin-sheet-row-number">#</th>{sheetColumns.map((column) => <th key={column.key} scope="col" aria-sort={sort.key === column.key ? (sort.direction === "asc" ? "ascending" : "descending") : "none"}><button type="button" onClick={() => changeSort(column.key)}>{column.label}{sort.key === column.key ? sort.direction === "asc" ? <ArrowUp size={13} aria-hidden="true" /> : <ArrowDown size={13} aria-hidden="true" /> : <ArrowUpDown size={12} aria-hidden="true" />}</button></th>)}<th scope="col">Details</th></tr></thead>
-        <tbody>{visible.map((item, index) => <tr key={`${item.kind}:${item.id}`}>
-          <th scope="row" className="admin-sheet-row-number">{(page - 1) * pageSize + index + 1}</th>
-          <td className="admin-sheet-reference"><span title={item.reference}>{item.reference || "—"}</span></td>
-          <td><span className="admin-sheet-cell-clip" title={item.title}>{item.title}</span></td>
-          <td><span className="admin-sheet-cell-clip" title={item.propertyLabel}>{item.propertyLabel}</span></td>
-          <td className="admin-sheet-date">{formatSheetDate(item.start)}</td>
-          <td className="admin-sheet-date">{formatSheetDate(item.end)}</td>
-          <td>{item.bookingCategory ? `${item.bookingCategory === "corporate" ? "Corporate" : "Standard"} booking` : statusPresentation("source", item.type).label}</td>
-          <td><AdminBadge domain="source" value={item.source} /></td>
-          <td><AdminBadge domain={item.kind === "enquiry" ? "enquiry" : item.kind === "block" ? "calendar" : "booking"} value={item.status} /></td>
-          <td><AdminBadge domain="payment" value={item.payment} /></td>
-          <td><button type="button" className="admin-sheet-open" onClick={() => onSelect(item)} aria-label={`Open details for ${item.reference || item.title}`}>View <ChevronRight size={14} aria-hidden="true" /></button></td>
+        <colgroup><col className="admin-sheet-col-reservation" /><col className="admin-sheet-col-house" /><col className="admin-sheet-col-stay" /><col className="admin-sheet-col-status" /><col className="admin-sheet-col-action" /></colgroup>
+        <thead><tr>{sheetColumns.map((column) => <th key={column.key} scope="col" aria-sort={sort.key === column.key ? (sort.direction === "asc" ? "ascending" : "descending") : "none"}><button type="button" onClick={() => changeSort(column.key)}>{column.label}{sort.key === column.key ? sort.direction === "asc" ? <ArrowUp size={13} aria-hidden="true" /> : <ArrowDown size={13} aria-hidden="true" /> : <ArrowUpDown size={12} aria-hidden="true" />}</button></th>)}<th scope="col">Details</th></tr></thead>
+        <tbody>{visible.map((item) => <tr key={`${item.kind}:${item.id}`}>
+          <td className="admin-sheet-reservation"><span className="admin-sheet-reservation-text"><strong title={item.reference}>{item.reference || item.title}</strong><small title={item.title}>{item.title}</small></span></td>
+          <td><strong className="admin-sheet-cell-clip" title={item.propertyLabel}>{item.propertyLabel}</strong><small className="admin-sheet-subline">{statusPresentation("source", item.source).label}</small></td>
+          <td className="admin-sheet-date"><strong>{formatSheetDate(item.start)}</strong><small className="admin-sheet-subline">to {formatSheetDate(item.end)}</small></td>
+          <td><AdminBadge domain={item.kind === "block" ? "calendar" : "booking"} value={item.status} />{item.kind === "booking" && <small className="admin-sheet-subline">{statusPresentation("payment", item.payment).label} payment</small>}{isReadOnlyReservation(item) && <small className="admin-sheet-subline">Read only</small>}</td>
+          <td><button type="button" className="admin-sheet-open" onClick={() => onSelect(item)} aria-label={`View details for ${item.reference || item.title}${isReadOnlyReservation(item) ? ", read only" : ""}`}>View <ChevronRight size={14} aria-hidden="true" /></button></td>
         </tr>)}</tbody>
       </table>
       {!items.length && <p className="admin-booking-sheet-empty">No reservations match these filters.</p>}
     </div>
-    <p className="admin-booking-sheet-mobile-hint">Scroll sideways to view every column.</p>
     <div className="admin-booking-sheet-pagination">{pagination}</div>
   </section>;
 }
 
-function ReservationPreview({ item, onClose }: { item: ReservationItem; onClose: () => void }) {
+function ReservationPreview({ item, onClose, onChange }: { item: ReservationItem; onClose: () => void; onChange: (changes: Row) => Promise<void> }) {
+  const { confirm } = useAdminWorkspace();
+  const [reason, setReason] = useState("");
+  const [internalNotes, setInternalNotes] = useState(String(item.raw.internal_notes ?? ""));
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const archived = Boolean(item.raw.archived_at);
+  const readOnly = isReadOnlyReservation(item);
+  const canArchive = ["cancelled", "expired", "checked_out"].includes(item.status);
+  const automaticRefund = item.payment === "paid" && Boolean(item.raw.stripe_checkout_session_id) && isWithinFreeCancellation(String(item.raw.free_cancellation_until ?? ""));
+  const notesChanged = internalNotes !== String(item.raw.internal_notes ?? "");
+  const close = async () => {
+    if (busy) return;
+    if (notesChanged && !await confirm({ title: "Discard internal note changes?", description: "Your unsaved note will be lost.", confirmLabel: "Discard changes", destructive: true })) return;
+    onClose();
+  };
+  const act = async (changes: Row) => {
+    setBusy(true); setError("");
+    try { await onChange(changes); }
+    catch (failure) { setError(failure instanceof Error ? failure.message : "Could not update this booking."); }
+    finally { setBusy(false); }
+  };
+  const cancel = async () => {
+    if (!reason.trim() || busy) return;
+    const description = automaticRefund
+      ? `Cancel ${item.propertyLabel} and refund ${formatAud(Number(item.raw.total ?? 0))} through Stripe? If this is one house in a corporate payment, the other houses remain booked.`
+      : `Cancel ${item.propertyLabel} and release its dates? ${item.payment === "paid" ? "No automatic refund will be made. Review this payment separately." : "No refund will be made."}`;
+    if (!await confirm({ title: automaticRefund ? "Cancel and refund booking?" : "Cancel booking?", description, confirmLabel: automaticRefund ? "Cancel and refund" : "Cancel booking", destructive: true })) return;
+    await act({ bookingStatus: "cancelled", cancellationReason: reason.trim() });
+  };
+  const changeArchive = async () => {
+    if (busy) return;
+    if (!archived && !await confirm({ title: "Archive this booking?", description: "It will move to Archived and stay in your records. Archiving does not cancel a booking, refund a payment, or change availability.", confirmLabel: "Archive booking" })) return;
+    await act({ archived: !archived });
+  };
   const guest = asObject(item.raw.guest_details);
   const details = item.kind === "booking" ? [
-    ["Booking status", cleanLabel(item.status)],
-    ["Payment", cleanLabel(item.payment)],
+    ["Stay type", item.bookingCategory === "corporate" ? "Corporate booking" : "Standard booking"],
+    ["Booked through", statusPresentation("source", item.source).label],
     ["Total", formatAud(Number(item.raw.total ?? 0))],
+    ["Guests", `${Number(item.raw.adults ?? 0)} adults · ${Number(item.raw.children ?? 0)} children · ${Number(item.raw.infants ?? 0)} infants · ${Number(item.raw.pets ?? 0)} pets`],
     ["Email", String(guest.email ?? "—")],
     ["Phone", String(guest.phone ?? "—")],
-    ["Guests", `${Number(item.raw.adults ?? 0)} adults · ${Number(item.raw.children ?? 0)} children · ${Number(item.raw.infants ?? 0)} infants · ${Number(item.raw.pets ?? 0)} pets`],
-  ] : item.kind === "enquiry" ? [["Status", cleanLabel(item.status)], ["Notes", String(item.raw.notes ?? "—")]] : [["Status", cleanLabel(item.status)], ["Note", String(item.raw.internal_note ?? item.raw.summary ?? "—")]];
-  return <AdminDialog label="Reservation preview" drawer onClose={onClose}>
-    <aside className="w-full p-5 sm:p-7">
-      <div className="flex items-start justify-between gap-4 border-b border-[var(--admin-border)] pb-5"><div><p className="text-sm font-semibold text-[var(--admin-text)]">{cleanLabel(item.kind)} · preview</p><h2 className="mt-1 break-all text-2xl font-semibold tracking-[-0.04em]">{item.reference || item.title}</h2></div><button type="button" className="admin-button min-h-10 px-3" onClick={onClose} aria-label="Close preview"><X size={17} /></button></div>
-      <dl className="grid grid-cols-2 border-b border-[var(--admin-border)] text-sm"><Detail label="Guest / event" value={item.title} /><Detail label="House" value={item.propertyLabel} /><Detail label="Check-in" value={formatDate(item.start)} /><Detail label="Checkout" value={formatDate(item.end)} /><Detail label="Type" value={item.bookingCategory ? `${item.bookingCategory === "corporate" ? "Corporate" : "Standard"} booking` : cleanLabel(item.type)} /><Detail label="Source" value={cleanLabel(item.source)} />{details.map(([label, value]) => <Detail key={label} label={label} value={value} />)}</dl>
-      <p className="mt-5 text-sm text-[var(--admin-muted)]">This is a read-only preview. Use Calendar to manage bookings and blocked dates.</p>
+  ] : [["Type", statusPresentation("source", item.type).label], ["Imported from", statusPresentation("source", item.source).label], ["Note", String(item.raw.internal_note ?? item.raw.summary ?? "—")]];
+  return <AdminDialog label="Reservation details" className="admin-reservation-dialog" busy={busy} onClose={() => void close()}>
+    <aside className="admin-booking-dialog-content">
+      <header className="admin-reservation-dialog-header"><div><p>Reservation details</p><h2>{item.reference || item.title}</h2><div className="admin-reservation-dialog-badges"><AdminBadge domain={item.kind === "block" ? "calendar" : "booking"} value={item.status} />{item.kind === "booking" && <AdminBadge domain="payment" value={item.payment} label={`${statusPresentation("payment", item.payment).label} payment`} />}{readOnly && <span className="admin-reservation-readonly"><LockKeyhole size={13} /> Read only</span>}</div></div><button type="button" className="admin-reservation-dialog-close" onClick={() => void close()} disabled={busy} aria-label="Close reservation details"><X size={18} /></button></header>
+      <section className="admin-reservation-stay" aria-label="Reservation stay"><p className="admin-reservation-label">{item.kind === "booking" ? "Booked for" : "Calendar event"}</p><h3>{item.propertyLabel}</h3><p className="admin-reservation-guest">{item.title}</p><div className="admin-reservation-dates"><div><span>Check-in</span><strong>{formatDate(item.start)}</strong></div><div><span>Checkout</span><strong>{formatDate(item.end)}</strong></div></div></section>
+      <dl className="admin-booking-dialog-details">{details.map(([label, value]) => <Detail key={label} label={label} value={value} />)}</dl>
+      {item.kind === "booking" && <section className="admin-reservation-notes"><div><h3>Internal notes</h3><p>Only your team can see these.</p></div>{readOnly ? <p className="admin-reservation-notes-readonly">{internalNotes || "No internal notes."}</p> : <><textarea className="admin-field" aria-label="Internal notes" maxLength={4000} value={internalNotes} onChange={(event) => setInternalNotes(event.target.value)} placeholder="Add a private note" /><button type="button" className="admin-button admin-button-primary" disabled={busy || !notesChanged} onClick={() => void act({ internalNotes })}>{busy ? "Saving…" : "Save note"}</button></>}</section>}
+      {readOnly && <div className="admin-reservation-readonly-note"><LockKeyhole size={18} aria-hidden="true" /><p><strong>Managed outside Serenity</strong><span>{item.source === "uploaded calendar" ? "Change the source calendar and upload it again." : item.kind === "block" ? "Make changes on the original platform. Updated dates will appear here after the calendar sync." : "Make changes on the original platform. This booking record cannot be edited here."}</span></p></div>}
+      {item.kind === "booking" && !readOnly ? <div className="admin-reservation-actions">
+        {error && <p className="admin-notice is-error" role="alert">{error}</p>}
+        {item.status !== "cancelled" && item.status !== "expired" && item.status !== "checked_out" && <section className="admin-reservation-action">
+          <div><h3>Cancel booking</h3><p>{automaticRefund ? `Free cancellation through ${formatDate(String(item.raw.free_cancellation_until))}. Automatically refund ${formatAud(Number(item.raw.total ?? 0))} to the original payment method.` : item.payment === "paid" ? "The free cancellation window has ended, or the payment was recorded outside Stripe. Review any refund separately." : "Cancelling makes these dates available again."}</p></div>
+          <label>Reason for cancellation<input className="admin-field" value={reason} onChange={(event) => setReason(event.target.value)} maxLength={500} placeholder="Enter a reason" /></label>
+          <button type="button" className="admin-button admin-button-danger" disabled={busy || !reason.trim()} onClick={() => void cancel()}>Cancel{automaticRefund ? " and refund" : ""} booking</button>
+        </section>}
+        {(archived || canArchive) && <section className="admin-reservation-action admin-reservation-action-inline"><div><h3>{archived ? "Restore booking" : "Archive booking"}</h3><p>{archived ? "Move this record back to Current." : "Move this completed record out of Current. Payment and availability stay the same."}</p></div><button type="button" className="admin-button inline-flex items-center gap-2" disabled={busy} onClick={() => void changeArchive()}>{archived ? <RotateCcw size={16} /> : <Archive size={16} />}{archived ? "Restore" : "Archive"}</button></section>}
+      </div> : !readOnly && <p className="admin-reservation-manual-note">Use Calendar to manage these blocked dates.</p>}
     </aside>
   </AdminDialog>;
 }
 
-function Detail({ label, value }: { label: string; value: string }) { return <div className="border-b border-r border-[var(--admin-border)] p-4"><dt className="text-sm font-semibold text-[var(--admin-muted)]">{label}</dt><dd className="mt-1 font-medium text-[var(--admin-text)]">{value}</dd></div>; }
+function Detail({ label, value }: { label: string; value: string }) { return <div className="admin-booking-preview-detail"><dt>{label}</dt><dd>{value}</dd></div>; }

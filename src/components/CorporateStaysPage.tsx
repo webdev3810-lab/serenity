@@ -25,22 +25,24 @@ import type { Property } from "@/src/data/properties";
 import { calculatePrice, defaultGuests, formatAud, formatDateAu, nightsBetween } from "@/src/lib/booking";
 import { DEFAULT_CONTACT_SETTINGS } from "@/src/lib/siteSettings";
 import { canBookCorporateDirectly } from "@/src/lib/reservationRules";
+import { freeCancellationText } from "@/src/lib/cancellationPolicy";
+import { PUBLIC_PAGE_MEDIA, type PublicPageMedia } from "@/src/lib/publicPageMedia";
+import type { PublicPageCopy } from "@/src/lib/publicPageCopy";
 
 type AvailabilityState = "checking" | "available" | "unavailable" | "error";
 type HouseStay = { arrival: string; departure: string; guests: number };
 type CalendarAvailability = { slug: string; status: "loading" | "ready" | "error"; blockedDates: string[] };
 
-const CORPORATE_STAY_FEATURES = [
-  { title: "Whole-home privacy", description: "More personal space than traditional hotel accommodation." },
-  { title: "Work-ready internet", description: "Reliable Wi-Fi for everyday business use." },
-  { title: "Kitchen & laundry", description: "Everyday facilities that make stays of several weeks or months easier." },
-  { title: "Flexible arrangements", description: "Stay extensions can be requested, subject to availability." },
-  { title: "Direct partner bookings", description: "Returning clients can use an ID issued by Serenity in the booking form below." },
-  { title: "Corporate invoicing", description: "GST tax invoices and purchase order details can be requested." },
-  { title: "One point of contact", description: "One Serenity contact throughout the booking and stay." },
-] as const;
-
-export function CorporateStaysPage({ today, properties }: { today: string; properties: Property[] }) {
+export function CorporateStaysPage({ today, properties, media, copy }: { today: string; properties: Property[]; media: PublicPageMedia; copy: PublicPageCopy }) {
+  const corporateStayFeatures = [
+    { title: copy.corporateFeature1Title, description: copy.corporateFeature1Lead },
+    { title: copy.corporateFeature2Title, description: copy.corporateFeature2Lead },
+    { title: copy.corporateFeature3Title, description: copy.corporateFeature3Lead },
+    { title: copy.corporateFeature4Title, description: copy.corporateFeature4Lead },
+    { title: copy.corporateFeature5Title, description: copy.corporateFeature5Lead },
+    { title: copy.corporateFeature6Title, description: copy.corporateFeature6Lead },
+    { title: copy.corporateFeature7Title, description: copy.corporateFeature7Lead },
+  ];
   const contact = useContactSettings() ?? DEFAULT_CONTACT_SETTINGS;
   const [formError, setFormError] = useState("");
   const [formSubmitting, setFormSubmitting] = useState(false);
@@ -310,15 +312,15 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
   };
 
   const corporateFaqs = [
-    ["Can I request temporary accommodation while my home is being repaired?", "Yes. Tell us your preferred dates, household size and bedroom needs through the insurance accommodation enquiry. We can discuss suitable furnished homes and provide a written quote, subject to availability."],
-    ["Do insurance accommodation enquiries need a Partner ID?", "No. A Partner ID is only needed for registered corporate partners booking and paying online. Insurance accommodation is arranged by enquiry and confirmed separately."],
-    ["Do you offer corporate accommodation in Pakenham?", "Yes. Serenity Stays provides direct accommodation in Pakenham for project teams, contractor crews, executive relocations, and extended business stays."],
-    ["Can our company book multiple houses for work crews?", "Yes. Registered corporate partners can book one or more available houses, with separate dates and guest counts for each house, in one payment."],
-    ["Are the houses furnished with utilities and Wi-Fi included?", "Every house is turn-key furnished with Wi-Fi, electricity, gas, water, a full kitchen, laundry facilities, and linen included."],
-    ["Can we enquire about weekly or monthly stays?", "Yes. Tell us the dates and number of houses you need, and the team will confirm the rate and arrangements in your enquiry."],
-    ["Can our company request GST tax invoices and ABN billing?", "Yes. We can provide tax invoices with ABN details and support purchase order processing for company bookings."],
-    ["Is parking available for work vans and utility trucks?", "Each house has off-street driveway parking plus street parking out front for commercial vehicles, utility trucks, and team cars."],
-    ["Are pets allowed for relocating employees?", "Some Serenity homes welcome declared family pets. Check the house details or ask us before booking."],
+    [copy.corporateFaq1Question, copy.corporateFaq1Answer],
+    [copy.corporateFaq2Question, copy.corporateFaq2Answer],
+    [copy.corporateFaq3Question, copy.corporateFaq3Answer],
+    [copy.corporateFaq4Question, copy.corporateFaq4Answer],
+    [copy.corporateFaq5Question, copy.corporateFaq5Answer],
+    [copy.corporateFaq6Question, copy.corporateFaq6Answer],
+    [copy.corporateFaq7Question, copy.corporateFaq7Answer],
+    [copy.corporateFaq8Question, copy.corporateFaq8Answer],
+    [copy.corporateFaq9Question, copy.corporateFaq9Answer],
   ];
 
   const combinedGuestCapacity = properties.reduce((total, property) => total + property.maxGuests, 0);
@@ -327,78 +329,78 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
     <main className="corporate-stays-page corporate-editorial-page homepage-theme">
       <section className="corporate-editorial-hero" aria-labelledby="corporate-hero-title">
         <div className="corporate-editorial-hero__copy">
-          <h1 id="corporate-hero-title">Insurance &amp; Corporate Accommodation <span>in Pakenham</span></h1>
-          <p>Fully furnished private homes for temporary relocation, employee stays and project teams.</p>
+          <h1 id="corporate-hero-title">{copy.corporateHeroTitle} <span>{copy.corporateHeroAccent}</span></h1>
+          <p>{copy.corporateHeroLead}</p>
           <div className="corporate-editorial-links">
             <Link href="#corporate-question" onClick={() => openEnquiryType("insurance")} aria-label="Request an insurance accommodation quote"><ShieldCheck size={18} aria-hidden="true" /> Insurance quote <ChevronRight size={16} aria-hidden="true" /></Link>
             <Link href="#corporate-question" onClick={() => openEnquiryType("corporate")} aria-label="Request a corporate stay quote"><BriefcaseBusiness size={18} aria-hidden="true" /> Corporate quote <ChevronRight size={16} aria-hidden="true" /></Link>
           </div>
         </div>
         <div className="corporate-editorial-hero__image">
-          <Image src="/corporate-hero-interior.jpg" alt="Illustrative furnished home interior with lounge, kitchen and garden patio" fill priority sizes="(max-width: 760px) 100vw, 52vw" />
-          <span className="corporate-editorial-hero__image-note illustrative-photo-label">Illustrative image</span>
+          <Image src={media.corporateHero.src} alt={media.corporateHero.alt} fill priority sizes="(max-width: 760px) 100vw, 52vw" />
+          {media.corporateHero.src === PUBLIC_PAGE_MEDIA.corporateHero.src && <span className="corporate-editorial-hero__image-note illustrative-photo-label">Illustrative image</span>}
         </div>
       </section>
 
       <section id="insurance-accommodation" className="corporate-insurance" aria-labelledby="corporate-insurance-title">
         <div className="corporate-insurance__heading">
           <span>Flexible accommodation, personally arranged</span>
-          <h2 id="corporate-insurance-title">One enquiry. A suitable home. A clear quote.</h2>
-          <p>Tell us what you need and we&apos;ll help find the right furnished home and confirm the arrangements before you commit.</p>
+          <h2 id="corporate-insurance-title">{copy.corporateIntroTitle}</h2>
+          <p>{copy.corporateIntroLead}</p>
         </div>
         <div className="corporate-insurance__paths">
           <article className="corporate-insurance__path corporate-insurance__path--insurance">
             <div className="corporate-insurance__path-media">
-              <Image src="/corporate-insurance-illustration.jpg" alt="Illustrative scene of a family arriving at temporary accommodation" fill sizes="(max-width: 760px) 100vw, 50vw" />
-              <span className="corporate-insurance__image-note illustrative-photo-label">Illustrative image</span>
+              <Image src={media.corporateInsurance.src} alt={media.corporateInsurance.alt} fill sizes="(max-width: 760px) 100vw, 50vw" />
+              {media.corporateInsurance.src === PUBLIC_PAGE_MEDIA.corporateInsurance.src && <span className="corporate-insurance__image-note illustrative-photo-label">Illustrative image</span>}
             </div>
             <div className="corporate-insurance__path-content">
               <span className="corporate-insurance__number"><ShieldCheck size={18} aria-hidden="true" /> 01 / Insurance accommodation</span>
-              <h3>A place to settle while home is on hold.</h3>
-              <p>Temporary, fully furnished housing for families who need to move out during repairs, a claim or a relocation.</p>
+              <h3>{copy.corporateInsuranceTitle}</h3>
+              <p>{copy.corporateInsuranceLead}</p>
               <ul>
-                <li>Private whole homes with kitchen and laundry facilities</li>
-                <li>Bedroom and household needs discussed before a quote</li>
-                <li>Shorter or extended stays, subject to availability</li>
-                <li>Written accommodation quote on request</li>
-                <li>Billing requirements can be discussed with your insurer</li>
+                <li>{copy.corporateInsurancePoint1}</li>
+                <li>{copy.corporateInsurancePoint2}</li>
+                <li>{copy.corporateInsurancePoint3}</li>
+                <li>{copy.corporateInsurancePoint4}</li>
+                <li>{copy.corporateInsurancePoint5}</li>
               </ul>
               <Link href="#corporate-question" onClick={() => openEnquiryType("insurance")}>Request an insurance quote <ArrowUpRight size={19} aria-hidden="true" /></Link>
             </div>
           </article>
           <article className="corporate-insurance__path corporate-insurance__path--corporate">
             <div className="corporate-insurance__path-media">
-              <Image src="/corporate-stays-illustration.jpg" alt="Illustrative scene of a business traveller working in a furnished home" fill sizes="(max-width: 760px) 100vw, 50vw" />
-              <span className="corporate-insurance__image-note illustrative-photo-label">Illustrative image</span>
+              <Image src={media.corporateWork.src} alt={media.corporateWork.alt} fill sizes="(max-width: 760px) 100vw, 50vw" />
+              {media.corporateWork.src === PUBLIC_PAGE_MEDIA.corporateWork.src && <span className="corporate-insurance__image-note illustrative-photo-label">Illustrative image</span>}
             </div>
             <div className="corporate-insurance__path-content">
               <span className="corporate-insurance__number"><BriefcaseBusiness size={18} aria-hidden="true" /> 02 / Corporate stays</span>
-              <h3>Room to work. Space to feel at home.</h3>
-              <p>Furnished accommodation for business travellers, project teams and employees staying in Pakenham.</p>
+              <h3>{copy.corporateWorkTitle}</h3>
+              <p>{copy.corporateWorkLead}</p>
               <ul>
-                <li>Private bedrooms, kitchen, laundry and Wi-Fi</li>
-                <li>Flexible dates and extensions, subject to availability</li>
+                <li>{copy.corporateWorkPoint1}</li>
+                <li>{copy.corporateWorkPoint2}</li>
                 {properties.length > 0 && <li>{properties.length} furnished homes with capacity for up to {combinedGuestCapacity} guests in total</li>}
-                <li>Multiple-home team bookings can be requested</li>
-                <li>GST invoices and purchase order details on request</li>
+                <li>{copy.corporateWorkPoint3}</li>
+                <li>{copy.corporateWorkPoint4}</li>
               </ul>
               <Link href="#corporate-question" onClick={() => openEnquiryType("corporate")}>Ask about a corporate stay <ArrowUpRight size={19} aria-hidden="true" /></Link>
             </div>
           </article>
         </div>
         <section className="corporate-coordinators" aria-labelledby="corporate-coordinators-title">
-          <h2 id="corporate-coordinators-title">Easy for booking coordinators</h2>
+          <h2 id="corporate-coordinators-title">{copy.corporateCoordinatorsTitle}</h2>
           <ul className="corporate-coordinators__grid">
-            <li><FileText size={32} strokeWidth={1.7} aria-hidden="true" /><span>Property information<br />sheets</span></li>
-            <li><FileText size={32} strokeWidth={1.7} aria-hidden="true" /><span>Clear inclusions &amp; terms</span></li>
-            <li><CreditCard size={32} strokeWidth={1.7} aria-hidden="true" /><span>Billing requirements</span></li>
-            <li><CalendarDays size={32} strokeWidth={1.7} aria-hidden="true" /><span>Stay extension enquiries</span></li>
+            <li><FileText size={32} strokeWidth={1.7} aria-hidden="true" /><span>{copy.corporateCoordinator1}</span></li>
+            <li><FileText size={32} strokeWidth={1.7} aria-hidden="true" /><span>{copy.corporateCoordinator2}</span></li>
+            <li><CreditCard size={32} strokeWidth={1.7} aria-hidden="true" /><span>{copy.corporateCoordinator3}</span></li>
+            <li><CalendarDays size={32} strokeWidth={1.7} aria-hidden="true" /><span>{copy.corporateCoordinator4}</span></li>
           </ul>
         </section>
         <div className="corporate-insurance__homes">
           <div className="corporate-insurance__homes-heading">
-            <h3>Three homes. Flexible options.</h3>
-            <p>Explore the layout and features of each home before you enquire.</p>
+            <h3>{copy.corporateHomesTitle}</h3>
+            <p>{copy.corporateHomesLead}</p>
           </div>
           <div className="corporate-insurance__homes-grid">
             {properties.map((property) => (
@@ -422,10 +424,10 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
         <div className="corporate-stay-features__grid">
           <div className="corporate-stay-features__intro">
             <span>Made for the longer stay</span>
-            <h2 id="corporate-stay-features-title">Designed for work. Ready for living.</h2>
+            <h2 id="corporate-stay-features-title">{copy.corporateFeaturesTitle}</h2>
           </div>
-          {CORPORATE_STAY_FEATURES.map((feature, index) => (
-            <article className="corporate-stay-features__item" key={feature.title}>
+          {corporateStayFeatures.map((feature, index) => (
+            <article className="corporate-stay-features__item" key={index}>
               <span>{String(index + 1).padStart(2, "0")}</span>
               <div>
                 <h3>{feature.title}</h3>
@@ -569,6 +571,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
                           <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor={`corp-guests-${property.slug}`}>Guests *</label><select id={`corp-guests-${property.slug}`} className="field bg-white text-sm font-medium" value={stay.guests} onChange={(event) => updateHouseStay(property.slug, { guests: Number(event.target.value) })}>{Array.from({ length: Math.min(property.maxGuests, property.maximumAdults) - Math.max(1, property.minimumGuests) + 1 }, (_, index) => { const count = Math.max(1, property.minimumGuests) + index; return <option key={count} value={count}>{count} guest{count === 1 ? "" : "s"}</option>; })}</select></div>
                         </div>
                         {nights > 0 && <p className="mt-3 text-sm text-stone-600">{nights} night{nights === 1 ? "" : "s"} · {formatAud(calculatePrice(property, stay.arrival, stay.departure, { ...defaultGuests, adults: stay.guests }).total)}</p>}
+                        {stay.arrival && stay.departure && <p className="mt-2 text-sm leading-relaxed text-[#002844]">{freeCancellationText(stay.arrival, property.freeCancellationDays)} Contact Serenity to cancel; later refund requests are reviewed.</p>}
                         {nights > 0 && nights < property.minimumCorporateStay && <p className="mt-2 text-sm text-red-700">Minimum corporate stay: {property.minimumCorporateStay} night{property.minimumCorporateStay === 1 ? "" : "s"}.</p>}
                         {state === "unavailable" && <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-medium text-red-700"><p>{availabilityConflict[property.slug] ? `${formatDateAu(availabilityConflict[property.slug])} is booked or blocked.` : "These dates overlap a booking or blocked night."}</p><button type="button" className="font-bold underline underline-offset-2" onClick={() => openCalendar(property.slug)}>Change dates</button></div>}
                         {state === "error" && <p className="mt-2 text-sm font-medium text-red-700">We could not check live availability. Open the calendar to retry.</p>}
@@ -627,7 +630,7 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
           <div className="grid gap-6 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-4">
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-black block mb-4">Before your stay</span>
-              <h2>Clear answers before arrival.</h2>
+              <h2>{copy.corporateFaqTitle}</h2>
             </div>
             <div className="lg:col-span-8">
               <div className="serenity-editorial-faq__list" aria-label="Corporate stay frequently asked questions">
@@ -651,10 +654,10 @@ export function CorporateStaysPage({ today, properties }: { today: string; prope
         <div className="container max-w-[92rem] px-5 py-20 sm:px-8 sm:py-28 lg:flex lg:items-end lg:justify-between lg:gap-16 lg:px-12">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white block mb-6">Personalised guest support</span>
-            <h2 className="max-w-3xl">A comfortable home for the next chapter.</h2>
+            <h2 className="max-w-3xl">{copy.corporateClosingTitle}</h2>
           </div>
           <div className="mt-10 max-w-sm lg:mt-0">
-            <p className="text-base leading-relaxed text-white">Whether you&apos;re arranging a temporary family stay or accommodation for a team, we&apos;re here to help from the first enquiry onward.</p>
+            <p className="text-base leading-relaxed text-white">{copy.corporateClosingLead}</p>
             <div className="mt-8 space-y-4 text-sm font-medium tracking-wide text-white">
               <p className="flex items-center gap-4"><Phone size={18} className="text-white" /> <a href={`tel:${contact.phoneNumber.replace(/[^+\d]/g, "")}`} className="hover:underline transition-colors">{contact.phoneNumber}</a></p>
               <p className="flex items-center gap-4"><Mail size={18} className="text-white" /> <a href={`mailto:${contact.contactEmail}`} className="break-words hover:underline transition-colors">{contact.contactEmail}</a></p>

@@ -331,6 +331,115 @@ body:has(.contact-story-page) .public-site > main {
   display: inline;
 }
 
+.contact-story-form label > .contact-story-form__phone {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  margin-top: 0.55rem;
+  overflow: hidden;
+  border: 1px solid #d6d6d0;
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
+.contact-story-form__phone > span {
+  display: flex;
+  align-items: center;
+  border-right: 1px solid #d6d6d0;
+  padding: 0.85rem 0.95rem;
+  background: #f3f7f9;
+  color: var(--contact-ink);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.contact-story-form .contact-story-form__phone input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  box-shadow: none;
+}
+
+.contact-story-form .contact-story-form__phone input:focus {
+  border: 0;
+  outline: 0;
+}
+
+.contact-story-form label > .contact-story-form__phone:hover {
+  border-color: #9cb0be;
+}
+
+.contact-story-form label > .contact-story-form__phone:focus-within {
+  border-color: var(--contact-green);
+  outline: 2px solid rgba(0, 40, 68, 0.15);
+}
+
+.contact-story-form__phone-hint {
+  display: block;
+  margin-top: 0.4rem;
+  color: #607588;
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+.contact-story-form__choice {
+  min-width: 0;
+}
+
+.contact-story-form__select {
+  position: relative;
+  display: block;
+}
+
+.contact-story-form__select select {
+  appearance: none;
+  padding-right: 3rem;
+  cursor: pointer;
+}
+
+.contact-story-form__select select.is-placeholder {
+  color: #718492;
+}
+
+.contact-story-form__select option {
+  color: var(--contact-ink);
+  background: #fff;
+}
+
+.contact-story-form__select svg {
+  position: absolute;
+  top: calc(50% + 0.275rem);
+  right: 1rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--contact-ink);
+}
+
+.contact-story-form .contact-story-form__other {
+  display: block;
+  margin-top: 0.85rem;
+  color: #50677a;
+  font-size: 0.78rem;
+}
+
+.contact-story-form .contact-story-form__other input {
+  margin-top: 0.25rem;
+  border: 0;
+  border-bottom: 1px solid #9cb0be;
+  border-radius: 0 !important;
+  padding: 0.65rem 0.15rem;
+}
+
+.contact-story-form .contact-story-form__other input:focus {
+  border-bottom-color: var(--contact-green);
+  outline: none;
+  box-shadow: 0 2px 0 var(--contact-green);
+}
+
 .contact-story-form :is(input, select, textarea) {
   display: block;
   width: 100%;
@@ -343,6 +452,16 @@ body:has(.contact-story-page) .public-site > main {
   color: var(--contact-ink);
   font-size: 0.95rem;
   font-weight: 400;
+  font-family: inherit;
+}
+
+.contact-story-form :is(input, textarea)::placeholder {
+  color: #8193a0;
+  opacity: 1;
+}
+
+.contact-story-form :is(input, select, textarea):hover {
+  border-color: #9cb0be;
 }
 
 .contact-story-form :is(input, select, textarea):focus {

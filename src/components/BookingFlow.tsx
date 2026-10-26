@@ -12,6 +12,7 @@ import { receiptCode } from "@/src/lib/paymentReceipt";
 import { FormInput, TextArea } from "@/src/components/UI";
 import { PriceBreakdownView } from "@/src/components/BookingWidgets";
 import ScrollWipeText from "@/src/components/homepage/ScrollWipeText";
+import { freeCancellationText } from "@/src/lib/cancellationPolicy";
 
 const steps = ["Review stay", "Guest details", "Stripe payment", "Confirmation"];
 
@@ -111,6 +112,7 @@ export function ReviewBookingPage() {
           <span className="booking-review-kicker">Your total</span>
           <h2>Price summary <small>AUD</small></h2>
           <PriceBreakdownView property={property} checkIn={booking.checkIn} checkout={booking.checkout} guests={booking.guests} />
+          <p className="mt-5 rounded-xl border border-[#b9cbd7] bg-[#f3f8fb] p-4 text-sm leading-relaxed text-[#002844]"><strong>{freeCancellationText(booking.checkIn, property.freeCancellationDays)}</strong> Contact Serenity to request cancellation. After this deadline, refund requests are reviewed.</p>
         </aside>
       </div>
     </BookingFrame>
@@ -265,6 +267,7 @@ export function PaymentPage() {
           </div>
           <div className="pt-2">
             <PriceBreakdownView property={property} checkIn={booking.checkIn} checkout={booking.checkout} guests={booking.guests} />
+            <p className="mt-4 rounded-xl border border-[#b9cbd7] bg-[#f3f8fb] p-3 text-sm leading-relaxed text-[#002844]"><strong>{freeCancellationText(booking.checkIn!, property.freeCancellationDays)}</strong> Contact Serenity to cancel. Later refund requests are reviewed.</p>
           </div>
         </aside>
       </div>
@@ -282,6 +285,7 @@ export function ConfirmationPage() {
   const [verifiedReference, setVerifiedReference] = useState("");
   const [verifiedTotal, setVerifiedTotal] = useState<number | null>(null);
   const [verifiedEmail, setVerifiedEmail] = useState("");
+  const [verifiedCancellationDeadline, setVerifiedCancellationDeadline] = useState("");
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState("");
   const [savingImage, setSavingImage] = useState(false);
@@ -306,6 +310,7 @@ export function ConfirmationPage() {
         setVerifiedReference(result.booking.reference);
         setVerifiedTotal(Number.isFinite(Number(result.booking.total)) ? Number(result.booking.total) : null);
         setVerifiedEmail(typeof result.customerEmail === "string" ? result.customerEmail : "");
+        setVerifiedCancellationDeadline(typeof result.booking.free_cancellation_until === "string" ? result.booking.free_cancellation_until : "");
         setBooking({ paymentStatus: "paid", reservationReference: result.booking?.reference });
         setVerification("paid");
       })
@@ -443,6 +448,7 @@ export function ConfirmationPage() {
           <Info label="Reservation Ref" value={reference} />
           <Info label="Receipt Code" value={receiptCode(reference)} />
           {emailAddress && <Info label="Email" value={emailAddress} />}
+          {verifiedCancellationDeadline && <Info label="Free cancellation deadline" value={`${formatDateAu(verifiedCancellationDeadline)}, 11:59 pm Melbourne time`} />}
         </div>
 
         <div data-image-content-end className="rounded-none bg-stone-900 text-white p-4 text-left text-xs space-y-1">

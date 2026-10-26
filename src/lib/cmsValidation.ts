@@ -146,6 +146,7 @@ export function validatePropertyContent(payload: CmsPayload) {
   [
     ["Minimum stay", payload.minimum_stay],
     ["Maximum stay", payload.maximum_stay],
+    ["Free cancellation days", payload.free_cancellation_days],
     ["Minimum guests", payload.minimum_guests],
     ["Maximum adults", payload.maximum_adults],
     ["Maximum children", payload.maximum_children],
@@ -160,6 +161,7 @@ export function validatePropertyContent(payload: CmsPayload) {
   ].forEach(([label, value]) => addNonNegativeNumberError(errors, String(label), value));
 
   const minimumStay = numberValue(payload.minimum_stay);
+  const freeCancellationDays = numberValue(payload.free_cancellation_days);
   const maximumStay = numberValue(payload.maximum_stay);
   const minimumGuests = numberValue(payload.minimum_guests);
   const maximumGuests = numberValue(payload.max_guests);
@@ -168,6 +170,7 @@ export function validatePropertyContent(payload: CmsPayload) {
   const maximumCorporateHouses = numberValue(payload.maximum_corporate_houses);
   const availableProperties = numberValue(payload.available_property_count);
   if (Number.isFinite(minimumStay) && minimumStay < 1) errors.push("Minimum stay must be at least 1 night.");
+  if (!Number.isInteger(freeCancellationDays) || freeCancellationDays < 1 || freeCancellationDays > 365) errors.push("Free cancellation days must be a whole number from 1 to 365.");
   if (Number.isFinite(minimumStay) && Number.isFinite(maximumStay) && maximumStay < minimumStay) errors.push("Maximum stay must be at least the minimum stay.");
   if (Number.isFinite(minimumGuests) && Number.isFinite(maximumGuests) && minimumGuests > maximumGuests) errors.push("Minimum guests cannot exceed maximum guests.");
   if (Number.isFinite(minimumCorporateStay) && minimumCorporateStay < 2) errors.push("Minimum corporate stay must be at least 2 nights.");

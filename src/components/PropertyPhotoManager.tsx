@@ -1,5 +1,5 @@
 "use client";
-import { useAdminWorkspace,useDirtyGuard } from "@/src/components/admin/AdminUI";
+import { useAdminPagination,useAdminWorkspace,useDirtyGuard } from "@/src/components/admin/AdminUI";
 import { fetchAllAdminRows } from "@/src/lib/admin-pagination";
 
 /* The photo manager keeps edits in the browser until the single Save changes
@@ -225,6 +225,7 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
 
   const propertyName = properties.find((property) => property.id === selectedId)?.name ?? "Selected house";
   const sortedImages = localImages;
+  const { visible: visibleImages, pagination: photoPagination } = useAdminPagination(sortedImages);
   const coverId = sortedImages.find((image) => !isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY)) && image.is_cover === true)?.id
     ?? sortedImages.find((image) => !isStagingCategory(String(image.category ?? DEFAULT_UPLOAD_CATEGORY)))?.id;
   const categoryBySlug = new Map(categories.map((category) => [category.category, category]));
@@ -245,7 +246,9 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
     });
     return categoriesWithOtherLast(Array.from(groups.values()).filter((group) => group.images.length));
   })();
-  const eagerlyLoadedImageIds = new Set(groupedImages.slice(0, 2).map((group) => String(group.images[0]?.id ?? "")).filter(Boolean));
+  const visibleImageIds = new Set(visibleImages.map((image) => image.id));
+  const visibleGroups = groupedImages.map((group) => ({ ...group, images: group.images.filter((image) => visibleImageIds.has(image.id)) })).filter((group) => group.images.length);
+  const eagerlyLoadedImageIds = new Set(visibleGroups.slice(0, 2).map((group) => String(group.images[0]?.id ?? "")).filter(Boolean));
 
   const propertyIds = Array.from(new Set([
     selectedId,
@@ -597,10 +600,10 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
       <div className="mt-5 grid gap-3 text-sm text-[var(--admin-muted)] sm:grid-cols-3"><p>New photos go to Unsorted uploads and stay hidden.</p><p>JPG, PNG, WebP, AVIF · max 5 MB each</p><p>Upload up to {MAX_UPLOAD_BATCH} at a time · room categories max {MAX_IMAGES_PER_HOUSE_CATEGORY}</p></div>
       {uploading ? <div className="mt-5 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-alt)] p-4" role="status"><div className="flex items-center gap-2 text-sm font-medium"><LoaderCircle size={16} className="animate-spin" /> {uploadMessage}</div><div className="mt-3 h-2 overflow-hidden rounded-xl bg-[var(--admin-surface-alt)]"><div className="h-full bg-[var(--admin-accent)] transition-all" style={{ width: `${Math.max(uploadProgress, 8)}%` }} /></div></div> : null}
       {sortedImages.length ? <div className="mt-6 space-y-8">
-        {groupedImages.map((group) => <section key={group.category} aria-labelledby={`photo-group-${group.category}`}>
+        {visibleGroups.map((group) => <section key={group.category} aria-labelledby={`photo-group-${group.category}`}>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--admin-border)] pb-2">
-            <div><h3 id={`photo-group-${group.category}`} className="text-sm font-semibold text-[var(--admin-text)]">{group.label}</h3><p className="mt-1 text-sm text-[var(--admin-muted)]">{isStagingCategory(group.category) ? "Hidden staging area — assign a room and publish when ready." : `${group.images.length} of ${MAX_IMAGES_PER_HOUSE_CATEGORY} photos used for this house category`}</p></div>
-            <span className="rounded-xl bg-[var(--admin-surface-alt)] px-3 py-1 text-sm font-medium text-[var(--admin-muted)]">{categoryCountLabel(group.category, group.images.length)}</span>
+            <div><h3 id={`photo-group-${group.category}`} className="text-sm font-semibold text-[var(--admin-text)]">{group.label}</h3><p className="mt-1 text-sm text-[var(--admin-muted)]">{isStagingCategory(group.category) ? "Hidden staging area — assign a room and publish when ready." : `${imageCountByCategory.get(group.category) ?? 0} of ${MAX_IMAGES_PER_HOUSE_CATEGORY} photos used for this house category`}</p></div>
+            <span className="rounded-xl bg-[var(--admin-surface-alt)] px-3 py-1 text-sm font-medium text-[var(--admin-muted)]">{categoryCountLabel(group.category, imageCountByCategory.get(group.category) ?? 0)}</span>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {group.images.map((image) => {
@@ -622,6 +625,7 @@ const PropertyPhotoManager = forwardRef<PropertyPhotoManagerHandle, PropertyPhot
           </div>
         </section>)}
       </div> : <div className="mt-6 rounded-xl border border-dashed border-[var(--admin-border)] bg-[var(--admin-surface-alt)] p-8 text-center text-sm text-[var(--admin-muted)]">No photos uploaded yet. Add the first real photo above.</div>}
+      {photoPagination}
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--admin-border)] pt-5"><p className="text-sm text-[var(--admin-muted)]" role={dirty ? "status" : undefined}>{dirty ? "Unsaved gallery changes. Save before leaving this house." : "Changes to category, order, cover, and visibility are saved together."}</p><button type="button" className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition ${dirty ? "bg-[var(--admin-accent)] text-[var(--admin-on-accent)]  hover:bg-[var(--admin-surface-alt)]" : "border border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-muted)] opacity-60"}`} disabled={!dirty || saving || uploading} onClick={() => void saveChanges()}><Save size={16} /> {saving ? "Saving…" : "Save gallery changes"}</button></div>
     </section>}
   </>;

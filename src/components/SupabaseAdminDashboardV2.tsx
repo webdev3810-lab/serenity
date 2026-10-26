@@ -28,12 +28,12 @@ ChevronLeft,
 ChevronRight,
 Clock3,
 Home,
+Images,
 LoaderCircle,
 Mail,
 Menu,
 MessageSquare,
 CreditCard,
-Wallet,
 ReceiptText,
 Settings,
 UsersRound,
@@ -50,6 +50,8 @@ import { Overview } from "@/src/components/admin/AdminOverview";
 import { HomepageSectionsEditor } from "./admin/AdminHomepageEditor";
 import { GuestInformationEditor } from "./admin/GuestInformationEditor";
 import { OtherBusinessesEditor } from "./admin/OtherBusinessesEditor";
+import { PublicPageMediaEditor } from "./admin/PublicPageMediaEditor";
+import { PublicPageCopyEditor } from "./admin/PublicPageCopyEditor";
 import { HouseEditor } from "./admin/AdminHouseEditor";
 import { AdminUserManager,ContactManager,EnquiryManager } from "./admin/AdminInboxSections";
 import { AdminNavItem,AdminRole,AdminUser,asBeds,asDatePrices,asList,emptyHomepage,emptyProperty,emptySettings,formatMelbourneCompactDateTime,formatMelbourneDateTime,HomepageDraft,HomepageSectionKey,normalizeAdminSettings,normalizeProperty,Row,Tab } from "./admin/AdminModels";
@@ -66,8 +68,9 @@ export function SupabaseAdminDashboardV2({ email, role, initialTab = "overview",
   const { theme } = useAdminTheme();
   const [localTab, setTab] = useState<Tab>(initialTab);
   const routeTab = searchParams.get("tab") as Tab | null;
-  const tab = initialHouseId || initialNewHouse ? localTab : routeTab && ["overview", "homepage", "other-businesses", "guest-information", "contact-page", "houses", "bookings", "payments", "earnings", "receipts", "calendar", "partners", "enquiries", "contacts", "email-notifications", "users", "settings"].includes(routeTab) && (!["users", "earnings"].includes(routeTab) || role === "super_admin") ? routeTab : initialTab;
+  const tab = initialHouseId || initialNewHouse ? localTab : routeTab && ["overview", "homepage", "page-images", "other-businesses", "guest-information", "contact-page", "houses", "bookings", "payments", "calendar", "partners", "enquiries", "contacts", "email-notifications", "users", "settings"].includes(routeTab) && (routeTab !== "users" || role === "super_admin") ? routeTab : initialTab;
   const calendarView = searchParams.get("view") === "settings" ? "settings" : "calendar";
+  const paymentsView = searchParams.get("view") === "earnings" && role === "super_admin" ? "earnings" : searchParams.get("view") === "receipts" ? "receipts" : "transactions";
   const [properties, setProperties] = useState<Row[]>([]);
   const [images, setImages] = useState<Row[]>([]);
   const [reviews, setReviews] = useState<Row[]>([]);
@@ -77,6 +80,7 @@ export function SupabaseAdminDashboardV2({ email, role, initialTab = "overview",
   const [enquiries, setEnquiries] = useState<Row[]>([]);
   const [contactMessages, setContactMessages] = useState<Row[]>([]);
   const [contactMessagesUnavailable, setContactMessagesUnavailable] = useState(false);
+  const [liveRefreshError, setLiveRefreshError] = useState("");
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [selectedId, setSelectedId] = useState(initialHouseId);
   const [draft, setDraft] = useState<Row>(emptyProperty());
@@ -102,6 +106,8 @@ export function SupabaseAdminDashboardV2({ email, role, initialTab = "overview",
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [melbourneNow, setMelbourneNow] = useState<Date | null>(null);
   const hasLoadedRef = useRef(false);
+  const fullLoadInFlightRef = useRef(false);
+  const refreshOperationalRowsRef = useRef<(() => void) | null>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
 useEffect(() => {
@@ -142,6 +148,7 @@ useEffect(() => {
   };
 
   const load = async () => {
+    fullLoadInFlightRef.current = true;
     const initialLoad = !hasLoadedRef.current;
     if (initialLoad) setLoading(true);
     setError("");
@@ -206,13 +213,83 @@ useEffect(() => {
     }
     setSelectedId((current) => current && nextProperties.some((property) => property.id === current) ? current : "");
     hasLoadedRef.current = true; setLoaded(true);
-    } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not load workspace data. Retry to continue."); setLoadFailed(true); } finally { setLoading(false); }
+    } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not load workspace data. Retry to continue."); setLoadFailed(true); } finally { fullLoadInFlightRef.current = false; refreshOperationalRowsRef.current?.(); setLoading(false); }
   };
 
   /* The initial load intentionally runs after hydration in this client dashboard. */
   /* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
   useEffect(() => { void load(); }, []);
   /* eslint-enable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
+
+  // A small admin-only Realtime table signals changes without exposing booking or message rows.
+  useEffect(() => {
+    if (!loaded) return;
+    type OperationalTable = "bookings" | "enquiries" | "contact_messages";
+    const tables: OperationalTable[] = ["bookings", "enquiries", "contact_messages"];
+    let active = true;
+    const pending = new Set<OperationalTable>();
+    const refreshing = new Set<OperationalTable>();
+    const failures = new Map<OperationalTable, string>();
+    let connectionError = "";
+    const showError = () => {
+      if (!active) return;
+      const detail = connectionError || failures.values().next().value;
+      setLiveRefreshError(detail ? `Live updates interrupted: ${detail}. Reconnecting or reopening this tab will refresh records.` : "");
+    };
+    const queueRefresh = (table: OperationalTable) => {
+      if (!active) return;
+      pending.add(table);
+      if (refreshing.has(table) || fullLoadInFlightRef.current) return;
+      refreshing.add(table);
+      void (async () => {
+        try {
+          while (active && pending.has(table)) {
+            pending.delete(table);
+            try {
+              const result = await fetchAllAdminRows<Row>(() => supabase.from(table).select("*").order("created_at", { ascending: false }).order("id"));
+              if (!active) return;
+              if (fullLoadInFlightRef.current) { pending.add(table); return; }
+              if (result.error) throw result.error;
+              if (table === "bookings") setBookings(result.data ?? []);
+              else if (table === "enquiries") setEnquiries(result.data ?? []);
+              else { setContactMessages(result.data ?? []); setContactMessagesUnavailable(false); }
+              failures.delete(table);
+            } catch (failure) {
+              if (!active) return;
+              failures.set(table, failure instanceof Error ? failure.message : "Could not refresh records");
+              if (table === "contact_messages") setContactMessagesUnavailable(true);
+            }
+            showError();
+          }
+        } finally {
+          refreshing.delete(table);
+        }
+      })();
+    };
+    const refreshAll = () => tables.forEach(queueRefresh);
+    refreshOperationalRowsRef.current = refreshAll;
+    const channel = supabase.channel("admin-operational-changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "admin_change_versions" }, (payload: { new?: { source_table?: string } }) => {
+        const source = payload.new?.source_table;
+        if (source && tables.includes(source as OperationalTable)) queueRefresh(source as OperationalTable);
+      })
+      .subscribe((status: string, failure?: Error) => {
+        if (!active) return;
+        if (status === "SUBSCRIBED") { connectionError = ""; showError(); refreshAll(); }
+        else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          connectionError = failure?.message || "Realtime connection lost";
+          showError();
+        }
+      });
+    const refreshOnReturn = () => { if (document.visibilityState === "visible") refreshAll(); };
+    document.addEventListener("visibilitychange", refreshOnReturn);
+    return () => {
+      active = false;
+      refreshOperationalRowsRef.current = null;
+      document.removeEventListener("visibilitychange", refreshOnReturn);
+      void supabase.removeChannel(channel);
+    };
+  }, [loaded, supabase]);
 
   const editProperty = (property: Row) => { const next = normalizeProperty(property); setSelectedId(property.id); setDraft(next); setSavedDraft(next); setTab("houses"); };
   const newProperty = () => { setSelectedId(""); setDraft(emptyProperty()); setSavedDraft(emptyProperty()); setTab("houses"); };
@@ -416,7 +493,9 @@ useEffect(() => {
 
   const setEnquiryNotes = async (enquiry: Row, internalNotes: string) => {
     const result = await supabase.from("enquiries").update({ internal_notes: internalNotes.slice(0, CMS_LIMITS.admin_notes) }).eq("id", enquiry.id);
-    if (result.error) setError(result.error.message); else { notify("Enquiry notes saved."); setEnquiries((current) => current.map((item) => item.id === enquiry.id ? { ...item, internal_notes: internalNotes.slice(0, CMS_LIMITS.admin_notes) } : item)); }
+    if (result.error) { setError(result.error.message); return false; }
+    notify("Enquiry notes saved."); setEnquiries((current) => current.map((item) => item.id === enquiry.id ? { ...item, internal_notes: internalNotes.slice(0, CMS_LIMITS.admin_notes) } : item));
+    return true;
   };
 
   const setContactStatus = async (contactMessage: Row, status: string) => {
@@ -427,7 +506,9 @@ useEffect(() => {
   const setContactNotes = async (contactMessage: Row, internalNotes: string) => {
     const notes = internalNotes.slice(0, CMS_LIMITS.admin_notes);
     const result = await supabase.from("contact_messages").update({ internal_notes: notes }).eq("id", contactMessage.id);
-    if (result.error) setError(result.error.message); else { notify("Contact message notes saved."); setContactMessages((current) => current.map((item) => item.id === contactMessage.id ? { ...item, internal_notes: notes } : item)); }
+    if (result.error) { setError(result.error.message); return false; }
+    notify("Contact message notes saved."); setContactMessages((current) => current.map((item) => item.id === contactMessage.id ? { ...item, internal_notes: notes } : item));
+    return true;
   };
 
   const convertEnquiry = async (enquiry: Row) => {
@@ -465,18 +546,17 @@ useEffect(() => {
   const navItems: AdminNavItem[] = [
     { id: "overview", label: "Overview", description: "At a glance", icon: BarChart3 },
     { id: "homepage", label: "Homepage", description: "Edit landing content", icon: Home },
+    { id: "page-images", label: "Page content", description: "Page photos and text", icon: Images },
     { id: "other-businesses", label: "Other businesses", description: "Listing and detail pages", icon: Building2 },
     { id: "guest-information", label: "Guest information", description: "Guide, policies and images", icon: ReceiptText },
     { id: "contact-page", label: "Contact page", description: "Public details and links", icon: Mail },
     { id: "houses", label: "Houses", description: "Content, pricing, photos", icon: Building2 },
     { id: "bookings", label: "Bookings", description: "Reservations and status", icon: CalendarDays },
-    { id: "payments", label: "Payments", description: "Stripe transactions and webhooks", icon: CreditCard },
-    ...(role === "super_admin" ? [{ id: "earnings" as Tab, label: "Earnings", description: "Stripe balance and payouts", icon: Wallet }] : []),
-    { id: "receipts", label: "Receipts", description: "Paid booking proof", icon: ReceiptText },
-    { id: "calendar", label: "Calendar", description: "Availability and rates", icon: CalendarRange },
-    { id: "partners", label: "Partners", description: "Corporate IDs and details", icon: Building2 },
     { id: "enquiries", label: "Enquiries", description: "Corporate requests", icon: MessageSquare },
     { id: "contacts", label: "Contacts", description: "Customer messages", icon: Mail },
+    { id: "partners", label: "Partners", description: "Corporate IDs and details", icon: Building2 },
+    { id: "payments", label: "Payments", description: "Transactions, earnings and receipts", icon: CreditCard },
+    { id: "calendar", label: "Calendar", description: "Availability and rates", icon: CalendarRange },
     { id: "email-notifications", label: "Email notifications", description: "Alert recipients", icon: Bell },
     ...(role === "super_admin" ? [{ id: "users" as Tab, label: "Users", description: "Access and roles", icon: UsersRound }] : []),
     { id: "settings", label: "Settings", description: "Regional defaults", icon: Settings },
@@ -560,17 +640,17 @@ useEffect(() => {
         <section id="admin-content" tabIndex={-1} className="admin-content" aria-busy={loading}>
           {message && <div className="admin-notice is-success" role="status"><CheckCircle2 size={18} />{message}</div>}
           {error && <div className="admin-notice is-error" role="alert"><X size={18} /><span>{error}</span>{loadFailed && <button type="button" className="admin-button" onClick={() => void load()}>Retry</button>}</div>}
+          {liveRefreshError && ["overview", "bookings", "enquiries", "contacts", "calendar"].includes(tab) && <div className="admin-notice is-error" role="status"><span>{liveRefreshError}</span></div>}
           {loading ? <div className="admin-card admin-loading-state" role="status"><LoaderCircle size={18} className="animate-spin" aria-hidden="true" /> <span>Loading your CMS workspace…</span></div>
             : loadFailed && !loaded ? <div className="admin-card p-8"><h2>Workspace unavailable</h2><p className="mt-2 text-[var(--admin-muted)]">Your records could not be loaded. Use Retry above to try again.</p></div>
             : tab === "overview" ? <Overview properties={properties} enquiries={enquiries} bookings={bookings} calendarEvents={calendarEvents} calendarConnections={calendarConnections} onNavigate={handleNavigation} />
             : tab === "homepage" ? <HomepageSectionsEditor baseline={savedHomepage} homepage={homepage} setHomepage={setHomepage} published={homepagePublished} saveSection={saveHomepageSection} saving={saving} properties={properties} toggleFeatured={toggleFeaturedProperty} />
+            : tab === "page-images" ? <><PublicPageMediaEditor /><PublicPageCopyEditor /></>
             : tab === "other-businesses" ? <OtherBusinessesEditor />
             : tab === "guest-information" ? <GuestInformationEditor images={images} properties={properties} />
             : tab === "houses" ? houseEditor
-            : tab === "bookings" ? <AdminReservationsManager bookings={bookings} enquiries={enquiries} calendarEvents={calendarEvents} calendarConnections={calendarConnections} properties={properties} />
-            : tab === "payments" ? <AdminPayments />
-            : tab === "earnings" && role === "super_admin" ? <AdminEarnings />
-            : tab === "receipts" ? <AdminReceipts />
+            : tab === "bookings" ? <AdminReservationsManager bookings={bookings} calendarEvents={calendarEvents} calendarConnections={calendarConnections} properties={properties} reload={load} />
+            : tab === "payments" ? <div className="space-y-5"><div className="admin-view-tabs" role="group" aria-label="Payments views"><button type="button" className={`admin-view-tab ${paymentsView === "transactions" ? "is-active" : ""}`} aria-pressed={paymentsView === "transactions"} onClick={() => void navigate(() => router.push("/admin?tab=payments", { scroll: false }))}>Transactions</button>{role === "super_admin" && <button type="button" className={`admin-view-tab ${paymentsView === "earnings" ? "is-active" : ""}`} aria-pressed={paymentsView === "earnings"} onClick={() => void navigate(() => router.push("/admin?tab=payments&view=earnings", { scroll: false }))}>Earnings</button>}<button type="button" className={`admin-view-tab ${paymentsView === "receipts" ? "is-active" : ""}`} aria-pressed={paymentsView === "receipts"} onClick={() => void navigate(() => router.push("/admin?tab=payments&view=receipts", { scroll: false }))}>Receipts</button></div>{paymentsView === "earnings" ? <AdminEarnings /> : paymentsView === "receipts" ? <AdminReceipts /> : <AdminPayments />}</div>
             : tab === "calendar" ? <div className="space-y-5"><div className="admin-view-tabs" role="group" aria-label="Calendar views"><button type="button" className={`admin-view-tab ${calendarView === "calendar" ? "is-active" : ""}`} aria-pressed={calendarView === "calendar"} onClick={() => void navigate(() => { void load(); router.push("/admin?tab=calendar", { scroll: false }); })}>Availability calendar</button><button type="button" className={`admin-view-tab ${calendarView === "settings" ? "is-active" : ""}`} aria-pressed={calendarView === "settings"} onClick={() => void navigate(() => router.push("/admin?tab=calendar&view=settings", { scroll: false }))}>Calendar sync settings</button></div>{calendarView === "settings" ? <CalendarSyncManager /> : <AdminAvailabilityCalendar properties={properties} bookings={bookings} calendarEvents={calendarEvents} reload={load} startBlockSelection={searchParams.get("action") === "block"} />}</div>
             : tab === "partners" ? <AdminCorporatePartners canEdit={role !== "editor"} />
             : tab === "enquiries" ? <EnquiryManager enquiries={enquiries} updateStatus={setEnquiryStatus} convert={convertEnquiry} updateNotes={setEnquiryNotes} />

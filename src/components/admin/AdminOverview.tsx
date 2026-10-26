@@ -4,7 +4,7 @@ import type { AdminTab as Tab } from "@/src/components/SupabaseAdminDashboardV2"
 import { addDays, formatAud, formatDateAu, nightsBetween, todayIso } from "@/src/lib/booking";
 import { ArrowUpRight, Building2, CalendarClock, CalendarDays, Filter, House, Inbox, RefreshCw, Wallet } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { AdminBadge as StatusBadge } from "./AdminUI";
+import { AdminBadge as StatusBadge, useAdminPagination } from "./AdminUI";
 import { PageHeader } from "./AdminFields";
 import { formatMelbourneCompactDateTime } from "./AdminModels";
 type Row = Record<string, any>;
@@ -156,7 +156,7 @@ export function Overview({ properties, enquiries, bookings, calendarEvents, cale
         <label>Booking status<select className="admin-field mt-1" value={bookingStatusFilter} onChange={(event) => setBookingStatusFilter(event.target.value)}><option value="all">All booking statuses</option>{OVERVIEW_BOOKING_STATUSES.map((status) => <option key={status} value={status}>{overviewStatusLabel(status)}</option>)}</select></label>
       </div><button type="button" className="admin-overview-reset" onClick={resetFilters}>Reset all filters</button></details>
       <div className="admin-overview-insights-grid">
-        <section className="admin-overview-arrivals"><OverviewBookingTable title="Upcoming arrivals" items={upcomingArrivals.slice(0, 6)} dateField="check_in" emptyLabel="No upcoming bookings in this range." propertyNames={propertyNames} onOpen={() => onNavigate("bookings")} /></section>
+        <section className="admin-overview-arrivals"><OverviewBookingTable title="Upcoming arrivals" items={upcomingArrivals} dateField="check_in" emptyLabel="No upcoming bookings in this range." propertyNames={propertyNames} onOpen={() => onNavigate("bookings")} /></section>
         <section className="admin-overview-panel admin-overview-availability"><div className="admin-overview-panel-heading"><div><h3>House availability</h3><p>Live status of published houses today</p></div><button type="button" className="admin-overview-text-action" onClick={() => onNavigate("calendar")}>Calendar <ArrowUpRight size={14} aria-hidden="true" /></button></div><div className="admin-overview-donut-layout"><div className="admin-overview-donut" role="img" aria-label={`${availableHouseCount} available, ${currentOccupiedCount} occupied, ${currentHeldCount} held, ${currentBlockedCount} blocked`} style={{ background: availabilityBackground }}><div><strong>{availabilityTotal}</strong><span>houses</span></div></div><div className="admin-overview-donut-legend"><span><i className="is-available" />Available <strong>{availableHouseCount}</strong></span><span><i className="is-occupied" />Occupied <strong>{currentOccupiedCount}</strong></span><span><i className="is-held" />Payment hold <strong>{currentHeldCount}</strong></span><span><i className="is-blocked" />Externally blocked <strong>{currentBlockedCount}</strong></span></div></div></section>
       </div>
 
@@ -202,6 +202,7 @@ function OverviewSectionHeading({ eyebrow, title, description, actionLabel, onAc
 }
 
 function OverviewChartCard({ title, description, points, emptyLabel, kind, valueFormatter = (value: number) => String(value), onOpen, headerAction }: { title: string; description: string; points: OverviewChartPoint[]; emptyLabel: string; kind: "bar" | "line"; valueFormatter?: (value: number) => string; onOpen: () => void; headerAction?: ReactNode }) {
+  const { visible: visiblePoints, pagination } = useAdminPagination(points);
   const max = Math.max(...points.map((point) => point.value), 0);
   const hasData = points.some((point) => point.value > 0);
   const total = points.reduce((sum, point) => sum + point.value, 0);
@@ -220,12 +221,13 @@ function OverviewChartCard({ title, description, points, emptyLabel, kind, value
         <div className="admin-overview-line-labels"><span>{points[0]?.label}</span>{points.length > 2 && <span>{points[Math.floor((points.length - 1) / 2)]?.label}</span>}{points.length > 1 && <span>{points[points.length - 1]?.label}</span>}</div>
       </div>}
     {!hasData && <p className="admin-overview-chart-empty">{emptyLabel} The graph still shows the selected period.</p>}
-    <div className="admin-overview-chart-footer"><details className="admin-overview-data-details"><summary>Exact values</summary><div className="admin-table-shell"><table className="admin-overview-data-table"><thead><tr><th>Period</th><th>Value</th></tr></thead><tbody>{points.map((point, index) => <tr key={`table-${point.label}-${index}`}><td>{point.label}</td><td>{valueFormatter(point.value)}</td></tr>)}</tbody></table></div></details><button type="button" className="admin-overview-text-action" onClick={onOpen}>Open records <ArrowUpRight size={14} aria-hidden="true" /></button></div>
+    <div className="admin-overview-chart-footer"><details className="admin-overview-data-details"><summary>Exact values</summary><div className="admin-table-shell"><table className="admin-overview-data-table"><thead><tr><th>Period</th><th>Value</th></tr></thead><tbody>{visiblePoints.map((point, index) => <tr key={`table-${point.label}-${index}`}><td>{point.label}</td><td>{valueFormatter(point.value)}</td></tr>)}</tbody></table></div>{pagination}</details><button type="button" className="admin-overview-text-action" onClick={onOpen}>Open records <ArrowUpRight size={14} aria-hidden="true" /></button></div>
   </section>;
 }
 
 function OverviewBookingTable({ title, items, dateField, emptyLabel, propertyNames, onOpen }: { title: string; items: Row[]; dateField: "check_in" | "checkout"; emptyLabel: string; propertyNames: Map<string, string>; onOpen: () => void }) {
-  return <section className="admin-overview-panel"><div className="admin-overview-panel-heading"><div><p className="admin-section-kicker">Live records</p><h3>{title}</h3></div><button type="button" className="admin-overview-text-action" onClick={onOpen}>Open bookings</button></div>{items.length ? <div className="admin-overview-record-list">{items.map((booking) => <button type="button" key={String(booking.id)} onClick={onOpen}><span className="admin-overview-record-main"><strong>{String(booking.reference || "Booking")}</strong><span>{propertyNames.get(String(booking.property_id)) ?? "Serenity house"}</span></span><span className="admin-overview-record-side"><span>{formatOverviewDate(booking[dateField])}</span><small>{overviewStatusLabel(overviewBookingType(booking))}</small></span></button>)}</div> : <OverviewEmptyState title={emptyLabel} description="No active booking records match the selected range." onOpen={onOpen} actionLabel="Open bookings" />}</section>;
+  const { visible, pagination } = useAdminPagination(items);
+  return <section className="admin-overview-panel"><div className="admin-overview-panel-heading"><div><p className="admin-section-kicker">Live records</p><h3>{title}</h3></div><button type="button" className="admin-overview-text-action" onClick={onOpen}>Open bookings</button></div>{items.length ? <div className="admin-overview-record-list">{visible.map((booking) => <button type="button" key={String(booking.id)} onClick={onOpen}><span className="admin-overview-record-main"><strong>{String(booking.reference || "Booking")}</strong><span>{propertyNames.get(String(booking.property_id)) ?? "Serenity house"}</span></span><span className="admin-overview-record-side"><span>{formatOverviewDate(booking[dateField])}</span><small>{overviewStatusLabel(overviewBookingType(booking))}</small></span></button>)}</div> : <OverviewEmptyState title={emptyLabel} description="No active booking records match the selected range." onOpen={onOpen} actionLabel="Open bookings" />}{pagination}</section>;
 }
 
 function OverviewEmptyState({ title, description, onOpen, actionLabel }: { title: string; description: string; onOpen: () => void; actionLabel: string }) {

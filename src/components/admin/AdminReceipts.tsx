@@ -4,6 +4,7 @@ import { CheckCircle2, Clipboard, Copy, Download, RefreshCw, Search } from "luci
 import { useCallback, useEffect, useState } from "react";
 import { formatAud } from "@/src/lib/booking";
 import { formatMelbourneReceiptDate } from "@/src/lib/paymentReceipt";
+import { useAdminPagination } from "./AdminUI";
 
 type Receipt = {
   code: string;
@@ -111,6 +112,7 @@ export function AdminReceipts() {
   const selected = receipts.find((receipt) => receipt.code === selectedCode);
   const filtered = receipts.filter((receipt) => [receipt.code, receipt.reference, receipt.guestName, receipt.companyName, ...receipt.homes]
     .some((value) => value.toLowerCase().includes(query.trim().toLowerCase())));
+  const { visible: visibleReceipts, pagination } = useAdminPagination(filtered);
 
   const saveImage = async () => {
     if (!selected) return;
@@ -153,12 +155,13 @@ export function AdminReceipts() {
         <div className="mt-4 max-h-[680px] space-y-2 overflow-y-auto">
           {loading && <p className="p-4 text-sm text-[var(--admin-muted)]">Loading receipts…</p>}
           {!loading && !filtered.length && <p className="p-4 text-sm text-[var(--admin-muted)]">{receipts.length ? "No matching receipt." : "No paid receipts yet."}</p>}
-          {filtered.map((receipt) => <button key={receipt.code} type="button" onClick={() => { setSelectedCode(receipt.code); setNotice(""); }} className={`w-full rounded-xl border p-4 text-left transition-colors ${selectedCode === receipt.code ? "border-[var(--admin-accent)] bg-[var(--admin-surface-alt)]" : "border-[var(--admin-border)] hover:bg-[var(--admin-surface-alt)]"}`}>
+          {visibleReceipts.map((receipt) => <button key={receipt.code} type="button" onClick={() => { setSelectedCode(receipt.code); setNotice(""); }} className={`w-full rounded-xl border p-4 text-left transition-colors ${selectedCode === receipt.code ? "border-[var(--admin-accent)] bg-[var(--admin-surface-alt)]" : "border-[var(--admin-border)] hover:bg-[var(--admin-surface-alt)]"}`}>
             <span className="flex items-center justify-between gap-2"><strong className="text-sm">{receipt.code}</strong><CheckCircle2 size={16} className="text-emerald-600" aria-label="Paid" /></span>
             <span className="mt-1 block text-sm text-[var(--admin-muted)]">{receipt.guestName} · {receipt.type === "corporate" ? "Corporate" : "Guest"}</span>
             <span className="mt-2 block text-sm font-semibold">{receipt.currency === "AUD" ? formatAud(receipt.total) : `${receipt.total} ${receipt.currency}`}</span>
           </button>)}
         </div>
+        {pagination}
       </section>
       {selected && <section className="admin-card overflow-hidden" aria-label="Receipt details">
         <div className="bg-[#062b45] p-6 text-white sm:p-8"><p className="text-xs font-bold uppercase tracking-[0.18em] text-[#e6c37a]">Serenity stays</p><h3 className="mt-3 text-2xl font-semibold">Booking &amp; payment confirmation</h3><p className="mt-2 text-sm text-slate-200">Paid and confirmed · {selected.type === "corporate" ? "Corporate partner stay" : "Direct guest stay"}</p></div>
