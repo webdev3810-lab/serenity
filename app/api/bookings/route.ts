@@ -4,6 +4,7 @@ import { calculatePrice, datesInRange, defaultGuests, reservationCode, todayIso,
 import { getPublicPropertyBySlug, isLocalContentPreview } from "@/src/lib/supabase/content";
 import { isSupabaseConfigured } from "@/src/lib/supabase/config";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
+import { createCheckoutCancellationToken } from "@/src/lib/checkoutCancellation";
 
 const getRequestOrigin = (request: Request) => {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
@@ -130,7 +131,8 @@ export async function POST(request: Request) {
     const stripe = new Stripe(stripeSecretKey);
     const origin = getRequestOrigin(request);
     const successUrl = `${origin}/booking/confirmation?session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${origin}/booking/payment?payment=cancelled&reference=${encodeURIComponent(reference)}`;
+    const cancellationToken = createCheckoutCancellationToken(booking.id, reference, stripeSecretKey);
+    const cancelUrl = `${origin}/booking/payment?payment=cancelled&reference=${encodeURIComponent(reference)}&token=${cancellationToken}`;
     const nightlyRateMetadata = price.nightlyRates.map((night) => `${night.date}:${night.nightlyPrice}${night.isOverride ? "*" : ""}`).join(",").slice(0, 450);
     const guestName = `${String(guestDetails?.firstName ?? "").trim()} ${String(guestDetails?.lastName ?? "").trim()}`.trim();
     const companyName = String(corporateDetails?.companyName ?? "").trim();
@@ -164,6 +166,7 @@ export async function POST(request: Request) {
     try {
       session = await stripe.checkout.sessions.create({
         mode: "payment",
+        expires_at: Math.floor(Date.now() / 1000) + 1860,
         client_reference_id: String(booking.id),
         // Keep every Serenity checkout in the property's AUD price instead of
         // allowing Stripe Adaptive Pricing to offer a converted local currency.

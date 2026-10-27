@@ -192,16 +192,29 @@ export function PaymentPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const reference = params.get("reference");
+    const token = params.get("token");
     if (params.get("payment") !== "cancelled") return;
-    const messageTimer = window.setTimeout(() => setError("Payment was cancelled. Your dates are available to try again."), 0);
-    if (reference) {
+    let active = true;
+    const messageTimer = window.setTimeout(() => setError(reference && token
+      ? "Payment was cancelled. Checking when your dates become available..."
+      : "Payment was cancelled. If your dates are still held, they will become available when checkout expires."), 0);
+    if (reference && token) {
       void fetch("/api/stripe/cancel", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reference }),
-      }).catch(() => undefined);
+        body: JSON.stringify({ reference, token }),
+      }).then((response) => {
+        if (!active) return;
+        setError(response.ok
+          ? "Payment was cancelled. Your dates are available to try again."
+          : response.status === 409
+            ? "This checkout may have completed. Please check your confirmation before trying again."
+            : "Payment was cancelled, but your dates may remain held until checkout expires. Please try again shortly.");
+      }).catch(() => {
+        if (active) setError("Payment was cancelled, but your dates may remain held until checkout expires. Please try again shortly.");
+      });
     }
-    return () => window.clearTimeout(messageTimer);
+    return () => { active = false; window.clearTimeout(messageTimer); };
   }, []);
 
   if (!property || !booking.checkIn || !booking.checkout || !booking.guestDetails) return <MissingBooking />;

@@ -1,6 +1,24 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { assertAudCheckout, bookingConfirmationState, describeStripeEvent } from "../src/lib/stripeMonitoring.ts";
+import { canCancelCheckoutSession, createCheckoutCancellationToken, verifyCheckoutCancellationToken } from "../src/lib/checkoutCancellation.ts";
+
+test("checkout cancellation needs a valid token tied to the booking", () => {
+  const token = createCheckoutCancellationToken("booking-1", "SER-7-ABCDE", "sk_test_example");
+  assert.equal(verifyCheckoutCancellationToken(token, "booking-1", "SER-7-ABCDE", "sk_test_example"), true);
+  assert.equal(verifyCheckoutCancellationToken(token, "booking-2", "SER-7-ABCDE", "sk_test_example"), false);
+  assert.equal(verifyCheckoutCancellationToken(token, "booking-1", "SER-7-OTHER", "sk_test_example"), false);
+  assert.equal(verifyCheckoutCancellationToken(token, "booking-1", "SER-7-ABCDE", "sk_test_other"), false);
+  assert.equal(verifyCheckoutCancellationToken("bad-token", "booking-1", "SER-7-ABCDE", "sk_test_example"), false);
+});
+
+test("only unpaid open or expired checkouts release booking dates", () => {
+  assert.equal(canCancelCheckoutSession({ status: "open", payment_status: "unpaid" }), true);
+  assert.equal(canCancelCheckoutSession({ status: "expired", payment_status: "unpaid" }), true);
+  assert.equal(canCancelCheckoutSession({ status: "complete", payment_status: "paid" }), false);
+  assert.equal(canCancelCheckoutSession({ status: "complete", payment_status: "unpaid" }), false);
+  assert.equal(canCancelCheckoutSession({ status: "open", payment_status: "paid" }), false);
+});
 
 const event = (type: string, object: Record<string, unknown>) => ({
   id: "evt_test", type, created: 1_700_000_000,
