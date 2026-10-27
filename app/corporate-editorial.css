@@ -129,43 +129,69 @@ body:has(.corporate-editorial-page) .public-site > main {
 }
 
 .corporate-editorial-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  width: min(100%, 37rem);
 }
 
-.corporate-editorial-page .corporate-editorial-links a {
+.corporate-editorial-page .corporate-editorial-links :is(.corporate-editorial-links__primary, .corporate-editorial-links__secondary) {
   display: inline-flex;
-  min-height: 3.4rem;
+  min-width: 0;
+  min-height: 3.75rem;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  border: 1px solid transparent;
-  border-radius: 0.7rem !important;
-  padding: 0.8rem 1.1rem;
+  gap: 0.65rem;
+  border: 1px solid #d7b36f;
+  border-radius: 0.65rem !important;
+  padding: 0.9rem 1rem;
   background: #d7b36f;
   color: #002844;
-  font-size: 0.9rem;
+  font-size: 0.84rem;
   font-weight: 700;
   text-decoration: none;
-  white-space: nowrap;
-  transition: background 0.18s, border-color 0.18s, transform 0.18s;
+  line-height: 1.25;
+  transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.18s;
 }
 
-.corporate-editorial-page .corporate-editorial-links a:nth-child(2) {
-  border-color: rgba(255, 255, 255, 0.85);
+.corporate-editorial-page .corporate-editorial-links :is(.corporate-editorial-links__primary, .corporate-editorial-links__secondary) span {
+  flex: 1;
+}
+
+.corporate-editorial-page .corporate-editorial-links .corporate-editorial-links__secondary {
+  border-color: rgba(255, 255, 255, 0.7);
   background: transparent;
   color: #fff;
 }
 
-.corporate-editorial-page .corporate-editorial-links a:hover {
+.corporate-editorial-page .corporate-editorial-links .corporate-editorial-links__primary:hover {
   transform: translateY(-2px);
   background: #e3c98d;
 }
 
-.corporate-editorial-page .corporate-editorial-links a:nth-child(2):hover {
+.corporate-editorial-page .corporate-editorial-links .corporate-editorial-links__secondary:hover {
+  transform: translateY(-2px);
   background: rgba(255, 255, 255, 0.12);
+}
+
+.corporate-editorial-page .corporate-editorial-links .corporate-editorial-links__text {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0;
+  color: #e6edf1;
+  font-size: 0.83rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(230, 237, 241, 0.55);
+  text-underline-offset: 0.25rem;
+  transition: color 0.18s, text-decoration-color 0.18s;
+}
+
+.corporate-editorial-page .corporate-editorial-links .corporate-editorial-links__text:hover {
+  color: #e3c98d;
+  text-decoration-color: currentColor;
 }
 
 .public-site .corporate-editorial-page .corporate-editorial-hero {
@@ -340,20 +366,21 @@ body:has(.corporate-editorial-page) .public-site > main {
 
 .corporate-insurance__path a {
   display: inline-flex;
-  min-height: 3rem;
+  width: 100%;
+  min-height: 3.5rem;
   align-items: center;
   justify-content: space-between;
-  gap: 0.6rem;
+  gap: 1rem;
   margin-top: auto;
   border: 1px solid #002844;
-  border-radius: 0.75rem !important;
-  padding: 0.75rem 1rem;
+  border-radius: 0.65rem !important;
+  padding: 0.85rem 1.1rem;
   background: #002844;
   color: #fff;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
   text-decoration: none;
+  transition: background 0.18s, color 0.18s, transform 0.18s;
 }
 
 .corporate-insurance__path--corporate a {
@@ -362,6 +389,7 @@ body:has(.corporate-editorial-page) .public-site > main {
 }
 
 .corporate-insurance__path a:is(:hover, :focus-visible) {
+  transform: translateY(-2px);
   background: #0b4869;
   color: #fff;
 }
@@ -1088,6 +1116,12 @@ body:has(.corporate-editorial-page) .public-site > main {
 
 .corporate-editorial-closing a:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 1100px) {
+  .corporate-editorial-links {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 900px) {

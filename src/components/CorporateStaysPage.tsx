@@ -11,7 +11,6 @@ import {
   Car,
   Check,
   CheckCircle2,
-  ChevronRight,
   CreditCard,
   FileText,
   Mail,
@@ -332,8 +331,9 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
           <h1 id="corporate-hero-title">{copy.corporateHeroTitle} <span>{copy.corporateHeroAccent}</span></h1>
           <p>{copy.corporateHeroLead}</p>
           <div className="corporate-editorial-links">
-            <Link href="#corporate-question" onClick={() => openEnquiryType("insurance")} aria-label="Request an insurance accommodation quote"><ShieldCheck size={18} aria-hidden="true" /> Insurance quote <ChevronRight size={16} aria-hidden="true" /></Link>
-            <Link href="#corporate-question" onClick={() => openEnquiryType("corporate")} aria-label="Ask about corporate bookings"><BriefcaseBusiness size={18} aria-hidden="true" /> Corporate bookings <ChevronRight size={16} aria-hidden="true" /></Link>
+            <Link className="corporate-editorial-links__primary" href="#corporate-booking"><BriefcaseBusiness size={19} aria-hidden="true" /><span>Book with Partner ID</span><ArrowUpRight size={18} aria-hidden="true" /></Link>
+            <Link className="corporate-editorial-links__secondary" href="#corporate-question" onClick={() => openEnquiryType("insurance")}><ShieldCheck size={19} aria-hidden="true" /><span>Request insurance quote</span><ArrowUpRight size={18} aria-hidden="true" /></Link>
+            <Link className="corporate-editorial-links__text" href="#corporate-question" onClick={() => openEnquiryType("corporate")}>Questions about corporate bookings? <ArrowUpRight size={17} aria-hidden="true" /></Link>
           </div>
         </div>
         <div className="corporate-editorial-hero__image">

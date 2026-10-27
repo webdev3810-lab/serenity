@@ -1241,8 +1241,20 @@ body:has(.corporate-editorial-page) .public-site > main,
   }
 
   .public-site .serenity-editorial-hero h1 {
-    font-size: clamp(1.55rem, 4.8vw, 2rem);
-    line-height: 1.02;
+    max-width: 10.5ch;
+    font-size: clamp(2.5rem, 9vw, 3.5rem);
+    line-height: 0.96;
+    overflow-wrap: break-word;
+  }
+
+  .public-site .serenity-editorial-hero h1[data-mobile-size="medium"] {
+    max-width: 14ch;
+    font-size: clamp(2.15rem, 7.7vw, 3rem);
+  }
+
+  .public-site .serenity-editorial-hero h1[data-mobile-size="long"] {
+    max-width: 18ch;
+    font-size: clamp(1.8rem, 6.5vw, 2.5rem);
   }
 
   .public-site .serenity-editorial-hero__description {

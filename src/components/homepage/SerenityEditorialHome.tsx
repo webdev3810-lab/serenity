@@ -58,14 +58,22 @@ export default function SerenityEditorialHome({
   const audienceText = audienceItems.length > 1
     ? `${audienceItems.slice(0, -1).join(", ")} & ${audienceItems[audienceItems.length - 1]}`
     : audienceItems[0] ?? "";
+  const headlineLines = content.editorial_hero_heading.split("\n");
+  const headlineLength = headlineLines.join(" ").trim().length;
+  const longestHeadlineLine = Math.max(0, ...headlineLines.map((line) => line.trim().length));
+  const mobileHeadlineSize = headlineLength > 45 || longestHeadlineLine > 28 || headlineLines.length > 3
+    ? "long"
+    : headlineLength > 28 || longestHeadlineLine > 18 || headlineLines.length > 2
+      ? "medium"
+      : "default";
 
   return (
     <div className="serenity-editorial-home">
       <section className="serenity-editorial-hero" aria-labelledby="serenity-editorial-title">
         <SerenityHeroImage key={heroImage} src={heroImage} alt={heroAlt} />
         <div className="serenity-editorial-hero__content">
-          <h1 id="serenity-editorial-title">
-            {content.editorial_hero_heading.split("\n").map((line, index) => <span key={index}>{line}</span>)}
+          <h1 id="serenity-editorial-title" data-mobile-size={mobileHeadlineSize}>
+            {headlineLines.map((line, index) => <span key={index}>{line}</span>)}
           </h1>
           {audienceText && <p className="serenity-editorial-hero__audience">For {audienceText}</p>}
           <p className="serenity-editorial-hero__description">

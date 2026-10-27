@@ -501,38 +501,12 @@ body:has(.serenity-editorial-home) ::selection {
   background: rgba(0, 28, 52, 0.34);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 280ms ease;
+  transition: opacity 180ms ease;
 }
 
 .serenity-staggered-menu[data-open="true"] .serenity-staggered-menu__shade {
   opacity: 1;
   pointer-events: auto;
-}
-
-.serenity-staggered-menu__layers {
-  position: fixed;
-  z-index: 1;
-  top: 4.5rem;
-  right: 0;
-  bottom: 0;
-  width: min(100vw, 38rem);
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.serenity-staggered-menu__layer {
-  position: absolute;
-  inset: 0;
-  transform: translateX(100%);
-  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.serenity-staggered-menu__layer:nth-child(2) {
-  transition-delay: 70ms;
-}
-
-.serenity-staggered-menu[data-open="true"] .serenity-staggered-menu__layer {
-  transform: translateX(0);
 }
 
 .serenity-staggered-menu .serenity-staggered-menu__panel {
@@ -550,14 +524,18 @@ body:has(.serenity-editorial-home) ::selection {
   background: #fff;
   color: #002844;
   overscroll-behavior: contain;
-  transform: translateX(100%);
-  transition: transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: 140ms;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-0.5rem);
+  transition: opacity 180ms ease, transform 180ms ease, visibility 0s linear 180ms;
   -webkit-overflow-scrolling: touch;
 }
 
 .serenity-staggered-menu[data-open="true"] .serenity-staggered-menu__panel {
-  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition-delay: 0s;
 }
 
 .serenity-staggered-menu__panel-inner {
@@ -661,20 +639,8 @@ body:has(.serenity-editorial-home) ::selection {
   transition: color 180ms ease;
 }
 
-.serenity-staggered-menu__item::after {
-  transition: opacity 300ms ease var(--sm-item-delay);
-}
-
 .serenity-staggered-menu__item-label {
   display: inline-block;
-  transform-origin: 50% 100%;
-  transform: translateY(140%) rotate(8deg);
-  transition: transform 720ms cubic-bezier(0.22, 1, 0.36, 1) var(--sm-item-delay);
-  will-change: transform;
-}
-
-.serenity-staggered-menu[data-open="true"] .serenity-staggered-menu__item-label {
-  transform: translateY(0) rotate(0);
 }
 
 .serenity-staggered-menu[data-open="true"] .serenity-staggered-menu__item {
@@ -735,10 +701,7 @@ body:has(.serenity-editorial-home) ::selection {
 @media (prefers-reduced-motion: reduce) {
   .serenity-staggered-menu__toggle-icon > span,
   .serenity-staggered-menu__shade,
-  .serenity-staggered-menu__layer,
-  .serenity-staggered-menu__panel,
-  .serenity-staggered-menu__item-label,
-  .serenity-staggered-menu__item::after {
+  .serenity-staggered-menu__panel {
     transition: none;
   }
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { createPortal } from "react-dom";
-import { useCallback, useEffect, useRef, useSyncExternalStore, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 
 type StaggeredMenuItem = {
   label: string;
@@ -22,7 +22,6 @@ type StaggeredMobileMenuProps = {
   onClose: () => void;
 };
 
-const colors = ["#e8edf4", "#f4f7fb"];
 const subscribeToMount = () => () => {};
 const getClientMountState = () => true;
 const getServerMountState = () => false;
@@ -106,15 +105,6 @@ export default function StaggeredMobileMenu({
             tabIndex={-1}
             onClick={dismiss}
           />
-          <div className="serenity-staggered-menu__layers" aria-hidden="true">
-            {colors.map((color) => (
-              <div
-                className="serenity-staggered-menu__layer"
-                key={color}
-                style={{ backgroundColor: color }}
-              />
-            ))}
-          </div>
           <aside
             id="serenity-staggered-menu-panel"
             ref={panelRef}
@@ -139,7 +129,7 @@ export default function StaggeredMobileMenu({
                     <li className="serenity-staggered-menu__item-wrap" key={`${item.href}-${item.label}`}>
                       {item.children ? (
                         <details className="serenity-staggered-menu__subnav">
-                          <summary className="serenity-staggered-menu__item" style={{ "--sm-item-delay": `${180 + index * 55}ms` } as CSSProperties}>
+                          <summary className="serenity-staggered-menu__item">
                             <span className="serenity-staggered-menu__item-label">{item.label}</span>
                             <ChevronDown size={19} aria-hidden="true" />
                           </summary>
@@ -157,7 +147,6 @@ export default function StaggeredMobileMenu({
                         aria-label={item.ariaLabel}
                         aria-current={item.active ? (item.href.includes("#") ? "location" : "page") : undefined}
                         data-index={index + 1}
-                        style={{ "--sm-item-delay": `${180 + index * 55}ms` } as CSSProperties}
                         onClick={onClose}
                       >
                         <span className="serenity-staggered-menu__item-label">{item.label}</span>
