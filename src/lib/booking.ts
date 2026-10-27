@@ -148,25 +148,25 @@ export const calculatePrice = (property: Property, checkIn?: string, checkout?: 
     const override = property.datePrices?.find((price) => price.date === date && price.active !== false);
     return { date, nightlyPrice: override?.nightlyPrice ?? property.nightlyPrice, label: override?.label ?? "", isOverride: Boolean(override) };
   }) : [];
-  const nightlySubtotal = nightlyRates.reduce((total, rate) => total + rate.nightlyPrice, 0);
+  const nightlySubtotal = Math.round(nightlyRates.reduce((total, rate) => total + rate.nightlyPrice, 0) * 100) / 100;
   const hasDatedRate = nightlyRates.some((rate) => rate.isOverride);
   const petFee = guests.pets > 0 ? property.petFee : 0;
   const extraGuests = Math.max(0, totalStayingGuests(guests) - property.extraGuestThreshold);
   const extraGuestFee = extraGuests * property.extraGuestFee * nights;
-  const taxable = nightlySubtotal + property.cleaningFee + petFee + extraGuestFee;
-  const tax = Math.round(taxable * 0.1);
+  // Historical bookings retain their original breakdown; new stays use the listed rate without separate cleaning or tax add-ons.
+  const total = Math.round((nightlySubtotal + petFee + extraGuestFee) * 100) / 100;
   return {
     nights,
     nightlyRates,
     nightlySubtotal,
-    cleaningFee: property.cleaningFee,
+    cleaningFee: 0,
     petFee,
     extraGuestFee,
     discount: 0,
     discountLabel: "",
     nightlyRateSummary: hasDatedRate ? "Nightly accommodation (seasonal rates applied)" : `${formatAud(property.nightlyPrice)} × ${nights} night${nights === 1 ? "" : "s"}`,
-    tax,
-    total: taxable + tax,
+    tax: 0,
+    total,
   };
 };
 

@@ -120,10 +120,9 @@ export function calculatePromotionDiscount(promotion: PromotionRecord, bookingAm
 }
 
 export function applyPromotionToPrice(price: PriceBreakdown, promotion: PromotionRecord): PriceBreakdown {
-  const baseTaxable = Math.max(0, price.nightlySubtotal + price.cleaningFee + price.petFee + price.extraGuestFee - price.discount);
+  const baseAmount = Math.max(0, price.nightlySubtotal + price.petFee + price.extraGuestFee - price.discount);
   const promotionDiscount = calculatePromotionDiscount(promotion, price.total);
-  const taxable = Math.max(0, baseTaxable - promotionDiscount);
-  const tax = Math.round(taxable * 0.1);
+  const total = Math.round(Math.max(0, baseAmount - promotionDiscount) * 100) / 100;
   const promotionLabel = promotion.discount_type === "percentage"
     ? `${promotion.discount_value}% promotion (${promotion.code})`
     : `${formatAudNumber(promotion.discount_value)} promotion (${promotion.code})`;
@@ -135,8 +134,8 @@ export function applyPromotionToPrice(price: PriceBreakdown, promotion: Promotio
     promotionCode: promotion.code,
     promotionId: promotion.id,
     promotionLabel,
-    tax,
-    total: taxable + tax,
+    tax: 0,
+    total,
   };
 }
 

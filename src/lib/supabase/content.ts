@@ -139,7 +139,7 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
       .filter((price) => price.is_active !== false)
       .sort((a, b) => String(a.price_date).localeCompare(String(b.price_date)))
       .map((price): PropertyDatePrice => ({ date: String(price.price_date), nightlyPrice: Number(price.nightly_price), label: String(price.label ?? ""), active: true })),
-    cleaningFee: Number(row.cleaning_fee),
+    cleaningFee: 0,
     petFee: Number(row.pet_fee),
     extraGuestFee: Number(row.extra_guest_fee),
     extraGuestThreshold: row.extra_guest_threshold,

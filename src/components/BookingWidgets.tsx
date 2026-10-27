@@ -271,7 +271,7 @@ export function PriceBreakdownView({ property, checkIn, checkout, guests, price:
           <span>Nightly rate</span>
           <span className="font-semibold text-stone-900">{formatAud(property.nightlyPrice)}</span>
         </div>
-        <p className="text-sm leading-relaxed text-stone-500">Select check-in and checkout dates to see the full AUD total, including fees.</p>
+        <p className="text-sm leading-relaxed text-stone-500">Select check-in and checkout dates to see the full AUD total.</p>
       </div>
     );
   }
@@ -279,10 +279,8 @@ export function PriceBreakdownView({ property, checkIn, checkout, guests, price:
   const price = providedPrice ?? calculatePrice(property, checkIn, checkout, guests);
   const rows = [
     [price.nightlyRateSummary, price.nightlySubtotal],
-    ["Cleaning fee", price.cleaningFee],
     ["Pet fee", price.petFee],
     ["Extra guest fee", price.extraGuestFee],
-    ["Taxes", price.tax],
   ].filter(([, amount]) => amount !== 0);
 
   return (
