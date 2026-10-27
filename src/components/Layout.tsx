@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, ChevronDown, ChevronRight } from "lucide-react";
@@ -10,6 +9,7 @@ import { ContactSettingsProvider } from "@/src/context/ContactSettingsContext";
 import type { ContactSettings } from "@/src/lib/siteSettings";
 import { EditorialFooter } from "@/src/components/EditorialFooter";
 import StaggeredMobileMenu from "@/src/components/StaggeredMobileMenu";
+import { BrandWordmark } from "@/src/components/BrandWordmark";
 
 export function AppShell({ children, contactSettings }: { children: React.ReactNode; contactSettings: ContactSettings }) {
   const pathname = usePathname();
@@ -113,16 +113,8 @@ function Header({ pathname }: { pathname: string | null }) {
 
   return (
     <header className={`serenity-editorial-nav serenity-editorial-nav--site${hidden ? " is-hidden" : ""}`}>
-      <Link href="/" className="serenity-editorial-nav__mark" aria-label="Serenity on the Rocks home" onClick={() => setMobileMenuOpen(false)}>
-        <Image src="/LOGO.png" alt="" width={1248} height={642} sizes="(max-width: 640px) 56px, 76px" loading="eager" />
-        <span className="serenity-editorial-nav__wordmark" aria-hidden="true">
-          <span className="serenity-editorial-nav__wordmark-name">SERENITY</span>
-          <span className="serenity-editorial-nav__wordmark-descriptor">
-            <span />
-            CORPORATE BOOKINGS
-            <span />
-          </span>
-        </span>
+      <Link href="/" className="serenity-editorial-nav__mark" aria-label="Serenity Corporate Bookings home" onClick={() => setMobileMenuOpen(false)}>
+        <BrandWordmark priority />
       </Link>
 
       <nav id="serenity-primary-navigation" className="serenity-editorial-nav__links" aria-label="Primary navigation">

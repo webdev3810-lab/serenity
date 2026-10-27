@@ -7,7 +7,7 @@ import { lodgingBusinessJsonLd, pageMetadata } from "@/src/lib/seo";
 import { isApprovedHomepageMediaSource } from "@/src/lib/homepageMedia";
 import { normalizeEditorialHomepageContent } from "@/src/lib/homepageEditorialContent";
 
-export const metadata = pageMetadata("Serenity on the Rocks");
+export const metadata = pageMetadata("Serenity Corporate Bookings");
 export const dynamic = "force-dynamic";
 
 const displayName = (name: string) => name.replace(" - Whole", "");
@@ -79,7 +79,7 @@ export default async function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd) }} />
       <SerenityEditorialHome
         heroImage={heroImage?.src || ""}
-        heroAlt={heroImage?.alt || "Serenity on the Rocks furnished interior"}
+        heroAlt={heroImage?.alt || "Serenity furnished home interior"}
         houses={houses}
         photoPreviews={photoPreviews}
         content={editorialContent}

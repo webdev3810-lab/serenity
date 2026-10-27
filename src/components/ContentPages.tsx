@@ -406,7 +406,7 @@ export function PolicyPage({ type }: { type: "Terms and Conditions" | "Privacy P
   return (
     <div className="policy-editorial-page">
       <header className="policy-editorial-masthead">
-        <span>Serenity on the Rocks</span>
+        <span>Serenity Corporate Bookings</span>
         <span>Stay information / Pakenham, Victoria</span>
       </header>
 

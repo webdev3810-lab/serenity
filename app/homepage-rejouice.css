@@ -243,7 +243,7 @@ body:has(.serenity-editorial-home) ::selection {
   transition: opacity 180ms ease;
 }
 
-.serenity-editorial-nav__mark img {
+.serenity-editorial-nav__mark > img {
   display: block;
   width: 5.2rem;
   height: 100%;
@@ -348,7 +348,7 @@ body:has(.serenity-editorial-home) ::selection {
     gap: 0.45rem;
   }
 
-  .serenity-editorial-nav__mark img {
+  .serenity-editorial-nav__mark > img {
     width: 3.85rem;
   }
 
@@ -387,7 +387,7 @@ body:has(.serenity-editorial-home) ::selection {
     gap: 0.3rem;
   }
 
-  .serenity-editorial-nav__mark img {
+  .serenity-editorial-nav__mark > img {
     width: 3rem;
   }
 

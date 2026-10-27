@@ -22,6 +22,7 @@ import "./public-spacing.css";
 import "./property-showcase.css";
 import "./location-map-image.css";
 import "./guest-information/guest-information.css";
+import "./serenity-brand.css";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700", "800", "900"],

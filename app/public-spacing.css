@@ -2131,31 +2131,6 @@ body:has(.corporate-editorial-page) .public-site > main,
   text-decoration: none;
 }
 
-.public-site .serenity-editorial-footer__brand-link img {
-  width: 3.5rem;
-  height: auto;
-  flex: 0 0 auto;
-}
-
-.public-site .serenity-editorial-footer__brand-link span {
-  display: grid;
-  gap: 0.1rem;
-}
-
-.public-site .serenity-editorial-footer__brand-link strong {
-  font-size: 1.05rem;
-  font-weight: 800;
-  letter-spacing: 0.13em;
-  line-height: 1.1;
-}
-
-.public-site .serenity-editorial-footer__brand-link small {
-  color: #8a6c39;
-  font-size: 0.57rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-}
-
 .public-site .serenity-editorial-footer__grid .serenity-editorial-footer__brand > p {
   max-width: 16rem;
   color: #526b7c;

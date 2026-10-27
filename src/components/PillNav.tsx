@@ -104,7 +104,7 @@ export default function PillNav({
     <>
       <header className={`pill-nav-header hidden sticky top-0 z-[80] transform-gpu border-b border-[#CBD6DE] bg-white text-[#001e35] md:block ${reducedMotion ? "transition-none" : "transition-[transform,background-color,border-color,box-shadow] duration-200 ease-out"} ${navHidden ? "-translate-y-full" : "translate-y-0"} ${isScrolled ? "is-scrolled" : ""} ${className}`}>
         <div className="mx-auto flex h-16 w-full max-w-[100rem] items-center gap-2 px-3 sm:px-5 lg:px-6">
-          <Link href="/" aria-label="Serenity on the Rocks home" className="pill-nav-brand relative z-10 flex shrink-0 items-center">
+          <Link href="/" aria-label="Serenity Corporate Bookings home" className="pill-nav-brand relative z-10 flex shrink-0 items-center">
             <BrandWordmark />
           </Link>
 

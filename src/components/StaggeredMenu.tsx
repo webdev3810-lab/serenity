@@ -216,7 +216,7 @@ export default function StaggeredMenu({
         </div>
 
         <header className="staggered-menu-header pointer-events-none absolute left-0 top-0 z-20 flex h-16 w-full items-center justify-between border-b border-[#D8CCC4] bg-white/[.98] px-4 shadow-[0_0.75rem_2rem_rgba(45,38,34,0.06)] sm:px-6" aria-label="Main navigation header">
-          <Link href="/" className="sm-logo pointer-events-auto flex items-center" aria-label="Serenity on the Rocks home" onClick={closeMenu}>
+          <Link href="/" className="sm-logo pointer-events-auto flex items-center" aria-label="Serenity Corporate Bookings home" onClick={closeMenu}>
             <BrandWordmark />
           </Link>
 

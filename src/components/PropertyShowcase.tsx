@@ -1,3 +1,5 @@
+"use client";
+
 import { AmenityIcon } from "@/src/components/AmenityIcon";
 import type { Property, PropertyImage } from "@/src/data/properties";
 import { normalizeAmenities } from "@/src/lib/amenities";
@@ -5,6 +7,7 @@ import { corporateBookingWording } from "@/src/lib/publicPageCopy";
 import { ArrowLeft, Bath, BedDouble, CalendarDays, Camera, Car, Check, ChevronRight, ClipboardList, CookingPot, DoorOpen, KeyRound, Map, MapPin, Shield, Snowflake, Users, WashingMachine, Wifi } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const imageUnoptimized = (src: string) => src.includes("a0.muscache.com");
 
@@ -27,14 +30,43 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
   const nav = [
     { id: "house-overview", label: "Overview", Icon: DoorOpen },
     ...(amenities.length ? [{ id: "house-amenities", label: "Amenities", Icon: Wifi }] : []),
-    ...(property.floorPlan ? [{ id: "floor-plan", label: "Floor plan", Icon: Map }] : []),
-    { id: "location", label: "Location", Icon: MapPin },
+    { id: "house-checkin", label: "Check-in", Icon: KeyRound },
     ...(property.houseRules.length ? [{ id: "house-rules", label: "House rules", Icon: ClipboardList }] : []),
     ...(property.safetyInformation || safetyAmenities.length ? [{ id: "house-safety", label: "Guest safety", Icon: Shield }] : []),
-    { id: "house-booking", label: "Booking", Icon: CalendarDays },
-    { id: "house-checkin", label: "Check-in", Icon: KeyRound },
     { id: "house-host", label: "Your host", Icon: Users },
+    ...(property.floorPlan ? [{ id: "floor-plan", label: "Floor plan", Icon: Map }] : []),
+    { id: "availability", label: "Dates & prices", Icon: CalendarDays },
+    { id: "location", label: "Location", Icon: MapPin },
   ];
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const navIds = nav.map(({ id }) => id).join("|");
+
+  useEffect(() => {
+    let frame = 0;
+    const updateVisibleSection = () => {
+      const threshold = Math.min(window.innerHeight * .35, 240);
+      const sections = navIds.split("|").map((id) => ({ id, top: document.getElementById(id)?.getBoundingClientRect().top }));
+      const visible = sections.filter((section) => section.top !== undefined && section.top <= threshold);
+      const nearestTop = Math.max(...visible.map((section) => section.top!));
+      const nearest = visible.filter((section) => Math.abs(section.top! - nearestTop) < 8);
+      const hashId = window.location.hash.slice(1);
+      setActiveSection(nearest.find((section) => section.id === hashId)?.id ?? nearest[0]?.id ?? sections[0]?.id ?? null);
+    };
+    const scheduleUpdate = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(updateVisibleSection);
+    };
+    scheduleUpdate();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    window.addEventListener("hashchange", scheduleUpdate);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      window.removeEventListener("hashchange", scheduleUpdate);
+    };
+  }, [navIds]);
 
   return <div className="property-showcase">
     <section className="property-showcase-hero" aria-labelledby="property-showcase-title">
@@ -57,7 +89,7 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
       </div>
     </section>
     <nav className="property-showcase-nav" aria-label="House information">
-      {nav.map(({ id, label, Icon }) => <a key={id} href={`#${id}`}><Icon size={22} strokeWidth={1.75} aria-hidden="true" /><span>{label}</span></a>)}
+      {nav.map(({ id, label, Icon }) => <a key={id} href={`#${id}`} aria-current={activeSection === id ? "location" : undefined} onClick={() => setActiveSection(id)}><Icon size={22} strokeWidth={1.75} aria-hidden="true" /><span>{label}</span></a>)}
     </nav>
 
     <section className="property-showcase-overview" id="house-overview">

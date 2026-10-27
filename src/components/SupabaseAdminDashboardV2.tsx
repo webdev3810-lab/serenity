@@ -40,7 +40,7 @@ UsersRound,
 X
 } from "lucide-react";
 import { useRouter,useSearchParams } from "next/navigation";
-import Image from "next/image";
+import { BrandWordmark } from "@/src/components/BrandWordmark";
 import { useEffect,useMemo,useRef,useState } from "react";
 
 import { AdminDialog,useAdminWorkspace,useDirtyGuard } from "@/src/components/admin/AdminUI";
@@ -577,9 +577,7 @@ useEffect(() => {
       <header className="admin-header">
         <div className="admin-header-inner">
           <div className="admin-header-site-brand">
-            <Image className="admin-header-site-logo" src="/LOGO.png" alt="" width={1248} height={642} sizes="64px" priority />
-            <span className="admin-header-site-wordmark"><strong>SERENITY</strong><small>CORPORATE STAYS</small></span>
-            <span className="admin-header-site-context">Admin workspace</span>
+            <BrandWordmark variant="admin" priority />
           </div>
           <div className="admin-header-brand">
             <button type="button" className="admin-mobile-menu" aria-label="Open admin navigation" aria-controls="admin-sidebar" aria-expanded={mobileDrawerOpen} onClick={() => { setSidebarCollapsed(false); setMobileDrawerOpen(true); }}><Menu size={21} /></button>

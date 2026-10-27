@@ -13,6 +13,7 @@ import type { PropertyImage } from "@/src/data/properties";
 import { pageMetadata } from "@/src/lib/seo";
 import { getGuestAutomaticImages, getGuestInformationContent } from "@/src/lib/supabase/guestInformation";
 import type { GuestImageSlot } from "@/src/lib/guestInformation";
+import { BrandWordmark } from "@/src/components/BrandWordmark";
 
 export const metadata = pageMetadata(
   "Guest Information & Stay Policies",
@@ -73,10 +74,7 @@ export default async function Page() {
       <section className="guest-information-hero" aria-labelledby="guest-information-title">
         {heroPhoto && <PropertyPhoto image={heroPhoto} alt={heroPhoto.alt || "Furnished living space at a Serenity home"} className="guest-information-hero-photo" sizes="100vw" priority />}
         <div className="guest-information-hero-content">
-          <div className="guest-information-hero-brand" aria-label="Serenity Corporate Bookings">
-            <Image className="guest-information-hero-logo" src="/LOGO.png" alt="" width={224} height={115} priority />
-            <span><strong>Serenity</strong><small>Corporate Bookings</small></span>
-          </div>
+          <div className="guest-information-hero-brand"><BrandWordmark priority /></div>
           <p className="guest-information-kicker">{content.heroKicker}</p>
           <h1 id="guest-information-title">{content.title} <span>{content.titleAccent}</span></h1>
           <p>{content.description}</p>

@@ -1,0 +1,75 @@
+.serenity-brand {
+  --serenity-brand-height: 2.8rem;
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: calc(var(--serenity-brand-height) * .2);
+  color: #002844;
+  font-family: var(--font-poppins), Arial, sans-serif;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.serenity-brand__symbol {
+  display: block;
+  width: calc(var(--serenity-brand-height) * 1.94);
+  height: var(--serenity-brand-height);
+  flex: none;
+  object-fit: contain;
+}
+
+.serenity-brand__wordmark {
+  display: grid;
+  min-width: 0;
+  gap: calc(var(--serenity-brand-height) * .085);
+}
+
+.serenity-brand__name {
+  color: #002844;
+  font-size: calc(var(--serenity-brand-height) * .42);
+  font-weight: 700;
+  letter-spacing: .13em;
+  line-height: 1;
+}
+
+.serenity-brand__descriptor {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--serenity-brand-height) * .11);
+  color: #173d57;
+  font-size: calc(var(--serenity-brand-height) * .15);
+  font-weight: 600;
+  letter-spacing: .19em;
+  line-height: 1;
+}
+
+.serenity-brand__rule {
+  width: calc(var(--serenity-brand-height) * .15);
+  height: 1px;
+  flex: none;
+  background: #c6a361;
+}
+
+.serenity-brand--footer { --serenity-brand-height: 3.1rem; }
+.serenity-brand--admin { --serenity-brand-height: 2.55rem; }
+.admin-header-site-brand .serenity-brand,
+.admin-auth-shell .serenity-brand--admin {
+  padding: .2rem .35rem;
+  border-radius: .6rem;
+  background: #fff;
+}
+.admin-auth-shell .serenity-brand--admin { --serenity-brand-height: 3.2rem; margin-bottom: .5rem; }
+
+@media (max-width: 1023px) {
+  .serenity-editorial-nav__mark .serenity-brand { --serenity-brand-height: 2.5rem; }
+}
+
+@media (max-width: 640px) {
+  .serenity-editorial-nav__mark .serenity-brand { --serenity-brand-height: 2.15rem; }
+  .admin-header-site-brand .serenity-brand { --serenity-brand-height: 2.1rem; }
+}
+
+@media (max-width: 420px) {
+  .serenity-editorial-nav__mark .serenity-brand { --serenity-brand-height: 1.85rem; }
+  .admin-header-site-brand .serenity-brand { --serenity-brand-height: 1.85rem; }
+}

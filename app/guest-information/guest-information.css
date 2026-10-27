@@ -40,11 +40,8 @@ body:has(.guest-information-page) .public-site > main { background: #f8f8f5; }
   margin: 0 auto;
   padding: 2rem 0 2.7rem;
 }
-.guest-information-hero-brand { display: grid; justify-items: center; width: clamp(9rem, 15vw, 13rem); margin-bottom: auto; text-transform: uppercase; }
-.guest-information-hero-logo { width: 100%; height: auto; mix-blend-mode: multiply; }
-.guest-information-hero-brand span { display: grid; justify-items: center; margin-top: -.55rem; }
-.guest-information-hero-brand strong { font-family: var(--guest-serif); font-size: clamp(1.45rem, 2.4vw, 2.2rem); font-weight: 500; letter-spacing: .02em; line-height: 1; }
-.guest-information-hero-brand small { margin-top: .15rem; color: #8f6b32; font-size: .55rem; font-weight: 750; letter-spacing: .2em; }
+.guest-information-hero-brand { margin-bottom: auto; }
+.guest-information-hero-brand .serenity-brand { --serenity-brand-height: clamp(2.4rem, 4vw, 3.2rem); }
 .guest-information-kicker {
   color: #8f6b32;
   font-size: .77rem !important;
@@ -126,10 +123,8 @@ body:has(.guest-information-page) .public-site > main { background: #f8f8f5; }
   .guest-information-hero-photo img { object-position: 70% center; }
   .guest-information-hero::before { display: none; }
   .guest-information-hero-content { display: block; min-height: 0; width: calc(100% - 2rem); padding: 1.4rem 0 1.8rem; }
-  .guest-information-hero-brand { width: 8rem; margin: 0 0 1.2rem; }
-  .guest-information-hero-brand span { margin-top: -.3rem; }
-  .guest-information-hero-brand strong { font-size: 1.35rem; }
-  .guest-information-hero-brand small { font-size: .43rem; }
+  .guest-information-hero-brand { margin: 0 0 1.2rem; }
+  .guest-information-hero-brand .serenity-brand { --serenity-brand-height: 2.25rem; }
   .guest-information-hero h1 { max-width: 100%; margin: .65rem 0 .8rem; font-size: clamp(2.5rem, 10.4vw, 3.8rem); line-height: 1; }
   .guest-information-hero-content > p:last-child { max-width: 24rem; font-size: 1.06rem !important; }
   .guest-information-hero-note { position: relative; top: auto; right: auto; width: 100%; padding: 1rem; }

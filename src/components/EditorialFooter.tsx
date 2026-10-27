@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, ClipboardList, Heart, House, Leaf, LifeBuoy, Sparkles, Users } from "lucide-react";
 import { useContactSettings } from "@/src/context/ContactSettingsContext";
 import { DEFAULT_CONTACT_SETTINGS } from "@/src/lib/siteSettings";
+import { BrandWordmark } from "@/src/components/BrandWordmark";
 
 export function EditorialFooter({ draft = false }: { draft?: boolean }) {
   const contact = useContactSettings() ?? DEFAULT_CONTACT_SETTINGS;
@@ -24,8 +24,7 @@ export function EditorialFooter({ draft = false }: { draft?: boolean }) {
       <div className="serenity-editorial-footer__grid">
         <div className="serenity-editorial-footer__brand">
           <Link href="/" className="serenity-editorial-footer__brand-link" aria-label="Serenity Corporate Bookings home">
-            <Image src="/LOGO.png" alt="" width={1248} height={642} sizes="72px" />
-            <span><strong>SERENITY</strong><small>CORPORATE BOOKINGS</small></span>
+            <BrandWordmark variant="footer" />
           </Link>
           <p>Furnished homes for the moments that bring you to Pakenham.</p>
           <Link href="/homes" className="serenity-editorial-footer__brand-cta">Explore our homes <ArrowRight size={16} aria-hidden="true" /></Link>
