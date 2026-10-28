@@ -912,6 +912,31 @@ body:has(.corporate-editorial-page) .public-site > main {
   opacity: 1;
 }
 
+.corporate-editorial-page .corporate-editorial-enquiry .corporate-enquiry-phone {
+  position: relative;
+  display: block;
+}
+
+.corporate-editorial-page .corporate-editorial-enquiry .corporate-enquiry-phone__prefix {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  color: var(--corp-ink);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  pointer-events: none;
+}
+
+.corporate-editorial-page .corporate-editorial-enquiry .corporate-enquiry-phone input.field {
+  width: 100%;
+  min-width: 0;
+  padding-left: 2.6rem;
+}
+
 .corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking) textarea.field {
   min-height: 7.5rem;
   resize: vertical;

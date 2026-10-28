@@ -6,18 +6,23 @@ import { receiptCode } from "@/src/lib/paymentReceipt";
 
 export async function GET() {
   if (!await getAdminUser()) return NextResponse.json({ error: "Not authorised." }, { status: 403 });
+  const key = process.env.STRIPE_SECRET_KEY ?? "";
+  const mode = key.startsWith("sk_live_") || key.startsWith("rk_live_") ? "live"
+    : key.startsWith("sk_test_") || key.startsWith("rk_test_") ? "test" : "not configured";
+  if (mode === "not configured") return NextResponse.json({ receipts: [], mode }, { headers: { "Cache-Control": "private, no-store" } });
   const supabase = createSupabaseAdminClient();
   const [bookingsResult, propertiesResult, eventsResult] = await Promise.all([
     fetchAllAdminRows(() => supabase.from("bookings")
       .select("id, reference, group_reference, property_id, guest_details, check_in, checkout, total, currency, booking_type, booking_status, stripe_checkout_session_id, stripe_payment_intent_id, updated_at")
       .eq("payment_status", "paid")
       .in("booking_status", ["confirmed", "checked_in", "checked_out"])
-      .not("stripe_checkout_session_id", "is", null)
+      .like("stripe_checkout_session_id", `cs_${mode}_%`)
       .order("updated_at", { ascending: false }).order("id")),
     supabase.from("properties").select("id, name"),
     fetchAllAdminRows(() => supabase.from("stripe_payment_events")
       .select("id, stripe_checkout_session_id, stripe_payment_intent_id, event_created_at")
       .eq("outcome", "succeeded").eq("processing_status", "processed")
+      .eq("livemode", mode === "live")
       .order("event_created_at", { ascending: true }).order("id")),
   ]);
   if (bookingsResult.error || propertiesResult.error || eventsResult.error || !bookingsResult.data || !propertiesResult.data || !eventsResult.data) {
@@ -31,8 +36,9 @@ export async function GET() {
     if (event.stripe_checkout_session_id && !paidAtBySession.has(event.stripe_checkout_session_id)) paidAtBySession.set(event.stripe_checkout_session_id, event.event_created_at);
     if (event.stripe_payment_intent_id && !paidAtByIntent.has(event.stripe_payment_intent_id)) paidAtByIntent.set(event.stripe_payment_intent_id, event.event_created_at);
   }
-  const groups = new Map<string, typeof bookingsResult.data>();
-  for (const booking of bookingsResult.data) {
+  const modeBookings = bookingsResult.data.filter((booking) => booking.stripe_checkout_session_id?.startsWith(`cs_${mode}_`));
+  const groups = new Map<string, typeof modeBookings>();
+  for (const booking of modeBookings) {
     const key = booking.group_reference || booking.reference;
     groups.set(key, [...(groups.get(key) ?? []), booking]);
   }
@@ -64,5 +70,5 @@ export async function GET() {
     };
   }).sort((a, b) => b.paidAt.localeCompare(a.paidAt));
 
-  return NextResponse.json({ receipts }, { headers: { "Cache-Control": "private, no-store" } });
+  return NextResponse.json({ receipts, mode }, { headers: { "Cache-Control": "private, no-store" } });
 }

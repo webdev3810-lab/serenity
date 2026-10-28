@@ -1437,6 +1437,17 @@
   opacity: 1;
 }
 
+/* Keep selected text visible throughout the public booking flow. */
+.public-site ::selection {
+  background: #3a6693;
+  color: #ffffff;
+}
+
+.public-site ::-moz-selection {
+  background: #3a6693;
+  color: #ffffff;
+}
+
 .public-site .field:hover,
 .public-site .field:focus {
   border-color: var(--public-green) !important;
@@ -1518,7 +1529,7 @@
 
 .public-site .booking-review-advantage p {
   color: var(--public-ink);
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
 }
 
 .public-site .booking-promotion-code-status.is-success {
@@ -1543,6 +1554,11 @@
 .public-site :is(a, button, input, select, textarea, summary):focus-visible {
   outline: 2px solid var(--public-green);
   outline-offset: 4px;
+}
+
+/* Guest fields already show focus with their border and shadow. */
+.public-site .booking-guest-form :is(input, select, textarea):focus-visible {
+  outline: none;
 }
 
 .public-site :is(button, input, select, textarea) {

@@ -82,6 +82,7 @@ function receiptPng(receipt: Receipt): Promise<Blob> {
 
 export function AdminReceipts() {
   const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [mode, setMode] = useState<"live" | "test" | "not configured">("not configured");
   const [selectedCode, setSelectedCode] = useState("");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -97,6 +98,7 @@ export function AdminReceipts() {
       if (!response.ok) throw new Error(body.error || "Could not load receipts.");
       const items = body.receipts as Receipt[];
       setReceipts(items);
+      setMode(body.mode);
       setSelectedCode((current) => items.some((receipt) => receipt.code === current) ? current : items[0]?.code ?? "");
       setError("");
     } catch (failure) {
@@ -144,7 +146,7 @@ export function AdminReceipts() {
 
   return <div className="space-y-6">
     <div className="flex flex-wrap items-start justify-between gap-4">
-      <div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--admin-muted)]">Paid bookings / AUD</p><h2 className="mt-1 text-3xl font-semibold">Receipts</h2><p className="mt-2 text-sm text-[var(--admin-muted)]">Proof of payment for confirmed direct and corporate bookings. Not a tax invoice.</p></div>
+      <div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--admin-muted)]">{mode === "live" ? "Live" : mode === "test" ? "Test" : "Stripe"} paid bookings / AUD</p><h2 className="mt-1 text-3xl font-semibold">Receipts</h2><p className="mt-2 text-sm text-[var(--admin-muted)]">Proof of payment for confirmed direct and corporate bookings. Not a tax invoice.</p></div>
       <button type="button" className="admin-button inline-flex items-center gap-2" onClick={() => void load()} disabled={loading}><RefreshCw size={16} /> Refresh</button>
     </div>
     {error && <p className="admin-notice is-error" role="alert">{error}</p>}

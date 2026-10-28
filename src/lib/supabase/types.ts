@@ -98,6 +98,7 @@ export type Database = {
           corporate_online_payment: boolean;
           gst_invoice_available: boolean;
           free_cancellation_days: number;
+          late_cancellation_fee: number;
           corporate_instructions: string;
           weekly_discount: number;
           monthly_discount: number;
@@ -219,6 +220,11 @@ export type Database = {
           property_id: string;
           check_in: string;
           free_cancellation_until: string | null;
+          late_cancellation_fee: number | null;
+          cancellation_fee_retained: number | null;
+          stripe_refund_id: string | null;
+          refund_amount: number | null;
+          refund_status: string | null;
           checkout: string;
           adults: number;
           children: number;

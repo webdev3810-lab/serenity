@@ -1165,8 +1165,57 @@ body:has(.corporate-editorial-page) .public-site > main,
   font-size: clamp(2.5rem, 4.2vw, 4.5rem);
 }
 
+.public-site .booking-flow-page .booking-guest-heading h1 {
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  line-height: 1.12;
+}
+
 .public-site .booking-flow-page h2 {
   font-size: clamp(1.75rem, 2.6vw, 2.75rem);
+}
+
+/* Keep the review cards rounded, but keep their inner dividers and photo edges straight. */
+.public-site .booking-review-property,
+.public-site .booking-review-property-media,
+.public-site .booking-review-property-media img,
+.public-site .booking-review-advantage,
+.public-site .booking-review-price-heading,
+.public-site .booking-review-price .booking-total,
+.public-site .booking-review-policy {
+  border-radius: 0 !important;
+}
+
+.public-site .booking-flow-page .booking-review-header h1 {
+  font-size: clamp(2.8rem, 4.7vw, 4.75rem);
+}
+
+.public-site .booking-flow-page .booking-review-property-copy h2 {
+  font-size: clamp(1.3rem, 8.5cqi, 3rem);
+}
+
+.public-site .booking-flow-page .booking-review-price h2 {
+  font-size: clamp(1.8rem, 2.6vw, 2.5rem);
+}
+
+@media (max-width: 640px) {
+  .public-site .booking-progress {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 1.5rem !important;
+  }
+
+  .public-site .booking-progress-step {
+    padding: 0.75rem;
+    font-size: 0.78rem;
+  }
+
+  .public-site .booking-flow-page .booking-review-header h1 {
+    font-size: clamp(2.5rem, 10vw, 3.5rem);
+    line-height: 0.98;
+  }
+
+  .public-site .booking-flow-page .booking-review-property-copy h2 {
+    font-size: clamp(1.3rem, 8.5cqi, 2.5rem);
+  }
 }
 
 @media (max-width: 760px) {

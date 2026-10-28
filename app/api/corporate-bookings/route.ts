@@ -24,6 +24,7 @@ const ACTIVE_BOOKING_STATUSES = ["pending_payment", "confirmed", "corporate", "c
 
 const corporateReference = () => `CORP-${new Date().getUTCFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 const partnerIdPattern = /^SER-(?:[A-F0-9]{12}|[A-F0-9]{20})$/;
+const stayPurposes = new Set(["Contractor project crew", "Employee relocation", "Business travel", "Training or event", "Other"]);
 const isIsoDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`)) && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
 
 const getRequestOrigin = (request: Request) => {
@@ -41,6 +42,8 @@ export async function POST(request: Request) {
     const propertySlugs = houses.map((house) => house.propertySlug);
     const customerId = String(body.customerId ?? "").trim().toUpperCase();
     const notes = String(body.notes ?? "").trim();
+    const purpose = String(body.purpose ?? "Contractor project crew").trim();
+    const purposeOther = String(body.purposeOther ?? "").trim();
     const idempotencyKey = String(request.headers.get("Idempotency-Key") ?? body.idempotencyKey ?? "").trim();
 
     if (!partnerIdPattern.test(customerId) || !houses.length || new Set(propertySlugs).size !== houses.length || houses.some((house) => !house.propertySlug || !isIsoDate(house.checkIn) || !isIsoDate(house.checkout))) {
@@ -52,6 +55,10 @@ export async function POST(request: Request) {
     if (idempotencyKey.length > 128 || notes.length > 1000) {
       return NextResponse.json({ error: "Please shorten one or more reservation fields." }, { status: 400 });
     }
+    if (!stayPurposes.has(purpose) || (purpose === "Other" && (!purposeOther || purposeOther.length > 160))) {
+      return NextResponse.json({ error: "Enter a valid stay purpose." }, { status: 400 });
+    }
+    const stayPurpose = purpose === "Other" ? purposeOther : purpose;
 
     const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
     if (isLocalContentPreview || !isSupabaseConfigured || !process.env.SUPABASE_SERVICE_ROLE_KEY || !stripeSecretKey || (stripeSecretKey.startsWith("sk_live_") && !process.env.STRIPE_WEBHOOK_SECRET?.startsWith("whsec_"))) {
@@ -136,6 +143,7 @@ export async function POST(request: Request) {
           abn: partner.abn,
           purchaseOrder: partner.purchase_order,
           invoiceRequested: partner.invoice_requested,
+          stayPurpose,
         },
         price_breakdown: price,
         total: price.total,

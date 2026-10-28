@@ -8,6 +8,7 @@ export type CorporateConfirmationHouse = {
   check_in: string;
   checkout: string;
   free_cancellation_until?: string | null;
+  late_cancellation_fee?: number | null;
   adults: number;
   total: number;
 };
@@ -90,7 +91,9 @@ export async function createCorporateConfirmationPdf({ reference, total, houses 
     const nameLines = wrap(house.home, bold, 12, contentWidth - 36);
     const stay = `${formatDateAu(house.check_in)} to ${formatDateAu(house.checkout)} | ${house.adults} guest${house.adults === 1 ? "" : "s"} | ${formatAud(Number(house.total))}`;
     const stayLines = wrap(stay, regular, 10, contentWidth - 36);
-    const rowHeight = 27 + nameLines.length * 17 + stayLines.length * 15 + 12;
+    const policy = house.free_cancellation_until ? `Free cancellation through ${formatDateAu(house.free_cancellation_until)}, 11:59 pm Melbourne time.${house.late_cancellation_fee == null ? "" : ` Afterward, up to ${formatAud(Number(house.late_cancellation_fee))} is retained and the rest refunded.`}` : "";
+    const policyLines = policy ? wrap(policy, regular, 8.5, contentWidth - 36) : [];
+    const rowHeight = 27 + nameLines.length * 17 + stayLines.length * 15 + policyLines.length * 12 + 12;
     if (y - rowHeight < 133) {
       ({ page, y } = addPage(true));
       sectionTitle();
@@ -99,6 +102,7 @@ export async function createCorporateConfirmationPdf({ reference, total, houses 
     let textY = y - 25;
     for (const line of nameLines) { page.drawText(line, { x: margin + 16, y: textY, font: bold, size: 12, color: navy }); textY -= 17; }
     for (const line of stayLines) { page.drawText(line, { x: margin + 16, y: textY - 2, font: regular, size: 10, color: navy }); textY -= 15; }
+    for (const line of policyLines) { page.drawText(line, { x: margin + 16, y: textY - 2, font: regular, size: 8.5, color: muted }); textY -= 12; }
     y -= rowHeight + 10;
   }
 

@@ -145,6 +145,7 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
     extraGuestThreshold: row.extra_guest_threshold,
     minimumStay: row.minimum_stay,
     freeCancellationDays: Number(row.free_cancellation_days ?? 7),
+    lateCancellationFee: Number(row.late_cancellation_fee ?? 25),
     maximumStay: Number(row.maximum_stay ?? 90),
     minimumGuests: Number(row.minimum_guests ?? 1),
     maximumAdults: Number(row.maximum_adults ?? row.max_guests),

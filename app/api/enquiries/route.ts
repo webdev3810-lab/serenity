@@ -3,6 +3,7 @@ import { isSupabaseConfigured } from "@/src/lib/supabase/config";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 import { datesInRange } from "@/src/lib/booking";
 import { acknowledgeCorporateEnquiry, notifyCorporateEnquiry } from "@/src/lib/transactionalEmail";
+import { normalizeAustralianMobile } from "@/src/lib/australianMobile";
 
 const enquiryReference = () => `ENQ-${new Date().getUTCFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 
@@ -16,7 +17,10 @@ export async function POST(request: Request) {
     const companyName = String(body.companyName ?? "").trim() || (isInsuranceQuestion ? "Private insurance enquiry" : "");
     const contactName = String(body.contactName ?? "").trim();
     const email = String(body.email ?? "").trim().toLowerCase();
-    const phone = String(body.phone ?? "").trim();
+    const rawPhone = String(body.phone ?? "").trim();
+    const normalizedPhone = normalizeAustralianMobile(rawPhone);
+    if (isShortEnquiry && rawPhone && !normalizedPhone) return NextResponse.json({ error: "Enter an Australian mobile number with 9 digits after +61, starting with 4." }, { status: 400 });
+    const phone = isShortEnquiry ? normalizedPhone ?? "" : rawPhone;
     const arrival = String(body.arrival ?? "");
     const departure = String(body.departure ?? "");
     const housesNeeded = Math.max(1, Number(body.housesNeeded ?? 1));

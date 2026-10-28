@@ -44,7 +44,7 @@ export const DEFAULT_GUEST_INFORMATION: GuestInformationContent = {
     { id: "cancellations", title: "Cancellation Policy", eyebrow: "Flexible, fair and transparent", items: [
       "Contact Serenity to request a cancellation or amendment.",
       "For direct bookings, free cancellation is available through 11:59 pm Melbourne time on the deadline shown before payment. The default is seven days before check-in and can vary by house.",
-      "Late cancellations, no-shows, or shortened stays may incur charges.",
+      "After the free cancellation deadline, the house's stated flat cancellation fee is retained and the remaining booking price is refunded. Your booking keeps the fee shown when you paid.",
       "Approved corporate or partner bookings may have separately agreed terms.",
       "Any applicable refund is returned to the original payment method.",
     ] },

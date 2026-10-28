@@ -5,6 +5,9 @@ import { getPublicPropertyBySlug, isLocalContentPreview } from "@/src/lib/supaba
 import { isSupabaseConfigured } from "@/src/lib/supabase/config";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 import { createCheckoutCancellationToken } from "@/src/lib/checkoutCancellation";
+import { normalizeAustralianMobile } from "@/src/lib/australianMobile";
+
+const stayPurposes = new Set(["", "Holiday", "Visiting family or friends", "Business travel", "Contractor project", "Employee relocation", "Temporary housing", "Other"]);
 
 const getRequestOrigin = (request: Request) => {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
@@ -29,17 +32,31 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { propertySlug, checkIn, checkout, guests: rawGuests, guestDetails, corporateDetails, notes } = body;
+    const { propertySlug, checkIn, checkout, guests: rawGuests, guestDetails, corporateDetails } = body;
     if (corporateDetails?.corporate === true || guestDetails?.corporate === true) {
       return NextResponse.json({ error: "Corporate bookings require a verified Partner ID. Please use the corporate bookings form." }, { status: 403 });
     }
+    const firstName = String(guestDetails?.firstName ?? "").trim();
+    const lastName = String(guestDetails?.lastName ?? "").trim();
     const email = String(guestDetails?.email ?? "").trim();
-    if (!propertySlug || !checkIn || !checkout || !email) {
-      return NextResponse.json({ error: "Property, dates, and guest email are required." }, { status: 400 });
+    const phone = normalizeAustralianMobile(String(guestDetails?.phone ?? ""));
+    const purpose = String(guestDetails?.purpose ?? "").trim();
+    const purposeOther = String(guestDetails?.purposeOther ?? "").trim();
+    const requests = String(guestDetails?.requests ?? "").trim();
+    if (!propertySlug || !checkIn || !checkout) {
+      return NextResponse.json({ error: "Property and stay dates are required." }, { status: 400 });
     }
-    if (!email.includes("@")) {
+    if (!firstName || !lastName || firstName.length > 100 || lastName.length > 100) {
+      return NextResponse.json({ error: "Enter your first and last name." }, { status: 400 });
+    }
+    if (!email || email.length > 254 || !/^\S+@\S+\.\S+$/.test(email)) {
       return NextResponse.json({ error: "Enter a valid guest email address." }, { status: 400 });
     }
+    if (!phone) return NextResponse.json({ error: "Enter an Australian mobile number with 9 digits after +61, starting with 4." }, { status: 400 });
+    if (!stayPurposes.has(purpose) || requests.length > 2000 || (purpose === "Other" && (!purposeOther || purposeOther.length > 160))) {
+      return NextResponse.json({ error: "Check the purpose of stay and notes." }, { status: 400 });
+    }
+    const cleanGuestDetails = { firstName, lastName, email, phone, purpose, purposeOther: purpose === "Other" ? purposeOther : "", requests, corporate: false };
 
     const property = await getPublicPropertyBySlug(propertySlug);
     if (!property) return NextResponse.json({ error: "Published property not found." }, { status: 404 });
@@ -108,7 +125,7 @@ export async function POST(request: Request) {
       children: guests.children,
       infants: guests.infants,
       pets: guests.pets,
-      guest_details: guestDetails,
+      guest_details: cleanGuestDetails,
       corporate_details: {},
       price_breakdown: price,
       total: price.total,
@@ -120,7 +137,7 @@ export async function POST(request: Request) {
       booking_status: "pending_payment",
       booking_type: "standard",
       booking_source: "website",
-      notes: notes ?? guestDetails.requests ?? "",
+      notes: requests,
     }).select("id, reference").single();
 
     if (error) {
@@ -134,7 +151,7 @@ export async function POST(request: Request) {
     const cancellationToken = createCheckoutCancellationToken(booking.id, reference, stripeSecretKey);
     const cancelUrl = `${origin}/booking/payment?payment=cancelled&reference=${encodeURIComponent(reference)}&token=${cancellationToken}`;
     const nightlyRateMetadata = price.nightlyRates.map((night) => `${night.date}:${night.nightlyPrice}${night.isOverride ? "*" : ""}`).join(",").slice(0, 450);
-    const guestName = `${String(guestDetails?.firstName ?? "").trim()} ${String(guestDetails?.lastName ?? "").trim()}`.trim();
+    const guestName = `${firstName} ${lastName}`;
     const companyName = String(corporateDetails?.companyName ?? "").trim();
     const metadata: Record<string, string> = {
       bookingId: String(booking.id),

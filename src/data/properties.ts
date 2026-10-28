@@ -63,6 +63,7 @@ export type Property = {
   extraGuestThreshold: number;
   minimumStay: number;
   freeCancellationDays: number;
+  lateCancellationFee: number;
   maximumStay: number;
   minimumGuests: number;
   maximumAdults: number;
@@ -174,6 +175,7 @@ const localPropertyLibrary: Property[] = [
     extraGuestThreshold: 4,
     minimumStay: 2,
     freeCancellationDays: 7,
+    lateCancellationFee: 25,
     maximumStay: 90,
     minimumGuests: 1,
     maximumAdults: 6,
@@ -295,6 +297,7 @@ const localPropertyLibrary: Property[] = [
     extraGuestThreshold: 6,
     minimumStay: 2,
     freeCancellationDays: 7,
+    lateCancellationFee: 25,
     maximumStay: 90,
     minimumGuests: 1,
     maximumAdults: 8,
@@ -454,6 +457,7 @@ const localPropertyLibrary: Property[] = [
     extraGuestThreshold: 5,
     minimumStay: 2,
     freeCancellationDays: 7,
+    lateCancellationFee: 25,
     maximumStay: 90,
     minimumGuests: 1,
     maximumAdults: 7,

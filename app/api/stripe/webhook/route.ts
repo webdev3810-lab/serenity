@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
-import { getStripeClient, markBookingCancelled, markBookingFailed, markBookingPaid, markBookingPaidFromPaymentIntent, markBookingRefunded, markCorporateGroupPaid, markCorporateGroupClosed } from "@/src/lib/stripe";
+import { getStripeClient, markBookingCancelled, markBookingFailed, markBookingPaid, markBookingPaidFromPaymentIntent, markBookingRefunded, markBookingRefundStatus, markCorporateGroupPaid, markCorporateGroupClosed } from "@/src/lib/stripe";
 import { describeStripeEvent } from "@/src/lib/stripeMonitoring";
 
 async function processStripeEvent(event: Stripe.Event) {
@@ -38,10 +38,21 @@ async function processStripeEvent(event: Stripe.Event) {
     // A declined attempt is not the end of Checkout: the guest can retry.
     case "payment_intent.payment_failed":
       break;
+    case "refund.created":
+    case "refund.updated":
+    case "refund.failed": {
+      const eventRefund = event.data.object as Stripe.Refund;
+      await markBookingRefundStatus(await getStripeClient().refunds.retrieve(eventRefund.id));
+      break;
+    }
     case "charge.refunded": {
       const charge = event.data.object as Stripe.Charge;
       const paymentIntentId = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id;
-      if (paymentIntentId && charge.amount_refunded >= charge.amount) await markBookingRefunded(paymentIntentId);
+      if (paymentIntentId) {
+        const refunds = await getStripeClient().refunds.list({ payment_intent: paymentIntentId, limit: 100 });
+        for (const refund of refunds.data) await markBookingRefundStatus(refund);
+        if (charge.amount_refunded >= charge.amount && refunds.data.length > 0 && refunds.data.every((refund) => refund.status === "succeeded") && refunds.data.some((refund) => !refund.metadata?.bookingId)) await markBookingRefunded(paymentIntentId);
+      }
       break;
     }
   }
@@ -51,6 +62,7 @@ const supportedTypes = new Set([
   "checkout.session.completed", "checkout.session.async_payment_succeeded",
   "checkout.session.async_payment_failed", "checkout.session.expired",
   "payment_intent.succeeded", "payment_intent.payment_failed", "charge.refunded",
+  "refund.created", "refund.updated", "refund.failed",
 ]);
 
 export async function POST(request: Request) {

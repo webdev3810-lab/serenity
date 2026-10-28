@@ -214,7 +214,7 @@ export async function sendCorporateBookingEmails(groupReference: string) {
   if (!process.env.RESEND_API_KEY || !sender()) return;
   const supabase = createSupabaseAdminClient();
   const { data: bookings, error } = await supabase.from("bookings")
-    .select("id, property_id, check_in, checkout, free_cancellation_until, adults, guest_details, total, currency, payment_status, booking_status, stripe_payment_intent_id, updated_at")
+    .select("id, property_id, check_in, checkout, free_cancellation_until, late_cancellation_fee, adults, guest_details, total, currency, payment_status, booking_status, stripe_payment_intent_id, updated_at")
     .eq("group_reference", groupReference)
     .order("reference", { ascending: true });
   if (error) throw error;
@@ -231,7 +231,7 @@ export async function sendCorporateBookingEmails(groupReference: string) {
   if (propertiesError) throw propertiesError;
   if (!properties || properties.length !== bookings.length) throw new Error("Corporate booking houses could not be loaded.");
   const houseNames = bookings.map((booking) => properties.find((property) => property.id === booking.property_id)?.name ?? "House");
-  const houseDetails = bookings.map((booking, index) => `${houseNames[index]} · ${formatDateAu(booking.check_in)} to ${formatDateAu(booking.checkout)} · ${booking.adults} guest${booking.adults === 1 ? "" : "s"} · ${formatAud(Number(booking.total))} · free cancellation deadline: ${booking.free_cancellation_until ? formatDateAu(booking.free_cancellation_until) : "see booking terms"}, 11:59 pm Melbourne time`);
+  const houseDetails = bookings.map((booking, index) => `${houseNames[index]} · ${formatDateAu(booking.check_in)} to ${formatDateAu(booking.checkout)} · ${booking.adults} guest${booking.adults === 1 ? "" : "s"} · ${formatAud(Number(booking.total))} · free cancellation deadline: ${booking.free_cancellation_until ? formatDateAu(booking.free_cancellation_until) : "see booking terms"}, 11:59 pm Melbourne time${booking.late_cancellation_fee == null ? "" : ` · after the deadline, a ${formatAud(Number(booking.late_cancellation_fee))} cancellation fee applies (capped at this house's booking price) and the rest is refunded`}`);
   const total = formatAud(bookings.reduce((sum, booking) => sum + Number(booking.total), 0));
   const contact = String(guest.contactName ?? guest.firstName ?? "there");
   const receipt = receiptCode(groupReference);
@@ -345,7 +345,7 @@ export async function sendBookingEmails(bookingId: string) {
   if (!process.env.RESEND_API_KEY || !sender()) return;
   const supabase = createSupabaseAdminClient();
   const { data: booking, error } = await supabase.from("bookings")
-    .select("id, reference, property_id, check_in, checkout, free_cancellation_until, guest_details, total, currency, stripe_payment_intent_id, updated_at")
+    .select("id, reference, property_id, check_in, checkout, free_cancellation_until, late_cancellation_fee, guest_details, total, currency, stripe_payment_intent_id, updated_at")
     .eq("id", bookingId).single();
   if (error) throw error;
   const guest = booking.guest_details && typeof booking.guest_details === "object" && !Array.isArray(booking.guest_details)
@@ -378,6 +378,7 @@ export async function sendBookingEmails(bookingId: string) {
       `Check-in: ${booking.check_in}`,
       `Checkout: ${booking.checkout}`,
       `Free cancellation deadline: ${booking.free_cancellation_until ? formatDateAu(booking.free_cancellation_until) : "See booking terms"}, 11:59 pm Melbourne time. Contact Serenity to cancel.`,
+      ...(booking.late_cancellation_fee == null ? [] : [`After the deadline, a ${formatAud(Number(booking.late_cancellation_fee))} cancellation fee applies and the remaining booking amount is refunded. The fee cannot exceed the booking price.`]),
       `Total paid: ${amount}`,
       `Stripe payment: ${paymentId}`,
       "",

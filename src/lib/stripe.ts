@@ -35,7 +35,7 @@ export async function markCorporateGroupPaid(session: Stripe.Checkout.Session) {
     .select("id, reference, group_reference, payment_status, booking_status");
   if (error) throw error;
   const { data: confirmed, error: confirmationError } = await supabase.from("bookings")
-    .select("id, reference, property_id, check_in, checkout, free_cancellation_until, adults, total, payment_status, booking_status")
+    .select("id, reference, property_id, check_in, checkout, free_cancellation_until, late_cancellation_fee, adults, total, payment_status, booking_status")
     .eq("group_reference", groupReference).eq("stripe_checkout_session_id", session.id);
   if (confirmationError) throw confirmationError;
   if (confirmed?.length !== bookings.length || confirmed.some((booking) => booking.payment_status !== "paid" || !["confirmed", "checked_in", "checked_out"].includes(booking.booking_status))) {
@@ -90,7 +90,7 @@ export async function markBookingPaid(session: Stripe.Checkout.Session) {
   const supabase = createSupabaseAdminClient();
   const { data: existing, error: readError } = await supabase
     .from("bookings")
-    .select("id, reference, payment_status, booking_status, stripe_payment_intent_id, stripe_checkout_session_id, currency, total, free_cancellation_until, promotion_redemption_id")
+    .select("id, reference, payment_status, booking_status, stripe_payment_intent_id, stripe_checkout_session_id, currency, total, free_cancellation_until, late_cancellation_fee, promotion_redemption_id")
     .eq("id", bookingId)
     .eq("reference", reference)
     .maybeSingle();
@@ -112,7 +112,7 @@ export async function markBookingPaid(session: Stripe.Checkout.Session) {
       .eq("reference", reference)
       .eq("payment_status", "pending")
       .eq("booking_status", "pending_payment")
-      .select("id, reference, payment_status, booking_status, stripe_payment_intent_id, stripe_checkout_session_id, currency, total, free_cancellation_until, promotion_redemption_id")
+      .select("id, reference, payment_status, booking_status, stripe_payment_intent_id, stripe_checkout_session_id, currency, total, free_cancellation_until, late_cancellation_fee, promotion_redemption_id")
       .maybeSingle();
     if (error) throw error;
     if (updatedBooking) {
@@ -124,7 +124,7 @@ export async function markBookingPaid(session: Stripe.Checkout.Session) {
       }
     } else {
       const { data: paidBooking, error: paidBookingError } = await supabase.from("bookings")
-        .select("id, reference, payment_status, booking_status, stripe_payment_intent_id, stripe_checkout_session_id, currency, total, free_cancellation_until, promotion_redemption_id")
+        .select("id, reference, payment_status, booking_status, stripe_payment_intent_id, stripe_checkout_session_id, currency, total, free_cancellation_until, late_cancellation_fee, promotion_redemption_id")
         .eq("id", bookingId).eq("reference", reference).single();
       if (paidBookingError) throw paidBookingError;
       bookingConfirmationState(paidBooking);
@@ -216,6 +216,27 @@ export async function markBookingFailed(reference: string) {
     const { error: releaseError } = await supabase.rpc("release_promotion_redemption", { p_booking_id: booking.id });
     if (releaseError) throw releaseError;
   }
+}
+
+export async function markBookingRefundStatus(refund: Stripe.Refund) {
+  const bookingId = refund.metadata?.bookingId;
+  const paymentIntentId = typeof refund.payment_intent === "string" ? refund.payment_intent : refund.payment_intent?.id;
+  if (!bookingId || !paymentIntentId) return;
+  const supabase = createSupabaseAdminClient();
+  const { data: booking, error: readError } = await supabase.from("bookings")
+    .select("id, total, payment_status, stripe_refund_id")
+    .eq("id", bookingId).eq("stripe_payment_intent_id", paymentIntentId).maybeSingle();
+  if (readError) throw readError;
+  if (!booking || (booking.stripe_refund_id && booking.stripe_refund_id !== refund.id)) return;
+  const completed = refund.status === "succeeded";
+  const full = refund.amount === Math.round(Number(booking.total) * 100);
+  const { error } = await supabase.from("bookings").update({
+    stripe_refund_id: refund.id,
+    refund_amount: refund.amount / 100,
+    refund_status: refund.status,
+    ...(completed ? { payment_status: full ? "refunded" : "partially_refunded" } : {}),
+  }).eq("id", bookingId);
+  if (error) throw error;
 }
 
 export async function markBookingRefunded(paymentIntentId: string) {

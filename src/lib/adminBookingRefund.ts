@@ -13,7 +13,7 @@ type PaidBooking = {
 
 const cents = (amount: number) => Math.round(Number(amount) * 100);
 
-export async function refundCancelledBooking(booking: PaidBooking) {
+export async function refundCancelledBooking(booking: PaidBooking, amount: number) {
   if (!booking.stripe_checkout_session_id || !booking.stripe_payment_intent_id || booking.currency.toUpperCase() !== "AUD") {
     throw new Error("This paid booking has no verified AUD Stripe payment. Review it in Stripe before cancelling.");
   }
@@ -42,8 +42,7 @@ export async function refundCancelledBooking(booking: PaidBooking) {
     throw new Error("The Stripe charge does not match the booking total. No refund was made.");
   }
 
-  const amount = cents(booking.total);
-  if (amount <= 0 || existingRefunds.has_more) throw new Error("The refund amount needs review in Stripe. No refund was made.");
+  if (!Number.isSafeInteger(amount) || amount <= 0 || amount > cents(booking.total) || existingRefunds.has_more) throw new Error("The refund amount needs review in Stripe. No refund was made.");
   const activeRefunds = existingRefunds.data.filter((refund) => !["failed", "canceled"].includes(refund.status ?? ""));
   const priorRefund = activeRefunds.find((refund) => refund.metadata?.bookingId === booking.id);
   if (priorRefund) {

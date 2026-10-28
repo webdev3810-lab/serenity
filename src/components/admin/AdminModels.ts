@@ -72,6 +72,7 @@ export const emptyProperty = (): Row => ({
   corporate_online_payment: true,
   gst_invoice_available: true,
   free_cancellation_days: 7,
+  late_cancellation_fee: 25,
   corporate_instructions: "Corporate bookings are welcome. Contact Serenity for multi-house availability and project-team arrangements.",
   weekly_discount: 0,
   monthly_discount: 0,

@@ -113,6 +113,7 @@ export default function CorporateConfirmationPage() {
               <strong className="block text-[#002844]">{house.home}</strong>
               <span>{formatDateAu(house.check_in)} to {formatDateAu(house.checkout)} · {house.adults} guest{house.adults === 1 ? "" : "s"} · {formatAud(Number(house.total))}</span>
               {house.free_cancellation_until && <span className="mt-1 block text-xs text-slate-600">Free cancellation deadline: {formatDateAu(house.free_cancellation_until)}, 11:59 pm Melbourne time. Contact Serenity to cancel.</span>}
+              {house.late_cancellation_fee != null && <span className="mt-1 block text-xs text-slate-600">After that deadline, a fee of up to {formatAud(Number(house.late_cancellation_fee))} applies and the rest is refunded.</span>}
             </li>)}</ul>
           </div>}
           {total !== null && <p className="mt-4 font-semibold">Total paid: {formatAud(total)}</p>}

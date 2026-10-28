@@ -82,12 +82,14 @@ export function AdminPayments() {
   const { visible: visibleBookings, pagination: bookingPagination } = useAdminPagination(bookings);
   const { visible: visibleEvents, pagination: eventPagination } = useAdminPagination(events);
   const paid = bookings.filter((booking) => booking.payment_status === "paid");
+  const paidAud = paid.filter((booking) => booking.currency.toUpperCase() === "AUD");
+  const modeLabel = data?.mode === "live" ? "Live" : data?.mode === "test" ? "Test" : "Stripe";
   const declined = events.filter((event) => event.outcome === "declined").length;
   const failedDeliveries = events.filter((event) => event.processing_status === "failed").length;
 
   return <div className="space-y-6">
     <div className="flex flex-wrap items-start justify-between gap-4">
-      <div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--admin-muted)]">Stripe / AUD</p><h2 className="mt-1 text-3xl font-semibold">Payments &amp; webhook activity</h2><p className="mt-2 text-sm text-[var(--admin-muted)]">Latest 100 Stripe bookings and verified webhook events. Refreshes every 30 seconds while this tab is open.</p></div>
+      <div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--admin-muted)]">Stripe / AUD</p><h2 className="mt-1 text-3xl font-semibold">Payments &amp; webhook activity</h2><p className="mt-2 text-sm text-[var(--admin-muted)]">Latest 100 {data?.mode === "live" ? "live" : data?.mode === "test" ? "test" : "Stripe"} bookings and verified webhook events. Totals use this mode only. Refreshes every 30 seconds while this tab is open.</p></div>
       <button type="button" className="admin-button inline-flex min-h-11 items-center gap-2" onClick={() => void load()}><RefreshCw size={16} /> Refresh</button>
     </div>
     {error && <div className="admin-notice is-error" role="alert">{error}</div>}
@@ -100,8 +102,8 @@ export function AdminPayments() {
     </div>
     <div className="grid gap-3 sm:grid-cols-4">
       {[
-        ["Paid bookings", String(paid.length)],
-        ["Paid total", money(paid.reduce((sum, booking) => sum + Number(booking.total), 0))],
+        [`${modeLabel} paid bookings`, String(paid.length)],
+        [`${modeLabel} paid total (latest 100)`, money(paidAud.reduce((sum, booking) => sum + Number(booking.total), 0))],
         ["Declined attempts", String(declined)],
         ["Webhook errors", String(failedDeliveries)],
       ].map(([label, value]) => <div key={label} className="admin-card p-5"><p className="text-xs font-semibold uppercase tracking-wide text-[var(--admin-muted)]">{label}</p><strong className="mt-2 block text-2xl">{value}</strong></div>)}
@@ -110,7 +112,7 @@ export function AdminPayments() {
       <h3 id="stripe-bookings-heading" className="text-xl font-semibold">Checkout transactions</h3>
       <p className="mt-1 text-sm text-[var(--admin-muted)]">Booking status is the app’s current record. Stripe links open the matching payment in your dashboard.</p>
       <table className="mt-4 w-full min-w-[800px] text-left text-sm"><thead><tr className="border-b border-[var(--admin-border)] text-[var(--admin-muted)]"><th className="p-3">Created</th><th className="p-3">Booking</th><th className="p-3">Amount</th><th className="p-3">Payment</th><th className="p-3">Reservation</th><th className="p-3">Stripe</th></tr></thead><tbody>{visibleBookings.map((booking) => <tr key={booking.id} className="border-b border-[var(--admin-border)] last:border-0"><td className="p-3 whitespace-nowrap">{dateTime(booking.created_at)}</td><td className="p-3 font-semibold">{booking.reference}</td><td className="p-3 whitespace-nowrap">{booking.currency === "AUD" ? money(Number(booking.total)) : `${booking.total} ${booking.currency}`}</td><td className="p-3"><Status value={booking.payment_status} /></td><td className="p-3"><Status value={booking.booking_status} /></td><td className="p-3">{booking.stripe_payment_intent_id ? <a className="inline-flex items-center gap-1 underline" href={paymentUrl(booking.stripe_payment_intent_id, data?.mode === "live")} target="_blank" rel="noopener noreferrer">Payment <ArrowUpRight size={14} /></a> : <span className="text-[var(--admin-muted)]">Awaiting payment</span>}</td></tr>)}</tbody></table>
-      {!bookings.length && <p className="p-5 text-center text-sm text-[var(--admin-muted)]">No Stripe checkouts recorded yet.</p>}
+      {!bookings.length && <p className="p-5 text-center text-sm text-[var(--admin-muted)]">No {data?.mode === "live" ? "live" : data?.mode === "test" ? "test" : "Stripe"} checkouts recorded yet.</p>}
       {bookingPagination}
     </section>
     <section className="admin-card overflow-x-auto p-4 sm:p-6" aria-labelledby="stripe-events-heading">

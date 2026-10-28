@@ -113,7 +113,8 @@ export function validatePropertyContent(payload: CmsPayload) {
   if (Number(payload.maximum_adults) > Number(payload.max_guests) || Number(payload.maximum_children) > Number(payload.max_guests)) errors.push("Adult and child limits cannot exceed total staying guest capacity.");
   if (Number(payload.maximum_adults) + Number(payload.maximum_children) < Number(payload.minimum_guests)) errors.push("Allowed adults and children must accommodate the minimum guest count.");
   for (const key of ["weekly_discount", "monthly_discount"]) if (payload[key] !== undefined && (!Number.isFinite(Number(payload[key])) || Number(payload[key]) < 0 || Number(payload[key]) > 100)) errors.push(key.replaceAll("_", " ") + " must be between 0 and 100%.");
-  for (const key of ["nightly_price", "extra_guest_fee", "pet_fee", "cleaning_fee"]) if (payload[key] !== undefined && (!Number.isFinite(Number(payload[key])) || Number(payload[key]) < 0)) errors.push(key.replaceAll("_", " ") + " must be zero or more.");
+  for (const key of ["nightly_price", "extra_guest_fee", "pet_fee", "cleaning_fee", "late_cancellation_fee"]) if (payload[key] !== undefined && (!Number.isFinite(Number(payload[key])) || Number(payload[key]) < 0)) errors.push(key.replaceAll("_", " ") + " must be zero or more.");
+  if (payload.late_cancellation_fee !== undefined && (!Number.isFinite(Number(payload.late_cancellation_fee)) || Number(payload.late_cancellation_fee) > 100000 || Math.abs(Math.round(Number(payload.late_cancellation_fee) * 100) - Number(payload.late_cancellation_fee) * 100) > 0.000001)) errors.push("Late cancellation fee must be an AUD amount with no more than two decimal places.");
   if (payload.date_prices !== undefined) {
     if (!Array.isArray(payload.date_prices)) errors.push("Nightly overrides must be a list.");
     else {

@@ -1,7 +1,7 @@
 "use client";
 
 import { addDays, formatAud, todayIso } from "@/src/lib/booking";
-import { isWithinFreeCancellation } from "@/src/lib/cancellationPolicy";
+import { cancellationRefundPreview } from "@/src/lib/cancellationPolicy";
 import { isAppManagedBookingSource } from "@/src/lib/booking-source";
 import { AdminDialog, useAdminWorkspace, useDirtyGuard } from "@/src/components/admin/AdminUI";
 import type { Row } from "@/src/components/admin/AdminModels";
@@ -412,10 +412,12 @@ function CalendarBookingEditor({ booking, busy, onDirtyChange, onSave }: {
     event.preventDefault();
     if (bookingStatus === "cancelled" && bookingStatus !== booking.booking_status && !cancellationReason.trim()) return;
     if (bookingStatus === "cancelled" && bookingStatus !== booking.booking_status) {
-      const automaticRefund = stripeManaged && paymentStatus === "paid" && isWithinFreeCancellation(String(booking.free_cancellation_until ?? ""));
+      const fee = booking.late_cancellation_fee == null ? null : Number(booking.late_cancellation_fee);
+      const preview = stripeManaged && paymentStatus === "paid" ? cancellationRefundPreview(Number(booking.total ?? 0), String(booking.free_cancellation_until ?? ""), fee) : null;
+      const automaticRefund = Boolean(preview && preview.refundCents > 0);
       const description = automaticRefund
-        ? `This cancels ${String(booking.reference ?? "the booking")}, frees its dates, and automatically refunds ${formatAud(Number(booking.total ?? 0))} through Stripe. If this is one house in a corporate booking, the other houses stay booked. This cannot be undone.`
-        : `This cancels ${String(booking.reference ?? "the booking")} and frees its dates. ${paymentStatus === "paid" ? "No automatic refund will be made. Review this payment separately." : "No payment will be refunded."}`;
+        ? `This cancels ${String(booking.reference ?? "the booking")}, frees its dates, and refunds ${formatAud(preview!.refundCents / 100)} through Stripe. ${preview!.retainedCents ? `${formatAud(preview!.retainedCents / 100)} is retained as the late cancellation fee.` : "The original Stripe processing fee remains your cost."} If this is one house in a corporate booking, the other houses stay booked.`
+        : `This cancels ${String(booking.reference ?? "the booking")} and frees its dates. ${preview ? `The ${formatAud(preview.retainedCents / 100)} cancellation fee covers the booking; no refund is due.` : paymentStatus === "paid" ? "This booking has its original cancellation terms. Review any refund separately." : "No payment will be refunded."}`;
       if (!await confirm({ title: automaticRefund ? "Cancel and refund booking?" : "Cancel booking?", description, confirmLabel: automaticRefund ? "Cancel and refund" : "Cancel booking", destructive: true })) return;
     }
     if (!stripeManaged && paymentStatus !== booking.payment_status && !await confirm({ title: "Change payment record?", description: "Only set payment to paid when you have verified receipt outside Stripe. This action does not charge the guest.", confirmLabel: "Save payment status" })) return;
@@ -424,7 +426,7 @@ function CalendarBookingEditor({ booking, busy, onDirtyChange, onSave }: {
   return <form className="space-y-4 border-t border-[var(--admin-border)] pt-5" onSubmit={(event) => void save(event)}>
     <div><h4 className="text-lg font-semibold">Manage booking</h4><p className="mt-1 text-sm text-[var(--admin-muted)]">{String(guest.contactName ?? [guest.firstName, guest.lastName].filter(Boolean).join(" ") ?? "Guest")} · {String(guest.email ?? "No email")}</p><p className="mt-1 text-sm text-[var(--admin-muted)]">Total {formatAud(Number(booking.total ?? 0))} · {String(booking.booking_source ?? "website")}</p></div>
     <div className="grid gap-3 sm:grid-cols-2"><label className="text-sm font-medium">Booking status<select className="admin-field mt-1" value={bookingStatus} onChange={(event) => setBookingStatus(event.target.value)}>{["pending_payment", "confirmed", "corporate", "cancelled", "checked_in", "checked_out", "expired"].map((value) => <option key={value} value={value}>{value.replaceAll("_", " ")}</option>)}</select></label><label className="text-sm font-medium">Payment status<select className="admin-field mt-1" value={paymentStatus} disabled={stripeManaged} onChange={(event) => setPaymentStatus(event.target.value)}>{["pending", "paid", "failed", "refunded"].map((value) => <option key={value} value={value}>{value}</option>)}</select></label></div>
-    {stripeManaged && <p className="text-xs text-[var(--admin-muted)]">Paid Stripe bookings are automatically refunded only within their saved free cancellation window. For a corporate booking, only this house’s amount is refunded. Review later refunds in Payments.</p>}
+    {stripeManaged && <p className="text-xs text-[var(--admin-muted)]">Paid Stripe bookings receive a full refund within their saved free cancellation window. Afterward, the saved house fee is retained and the rest refunded. For a corporate booking, this applies only to this house.</p>}
     {booking.booking_source === "admin" && !stripeManaged && paymentStatus === "pending" && <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface-alt)] p-4"><strong className="text-sm">Offline payment pending</strong><p className="mt-1 text-sm text-[var(--admin-muted)]">Dates are already reserved. Record payment only after receiving it in person or by bank transfer.</p><button type="button" className="admin-button mt-3" disabled={busy || dirty} onClick={() => void recordOfflinePayment()}>Mark as paid</button>{dirty && <p className="mt-2 text-xs text-[var(--admin-muted)]">Save or discard other edits first.</p>}</div>}
     <label className="block text-sm font-medium">Internal notes<textarea className="admin-field mt-1 min-h-28" maxLength={4000} value={internalNotes} onChange={(event) => setInternalNotes(event.target.value)} /></label>
     {bookingStatus === "cancelled" && <label className="block text-sm font-medium">Cancellation reason<input className="admin-field mt-1" maxLength={500} value={cancellationReason} onChange={(event) => setCancellationReason(event.target.value)} required={bookingStatus !== booking.booking_status} placeholder="Required for the audit trail" /></label>}

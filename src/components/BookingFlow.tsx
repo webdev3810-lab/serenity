@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, CreditCard, Download, Image as ImageIcon, Loader2, ShieldCheck, Lock } from "lucide-react";
+import { CheckCircle2, ChevronDown, CreditCard, Download, Image as ImageIcon, Loader2, ShieldCheck, Lock } from "lucide-react";
 import type { Property } from "@/src/data/properties";
 import { useBooking } from "@/src/context/BookingContext";
 import { calculatePrice, formatAud, formatDateAu, nightsBetween, reservationCode } from "@/src/lib/booking";
@@ -12,7 +12,8 @@ import { receiptCode } from "@/src/lib/paymentReceipt";
 import { FormInput, TextArea } from "@/src/components/UI";
 import { PriceBreakdownView } from "@/src/components/BookingWidgets";
 import ScrollWipeText from "@/src/components/homepage/ScrollWipeText";
-import { freeCancellationText } from "@/src/lib/cancellationPolicy";
+import { cancellationDeadline, freeCancellationText, isWithinFreeCancellation } from "@/src/lib/cancellationPolicy";
+import { australianMobileLocalDigits, formatAustralianMobileLocal, normalizeAustralianMobile } from "@/src/lib/australianMobile";
 
 const steps = ["Review stay", "Guest details", "Stripe payment", "Confirmation"];
 
@@ -58,6 +59,16 @@ export function ReviewBookingPage() {
   const property = useCurrentProperty();
   if (!property || !booking.checkIn || !booking.checkout) return <MissingBooking />;
   const nights = nightsBetween(booking.checkIn, booking.checkout);
+  const cancellationDate = cancellationDeadline(booking.checkIn, property.freeCancellationDays);
+  const freeCancellationAvailable = isWithinFreeCancellation(cancellationDate);
+  const guestCount = booking.guests.adults + booking.guests.children;
+  const guestDetails = [
+    `${guestCount} guest${guestCount === 1 ? "" : "s"}`,
+    `${booking.guests.adults} adult${booking.guests.adults === 1 ? "" : "s"}`,
+    booking.guests.children ? `${booking.guests.children} child${booking.guests.children === 1 ? "" : "ren"}` : "",
+    booking.guests.infants ? `${booking.guests.infants} infant${booking.guests.infants === 1 ? "" : "s"}` : "",
+    booking.guests.pets ? `${booking.guests.pets} pet${booking.guests.pets === 1 ? "" : "s"}` : "",
+  ].filter(Boolean).join(" · ");
 
   return (
     <BookingFrame active={0}>
@@ -70,7 +81,7 @@ export function ReviewBookingPage() {
 
           <article className="booking-review-property">
             <div className="booking-review-property-media">
-              {property.featuredImage ? <Image src={property.featuredImage} alt={`${property.name} exterior`} width={960} height={720} sizes="(max-width: 720px) 100vw, 300px" /> : <div className="booking-review-property-placeholder" aria-label="Property photo not available" />}
+              {property.featuredImage ? <Image src={property.featuredImage} alt={`${property.name} exterior`} width={960} height={720} sizes="(max-width: 640px) calc(100vw - 4rem), (max-width: 960px) 42vw, 28vw" /> : <div className="booking-review-property-placeholder" aria-label="Property photo not available" />}
             </div>
             <div className="booking-review-property-copy">
               <span className="booking-review-property-type">{property.propertyType}</span>
@@ -79,7 +90,7 @@ export function ReviewBookingPage() {
               <dl className="booking-review-stay-facts">
                 <div>
                   <dt>Dates</dt>
-                  <dd>{formatDateAu(booking.checkIn)} — {formatDateAu(booking.checkout)}</dd>
+                  <dd className="booking-review-dates"><time dateTime={booking.checkIn}>{formatDateAu(booking.checkIn)}</time><span>to</span><time dateTime={booking.checkout}>{formatDateAu(booking.checkout)}</time></dd>
                 </div>
                 <div>
                   <dt>Length</dt>
@@ -87,33 +98,36 @@ export function ReviewBookingPage() {
                 </div>
                 <div>
                   <dt>Guests</dt>
-                  <dd>{booking.guests.adults + booking.guests.children} guests · {booking.guests.adults} adults · {booking.guests.children} children · {booking.guests.infants} infants · {booking.guests.pets} pets</dd>
+                  <dd>{guestDetails}</dd>
                 </div>
               </dl>
             </div>
           </article>
 
           <div className="booking-review-advantage">
-            <p>Direct booking advantage</p>
-            <span>No customer account registration required. Your stay dates are held temporarily during checkout. Exact address instructions are sent upon confirmation.</span>
-          </div>
-
-          <div className="booking-review-actions">
-            <Link className="btn-outline-dark" href={`/properties/${property.slug}`}>
-              Edit Dates or Guests
-            </Link>
-            <Link className="btn-primary" href="/booking/guest-details">
-              Continue to Guest Details →
-            </Link>
+            <CheckCircle2 size={20} aria-hidden="true" />
+            <div><p>Book direct with ease</p><span>No account needed. Your dates are held during checkout, and address details arrive with your confirmation.</span></div>
           </div>
         </section>
 
         <aside className="booking-review-price">
-          <span className="booking-review-kicker">Your total</span>
-          <h2>Price summary <small>AUD</small></h2>
+          <div className="booking-review-price-heading"><div><span className="booking-review-kicker">Your total</span><h2>Price summary</h2></div><span className="booking-review-currency">AUD</span></div>
           <PriceBreakdownView property={property} checkIn={booking.checkIn} checkout={booking.checkout} guests={booking.guests} />
-          <p className="mt-5 rounded-xl border border-[#b9cbd7] bg-[#f3f8fb] p-4 text-sm leading-relaxed text-[#002844]"><strong>{freeCancellationText(booking.checkIn, property.freeCancellationDays)}</strong> Contact Serenity to request cancellation. After this deadline, refund requests are reviewed.</p>
+          <section className="booking-review-policy" aria-label="Cancellation policy">
+            <div className="booking-review-policy-heading"><ShieldCheck size={19} aria-hidden="true" /><h3>Cancellation policy</h3></div>
+            <p className="booking-review-policy-deadline">{freeCancellationAvailable ? "Free cancellation until" : "Free cancellation ended on"} <strong>{formatDateAu(cancellationDate)}</strong> at 11:59 pm Melbourne time.</p>
+            <p>After the deadline, a {formatAud(property.lateCancellationFee)} fee applies. The rest is refunded; the fee cannot exceed the booking price.</p>
+            <p>Contact Serenity to request cancellation.</p>
+          </section>
         </aside>
+        <div className="booking-review-actions">
+          <Link className="btn-outline-dark" href={`/properties/${property.slug}`}>
+            Edit dates or guests
+          </Link>
+          <Link className="btn-primary" href="/booking/guest-details">
+            Continue to guest details <span aria-hidden="true">→</span>
+          </Link>
+        </div>
       </div>
     </BookingFrame>
   );
@@ -124,56 +138,87 @@ export function GuestDetailsPage() {
   const { booking, setBooking } = useBooking();
   const property = useCurrentProperty();
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [form, setForm] = useState<Record<string, string>>({
-    firstName: "", lastName: "", email: "", phone: "", country: "Australia", address: "", city: "", state: "", postcode: "", arrival: "", purpose: "Holiday", requests: "",
-    companyName: "", businessContact: "", businessEmail: "", businessPhone: "", billingAddress: "", abn: "", po: "", employees: "",
-    ...Object.fromEntries(Object.entries(booking.guestDetails ?? {}).map(([k, v]) => [k, String(v)])),
-  });
+  const [form, setForm] = useState<Record<string, string>>(() => ({
+    firstName: String(booking.guestDetails?.firstName ?? ""),
+    lastName: String(booking.guestDetails?.lastName ?? ""),
+    email: String(booking.guestDetails?.email ?? ""),
+    phone: australianMobileLocalDigits(String(booking.guestDetails?.phone ?? "")),
+    purpose: String(booking.guestDetails?.purpose ?? ""),
+    purposeOther: String(booking.guestDetails?.purposeOther ?? ""),
+    requests: String(booking.guestDetails?.requests ?? ""),
+  }));
 
   if (!property || !booking.checkIn || !booking.checkout) return <MissingBooking />;
 
-  const update = (key: string, value: string) => setForm((current) => ({ ...current, [key]: value }));
+  const update = (key: string, value: string) => {
+    setForm((current) => ({ ...current, [key]: value }));
+    setErrors((current) => current[key] ? { ...current, [key]: "" } : current);
+  };
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    const required = ["firstName", "lastName", "email", "phone", "country", "address", "city", "state", "postcode", "arrival", "purpose"];
-    const nextErrors = Object.fromEntries(required.filter((key) => !form[key]).map((key) => [key, "Required"]));
-    if (!form.email.includes("@")) nextErrors.email = "Enter a valid email address.";
+    const required = ["firstName", "lastName", "email", "phone"];
+    const nextErrors = Object.fromEntries(required.filter((key) => !form[key]?.trim()).map((key) => [key, "Required"]));
+    if (form.email && !/^\S+@\S+\.\S+$/.test(form.email.trim())) nextErrors.email = "Enter a valid email address.";
+    const phone = normalizeAustralianMobile(form.phone);
+    if (form.phone && !phone) nextErrors.phone = "Enter 9 digits starting with 4.";
+    if (form.purpose === "Other" && !form.purposeOther.trim()) nextErrors.purposeOther = "Tell us your purpose of stay.";
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
-    setBooking({ guestDetails: { ...form, corporate: false } });
+    setBooking({ guestDetails: {
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      email: form.email.trim(),
+      phone: phone!,
+      purpose: form.purpose,
+      purposeOther: form.purpose === "Other" ? form.purposeOther.trim() : "",
+      requests: form.requests.trim(),
+      corporate: false,
+    } });
     router.push("/booking/payment");
   };
 
   return (
     <BookingFrame active={1}>
-      <form onSubmit={submit} className="card p-6 bg-white max-w-4xl mx-auto space-y-6">
-        <div>
-          <span className="eyebrow">Guest Information</span>
-          <ScrollWipeText as="h1" className="text-3xl font-extrabold text-stone-900 mt-1">Enter Guest Contact Details</ScrollWipeText>
-          <p className="text-xs text-stone-500 mt-1">You are booking as a guest. No password or customer account creation needed.</p>
-        </div>
+      <form onSubmit={submit} noValidate className="booking-guest-form card bg-white max-w-4xl mx-auto">
+        <header className="booking-guest-heading">
+          <span className="eyebrow">Guest information</span>
+          <h1>Your details</h1>
+          <p>No account needed. We’ll email your booking confirmation to you.</p>
+        </header>
 
-        <div className="grid gap-5 md:grid-cols-2">
-          {["firstName", "lastName", "email", "phone", "country", "address", "city", "state", "postcode", "arrival"].map((key) => (
-            <FormInput key={key} id={key} label={labelize(key)} value={form[key]} error={errors[key]} onChange={(e) => update(key, e.target.value)} />
-          ))}
-          
-          <label className="block text-xs font-bold text-stone-900">
-            Purpose of stay
-            <select className="field mt-1 text-sm font-medium" value={form.purpose} onChange={(e) => update("purpose", e.target.value)}>
-              {["Holiday", "Visiting family or friends", "Business travel", "Contractor project", "Employee relocation", "Temporary housing", "Other"].map((item) => (
-                <option key={item}>{item}</option>
-              ))}
-            </select>
+        <div className="booking-guest-fields">
+          <FormInput id="firstName" label="First name *" placeholder="Your first name" autoComplete="given-name" required maxLength={100} value={form.firstName} error={errors.firstName} onChange={(e) => update("firstName", e.target.value)} />
+          <FormInput id="lastName" label="Last name *" placeholder="Your last name" autoComplete="family-name" required maxLength={100} value={form.lastName} error={errors.lastName} onChange={(e) => update("lastName", e.target.value)} />
+          <FormInput id="email" label="Email *" type="email" placeholder="you@example.com" autoComplete="email" required maxLength={254} value={form.email} error={errors.email} onChange={(e) => update("email", e.target.value)} />
+          <label className="block text-sm font-bold text-stone-900" htmlFor="phone">
+            Australian mobile number *
+            <span className="booking-guest-phone">
+              <span className="booking-guest-phone-prefix" aria-hidden="true">+61</span>
+              <input id="phone" type="tel" inputMode="numeric" autoComplete="tel-national" required placeholder="4XX XXX XXX" value={formatAustralianMobileLocal(form.phone)} aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? "phone-error" : "phone-hint"} onChange={(e) => update("phone", australianMobileLocalDigits(e.target.value))} />
+            </span>
+            {errors.phone ? <span id="phone-error" className="mt-1 block text-sm font-semibold text-red-700">{errors.phone}</span> : <span id="phone-hint" className="booking-guest-hint">Enter 9 digits after +61.</span>}
           </label>
 
-          <TextArea id="requests" label="Special Requests or Notes" value={form.requests} onChange={(e) => update("requests", e.target.value)} />
+          <div className="booking-guest-purpose-row">
+            <label className="block text-sm font-bold text-stone-900" htmlFor="purpose">
+              Purpose of stay <span className="booking-guest-optional">(optional)</span>
+              <span className="booking-guest-select">
+                <select id="purpose" className="field text-base font-medium" value={form.purpose} onChange={(e) => update("purpose", e.target.value)}>
+                  <option value="">Choose a purpose</option>
+                  {["Holiday", "Visiting family or friends", "Business travel", "Contractor project", "Employee relocation", "Temporary housing", "Other"].map((item) => <option key={item} value={item}>{item}</option>)}
+                </select>
+                <ChevronDown size={20} strokeWidth={2} aria-hidden="true" />
+              </span>
+            </label>
+            {form.purpose === "Other" && <FormInput id="purposeOther" label="Tell us your purpose *" placeholder="Describe your stay" required maxLength={160} value={form.purposeOther} error={errors.purposeOther} onChange={(e) => update("purposeOther", e.target.value)} />}
+          </div>
+          <div className="booking-guest-full-width">
+            <TextArea id="requests" label="Special requests or notes (optional)" placeholder="Anything we should know before your stay?" maxLength={2000} value={form.requests} onChange={(e) => update("requests", e.target.value)} />
+          </div>
         </div>
 
-        <div className="rounded-none border border-stone-200 bg-white p-5 text-sm text-stone-700">
-          Booking for a company? Corporate reservations require a Partner ID. <Link href="/corporate-stays#corporate-booking" className="font-semibold underline text-[#002844]">Make a corporate booking</Link> or send an enquiry to request an ID.
-        </div>
+        <p className="booking-guest-corporate">Booking for a company? <Link href="/corporate-stays#corporate-booking">Make a corporate booking</Link>.</p>
 
         <button type="submit" className="btn-primary w-full justify-center text-base">
           Continue to Stripe Payment →
@@ -228,7 +273,7 @@ export function PaymentPage() {
       const response = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ propertySlug: property.slug, checkIn: booking.checkIn, checkout: booking.checkout, guests: booking.guests, guestDetails: { ...booking.guestDetails, corporate: false }, notes: booking.guestDetails?.requests }),
+        body: JSON.stringify({ propertySlug: property.slug, checkIn: booking.checkIn, checkout: booking.checkout, guests: booking.guests, guestDetails: { ...booking.guestDetails, corporate: false } }),
       });
       const result = await response.json();
       if (!response.ok || !result.checkoutUrl) throw new Error(result.error || "Could not start secure checkout.");
@@ -280,7 +325,7 @@ export function PaymentPage() {
           </div>
           <div className="pt-2">
             <PriceBreakdownView property={property} checkIn={booking.checkIn} checkout={booking.checkout} guests={booking.guests} />
-            <p className="mt-4 rounded-xl border border-[#b9cbd7] bg-[#f3f8fb] p-3 text-sm leading-relaxed text-[#002844]"><strong>{freeCancellationText(booking.checkIn!, property.freeCancellationDays)}</strong> Contact Serenity to cancel. Later refund requests are reviewed.</p>
+            <p className="mt-4 rounded-xl border border-[#b9cbd7] bg-[#f3f8fb] p-3 text-sm leading-relaxed text-[#002844]"><strong>{freeCancellationText(booking.checkIn!, property.freeCancellationDays, property.lateCancellationFee)}</strong> Contact Serenity to cancel.</p>
           </div>
         </aside>
       </div>
@@ -299,6 +344,7 @@ export function ConfirmationPage() {
   const [verifiedTotal, setVerifiedTotal] = useState<number | null>(null);
   const [verifiedEmail, setVerifiedEmail] = useState("");
   const [verifiedCancellationDeadline, setVerifiedCancellationDeadline] = useState("");
+  const [verifiedLateCancellationFee, setVerifiedLateCancellationFee] = useState<number | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState("");
   const [savingImage, setSavingImage] = useState(false);
@@ -324,6 +370,7 @@ export function ConfirmationPage() {
         setVerifiedTotal(Number.isFinite(Number(result.booking.total)) ? Number(result.booking.total) : null);
         setVerifiedEmail(typeof result.customerEmail === "string" ? result.customerEmail : "");
         setVerifiedCancellationDeadline(typeof result.booking.free_cancellation_until === "string" ? result.booking.free_cancellation_until : "");
+        setVerifiedLateCancellationFee(result.booking.late_cancellation_fee == null ? null : Number(result.booking.late_cancellation_fee));
         setBooking({ paymentStatus: "paid", reservationReference: result.booking?.reference });
         setVerification("paid");
       })
@@ -462,6 +509,7 @@ export function ConfirmationPage() {
           <Info label="Receipt Code" value={receiptCode(reference)} />
           {emailAddress && <Info label="Email" value={emailAddress} />}
           {verifiedCancellationDeadline && <Info label="Free cancellation deadline" value={`${formatDateAu(verifiedCancellationDeadline)}, 11:59 pm Melbourne time`} />}
+          {verifiedLateCancellationFee !== null && <Info label="Cancellation after deadline" value={`Fee up to ${formatAud(verifiedLateCancellationFee)}; remaining booking amount refunded`} />}
         </div>
 
         <div data-image-content-end className="rounded-none bg-stone-900 text-white p-4 text-left text-xs space-y-1">
@@ -512,10 +560,6 @@ function MissingBooking() {
       </div>
     </BookingFrame>
   );
-}
-
-function labelize(key: string) {
-  return key.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase());
 }
 
 function Info({ label, value }: { label: string; value: string }) {

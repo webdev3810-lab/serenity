@@ -395,7 +395,7 @@ export function PolicyPage({ type }: { type: "Terms and Conditions" | "Privacy P
       items: [
         { heading: "Request changes early", text: "Contact Serenity to request cancellation or an amendment. Your house’s free cancellation deadline is shown before payment." },
         { heading: "Refund eligibility", text: "Direct bookings can be cancelled for a full refund through 11:59 pm Melbourne time on the displayed deadline. This is seven days before check-in by default; the period may vary by house." },
-        { heading: "Late cancellations and no-shows", text: "Late cancellations, no-shows, or shortened stays may incur charges." },
+        { heading: "After the free cancellation deadline", text: "A flat cancellation fee applies to later cancellations and the rest of the booking price is refunded. The fee for your house is shown before payment and saved with your booking. Contact Serenity to cancel." },
         { heading: "Corporate and partner bookings", text: "Approved corporate or partner bookings may be subject to separately agreed terms." },
         { heading: "How refunds are returned", text: "Any applicable refund is returned to the original payment method." },
       ],

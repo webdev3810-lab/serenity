@@ -27,6 +27,7 @@ import { canBookCorporateDirectly } from "@/src/lib/reservationRules";
 import { freeCancellationText } from "@/src/lib/cancellationPolicy";
 import { PUBLIC_PAGE_MEDIA, type PublicPageMedia } from "@/src/lib/publicPageMedia";
 import type { PublicPageCopy } from "@/src/lib/publicPageCopy";
+import { australianMobileLocalDigits, formatAustralianMobileLocal, normalizeAustralianMobile } from "@/src/lib/australianMobile";
 
 type AvailabilityState = "checking" | "available" | "unavailable" | "error";
 type HouseStay = { arrival: string; departure: string; guests: number };
@@ -76,6 +77,7 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
     customerId: "",
     propertySlugs: [properties[0]?.slug ?? "serenity-7"],
     purpose: "Contractor project crew",
+    purposeOther: "",
     notes: "",
   });
 
@@ -223,6 +225,11 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
       setFormError("This house combination requires a corporate enquiry before it can be booked.");
       return;
     }
+    if (formData.purpose === "Other" && !formData.purposeOther.trim()) {
+      setFormError("Tell us the purpose of your stay when choosing Other.");
+      document.getElementById("corp-purpose-other")?.focus();
+      return;
+    }
 
     setFormSubmitting(true);
     try {
@@ -275,6 +282,12 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
       setEnquiryError(enquiryType === "insurance" ? "Complete your name, email, and accommodation needs." : "Complete your company, contact name, email, and question.");
       return;
     }
+    const phone = enquiryData.phone ? normalizeAustralianMobile(enquiryData.phone) : "";
+    if (enquiryData.phone && !phone) {
+      setEnquiryError("Enter 9 digits starting with 4 after +61, or leave the phone number blank.");
+      document.getElementById("corp-enquiry-phone")?.focus();
+      return;
+    }
 
     setEnquirySubmitting(true);
     try {
@@ -288,7 +301,7 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
           companyName: enquiryData.companyName,
           contactName: enquiryData.contactName,
           email: enquiryData.email,
-          phone: enquiryData.phone,
+          phone,
           notes: enquiryType === "insurance"
             ? [
                 `Preferred dates: ${enquiryData.preferredDates.trim() || "To be confirmed"}`,
@@ -472,7 +485,13 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
                       <FormInput id="corp-enquiry-company" label={enquiryType === "insurance" ? "Insurer / organisation (optional)" : "Company name *"} required={enquiryType === "corporate"} value={enquiryData.companyName} onChange={(event) => setEnquiryData({ ...enquiryData, companyName: event.target.value })} placeholder={enquiryType === "insurance" ? "If applicable" : "Your company"} />
                       <FormInput id="corp-enquiry-contact" label="Contact name *" required value={enquiryData.contactName} onChange={(event) => setEnquiryData({ ...enquiryData, contactName: event.target.value })} placeholder="Full name" />
                       <FormInput id="corp-enquiry-email" label={enquiryType === "insurance" ? "Email address *" : "Business email *"} type="email" required value={enquiryData.email} onChange={(event) => setEnquiryData({ ...enquiryData, email: event.target.value })} placeholder={enquiryType === "insurance" ? "you@example.com" : "name@company.com.au"} />
-                      <FormInput id="corp-enquiry-phone" label="Phone number (optional)" type="tel" value={enquiryData.phone} onChange={(event) => setEnquiryData({ ...enquiryData, phone: event.target.value })} placeholder="+61 400 000 000" />
+                      <label htmlFor="corp-enquiry-phone">
+                        Australian mobile number (optional)
+                        <span className="corporate-enquiry-phone">
+                          <span className="corporate-enquiry-phone__prefix" aria-hidden="true">+61</span>
+                          <input id="corp-enquiry-phone" className="field" type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="4XX XXX XXX" value={formatAustralianMobileLocal(enquiryData.phone)} onChange={(event) => setEnquiryData({ ...enquiryData, phone: australianMobileLocalDigits(event.target.value) })} />
+                        </span>
+                      </label>
                     </div>
                     {enquiryType === "insurance" && (
                       <div className="grid gap-5 sm:grid-cols-2">
@@ -571,7 +590,7 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
                           <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor={`corp-guests-${property.slug}`}>Guests *</label><select id={`corp-guests-${property.slug}`} className="field bg-white text-sm font-medium" value={stay.guests} onChange={(event) => updateHouseStay(property.slug, { guests: Number(event.target.value) })}>{Array.from({ length: Math.min(property.maxGuests, property.maximumAdults) - Math.max(1, property.minimumGuests) + 1 }, (_, index) => { const count = Math.max(1, property.minimumGuests) + index; return <option key={count} value={count}>{count} guest{count === 1 ? "" : "s"}</option>; })}</select></div>
                         </div>
                         {nights > 0 && <p className="mt-3 text-sm text-stone-600">{nights} night{nights === 1 ? "" : "s"} · {formatAud(calculatePrice(property, stay.arrival, stay.departure, { ...defaultGuests, adults: stay.guests }).total)}</p>}
-                        {stay.arrival && stay.departure && <p className="mt-2 text-sm leading-relaxed text-[#002844]">{freeCancellationText(stay.arrival, property.freeCancellationDays)} Contact Serenity to cancel; later refund requests are reviewed.</p>}
+                        {stay.arrival && stay.departure && <p className="mt-2 text-sm leading-relaxed text-[#002844]">{freeCancellationText(stay.arrival, property.freeCancellationDays, property.lateCancellationFee)} Contact Serenity to cancel.</p>}
                         {nights > 0 && nights < property.minimumCorporateStay && <p className="mt-2 text-sm text-red-700">Minimum stay for corporate bookings: {property.minimumCorporateStay} night{property.minimumCorporateStay === 1 ? "" : "s"}.</p>}
                         {state === "unavailable" && <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-medium text-red-700"><p>{availabilityConflict[property.slug] ? `${formatDateAu(availabilityConflict[property.slug])} is booked or blocked.` : "These dates overlap a booking or blocked night."}</p><button type="button" className="font-bold underline underline-offset-2" onClick={() => openCalendar(property.slug)}>Change dates</button></div>}
                         {state === "error" && <p className="mt-2 text-sm font-medium text-red-700">We could not check live availability. Open the calendar to retry.</p>}
@@ -592,7 +611,11 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
                         {(stayFor(calendarProperty).arrival || stayFor(calendarProperty).departure) && <button type="button" className="corporate-date-dialog__clear" onClick={() => { updateHouseStay(calendarProperty.slug, { arrival: "", departure: "" }); setCalendarResetKey((value) => value + 1); }}>Clear dates</button>}
                       </>}
                     </Modal>
-                    <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor="corp-purpose">Stay purpose</label><select id="corp-purpose" className="field bg-white text-sm font-medium" value={formData.purpose} onChange={(event) => setFormData({ ...formData, purpose: event.target.value })}><option>Contractor project crew</option><option>Employee relocation</option><option>Business travel</option><option>Training or event</option><option>Other</option></select></div>
+                    <div>
+                      <label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor="corp-purpose">Stay purpose</label>
+                      <select id="corp-purpose" className="field bg-white text-sm font-medium" value={formData.purpose} onChange={(event) => setFormData({ ...formData, purpose: event.target.value })}><option>Contractor project crew</option><option>Employee relocation</option><option>Business travel</option><option>Training or event</option><option>Other</option></select>
+                      {formData.purpose === "Other" && <div className="mt-4"><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor="corp-purpose-other">Tell us your stay purpose *</label><input id="corp-purpose-other" className="field bg-white text-sm font-medium" type="text" placeholder="Describe the purpose of your stay" value={formData.purposeOther} maxLength={160} required onChange={(event) => setFormData({ ...formData, purposeOther: event.target.value })} /></div>}
+                    </div>
                     {datesReady && <div className={`mt-4 rounded-xl p-4 text-sm font-medium ${allSelectedAvailable ? "bg-[#e8eef2] text-[#002844] border border-[#b9cbd7]" : availabilityReady || availabilityFailed ? "bg-red-50 text-red-800 border border-red-200" : "bg-stone-50 text-stone-600 border border-stone-200"}`} aria-live="polite">{allSelectedAvailable ? "All selected houses are available for their chosen dates." : availabilityFailed ? "Live availability could not be checked. Open the house calendar to retry." : availabilityReady ? "One or more houses overlap a booking or blocked night. Choose different dates." : "Checking bookings, manual blocks, and connected calendars…"}</div>}
                     {allSelectedAvailable && (
                       <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border border-stone-300 bg-white p-6 shadow-sm">

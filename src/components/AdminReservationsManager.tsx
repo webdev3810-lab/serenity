@@ -1,7 +1,7 @@
 "use client";
 
 import { addDays,formatAud } from "@/src/lib/booking";
-import { isWithinFreeCancellation } from "@/src/lib/cancellationPolicy";
+import { cancellationRefundPreview, isWithinFreeCancellation } from "@/src/lib/cancellationPolicy";
 import { Archive,ArrowDown,ArrowUp,ArrowUpDown,ChevronRight,LockKeyhole,RotateCcw,Search,X } from "lucide-react";
 import { useMemo,useState } from "react";
 
@@ -88,7 +88,7 @@ export default function AdminReservationsManager({ bookings, calendarEvents, cal
       return {
         id: String(booking.id), kind: "booking", reference: String(booking.reference ?? ""), propertyIds: [property], propertyLabel: propertyMap.get(property) ?? "House",
         start: String(booking.check_in ?? ""), end: String(booking.checkout ?? ""), type: String(booking.booking_type ?? (category === "corporate" ? "corporate" : "standard")), bookingCategory: category,
-        source: String(booking.booking_source ?? "website"), status: String(booking.booking_status ?? "pending_payment"), payment: String(booking.payment_status ?? "pending"),
+        source: String(booking.booking_source ?? "website"), status: String(booking.booking_status ?? "pending_payment"), payment: ["pending", "requires_action"].includes(String(booking.refund_status ?? "")) ? "refund_pending" : ["failed", "canceled"].includes(String(booking.refund_status ?? "")) ? "refund_failed" : String(booking.payment_status ?? "pending"),
         title: guestName, raw: booking,
       };
     });
@@ -132,7 +132,7 @@ export default function AdminReservationsManager({ bookings, calendarEvents, cal
     if (!response.ok) throw new Error(String(result.error ?? "Could not update this booking."));
     await reload();
     setSelected(null);
-    setNotice(changes.archived === true ? "Booking archived. You can find it in Archived." : changes.archived === false ? "Booking restored to the main list." : changes.internalNotes !== undefined ? "Internal notes saved." : result.refund ? `Booking cancelled. Stripe ${result.refund.status === "succeeded" ? "refunded" : "started a refund of"} ${formatAud(result.refund.amount / 100)} for this house.` : "Booking cancelled. Its dates are available again.");
+    setNotice(changes.archived === true ? "Booking archived. You can find it in Archived." : changes.archived === false ? "Booking restored to the main list." : changes.internalNotes !== undefined ? "Internal notes saved." : result.refund ? `Booking cancelled. Stripe refund of ${formatAud(result.refund.amount / 100)} is ${result.refund.status}. The original payment processing fee remains your cost.` : result.retainedFeeCents ? `Booking cancelled. ${formatAud(result.retainedFeeCents / 100)} cancellation fee retained; no refund is due.` : "Booking cancelled. Its dates are available again.");
   };
 
   return <>
@@ -223,7 +223,11 @@ function ReservationPreview({ item, onClose, onChange }: { item: ReservationItem
   const archived = Boolean(item.raw.archived_at);
   const readOnly = isReadOnlyReservation(item);
   const canArchive = ["cancelled", "expired", "checked_out"].includes(item.status);
-  const automaticRefund = item.payment === "paid" && Boolean(item.raw.stripe_checkout_session_id) && isWithinFreeCancellation(String(item.raw.free_cancellation_until ?? ""));
+  const stripePaid = item.payment === "paid" && Boolean(item.raw.stripe_checkout_session_id);
+  const lateFee = item.raw.late_cancellation_fee == null ? null : Number(item.raw.late_cancellation_fee);
+  const refundPreview = stripePaid ? cancellationRefundPreview(Number(item.raw.total ?? 0), String(item.raw.free_cancellation_until ?? ""), lateFee) : null;
+  const automaticRefund = Boolean(refundPreview && refundPreview.refundCents > 0);
+  const freeCancellation = isWithinFreeCancellation(String(item.raw.free_cancellation_until ?? ""));
   const notesChanged = internalNotes !== String(item.raw.internal_notes ?? "");
   const close = async () => {
     if (busy) return;
@@ -239,7 +243,8 @@ function ReservationPreview({ item, onClose, onChange }: { item: ReservationItem
   const cancel = async () => {
     if (!reason.trim() || busy) return;
     const description = automaticRefund
-      ? `Cancel ${item.propertyLabel} and refund ${formatAud(Number(item.raw.total ?? 0))} through Stripe? If this is one house in a corporate payment, the other houses remain booked.`
+      ? `Cancel ${item.propertyLabel} and refund ${formatAud(refundPreview!.refundCents / 100)} through Stripe? ${freeCancellation ? "The original Stripe processing fee remains your cost." : `${formatAud(refundPreview!.retainedCents / 100)} late cancellation fee is retained.`} If this is one house in a corporate payment, the other houses remain booked.`
+      : refundPreview ? `Cancel ${item.propertyLabel} and release its dates? The ${formatAud(refundPreview.retainedCents / 100)} late cancellation fee covers the booking, so no refund is due.`
       : `Cancel ${item.propertyLabel} and release its dates? ${item.payment === "paid" ? "No automatic refund will be made. Review this payment separately." : "No refund will be made."}`;
     if (!await confirm({ title: automaticRefund ? "Cancel and refund booking?" : "Cancel booking?", description, confirmLabel: automaticRefund ? "Cancel and refund" : "Cancel booking", destructive: true })) return;
     await act({ bookingStatus: "cancelled", cancellationReason: reason.trim() });
@@ -250,13 +255,19 @@ function ReservationPreview({ item, onClose, onChange }: { item: ReservationItem
     await act({ archived: !archived });
   };
   const guest = asObject(item.raw.guest_details);
+  const corporate = asObject(item.raw.corporate_details);
   const details = item.kind === "booking" ? [
     ["Stay type", item.bookingCategory === "corporate" ? "Corporate booking" : "Standard booking"],
     ["Booked through", statusPresentation("source", item.source).label],
     ["Total", formatAud(Number(item.raw.total ?? 0))],
+    ...(item.raw.refund_status ? [["Refund status", String(item.raw.refund_status)], ["Refund amount", formatAud(Number(item.raw.refund_amount ?? 0))]] : []),
+    ...(Number(item.raw.cancellation_fee_retained ?? 0) > 0 ? [["Cancellation fee retained", formatAud(Number(item.raw.cancellation_fee_retained))]] : []),
     ["Guests", `${Number(item.raw.adults ?? 0)} adults · ${Number(item.raw.children ?? 0)} children · ${Number(item.raw.infants ?? 0)} infants · ${Number(item.raw.pets ?? 0)} pets`],
     ["Email", String(guest.email ?? "—")],
     ["Phone", String(guest.phone ?? "—")],
+    ...(corporate.stayPurpose ? [["Stay purpose", String(corporate.stayPurpose)]] : []),
+    ...(guest.purpose ? [["Purpose of stay", guest.purpose === "Other" ? String(guest.purposeOther || "Other") : String(guest.purpose)]] : []),
+    ...(guest.requests ? [["Special requests", String(guest.requests)]] : []),
   ] : [["Type", statusPresentation("source", item.type).label], ["Imported from", statusPresentation("source", item.source).label], ["Note", String(item.raw.internal_note ?? item.raw.summary ?? "—")]];
   return <AdminDialog label="Reservation details" className="admin-reservation-dialog" busy={busy} onClose={() => void close()}>
     <aside className="admin-booking-dialog-content">
@@ -268,7 +279,7 @@ function ReservationPreview({ item, onClose, onChange }: { item: ReservationItem
       {item.kind === "booking" && !readOnly ? <div className="admin-reservation-actions">
         {error && <p className="admin-notice is-error" role="alert">{error}</p>}
         {item.status !== "cancelled" && item.status !== "expired" && item.status !== "checked_out" && <section className="admin-reservation-action">
-          <div><h3>Cancel booking</h3><p>{automaticRefund ? `Free cancellation through ${formatDate(String(item.raw.free_cancellation_until))}. Automatically refund ${formatAud(Number(item.raw.total ?? 0))} to the original payment method.` : item.payment === "paid" ? "The free cancellation window has ended, or the payment was recorded outside Stripe. Review any refund separately." : "Cancelling makes these dates available again."}</p></div>
+          <div><h3>Cancel booking</h3><p>{automaticRefund ? `${freeCancellation ? `Free cancellation through ${formatDate(String(item.raw.free_cancellation_until))}.` : `After the free cancellation deadline, ${formatAud(refundPreview!.retainedCents / 100)} is retained.`} Automatically refund ${formatAud(refundPreview!.refundCents / 100)} to the original payment method. The original Stripe processing fee remains your cost.` : refundPreview ? `${formatAud(refundPreview.retainedCents / 100)} late cancellation fee covers the booking; no refund is due.` : item.payment === "paid" ? "This booking has its original cancellation terms. Review any refund separately." : "Cancelling makes these dates available again."}</p></div>
           <label>Reason for cancellation<input className="admin-field" value={reason} onChange={(event) => setReason(event.target.value)} maxLength={500} placeholder="Enter a reason" /></label>
           <button type="button" className="admin-button admin-button-danger" disabled={busy || !reason.trim()} onClick={() => void cancel()}>Cancel{automaticRefund ? " and refund" : ""} booking</button>
         </section>}
