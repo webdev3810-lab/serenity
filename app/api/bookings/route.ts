@@ -169,6 +169,7 @@ export async function POST(request: Request) {
       nights: String(price.nights),
       nightlyRates: nightlyRateMetadata,
       nightlySubtotal: String(price.nightlySubtotal),
+      cleaningFee: String(price.cleaningFee),
       petFee: String(price.petFee),
       extraGuestFee: String(price.extraGuestFee),
       totalDiscount: String(price.discount),
@@ -189,17 +190,10 @@ export async function POST(request: Request) {
         customer_email: email,
         success_url: successUrl,
         cancel_url: cancelUrl,
-        line_items: [{
-          price_data: {
-            currency: "aud",
-            product_data: {
-              name: `${property.name} direct booking`,
-              description: `${price.nights} night stay from ${checkIn} to ${checkout}.`,
-            },
-            unit_amount: Math.round(price.total * 100),
-          },
-          quantity: 1,
-        }],
+        line_items: [
+          { price_data: { currency: "aud", product_data: { name: `${property.name} accommodation`, description: `${price.nights} night stay from ${checkIn} to ${checkout}, including any guest or pet charges.` }, unit_amount: Math.round(price.total * 100) - Math.round(price.cleaningFee * 100) }, quantity: 1 },
+          ...(price.cleaningFee > 0 ? [{ price_data: { currency: "aud", product_data: { name: `${property.name} cleaning service`, description: "One-time cleaning service for this stay." }, unit_amount: Math.round(price.cleaningFee * 100) }, quantity: 1 }] : []),
+        ],
         metadata,
         payment_intent_data: {
           metadata,

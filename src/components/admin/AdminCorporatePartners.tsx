@@ -54,7 +54,7 @@ export function AdminCorporatePartners({ canEdit }: { canEdit: boolean }) {
   const field = (label: string, key: keyof Draft, type = "text", required = false, placeholder = "") => <label className="block text-sm font-medium text-[var(--admin-text)]">{label}<input className="admin-field mt-1 w-full" type={type} required={required} placeholder={placeholder} value={String(draft[key])} onChange={(event) => setDraft({ ...draft, [key]: event.target.value })} /></label>;
 
   return <div className="space-y-6">
-    <div><p className="admin-section-kicker">Corporate accounts</p><h2 className="mt-2">Partner IDs</h2><p className="mt-2 max-w-2xl text-sm text-[var(--admin-muted)]">Create a partner once. Their company and contact details are then used automatically whenever they book with their ID. Treat IDs like private booking credentials.</p></div>
+    <div><p className="admin-section-kicker">Corporate accounts</p><h2 className="mt-2">Partner IDs</h2><p className="mt-2 max-w-2xl text-sm text-[var(--admin-muted)]">Create a partner once. Their company and contact details are then used automatically whenever they book with their ID. Share each ID with its partner.</p></div>
     {error && <div className="admin-notice is-error" role="alert">{error}</div>}
     {message && <div className="admin-notice" role="status">{message}</div>}
     {canEdit && <form onSubmit={save} className="admin-card space-y-5 p-5 sm:p-7">

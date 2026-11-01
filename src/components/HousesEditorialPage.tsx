@@ -14,6 +14,7 @@ import { hasUnavailableConflict, validateGuestCapacity } from "@/src/lib/booking
 import { isApprovedHomepageMediaSource } from "@/src/lib/homepageMedia";
 import { editorialHouseDetails } from "@/src/lib/editorialHouseDetails";
 import type { PublicPageCopy } from "@/src/lib/publicPageCopy";
+import HomesPreviewRail from "@/src/components/HomesPreviewRail";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -137,58 +138,59 @@ export function HousesEditorialPage({ properties, copy }: { properties: Property
           <a href="#houses-list">View the collection <ArrowDownRight size={18} aria-hidden="true" /></a>
         </div>
       </header>
-      <section className="houses-editorial-list" id="houses-list" aria-labelledby="houses-editorial-title">
-        {results.length ? results.map((property) => {
-          const name = property.name.replace(" - Whole", "");
-          const image = approvedImage(property);
-          const href = `/properties/${property.slug}`;
-          const details = editorialHouseDetails(property);
+      <div className="houses-editorial-page__body">
+        <section className="houses-editorial-list" id="houses-list" aria-labelledby="houses-editorial-title">
+          {results.length ? results.map((property) => {
+            const name = property.name.replace(" - Whole", "");
+            const image = approvedImage(property);
+            const href = `/properties/${property.slug}`;
+            const details = editorialHouseDetails(property);
 
-          return (
-            <article className="houses-editorial-list__card" key={property.id || property.slug}>
-              <Link href={href} className="houses-editorial-list__link">
-                <span className="houses-editorial-list__media">
-                  {image ? (
-                    <Image
-                      src={image}
-                      alt={`${name} furnished home in Pakenham`}
-                      fill
-                      loading="eager"
-                      sizes="(max-width: 760px) 100vw, (max-width: 1023px) 50vw, 33vw"
-                      unoptimized={image.includes(".supabase.co/")}
-                    />
-                  ) : <span className="houses-editorial-list__fallback">Home photos coming soon</span>}
-                </span>
-                <div className="houses-editorial-list__content">
-                  <div className="houses-editorial-list__caption">
-                    <span className="houses-editorial-list__title">{name}</span>
+            return (
+              <article className="houses-editorial-list__card" key={property.id || property.slug}>
+                <Link href={href} className="houses-editorial-list__link">
+                  <span className="houses-editorial-list__media">
+                    {image ? (
+                      <Image
+                        src={image}
+                        alt={`${name} furnished home in Pakenham`}
+                        fill
+                        loading="eager"
+                        sizes="(max-width: 760px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                        unoptimized={image.includes(".supabase.co/")}
+                      />
+                    ) : <span className="houses-editorial-list__fallback">Home photos coming soon</span>}
+                  </span>
+                  <div className="houses-editorial-list__content">
+                    <div className="houses-editorial-list__caption">
+                      <span className="houses-editorial-list__title">{name}</span>
+                    </div>
+                    <ul className="houses-editorial-list__details" aria-label={`${name} at a glance`}>
+                      {details.map(({ label, Icon }) => (
+                        <li key={label}><Icon size={17} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span></li>
+                      ))}
+                    </ul>
+                    <span className="houses-editorial-list__cta">Explore home <ArrowUpRight size={17} aria-hidden="true" /></span>
                   </div>
-                  <ul className="houses-editorial-list__details" aria-label={`${name} at a glance`}>
-                    {details.map(({ label, Icon }) => (
-                      <li key={label}><Icon size={17} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span></li>
-                    ))}
-                  </ul>
-                  <span className="houses-editorial-list__cta">Explore home <ArrowUpRight size={17} aria-hidden="true" /></span>
-                </div>
-              </Link>
-            </article>
-          );
-        }) : (
-          <div className="houses-editorial-empty">
-            <h2>No homes available for those dates.</h2>
-            <p>Try different dates or guest numbers to see the full collection.</p>
-            <Link href="/homes">View all homes <ArrowUpRight size={17} aria-hidden="true" /></Link>
-          </div>
-        )}
-      </section>
+                </Link>
+              </article>
+            );
+          }) : (
+            <div className="houses-editorial-empty">
+              <h2>No homes available for those dates.</h2>
+              <p>Try different dates or guest numbers to see the full collection.</p>
+              <Link href="/homes">View all homes <ArrowUpRight size={17} aria-hidden="true" /></Link>
+            </div>
+          )}
+        </section>
 
-      <section className="houses-editorial-comfort" aria-labelledby="houses-editorial-comfort-title">
-        <div className="houses-editorial-comfort__heading">
-          <h2 id="houses-editorial-comfort-title">{copy.homesComfortTitle}</h2>
-          <p>{copy.homesComfortLead}</p>
-        </div>
-      </section>
-      <section ref={comfortGridRef} className="houses-editorial-comfort__grid" aria-label="Stay in comfort details">
+        <section className="houses-editorial-comfort" aria-labelledby="houses-editorial-comfort-title">
+          <div className="houses-editorial-comfort__heading">
+            <h2 id="houses-editorial-comfort-title">{copy.homesComfortTitle}</h2>
+            <p>{copy.homesComfortLead}</p>
+          </div>
+        </section>
+        <section ref={comfortGridRef} className="houses-editorial-comfort__grid" aria-label="Booking steps">
           {comfortFeatures.map((feature, index) => (
             <article className={`houses-editorial-comfort__card${index % 2 ? " houses-editorial-comfort__card--soft" : ""}`} key={feature.number}>
               <div className="houses-editorial-comfort__card-copy">
@@ -199,7 +201,9 @@ export function HousesEditorialPage({ properties, copy }: { properties: Property
               <span className="houses-editorial-comfort__number">{feature.number}</span>
             </article>
           ))}
-      </section>
+        </section>
+        <HomesPreviewRail properties={properties} />
+      </div>
     </div>
   );
 }

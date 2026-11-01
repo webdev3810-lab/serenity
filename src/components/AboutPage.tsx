@@ -40,7 +40,7 @@ export function AboutPage({ properties, mapUrl, media, copy }: { properties: Pro
           <h2 style={{ whiteSpace: "pre-line" }}>{copy.aboutHeroSubtitle}</h2>
           <p>{copy.aboutHeroLead}</p>
           <div className="about-story-hero__links">
-            <Link href="/homes">Explore our homes <ArrowUpRight size={17} aria-hidden="true" /></Link>
+            <Link href="/book-now">Book now <ArrowUpRight size={17} aria-hidden="true" /></Link>
             <Link href="/contact">Get in touch <ArrowUpRight size={17} aria-hidden="true" /></Link>
           </div>
         </div>
@@ -108,7 +108,7 @@ export function AboutPage({ properties, mapUrl, media, copy }: { properties: Pro
         </div>
       </section>
 
-      <section className="about-story-host" aria-labelledby="about-story-host-title">
+      <section className="about-story-host" id="your-host" aria-labelledby="about-story-host-title">
         <div className="about-story-section-topline">
           <span>The person behind your stay</span>
           <span>03 / Your host</span>
@@ -146,8 +146,8 @@ export function AboutPage({ properties, mapUrl, media, copy }: { properties: Pro
           description={copy.aboutReviewsLead}
           reviews={reviews}
           maxReviews={reviews.length}
-          allReviewsHref="/homes"
-          allReviewsLabel="Explore our homes"
+          allReviewsHref="/book-now"
+          allReviewsLabel="Book now"
         />
       ) : null}
     </div>

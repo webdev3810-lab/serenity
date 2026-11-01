@@ -83,7 +83,7 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
           <span><Bath size={18} aria-hidden="true" />{property.bathrooms} bathrooms</span>
         </div>
         <div className="property-showcase-hero-actions">
-          <a href="#availability" className="property-showcase-button is-gold"><CalendarDays size={18} aria-hidden="true" />Check availability <ChevronRight size={16} aria-hidden="true" /></a>
+          <a href="#availability" className="property-showcase-button is-gold"><CalendarDays size={18} aria-hidden="true" />Book now <ChevronRight size={16} aria-hidden="true" /></a>
           {property.corporateBookingAllowed && <Link href="/corporate-stays#corporate-booking" className="property-showcase-button is-outline"><DoorOpen size={18} aria-hidden="true" />Partner booking <ChevronRight size={16} aria-hidden="true" /></Link>}
         </div>
       </div>
@@ -92,6 +92,7 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
       {nav.map(({ id, label, Icon }) => <a key={id} href={`#${id}`} aria-current={activeSection === id ? "location" : undefined} onClick={() => setActiveSection(id)}><Icon size={22} strokeWidth={1.75} aria-hidden="true" /><span>{label}</span></a>)}
     </nav>
 
+    <div className="property-showcase-body">
     <section className="property-showcase-overview" id="house-overview">
       <div className="property-showcase-overview-copy">
         <p className="property-showcase-kicker">Discover the home</p>
@@ -146,10 +147,11 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
       {property.houseRules.length > 0 && <section className="property-showcase-panel" id="house-rules"><h2><ClipboardList size={23} aria-hidden="true" />House rules</h2><ul className="property-showcase-check-list">{property.houseRules.map((rule) => <li key={rule}><Check size={16} aria-hidden="true" />{rule}</li>)}</ul>{property.petPolicy && <p className="property-showcase-panel-note">{property.petPolicy}</p>}</section>}
       {(property.safetyInformation || safetyAmenities.length > 0) && <section className="property-showcase-panel" id="house-safety"><h2><Shield size={23} aria-hidden="true" />Guest safety</h2>{property.safetyInformation && <p>{property.safetyInformation}</p>}{safetyAmenities.length > 0 && <ul className="property-showcase-check-list">{safetyAmenities.map((amenity) => <li key={amenity.id}><Check size={16} aria-hidden="true" />{amenity.label}</li>)}</ul>}</section>}
       <section className="property-showcase-panel" id="house-booking"><h2><CalendarDays size={23} aria-hidden="true" />Booking & cancellation</h2><ul><li>Minimum stay: {property.minimumStay} nights</li><li>Free cancellation until 11:59 pm Melbourne time, {property.freeCancellationDays} day{property.freeCancellationDays === 1 ? "" : "s"} before check-in</li><li>After that, an AUD ${property.lateCancellationFee.toFixed(2)} cancellation fee applies; the remainder is refunded</li><li>Direct booking subject to availability</li>{property.longTermStaysAllowed && <li>Longer stays available</li>}</ul><p className="property-showcase-panel-note">Contact Serenity to cancel. The deadline for your dates is shown before payment. The cancellation fee is capped at the booking price.</p><a className="property-showcase-text-action" href="#availability">View dates and pricing <ChevronRight size={16} aria-hidden="true" /></a></section>
-      <section className="property-showcase-panel" id="house-host"><h2><Users size={23} aria-hidden="true" />About your host</h2><p>{hostBio || "The Serenity team can help with questions about the house and your stay."}</p><Link className="property-showcase-text-action" href="/contact">Contact Serenity <ChevronRight size={16} aria-hidden="true" /></Link></section>
+      <section className="property-showcase-panel" id="house-host"><h2><Users size={23} aria-hidden="true" />About your host</h2><p>{hostBio || "The Serenity team can help with questions about the house and your stay."}</p><Link className="property-showcase-text-action" href="/about#your-host">Meet your host <ChevronRight size={16} aria-hidden="true" /></Link></section>
     </div>
     </div>
 
     {property.corporateBookingAllowed && <aside className="property-showcase-partner"><div><p>Regular corporate client?</p><h2>Book using your Partner ID</h2><span>Access your organisation’s booking arrangement for this home.</span></div><Link href="/corporate-stays#corporate-booking" className="property-showcase-button is-gold">Go to partner booking <ChevronRight size={16} aria-hidden="true" /></Link></aside>}
+    </div>
   </div>;
 }

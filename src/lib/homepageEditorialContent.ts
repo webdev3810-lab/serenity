@@ -117,7 +117,7 @@ export const defaultEditorialHomepageContent: EditorialHomepageContent = {
   editorial_hero_heading: "Premium\nFurnished Homes",
   editorial_hero_audience: "corporate\ninsurance\nextended stays",
   editorial_hero_description: "Three neighbouring private homes in Pakenham, Victoria, offering comfort and flexibility for displaced families, business travellers, relocations and project teams.",
-  editorial_hero_primary_label: "Corporate Enquiries",
+  editorial_hero_primary_label: "Book now",
   editorial_hero_secondary_label: "Explore Our Homes",
   editorial_highlights: [
     { icon: "house", title: "3 Private Homes", description: "Up to 21 guests" },
@@ -155,6 +155,9 @@ export function normalizeEditorialHomepageContent(value: unknown): EditorialHome
   for (const key of Object.keys(defaults) as Array<keyof EditorialHomepageContent>) {
     if (key === "editorial_highlights" || key === "editorial_services" || key === "faqs") continue;
     if (typeof source[key] === "string") (normalized as unknown as Record<string, unknown>)[key] = source[key];
+  }
+  if (typeof source.editorial_hero_primary_label === "string" && source.editorial_hero_primary_label.trim().toLowerCase() === "corporate enquiries") {
+    normalized.editorial_hero_primary_label = defaults.editorial_hero_primary_label;
   }
   // The previous default put the audience inside the headline. Existing published
   // homepage records should receive the new layout without overriding custom copy.

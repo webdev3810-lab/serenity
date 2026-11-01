@@ -51,13 +51,15 @@ function Header({ pathname }: { pathname: string | null }) {
     { label: "Other Businesses", href: "/other-businesses" },
   ];
   const aboutLinks = [
-    { label: "How It Works", href: "/how-it-works" },
     { label: "Guest Info", href: "/guest-information" },
   ];
   const partnerBookingHref = "/corporate-stays#corporate-booking";
 
   useEffect(() => {
-    const updateHash = () => setCurrentHash(window.location.hash);
+    const updateHash = () => {
+      setCurrentHash(window.location.hash);
+      if (window.location.pathname === "/corporate-stays" && window.location.hash === "#corporate-booking") setHidden(false);
+    };
     updateHash();
     window.addEventListener("hashchange", updateHash);
     return () => window.removeEventListener("hashchange", updateHash);
@@ -76,7 +78,12 @@ function Header({ pathname }: { pathname: string | null }) {
     let lastScrollY = window.scrollY;
     const onScroll = () => {
       const currentScrollY = window.scrollY;
-      if (currentScrollY <= 24) {
+      const partnerFormTop = window.location.pathname === "/corporate-stays" && window.location.hash === "#corporate-booking"
+        ? document.getElementById("corporate-booking")?.getBoundingClientRect().top
+        : undefined;
+      if (partnerFormTop !== undefined && partnerFormTop >= -40 && partnerFormTop <= 160) {
+        setHidden(false);
+      } else if (currentScrollY <= 24) {
         setHidden(false);
       } else if (currentScrollY > lastScrollY + 8) {
         setHidden(true);

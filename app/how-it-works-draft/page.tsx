@@ -55,7 +55,7 @@ export default async function HowItWorksDraftPage() {
     <div className={styles.page}>
       <div className={styles.previewBar}>
         <span><i aria-hidden="true" /> Serenity design concept</span>
-        <Link href="/how-it-works">View current page <ArrowUpRight size={14} aria-hidden="true" /></Link>
+        <Link href="/#how-it-works">View current section <ArrowUpRight size={14} aria-hidden="true" /></Link>
       </div>
 
       <section className={styles.hero} aria-labelledby="draft-title">

@@ -15,9 +15,11 @@ export function GuestsPricingEditor({ draft, setDraft }: { draft: Row; setDraft:
   const [pets, setPets] = useState(0);
   const property = {
     nightlyPrice: Number(draft.nightly_price),
+    cleaningFee: Number(draft.cleaning_fee),
     petFee: Number(draft.pet_fee),
     extraGuestFee: Number(draft.extra_guest_fee),
     extraGuestThreshold: Number(draft.extra_guest_threshold),
+    corporateDiscount: Number(draft.corporate_discount ?? 10),
     minimumGuests: Number(draft.minimum_guests),
     maxGuests: Number(draft.max_guests),
     maximumAdults: Number(draft.maximum_adults),
@@ -28,6 +30,7 @@ export function GuestsPricingEditor({ draft, setDraft }: { draft: Row; setDraft:
   } as Property;
   const guests = { adults, children, infants, pets };
   const price = calculatePrice(property, todayIso(), addDays(todayIso(), Math.max(1, Math.min(365, nights || 1))), guests);
+  const corporatePrice = calculatePrice(property, todayIso(), addDays(todayIso(), Math.max(1, Math.min(365, nights || 1))), guests, true);
   const error = validateGuestCapacity(property, guests);
   const numberFields = [
     ["Minimum staying guests", "minimum_guests"],
@@ -38,10 +41,13 @@ export function GuestsPricingEditor({ draft, setDraft }: { draft: Row; setDraft:
     ["Maximum pets", "maximum_pets"],
     ["Guests included in default rate", "extra_guest_threshold"],
     ["Extra guest / night (AUD)", "extra_guest_fee"],
+    ["Cleaning service / stay (AUD)", "cleaning_fee"],
     ["Pet fee / stay (AUD)", "pet_fee"],
+    ["Corporate accommodation discount (%)", "corporate_discount"],
   ] as const;
   const examples = [
     ["Accommodation", price.nightlySubtotal],
+    ["Cleaning service", price.cleaningFee],
     ["Extra guests", price.extraGuestFee],
     ["Pet fee", price.petFee],
     ["Total", price.total],
@@ -61,7 +67,7 @@ export function GuestsPricingEditor({ draft, setDraft }: { draft: Row; setDraft:
         <Toggle label="Infants allowed" checked={Number(draft.maximum_infants) > 0} onChange={(value) => field("maximum_infants", value ? 1 : 0)} />
         <Toggle label="Pets allowed" checked={draft.pets_allowed !== false} onChange={(value) => setDraft((row) => ({ ...row, pets_allowed: value, maximum_pets: value ? Math.max(1, Number(row.maximum_pets)) : 0 }))} />
       </div>
-      <p className="text-sm text-[var(--admin-muted)]">The nightly rate is the accommodation price charged. Extra guests and pets are charged only when applicable. No separate cleaning fee or tax is added at checkout.</p>
+      <p className="text-sm text-[var(--admin-muted)]">The cleaning service is charged once per booked house and stay. Extra guests and pets are charged only when applicable. No separate tax is added at checkout.</p>
       <details open className="rounded-xl border border-[var(--admin-border)] p-4">
         <summary className="cursor-pointer font-medium">Live example at the default rate</summary>
         <div className="my-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
@@ -78,6 +84,8 @@ export function GuestsPricingEditor({ draft, setDraft }: { draft: Row; setDraft:
         {error && <p className="admin-notice is-error" role="status">{error}</p>}
         <dl className="admin-example-price">
           {examples.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{formatAud(value)}</dd></div>)}
+          <div><dt>Corporate accommodation discount ({property.corporateDiscount}%)</dt><dd>−{formatAud(corporatePrice.discount)}</dd></div>
+          <div><dt>Corporate total</dt><dd>{formatAud(corporatePrice.total)}</dd></div>
         </dl>
         <p className="text-sm text-[var(--admin-muted)]">Illustration only. Date overrides and promotion codes are not included in this example.</p>
       </details>

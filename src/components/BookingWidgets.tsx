@@ -6,7 +6,9 @@ import type { Property } from "@/src/data/properties";
 import { properties } from "@/src/data/properties";
 import { addDays,calculatePrice,dateToIso,defaultGuests,formatAud,formatDateAu,getNightlyPrice,GuestCounts,nightsBetween,totalStayingGuests,validateDateRange,validateGuestCapacity } from "@/src/lib/booking";
 import { AU_LOCALE,AU_TIME_ZONE,formatAuNumber } from "@/src/lib/localization";
-import { ArrowUpRight,Bath,BedDouble,Car,ChevronDown,ChevronLeft,ChevronRight,Dog,LoaderCircle,MapPin,Minus,Plus,Users,Wifi } from "lucide-react";
+import { editorialHouseDetails } from "@/src/lib/editorialHouseDetails";
+import { isApprovedHomepageMediaSource } from "@/src/lib/homepageMedia";
+import { ArrowUpRight,BedDouble,Car,ChevronDown,ChevronLeft,ChevronRight,Dog,LoaderCircle,MapPin,Minus,Plus,Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -279,6 +281,7 @@ export function PriceBreakdownView({ property, checkIn, checkout, guests, price:
   const price = providedPrice ?? calculatePrice(property, checkIn, checkout, guests);
   const rows = [
     [price.nightlyRateSummary, price.nightlySubtotal],
+    ["Cleaning service", price.cleaningFee],
     ["Pet fee", price.petFee],
     ["Extra guest fee", price.extraGuestFee],
   ].filter(([, amount]) => amount !== 0);
@@ -303,7 +306,7 @@ export function PriceBreakdownView({ property, checkIn, checkout, guests, price:
   );
 }
 
-export function MiniCalendar({ property, checkIn, checkout, today, onSelect, onCheckInSelect, blockedDates = [], availabilityLoading = false, singleMonth = false, showSelectionHeader = true, showHint = true, corporate = false, propertyCalendar = false }: { property: Property; checkIn?: string; checkout?: string; today: string; onSelect: (checkIn: string, checkout: string) => void; onCheckInSelect?: (checkIn: string) => void; blockedDates?: string[]; availabilityLoading?: boolean; singleMonth?: boolean; showSelectionHeader?: boolean; showHint?: boolean; corporate?: boolean; propertyCalendar?: boolean }) {
+export function MiniCalendar({ property, checkIn, checkout, today, onSelect, onCheckInSelect, blockedDates = [], availabilityLoading = false, selectionDisabled = false, singleMonth = false, showSelectionHeader = true, showHint = true, corporate = false, propertyCalendar = false }: { property: Property; checkIn?: string; checkout?: string; today: string; onSelect: (checkIn: string, checkout: string) => void; onCheckInSelect?: (checkIn: string) => void; blockedDates?: string[]; availabilityLoading?: boolean; selectionDisabled?: boolean; singleMonth?: boolean; showSelectionHeader?: boolean; showHint?: boolean; corporate?: boolean; propertyCalendar?: boolean }) {
   const [monthOffset, setMonthOffset] = useState(() => (singleMonth || propertyCalendar) && checkIn
     ? Math.max(0, (Number(checkIn.slice(0, 4)) - Number(today.slice(0, 4))) * 12 + Number(checkIn.slice(5, 7)) - Number(today.slice(5, 7)))
     : 0);
@@ -322,6 +325,7 @@ export function MiniCalendar({ property, checkIn, checkout, today, onSelect, onC
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const pick = (iso: string) => {
+    if (selectionDisabled) return;
     if (!pendingStart || pendingStart < today || checkout || iso <= pendingStart) {
       setPendingStart(iso);
       setMessage("");
@@ -361,7 +365,7 @@ export function MiniCalendar({ property, checkIn, checkout, today, onSelect, onC
       </div>
       <div className={`booking-calendar-months grid gap-6 ${singleMonth ? "" : "md:grid-cols-2"}`}>
         {months.map((month) => (
-          <Month key={month.toISOString()} month={month} property={property} today={today} checkIn={pendingStart || checkIn} checkout={checkout} blockedDates={blockedDates} corporate={corporate} propertyCalendar={propertyCalendar} onPick={pick} />
+          <Month key={month.toISOString()} month={month} property={property} today={today} checkIn={pendingStart || checkIn} checkout={checkout} blockedDates={blockedDates} corporate={corporate} propertyCalendar={propertyCalendar} selectionDisabled={selectionDisabled} onPick={pick} />
         ))}
       </div>
       {availabilityLoading && <p className="booking-calendar-status mt-4 text-sm font-semibold text-stone-600" role="status">Checking live availability…</p>}
@@ -371,7 +375,7 @@ export function MiniCalendar({ property, checkIn, checkout, today, onSelect, onC
   );
 }
 
-function Month({ month, property, today, checkIn, checkout, blockedDates, corporate, propertyCalendar, onPick }: { month: Date; property: Property; today: string; checkIn?: string; checkout?: string; blockedDates: string[]; corporate: boolean; propertyCalendar: boolean; onPick: (iso: string) => void }) {
+function Month({ month, property, today, checkIn, checkout, blockedDates, corporate, propertyCalendar, selectionDisabled, onPick }: { month: Date; property: Property; today: string; checkIn?: string; checkout?: string; blockedDates: string[]; corporate: boolean; propertyCalendar: boolean; selectionDisabled: boolean; onPick: (iso: string) => void }) {
   const days = useMemo(() => {
     const result: (string | null)[] = Array(month.getUTCDay()).fill(null);
     const count = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + 1, 0)).getUTCDate();
@@ -392,7 +396,7 @@ function Month({ month, property, today, checkIn, checkout, blockedDates, corpor
         {days.map((iso, index) => {
           const choosingCheckout = Boolean(iso && checkIn && checkIn >= today && !checkout && iso > checkIn);
           const dateValidation = choosingCheckout ? validateDateRange(property, checkIn, iso!, today, blockedDates, corporate) : "";
-          const disabled = !iso || iso < today || iso > addDays(today, property.maximumAdvanceBookingDays) || (blocked.has(iso) && !choosingCheckout) || (!property.sameDayBookingAllowed && iso === today) || Boolean(dateValidation);
+          const disabled = selectionDisabled || !iso || iso < today || iso > addDays(today, property.maximumAdvanceBookingDays) || (blocked.has(iso) && !choosingCheckout) || (!property.sameDayBookingAllowed && iso === today) || Boolean(dateValidation);
           const selected = iso && (iso === checkIn || iso === checkout);
           const inRange = Boolean(iso && checkIn && checkout && iso > checkIn && iso < checkout);
           const rangeStart = Boolean(checkIn && checkout && iso === checkIn);
@@ -456,55 +460,37 @@ export function BookingCard({ property, today, blockedDates = [], availabilitySt
 
 export function RelatedHouses({ currentSlug, properties: relatedProperties = properties }: { currentSlug: string; properties?: Property[] }) {
   return (
-    <div className="related-houses-preview">
-      {relatedProperties
-        .filter((property) => property.slug !== currentSlug)
-        .map((property) => {
+    <div className="houses-editorial-list property-related-houses-grid">
+      {relatedProperties.filter((property) => property.slug !== currentSlug).map((property) => {
           const displayName = property.name.replace(/\s+-\s+Whole$/i, "");
-          const amenities = property.amenities ?? [];
-          const rawParking = property.parkingType?.trim() || amenities.find((amenity) => /parking/i.test(amenity)) || "";
-          const parking = /on[- ]premises/i.test(rawParking) && /street/i.test(rawParking)
-            ? `${/free/i.test(rawParking) ? "Free " : ""}on-site & street parking`
-            : rawParking.replace(/parking on premises/gi, "on-site parking");
-          const hasWifi = Boolean(property.wifiInformation?.trim()) || amenities.some((amenity) => /wi[- ]?fi|internet/i.test(amenity));
-          const facts = [
-            { Icon: Users, label: `Sleeps up to ${property.maxGuests}` },
-            { Icon: BedDouble, label: `${property.bedrooms} ${property.bedrooms === 1 ? "bedroom" : "bedrooms"}` },
-            { Icon: Bath, label: `${property.bathrooms} ${property.bathrooms === 1 ? "bathroom" : "bathrooms"}` },
-            { Icon: BedDouble, label: `${property.beds} ${property.beds === 1 ? "bed" : "beds"}` },
-            ...(parking ? [{ Icon: Car, label: parking }] : []),
-            ...(hasWifi ? [{ Icon: Wifi, label: "Wi-Fi" }] : []),
-          ];
+          const image = isApprovedHomepageMediaSource(property.featuredImage)
+            ? property.featuredImage
+            : property.images.find((photo) => isApprovedHomepageMediaSource(photo.src))?.src ?? "";
+          const facts = editorialHouseDetails(property);
 
           return (
-            <article className="related-house-card" key={property.slug}>
-              <Link href={`/properties/${property.slug}`} className="related-house-link" aria-label={`Explore ${displayName}`}>
-                <span className="related-house-media">
-                  {property.featuredImage ? (
+            <article className="houses-editorial-list__card" key={property.slug}>
+              <Link href={`/properties/${property.slug}`} className="houses-editorial-list__link" aria-label={`Explore ${displayName}`}>
+                <span className="houses-editorial-list__media">
+                  {image ? (
                     <Image
-                      src={property.featuredImage}
+                      src={image}
                       alt={`${displayName} furnished house in Pakenham`}
                       fill
-                      sizes="(max-width: 520px) 100vw, (max-width: 760px) 50vw, 50vw"
-                      unoptimized={property.featuredImage.includes(".supabase.co/")}
+                      sizes="(max-width: 760px) 100vw, (max-width: 1100px) 50vw, 33vw"
+                      unoptimized={image.includes(".supabase.co/")}
                     />
-                  ) : <span className="related-house-fallback">House photos coming soon</span>}
+                  ) : <span className="houses-editorial-list__fallback">Home photos coming soon</span>}
                 </span>
-                <span className="related-house-caption">
-                  <span className="related-house-title">{displayName}</span>
-                  <span className="related-house-facts" aria-label={`${displayName} details`}>
+                <div className="houses-editorial-list__content">
+                  <div className="houses-editorial-list__caption"><span className="houses-editorial-list__title">{displayName}</span></div>
+                  <ul className="houses-editorial-list__details" aria-label={`${displayName} details`}>
                     {facts.map(({ Icon, label }) => (
-                      <span className="related-house-fact" key={label}>
-                        <Icon size={18} strokeWidth={1.7} aria-hidden="true" />
-                        <span>{label}</span>
-                      </span>
+                      <li key={label}><Icon size={17} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span></li>
                     ))}
-                  </span>
-                  <span className="related-house-explore">
-                    <span>Explore house</span>
-                    <ArrowUpRight size={20} strokeWidth={1.5} aria-hidden="true" />
-                  </span>
-                </span>
+                  </ul>
+                  <span className="houses-editorial-list__cta">Explore home <ArrowUpRight size={17} aria-hidden="true" /></span>
+                </div>
               </Link>
             </article>
           );

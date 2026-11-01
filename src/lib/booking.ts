@@ -142,7 +142,7 @@ export const validateGuestCapacity = (property: Property, guests: GuestCounts) =
   return "";
 };
 
-export const calculatePrice = (property: Property, checkIn?: string, checkout?: string, guests: GuestCounts = defaultGuests): PriceBreakdown => {
+export const calculatePrice = (property: Property, checkIn?: string, checkout?: string, guests: GuestCounts = defaultGuests, corporate = false): PriceBreakdown => {
   const nights = nightsBetween(checkIn, checkout);
   const nightlyRates = checkIn && checkout ? datesInRange(checkIn, checkout).map((date) => {
     const override = property.datePrices?.find((price) => price.date === date && price.active !== false);
@@ -151,19 +151,22 @@ export const calculatePrice = (property: Property, checkIn?: string, checkout?: 
   const nightlySubtotal = Math.round(nightlyRates.reduce((total, rate) => total + rate.nightlyPrice, 0) * 100) / 100;
   const hasDatedRate = nightlyRates.some((rate) => rate.isOverride);
   const petFee = guests.pets > 0 ? property.petFee : 0;
+  const cleaningFee = nights > 0 ? Math.round(Number(property.cleaningFee ?? 0) * 100) / 100 : 0;
   const extraGuests = Math.max(0, totalStayingGuests(guests) - property.extraGuestThreshold);
   const extraGuestFee = extraGuests * property.extraGuestFee * nights;
-  // Historical bookings retain their original breakdown; new stays use the listed rate without separate cleaning or tax add-ons.
-  const total = Math.round((nightlySubtotal + petFee + extraGuestFee) * 100) / 100;
+  const configuredDiscount = Number(property.corporateDiscount ?? 10);
+  const discountPercent = corporate && Number.isFinite(configuredDiscount) ? Math.min(100, Math.max(0, configuredDiscount)) : 0;
+  const discount = Math.round(nightlySubtotal * discountPercent) / 100;
+  const total = Math.round((nightlySubtotal - discount + cleaningFee + petFee + extraGuestFee) * 100) / 100;
   return {
     nights,
     nightlyRates,
     nightlySubtotal,
-    cleaningFee: 0,
+    cleaningFee,
     petFee,
     extraGuestFee,
-    discount: 0,
-    discountLabel: "",
+    discount,
+    discountLabel: discount > 0 ? `Corporate accommodation discount (${discountPercent}%)` : "",
     nightlyRateSummary: hasDatedRate ? "Nightly accommodation (seasonal rates applied)" : `${formatAud(property.nightlyPrice)} × ${nights} night${nights === 1 ? "" : "s"}`,
     tax: 0,
     total,

@@ -13,7 +13,7 @@ const PAGE_LINKS: Record<string, string> = {
   About: "/about",
   "Corporate Stays": "/corporate-stays",
   Contact: "/contact",
-  "How It Works": "/how-it-works",
+  "How It Works": "/#how-it-works",
 };
 
 const GROUPS = [...new Set(Object.values(PUBLIC_PAGE_MEDIA).map((item) => item.page))];
@@ -110,9 +110,9 @@ export function PublicPageMediaEditor() {
     {loading ? <div className="admin-card flex items-center gap-2 p-6" role="status"><LoaderCircle size={18} className="animate-spin" /> Loading page images…</div> : !loaded ? <div className="admin-card p-6"><p>Saved page images could not be loaded.</p><button type="button" className="admin-button mt-4" onClick={() => window.location.reload()}>Retry</button></div> : <>
       <div className="grid gap-6">
         {GROUPS.map((page) => <section key={page} className="admin-card bg-[var(--admin-surface)] p-5 sm:p-7" aria-labelledby={`page-media-${page.replace(/\s+/g, "-").toLowerCase()}`}>
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--admin-border)] pb-4"><div><h2 id={`page-media-${page.replace(/\s+/g, "-").toLowerCase()}`} className="text-xl font-semibold">{page}</h2><p className="mt-1 text-sm text-[var(--admin-muted)]">Choose the photos and descriptions guests see on this page.</p></div><Link href={PAGE_LINKS[page]} target="_blank" rel="noopener noreferrer" className="admin-button"><ExternalLink size={15} /> View page</Link></div>
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--admin-border)] pb-4"><div><h2 id={`page-media-${page.replace(/\s+/g, "-").toLowerCase()}`} className="text-xl font-semibold">{page}</h2><p className="mt-1 text-sm text-[var(--admin-muted)]">Choose the photos and descriptions guests see {page === "How It Works" ? "on the homepage" : "on this page"}.</p></div><Link href={PAGE_LINKS[page]} target="_blank" rel="noopener noreferrer" className="admin-button"><ExternalLink size={15} /> {page === "How It Works" ? "View homepage section" : "View page"}</Link></div>
           <div className="grid gap-5 lg:grid-cols-2">
-            {(Object.keys(PUBLIC_PAGE_MEDIA) as PublicPageMediaKey[]).filter((key) => PUBLIC_PAGE_MEDIA[key].page === page).map((key) => <article key={key} className="overflow-hidden rounded-xl border border-[var(--admin-border)]">
+            {(Object.keys(PUBLIC_PAGE_MEDIA) as PublicPageMediaKey[]).filter((key) => PUBLIC_PAGE_MEDIA[key].page === page && (page !== "How It Works" || key === "howArrival")).map((key) => <article key={key} className="overflow-hidden rounded-xl border border-[var(--admin-border)]">
               <div className="relative aspect-[16/9] bg-[var(--admin-surface-alt)]">{draft[key].src ? <Image src={draft[key].src} alt={draft[key].alt} fill sizes="(max-width: 1024px) 100vw, 40vw" className="object-cover" unoptimized /> : <div className="flex h-full items-center justify-center text-[var(--admin-muted)]"><ImageIcon size={24} /></div>}</div>
               <div className="grid gap-3 p-4"><div><h3 className="font-semibold">{PUBLIC_PAGE_MEDIA[key].label}</h3><p className="mt-1 text-xs text-[var(--admin-muted)]">{draft[key].src === PUBLIC_PAGE_MEDIA[key].src ? "Showing the current default image" : "Custom image selected"}</p></div>
                 <CharacterField label="Image description" value={draft[key].alt} onChange={(alt) => update(key, { alt })} limit={180} help="Used by screen readers and when the image cannot load." />

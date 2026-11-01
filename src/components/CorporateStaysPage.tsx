@@ -87,12 +87,13 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
     const stay = stayFor(property);
     return stay.arrival && stay.departure > stay.arrival && nightsBetween(stay.arrival, stay.departure) >= property.minimumCorporateStay;
   });
-  const estimatedCorporateTotal = datesReady
-    ? selectedProperties.reduce((total, property) => {
-        const stay = stayFor(property);
-        return total + calculatePrice(property, stay.arrival, stay.departure, { ...defaultGuests, adults: stay.guests }).total;
-      }, 0)
-    : 0;
+  const estimatedPrices = datesReady ? selectedProperties.map((property) => {
+    const stay = stayFor(property);
+    return calculatePrice(property, stay.arrival, stay.departure, { ...defaultGuests, adults: stay.guests }, true);
+  }) : [];
+  const estimatedCorporateTotal = estimatedPrices.reduce((total, price) => total + price.total, 0);
+  const estimatedCleaningTotal = estimatedPrices.reduce((total, price) => total + price.cleaningFee, 0);
+  const estimatedCorporateDiscount = estimatedPrices.reduce((total, price) => total + price.discount, 0);
   const availabilityFailed = datesReady && selectedProperties.some((property) => availability[property.slug] === "error");
   const availabilityReady = datesReady && selectedProperties.every((property) => availability[property.slug] === "available" || availability[property.slug] === "unavailable");
   const allSelectedAvailable = availabilityReady && selectedProperties.every((property) => availability[property.slug] === "available");
@@ -510,17 +511,21 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
         </div>
       </section>
 
-      <section id="corporate-booking" className="corporate-editorial-booking bg-white py-20 sm:py-28 border-y border-neutral-200">
+      <section className="corporate-editorial-booking bg-white py-20 sm:py-28 border-y border-neutral-200">
         <div className="container max-w-[92rem] px-5 sm:px-8 lg:px-12">
           <div className="corporate-partner-direct">
             <div className="corporate-partner-direct__intro">
-              <div>
+              <div className="corporate-partner-direct__heading">
                 <span className="corporate-partner-direct__eyebrow">Partner booking</span>
                 <h2>Book for your team.</h2>
-                <p>Enter your Partner ID, choose your houses and dates, then pay securely to confirm your stay.</p>
-                <p className="corporate-partner-direct__note">Online corporate booking is available only to registered partners. Dates are confirmed after payment succeeds.</p>
               </div>
-              <button type="button" onClick={() => document.getElementById("corp-customer-id")?.focus()}>Start booking <ArrowUpRight size={19} aria-hidden="true" /></button>
+              <div className="corporate-partner-direct__details">
+                <p>Enter your Partner ID, choose your houses and dates, then pay securely to confirm your stay.</p>
+                <div className="corporate-partner-direct__notes">
+                  <p>For registered partners</p>
+                  <p>Dates confirmed after payment</p>
+                </div>
+              </div>
             </div>
             <ol className="corporate-partner-direct__steps" aria-label="Corporate booking steps">
               <li><span>01</span> Verify Partner ID</li>
@@ -537,12 +542,12 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
             </div>
             
             <div className="lg:col-span-8">
-              <div className="corporate-form-surface">
+              <div id="corporate-booking" className="corporate-form-surface">
                 <form onSubmit={handleBookingSubmit} className="mt-8 space-y-8">
                   <div className="space-y-5">
                     <h4 className="text-xl text-stone-900 border-b border-stone-200 pb-3">1. Verify Partner ID</h4>
                     <div className="corporate-customer-id">
-                      <FormInput id="corp-customer-id" label="Partner ID *" required maxLength={24} value={formData.customerId} onChange={(event) => { partnerLookupVersion.current += 1; setPartnerChecking(false); setFormData({ ...formData, customerId: event.target.value.toUpperCase() }); setPartnerCompany(""); setPartnerLookupError(""); }} onBlur={() => void verifyPartner()} placeholder="SER-XXXXXXXXXXXX" />
+                      <FormInput id="corp-customer-id" label="Partner ID *" required maxLength={24} value={formData.customerId} onChange={(event) => { partnerLookupVersion.current += 1; setPartnerChecking(false); setFormData({ ...formData, customerId: event.target.value.toUpperCase() }); setPartnerCompany(""); setPartnerLookupError(""); }} onBlur={() => void verifyPartner()} placeholder="SER-AA001" />
                       <p className="mt-2 text-xs leading-5 text-stone-600">Enter the ID issued by Serenity. Your registered company details will load after verification.</p>
                       {partnerChecking && <p className="mt-2 text-sm text-stone-600" role="status">Checking Partner ID…</p>}
                       {partnerCompany && <p className="mt-2 text-sm font-semibold text-[#002844]" role="status">Connected to {partnerCompany}</p>}
@@ -589,7 +594,7 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
                           <button type="button" className="field min-h-[4.55rem] bg-white text-left" onClick={() => openCalendar(property.slug)} aria-haspopup="dialog"><span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-neutral-600"><CalendarCheck size={14} /> Checkout *</span><strong className="mt-1.5 block text-sm font-semibold text-stone-900">{stay.departure ? formatDateAu(stay.departure) : "Add date"}</strong></button>
                           <div><label className="label mb-1.5 block text-[11px] uppercase tracking-[0.1em] font-bold text-black" htmlFor={`corp-guests-${property.slug}`}>Guests *</label><select id={`corp-guests-${property.slug}`} className="field bg-white text-sm font-medium" value={stay.guests} onChange={(event) => updateHouseStay(property.slug, { guests: Number(event.target.value) })}>{Array.from({ length: Math.min(property.maxGuests, property.maximumAdults) - Math.max(1, property.minimumGuests) + 1 }, (_, index) => { const count = Math.max(1, property.minimumGuests) + index; return <option key={count} value={count}>{count} guest{count === 1 ? "" : "s"}</option>; })}</select></div>
                         </div>
-                        {nights > 0 && <p className="mt-3 text-sm text-stone-600">{nights} night{nights === 1 ? "" : "s"} · {formatAud(calculatePrice(property, stay.arrival, stay.departure, { ...defaultGuests, adults: stay.guests }).total)}</p>}
+                        {nights > 0 && <p className="mt-3 text-sm text-stone-600">{nights} night{nights === 1 ? "" : "s"} · {formatAud(calculatePrice(property, stay.arrival, stay.departure, { ...defaultGuests, adults: stay.guests }, true).total)} total, including {formatAud(property.cleaningFee)} cleaning service</p>}
                         {stay.arrival && stay.departure && <p className="mt-2 text-sm leading-relaxed text-[#002844]">{freeCancellationText(stay.arrival, property.freeCancellationDays, property.lateCancellationFee)} Contact Serenity to cancel.</p>}
                         {nights > 0 && nights < property.minimumCorporateStay && <p className="mt-2 text-sm text-red-700">Minimum stay for corporate bookings: {property.minimumCorporateStay} night{property.minimumCorporateStay === 1 ? "" : "s"}.</p>}
                         {state === "unavailable" && <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-medium text-red-700"><p>{availabilityConflict[property.slug] ? `${formatDateAu(availabilityConflict[property.slug])} is booked or blocked.` : "These dates overlap a booking or blocked night."}</p><button type="button" className="font-bold underline underline-offset-2" onClick={() => openCalendar(property.slug)}>Change dates</button></div>}
@@ -623,7 +628,12 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
                           <p className="corporate-editorial-serif text-lg text-stone-900">Indicative estimate</p>
                           <p className="mt-1 text-sm text-stone-600">{selectedProperties.length} house{selectedProperties.length === 1 ? "" : "s"} · one payment</p>
                         </div>
-                        <p className="text-2xl sm:text-3xl font-bold text-stone-900">{formatAud(estimatedCorporateTotal)}</p>
+                        <div className="text-right">
+                          <p className="text-sm text-stone-600">Stays and guest charges: {formatAud(estimatedCorporateTotal - estimatedCleaningTotal + estimatedCorporateDiscount)}</p>
+                          {estimatedCorporateDiscount > 0 && <p className="text-sm text-stone-600">Corporate discount on accommodation: −{formatAud(estimatedCorporateDiscount)}</p>}
+                          <p className="text-sm text-stone-600">Cleaning service: {formatAud(estimatedCleaningTotal)}</p>
+                          <p className="mt-1 text-2xl sm:text-3xl font-bold text-stone-900">{formatAud(estimatedCorporateTotal)}</p>
+                        </div>
                       </div>
                     )}
                   </div>

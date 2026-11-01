@@ -19,16 +19,90 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
 }
 .public-site .property-theme:has(.property-showcase) .stay-body { margin-top: 2.25rem; }
 .public-site .property-theme:has(.property-showcase) .stay-section { scroll-margin-top: 7rem; }
+.public-site .property-theme:has(.property-showcase) .stay-section#availability { scroll-margin-top: .75rem; }
 @media (min-width: 768px) {
   .public-site .property-theme:has(.property-showcase) .stay-location-map {
     width: min(100%, 88rem);
     margin-inline: auto;
   }
 }
-.public-site .property-theme:has(.property-showcase) .stay-related-homes > h2,
-.public-site .property-theme:has(.property-showcase) .related-houses-preview {
+.public-site .property-theme:has(.property-showcase) .stay-related-homes {
+  padding-block: clamp(2.5rem, 4vw, 4rem);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.public-site .property-theme:has(.property-showcase) .stay-section.stay-related-homes > h2 {
   max-width: none;
   padding-inline: 0;
+  margin-bottom: 1.5rem;
+  color: var(--showcase-navy);
+  font-family: var(--property-serif) !important;
+  font-size: clamp(2.2rem, 3vw, 3.35rem);
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  line-height: 1.1;
+  text-align: center;
+}
+.public-site .property-theme:has(.property-showcase) .stay-section.stay-related-homes > h2::before {
+  display: block;
+  width: 2.5rem;
+  height: 2px;
+  margin: 0 auto 0.9rem;
+  background: #b98b3e;
+  content: "";
+}
+.public-site .property-theme:has(.property-showcase) .property-related-houses-grid {
+  --houses-paper: #fff;
+  --houses-serif: var(--font-brand-serif), Georgia, serif;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: none;
+  margin-inline: auto;
+  padding: 0;
+  background: transparent;
+}
+.public-site .property-theme:has(.property-showcase) .property-related-houses-grid .houses-editorial-list__card {
+  border-radius: 1rem !important;
+  background: #fff;
+  box-shadow: 0 0.65rem 1.8rem rgba(0, 40, 68, 0.07);
+}
+.public-site .property-theme:has(.property-showcase) .property-related-houses-grid .houses-editorial-list__cta {
+  min-height: 3.25rem;
+  padding: 0.8rem 1rem;
+  border-top: 0;
+  border-radius: 0.8rem !important;
+  background: #002844;
+  color: #fff;
+  font-size: 0.85rem;
+  transition: background-color 180ms ease;
+}
+.public-site .property-theme:has(.property-showcase) .property-related-houses-grid .houses-editorial-list__cta svg {
+  color: #fff;
+}
+.public-site .property-theme:has(.property-showcase) .property-related-houses-grid .houses-editorial-list__link:is(:hover, :focus-visible) .houses-editorial-list__cta {
+  background: #0b4869;
+}
+@media (min-width: 1051px) {
+  .public-site .property-theme:has(.property-showcase) .stay-related-homes {
+    width: calc(100% - clamp(0.75rem, 2.25vw, 2.25rem));
+  }
+  .public-site .property-theme:has(.property-showcase) .property-related-houses-grid {
+    zoom: 75%;
+  }
+  .public-site .property-theme:has(.property-showcase) .property-related-houses-grid .houses-editorial-list__details li,
+  .public-site .property-theme:has(.property-showcase) .property-related-houses-grid .houses-editorial-list__cta {
+    font-size: 1.125rem;
+  }
+}
+@media (min-width: 1024px) {
+  .public-site .property-theme:has(.property-showcase) .property-related-houses-grid {
+    width: 66.5%;
+  }
+}
+@media (max-width: 760px) {
+  .public-site .property-theme:has(.property-showcase) .property-related-houses-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .property-showcase { --showcase-navy: var(--hero-green, #002844); --showcase-gold: #d9b878; color: var(--showcase-navy); }
@@ -36,28 +110,26 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
   position: relative; display: flex; align-items: flex-start; min-height: clamp(29rem, 47vw, 38rem);
   overflow: hidden; background: var(--showcase-navy);
 }
-.property-showcase-hero-media { position: absolute; inset: 0; }
-.property-showcase-hero-media img { object-fit: cover; object-position: center 48%; }
+.property-showcase-hero-media { position: absolute; inset: 0; overflow: hidden; }
+.property-showcase-hero-media img { object-fit: cover; object-position: center 18%; }
 @media (min-width: 768px) {
   .public-site .property-theme:has(.property-showcase) .property-showcase-hero {
     width: 100%;
-    height: calc(100svh - 3.375rem);
+    height: calc(100svh - 6.125rem);
     min-height: 0;
     margin-inline: 0;
     border-radius: 0;
   }
-
-  .property-showcase-hero-media img { object-position: center; }
 }
 .property-showcase-hero::after {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(90deg, rgba(0, 30, 53, .9) 0%, rgba(0, 30, 53, .72) 24%, rgba(0, 30, 53, .34) 44%, transparent 62%);
+  background: linear-gradient(90deg, rgba(0, 30, 53, .9) 0%, rgba(0, 30, 53, .84) 18%, rgba(0, 30, 53, .65) 34%, rgba(0, 30, 53, .34) 52%, rgba(0, 30, 53, .1) 68%, transparent 78%);
 }
 .property-showcase-hero-content { position: relative; z-index: 1; width: calc(100% - 2 * var(--public-card-gutter)); max-width: none; margin: 0 auto; padding: clamp(6rem, 10vh, 8rem) 0 2rem; color: #fff; }
 @media (min-width: 768px) {
   .property-showcase-hero-content {
-    display: flex; flex-direction: column; justify-content: center;
-    height: 100%; padding: 5.5rem 0 2rem;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    height: 100%; padding: 5.5rem 0 10.5rem;
   }
   .property-showcase-back { position: absolute; top: 6rem; left: 0; }
 }
@@ -68,12 +140,12 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
   text-decoration: none; transition: background .18s, border-color .18s;
 }
 .property-showcase-back:hover, .property-showcase-back:focus-visible { border-color: #fff; background: rgba(0, 30, 53, .78); }
-.property-showcase-eyebrow { margin: 0 0 .65rem; color: #e8cf9c; font-size: .75rem !important; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
-.property-theme .property-showcase h1 { max-width: 48rem; margin: 0 0 .8rem; color: #fff; font-family: var(--property-serif); font-size: clamp(3.25rem, 5vw, 4.75rem); font-weight: 400; line-height: 1; letter-spacing: -.055em; }
-.property-showcase-tagline { max-width: 48rem; margin: 0 0 1.1rem; color: #fff; font-size: clamp(1.05rem, 1.65vw, 1.45rem) !important; font-weight: 550; line-height: 1.4 !important; }
+.property-showcase-eyebrow { margin: 0 0 .55rem; color: #e8cf9c; font-size: .7rem !important; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
+.property-theme .property-showcase h1 { max-width: 48rem; margin: 0 0 .65rem; color: #fff; font-family: var(--property-serif); font-size: clamp(2.75rem, 3.7vw, 3.5rem); font-weight: 400; line-height: 1; letter-spacing: -.055em; }
+.property-showcase-tagline { max-width: 48rem; margin: 0 0 .9rem; color: #fff; font-size: clamp(.95rem, 1.3vw, 1.2rem) !important; font-weight: 550; line-height: 1.4 !important; }
 .property-showcase-location, .property-showcase-hero-facts span { display: flex; align-items: center; gap: .55rem; color: #f4f6f6; }
-.property-showcase-location { margin: 0 0 .7rem; font-size: .9rem !important; }
-.property-showcase-hero-facts { display: flex; flex-wrap: wrap; gap: .65rem 1.6rem; margin: 1.1rem 0 1.65rem; font-size: .9rem; }
+.property-showcase-location { margin: 0 0 .65rem; font-size: .8rem !important; }
+.property-showcase-hero-facts { display: flex; flex-wrap: wrap; gap: .6rem 1.4rem; margin: .9rem 0 1.25rem; font-size: .8rem; }
 .property-showcase-hero-facts svg, .property-showcase-location svg { flex: none; color: #ebc785; }
 .property-showcase-hero-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
 .property-showcase .property-showcase-button {
@@ -87,7 +159,7 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
 .property-showcase .property-showcase-button.is-gold:hover { background: #e5c992; }
 .property-showcase .property-showcase-button.is-outline { color: var(--showcase-navy); background: transparent; }
 .property-showcase .property-showcase-button.is-outline:hover { background: #e9efed; }
-.property-showcase-hero .property-showcase-button { min-height: 2.9rem; padding: .65rem 1.15rem; border: 1px solid transparent; border-radius: .3rem; font-size: .78rem; font-weight: 750; letter-spacing: .065em; }
+.property-showcase-hero .property-showcase-button { min-height: 2.65rem; padding: .6rem .9rem; border: 1px solid transparent; border-radius: .3rem; font-size: .7rem; font-weight: 750; letter-spacing: .065em; }
 .property-showcase .property-showcase-hero .property-showcase-button.is-gold { background: #b98b3e; color: #fff; }
 .property-showcase .property-showcase-hero .property-showcase-button.is-gold:hover { background: #a77b32; }
 .property-showcase .property-showcase-hero .property-showcase-button.is-outline { border-color: rgba(255,255,255,.85); color: #fff; background: rgba(0, 30, 53, .4); }
@@ -95,30 +167,32 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
 
 .property-showcase-nav {
   position: relative; z-index: 2;
-  display: flex; justify-content: center; gap: clamp(.25rem, .55vw, .7rem);
-  width: 100%; margin: -1.5rem 0 0; padding: .7rem var(--public-card-gutter);
-  overflow-x: auto; border-top: 1px solid #e3e8e7; border-bottom: 1px solid #e3e8e7; border-radius: 0;
-  background: #fff; box-shadow: 0 .6rem 2rem rgba(0,30,53,.09); scrollbar-width: thin;
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+  width: 100%; margin: 0; padding: 0;
+  border-top: 1px solid #dce5e8; border-bottom: 1px solid #dce5e8;
+  background: #fff; box-shadow: 0 .5rem 1.5rem rgba(0,30,53,.08);
 }
 .property-showcase-nav a {
-  display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; gap: .55rem;
-  min-height: 3.1rem; padding: .65rem clamp(.65rem, .8vw, .9rem); color: #36505f;
-  border: 1px solid #e6edf0; border-radius: 999px; background: #f7f9fa;
-  font-size: clamp(.84rem, .92vw, .96rem); font-weight: 650; white-space: nowrap;
-  transition: background .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease;
+  display: flex; min-width: 0; min-height: 6rem; flex-direction: column;
+  align-items: center; justify-content: center; gap: .45rem;
+  padding: .9rem .4rem; border-right: 1px solid #e3e9eb;
+  color: #36505f; background: #fff;
+  font-size: clamp(.84rem, .92vw, .96rem); font-weight: 650; text-align: center; white-space: nowrap;
+  transition: background .18s ease, color .18s ease;
 }
-.property-showcase-nav a:hover { color: var(--showcase-navy); border-color: #d9e5ea; background: #f2f7f9; }
-.property-showcase-nav a:focus-visible { outline: 2px solid var(--showcase-navy); outline-offset: 2px; }
-.property-showcase-nav a[aria-current="location"] { border-color: var(--showcase-navy); background: var(--showcase-navy); color: #fff; box-shadow: 0 .25rem .7rem rgba(0,40,68,.16); }
+.property-showcase-nav a:last-child { border-right: 0; }
+.property-showcase-nav a:hover { color: var(--showcase-navy); background: #f0f5f6; }
+.property-showcase-nav a:focus-visible { outline: 2px solid var(--showcase-navy); outline-offset: -3px; }
+.property-showcase-nav a[aria-current="location"] { background: var(--showcase-navy); color: #fff; box-shadow: inset 0 -.3rem 0 var(--showcase-gold); }
 .property-showcase-nav a[aria-current="location"] svg { color: var(--showcase-gold); }
-.property-showcase-nav svg { flex: none; width: 19px; height: 19px; color: #a9814c; }
+.property-showcase-nav svg { flex: none; width: 24px; height: 24px; color: #a9814c; }
 
 .property-showcase-overview,
 .property-showcase-features,
 .property-showcase-info-grid,
 .property-showcase-details-grid,
 .property-showcase-partner { width: calc(100% - 2 * var(--public-card-gutter)); max-width: none; margin-inline: auto; }
-.property-showcase-overview { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.15fr); gap: clamp(2rem, 5vw, 5rem); align-items: center; padding: clamp(3rem, 5vw, 5rem) 0 3rem; scroll-margin-top: 7rem; }
+.property-showcase-overview { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.15fr); gap: clamp(2rem, 5vw, 5rem); align-items: center; padding: 1.5rem 0 3rem; scroll-margin-top: 7rem; }
 .property-showcase-overview:not(:has(.property-showcase-mosaic)) { grid-template-columns: 1fr; }
 .property-showcase-kicker { margin: 0 0 .6rem; color: #9d752f; font-size: .76rem !important; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
 .property-theme .property-showcase h2 { margin: 0 0 1rem; color: var(--showcase-navy); font-family: var(--property-serif); font-size: var(--property-section-heading-size); font-weight: 400; line-height: 1.06; letter-spacing: -.045em; }
@@ -154,6 +228,8 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
 .property-showcase-info-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .property-showcase-details-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .property-showcase-panel { min-width: 0; padding: clamp(1.4rem, 2.3vw, 2rem); border-radius: .8rem; background: #fff; box-shadow: 0 .5rem 1.75rem rgba(0, 40, 68, .06); scroll-margin-top: 7rem; }
+.property-showcase-amenities,
+.property-showcase-panel#house-checkin { scroll-margin-top: 2.5rem; }
 .property-theme .property-showcase-panel h2 { display: flex; align-items: center; gap: .55rem; margin: 0 0 1rem; font-size: 1.25rem; }
 .property-showcase-panel h2 svg { flex: none; width: 20px; height: 20px; color: #b18a55; }
 .property-showcase-panel p, .property-showcase-panel li { color: #36505f; font-size: .87rem !important; line-height: 1.6 !important; white-space: pre-line; }
@@ -224,8 +300,16 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
 @media (max-width: 1100px) {
   .property-showcase-feature-list { grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr)); }
 }
-@media (max-width: 1280px) {
-  .property-showcase-nav { justify-content: flex-start; }
+@media (max-width: 1050px) {
+  .property-showcase-nav { display: flex; overflow-x: auto; scrollbar-width: thin; scroll-snap-type: x proximity; }
+  .property-showcase-nav a { flex: 0 0 auto; min-height: 3.7rem; flex-direction: row; gap: .55rem; padding: .7rem 1rem; scroll-snap-align: start; }
+  .property-showcase-nav svg { width: 20px; height: 20px; }
+}
+@media (min-width: 768px) and (max-width: 1050px) {
+  .public-site .property-theme:has(.property-showcase) .property-showcase-hero { height: calc(100svh - 3.825rem); }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .public-site .property-theme:has(.property-showcase) .property-showcase-hero { height: calc(100svh - 3.825rem - 5.1625rem - env(safe-area-inset-bottom)); }
 }
 @media (max-width: 900px) {
   .public-site .property-theme:has(.property-showcase) #sleep .stay-room-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -274,19 +358,17 @@ body:has(.property-showcase) .public-site > main { background: #fff; }
   .property-showcase .property-showcase-hero .property-showcase-button.is-outline { border-color: var(--showcase-navy); color: var(--showcase-navy); background: #fff; }
   .property-showcase .property-showcase-hero .property-showcase-button.is-outline:hover { background: #eef3f6; }
   .property-showcase-nav {
-    position: static; justify-content: flex-start; gap: .45rem;
+    position: static;
     width: 100%; margin: 0;
-    padding: .6rem var(--public-card-gutter) .75rem; border: 0; border-bottom: 1px solid #e3e8e7;
-    border-radius: 0; background: #fff; box-shadow: none; scrollbar-width: thin; scroll-snap-type: x proximity;
+    padding: 0; border-top: 1px solid #e3e8e7; border-bottom: 1px solid #e3e8e7;
+    background: #fff; box-shadow: none;
   }
   .property-showcase-nav::-webkit-scrollbar { height: 3px; }
   .property-showcase-nav::-webkit-scrollbar-thumb { background: #c8d6dc; }
   .property-showcase-nav a {
-    min-height: 2.7rem; padding: .55rem .8rem; border-color: #e5ebee;
-    border-radius: 999px; background: #f7f9fa; font-size: .75rem; scroll-snap-align: start;
+    min-height: 3.2rem; padding: .6rem .85rem; font-size: .75rem;
   }
   .property-showcase-nav a:hover { background: #edf3f6; }
-  .property-showcase-nav a[aria-current="location"] { border-color: var(--showcase-navy); background: var(--showcase-navy); color: #fff; }
   .property-showcase-nav svg { width: 16px; height: 16px; }
   .property-showcase-overview, .property-showcase-features, .property-showcase-info-grid, .property-showcase-details-grid, .property-showcase-partner { width: calc(100% - 2 * var(--public-card-gutter)); }
   .property-showcase-overview { padding: 1.9rem 0 1.5rem; }

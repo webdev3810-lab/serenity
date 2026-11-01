@@ -120,7 +120,7 @@ export function calculatePromotionDiscount(promotion: PromotionRecord, bookingAm
 }
 
 export function applyPromotionToPrice(price: PriceBreakdown, promotion: PromotionRecord): PriceBreakdown {
-  const baseAmount = Math.max(0, price.nightlySubtotal + price.petFee + price.extraGuestFee - price.discount);
+  const baseAmount = Math.max(0, price.nightlySubtotal + price.cleaningFee + price.petFee + price.extraGuestFee - price.discount);
   const promotionDiscount = calculatePromotionDiscount(promotion, price.total);
   const total = Math.round(Math.max(0, baseAmount - promotionDiscount) * 100) / 100;
   const promotionLabel = promotion.discount_type === "percentage"

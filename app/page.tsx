@@ -2,7 +2,7 @@ import SerenityEditorialHome, {
   type SerenityEditorialHouse,
   type SerenityEditorialPreviewImage,
 } from "@/src/components/homepage/SerenityEditorialHome";
-import { getHomepageContent, getHomepageHeroMedia, getPublicProperties } from "@/src/lib/supabase/content";
+import { getHomepageContent, getHomepageHeroMedia, getPublicPageCopy, getPublicPageMedia, getPublicProperties } from "@/src/lib/supabase/content";
 import { lodgingBusinessJsonLd, pageMetadata } from "@/src/lib/seo";
 import { isApprovedHomepageMediaSource } from "@/src/lib/homepageMedia";
 import { normalizeEditorialHomepageContent } from "@/src/lib/homepageEditorialContent";
@@ -13,14 +13,19 @@ export const dynamic = "force-dynamic";
 const displayName = (name: string) => name.replace(" - Whole", "");
 
 export default async function Home() {
-  const [properties, homepageHeroMedia, homepageContent] = await Promise.all([
+  const [properties, homepageHeroMedia, homepageContent, howItWorksCopy, howItWorksMedia] = await Promise.all([
     getPublicProperties(),
     getHomepageHeroMedia(),
     getHomepageContent(),
+    getPublicPageCopy(),
+    getPublicPageMedia(),
   ]);
   const editorialContent = normalizeEditorialHomepageContent(homepageContent);
   const featuredProperties = properties.filter((property) => property.featured);
-  const homepageProperties = (featuredProperties.length ? featuredProperties : properties).slice(0, 3);
+  const homepageProperties = [
+    ...featuredProperties,
+    ...properties.filter((property) => !property.featured),
+  ];
 
   const houses: SerenityEditorialHouse[] = homepageProperties.map((property) => {
     const approvedImages = property.images.filter((image) => isApprovedHomepageMediaSource(image.src));
@@ -83,6 +88,8 @@ export default async function Home() {
         houses={houses}
         photoPreviews={photoPreviews}
         content={editorialContent}
+        howItWorksCopy={howItWorksCopy}
+        howItWorksMedia={howItWorksMedia}
       />
     </>
   );

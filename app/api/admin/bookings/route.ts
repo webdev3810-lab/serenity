@@ -4,9 +4,9 @@ import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 import { getAdminUser } from "@/src/lib/supabase/auth";
 import { getPublicPropertyBySlug } from "@/src/lib/supabase/content";
 import type { Json } from "@/src/lib/supabase/types";
+import { isValidPartnerId } from "@/src/lib/partnerId";
 
 const reference = () => `ADM-${new Date().getUTCFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
-const partnerIdPattern = /^SER-(?:[A-F0-9]{12}|[A-F0-9]{20})$/;
 
 const guestCounts = (value: unknown): GuestCounts => {
   const row = value && typeof value === "object" ? value as Record<string, unknown> : {};
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     const paymentStatus = String(body.paymentStatus ?? "pending");
     if (!propertyId || !checkIn || !checkout || !contactName || !email) return NextResponse.json({ error: "House, dates, guest name, and email are required." }, { status: 400 });
     if (!/^\S+@\S+\.\S+$/.test(email)) return NextResponse.json({ error: "Enter a valid guest email address." }, { status: 400 });
-    if (corporate && !partnerIdPattern.test(partnerId)) return NextResponse.json({ error: "A valid Partner ID is required for corporate reservations." }, { status: 400 });
+    if (corporate && !isValidPartnerId(partnerId)) return NextResponse.json({ error: "A valid Partner ID is required for corporate reservations." }, { status: 400 });
     if (!(["pending", "paid"] as const).includes(paymentStatus as "pending" | "paid")) return NextResponse.json({ error: "Manual bookings can start as pending or paid." }, { status: 400 });
     if (internalNotes.length > 4000) return NextResponse.json({ error: "Internal notes must be 4,000 characters or fewer." }, { status: 400 });
 

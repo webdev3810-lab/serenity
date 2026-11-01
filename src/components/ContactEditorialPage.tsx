@@ -88,7 +88,7 @@ export function ContactEditorialPage({ faqContent, media, copy, properties }: { 
           <p>{contact.contactPageDescription}</p>
           <div className="contact-story-links">
             <a href="#contact-form">Send a message <ArrowUpRight size={17} aria-hidden="true" /></a>
-            <Link href="/homes">Explore our homes <ArrowUpRight size={17} aria-hidden="true" /></Link>
+            <Link href="/book-now">Book now <ArrowUpRight size={17} aria-hidden="true" /></Link>
           </div>
         </div>
         <figure className="contact-story-hero__media">
@@ -217,7 +217,7 @@ export function ContactEditorialPage({ faqContent, media, copy, properties }: { 
         </div>
         <div className="contact-story-closing__links">
           {socialLinks.map(([label, href]) => <a key={label} href={href} target="_blank" rel="noopener noreferrer">{label} <ArrowUpRight size={17} aria-hidden="true" /></a>)}
-          <Link href="/homes">View all homes <ArrowUpRight size={17} aria-hidden="true" /></Link>
+          <Link href="/book-now">Book now <ArrowUpRight size={17} aria-hidden="true" /></Link>
         </div>
       </section>
     </main>

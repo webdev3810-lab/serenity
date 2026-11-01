@@ -289,10 +289,12 @@ body:has(.about-story-page) .public-site > main {
 }
 
 .about-story-intro__map {
+  width: 100%;
+  max-width: 88rem;
   aspect-ratio: 1672 / 941;
   overflow: hidden;
-  border-radius: 1rem;
-  margin-top: clamp(2rem, 4vw, 4rem);
+  border-radius: 1.25rem;
+  margin: clamp(2rem, 4vw, 4rem) auto 0;
   background: #e9efdf;
 }
 
@@ -416,6 +418,7 @@ body:has(.about-story-page) .public-site > main {
   padding: clamp(2rem, 4vw, 4rem);
   border-radius: 1.5rem;
   background: #f8fafb;
+  scroll-margin-top: 1rem;
 }
 
 .about-story-host__content {

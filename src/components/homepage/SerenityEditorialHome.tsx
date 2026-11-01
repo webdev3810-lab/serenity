@@ -7,6 +7,9 @@ import ScrollWipeText from "./ScrollWipeText";
 import StayHighlightIcon from "./StayHighlightIcon";
 import type { EditorialHomepageContent } from "@/src/lib/homepageEditorialContent";
 import { editorialHouseDetails } from "@/src/lib/editorialHouseDetails";
+import type { PublicPageCopy } from "@/src/lib/publicPageCopy";
+import type { PublicPageMedia } from "@/src/lib/publicPageMedia";
+import HomepageHowItWorks from "./HomepageHowItWorks";
 
 export type SerenityEditorialHouse = {
   name: string;
@@ -35,6 +38,8 @@ type SerenityEditorialHomeProps = {
   houses: SerenityEditorialHouse[];
   photoPreviews: SerenityEditorialPreviewImage[];
   content: EditorialHomepageContent;
+  howItWorksCopy: PublicPageCopy;
+  howItWorksMedia: PublicPageMedia;
 };
 
 const stayEssentials = [
@@ -52,6 +57,8 @@ export default function SerenityEditorialHome({
   houses,
   photoPreviews,
   content,
+  howItWorksCopy,
+  howItWorksMedia,
 }: SerenityEditorialHomeProps) {
   const marqueeDuration = `${Math.max(photoPreviews.length * 6, 72)}s`;
   const audienceItems = content.editorial_hero_audience.split("\n").map((item) => item.trim()).filter(Boolean);
@@ -80,7 +87,7 @@ export default function SerenityEditorialHome({
             {content.editorial_hero_description}
           </p>
           <div className="serenity-editorial-hero__actions">
-            <Link href="/corporate-stays#corporate-question">{content.editorial_hero_primary_label}<ArrowRight size={18} aria-hidden="true" /></Link>
+            <Link href="/book-now">{content.editorial_hero_primary_label}<ArrowRight size={18} aria-hidden="true" /></Link>
             <Link href="/homes">{content.editorial_hero_secondary_label}<ArrowRight size={18} aria-hidden="true" /></Link>
           </div>
           <div className="serenity-editorial-hero__stats" aria-label="Stay benefits">
@@ -93,90 +100,94 @@ export default function SerenityEditorialHome({
         </div>
       </section>
 
-      <section className="houses-editorial-list serenity-editorial-house-cards" aria-label="The Serenity houses">
-        {houses.map((house) => (
-          <article className="houses-editorial-list__card" key={house.slug}>
-            <Link href={`/properties/${house.slug}`} className="houses-editorial-list__link">
-              <span className="houses-editorial-list__media">
-                {house.image ? (
-                  <Image
-                    src={house.image}
-                    alt={house.imageAlt}
-                    fill
-                    sizes="(max-width: 760px) 100vw, (max-width: 1023px) 50vw, 33vw"
-                    unoptimized={house.image.includes(".supabase.co/")}
-                  />
-                ) : <span className="houses-editorial-list__fallback">House photos coming soon</span>}
-              </span>
-              <div className="houses-editorial-list__content">
-                <div className="houses-editorial-list__caption">
-                  <h2 className="houses-editorial-list__title">{house.name}</h2>
+      <div className="serenity-editorial-home__body">
+        <section className="houses-editorial-list serenity-editorial-house-cards" aria-label="The Serenity houses">
+          {houses.map((house) => (
+            <article className="houses-editorial-list__card" key={house.slug}>
+              <Link href={`/properties/${house.slug}`} className="houses-editorial-list__link">
+                <span className="houses-editorial-list__media">
+                  {house.image ? (
+                    <Image
+                      src={house.image}
+                      alt={house.imageAlt}
+                      fill
+                      sizes="(max-width: 760px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                      unoptimized={house.image.includes(".supabase.co/")}
+                    />
+                  ) : <span className="houses-editorial-list__fallback">House photos coming soon</span>}
+                </span>
+                <div className="houses-editorial-list__content">
+                  <div className="houses-editorial-list__caption">
+                    <h2 className="houses-editorial-list__title">{house.name}</h2>
+                  </div>
+                  <ul className="houses-editorial-list__details" aria-label={`${house.name} at a glance`}>
+                    {editorialHouseDetails(house).map(({ label, Icon }) => (
+                      <li key={label}><Icon size={17} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span></li>
+                    ))}
+                  </ul>
+                  <span className="houses-editorial-list__cta">Explore house <ArrowUpRight size={17} aria-hidden="true" /></span>
                 </div>
-                <ul className="houses-editorial-list__details" aria-label={`${house.name} at a glance`}>
-                  {editorialHouseDetails(house).map(({ label, Icon }) => (
-                    <li key={label}><Icon size={17} strokeWidth={1.8} aria-hidden="true" /><span>{label}</span></li>
-                  ))}
-                </ul>
-                <span className="houses-editorial-list__cta">Explore house <ArrowUpRight size={17} aria-hidden="true" /></span>
-              </div>
-            </Link>
-          </article>
-        ))}
-      </section>
-
-      <section className="serenity-editorial-essentials" aria-label="Stay essentials">
-        <ul className="serenity-editorial-essentials__grid">
-          {stayEssentials.map(({ label, detail, Icon }) => (
-            <li className="serenity-editorial-essentials__card" key={label}>
-              <Icon size={27} strokeWidth={1.8} aria-hidden="true" />
-              <span><strong>{label}</strong>{detail && <small>{detail}</small>}</span>
-            </li>
+              </Link>
+            </article>
           ))}
-        </ul>
-      </section>
-
-      <section className="serenity-editorial-intro" aria-labelledby="serenity-editorial-intro-title">
-        <div className="serenity-editorial-intro__topline">
-          <ScrollWipeText as="h2" id="serenity-editorial-intro-title">{content.editorial_intro_heading}</ScrollWipeText>
-          <Link href="/homes">{content.editorial_intro_link_label} <ArrowUpRight size={17} aria-hidden="true" /></Link>
-        </div>
-        <div className="serenity-editorial-intro__statement">
-          <ScrollWipeText as="p">{content.editorial_intro_statement_one}</ScrollWipeText>
-          <ScrollWipeText as="p">{content.editorial_intro_statement_two}</ScrollWipeText>
-        </div>
-      </section>
-
-      {photoPreviews.length > 0 ? (
-        <section className="serenity-editorial-photo-preview" aria-label="Serenity house photo previews">
-          <SerenityPhotoPreviewRail photos={photoPreviews} duration={marqueeDuration} />
         </section>
-      ) : null}
 
-      <section className="serenity-editorial-services" aria-labelledby="serenity-editorial-services-title">
-        <div className="serenity-editorial-services__heading">
-          <ScrollWipeText as="h2" id="serenity-editorial-services-title" tone="light">{content.editorial_services_heading}</ScrollWipeText>
-          <ScrollWipeText as="p" tone="light">{content.editorial_services_description}</ScrollWipeText>
-        </div>
-        <div className="serenity-editorial-services__grid">
-          {content.editorial_services.map((service, index) => <Link href={["/homes", "/corporate-stays", "/contact"][index]} key={index}>
-            <div className="serenity-editorial-services__meta" aria-hidden="true">
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <ArrowUpRight size={18} strokeWidth={1.5} />
-            </div>
-            <ScrollWipeText as="h3" tone="light">{service.title}</ScrollWipeText>
-            <p>{service.description}</p>
-          </Link>)}
-        </div>
-      </section>
+        <section className="serenity-editorial-essentials" aria-label="Stay essentials">
+          <ul className="serenity-editorial-essentials__grid">
+            {stayEssentials.map(({ label, detail, Icon }) => (
+              <li className="serenity-editorial-essentials__card" key={label}>
+                <Icon size={27} strokeWidth={1.8} aria-hidden="true" />
+                <span><strong>{label}</strong>{detail && <small>{detail}</small>}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-      <section className="serenity-editorial-social" aria-labelledby="serenity-editorial-social-title">
-        <h2 id="serenity-editorial-social-title">{content.editorial_social_heading}</h2>
-        <div>
-          <Link href="/homes"><span className="serenity-editorial-social__number" aria-hidden="true">01</span><span>{content.editorial_social_houses_label}</span><ArrowUpRight size={20} strokeWidth={1.5} aria-hidden="true" /></Link>
-          <Link href="/about"><span className="serenity-editorial-social__number" aria-hidden="true">02</span><span>{content.editorial_social_story_label}</span><ArrowUpRight size={20} strokeWidth={1.5} aria-hidden="true" /></Link>
-          <Link href="/contact"><span className="serenity-editorial-social__number" aria-hidden="true">03</span><span>{content.editorial_social_contact_label}</span><ArrowUpRight size={20} strokeWidth={1.5} aria-hidden="true" /></Link>
-        </div>
-      </section>
+        <section className="serenity-editorial-intro" aria-labelledby="serenity-editorial-intro-title">
+          <div className="serenity-editorial-intro__topline">
+            <ScrollWipeText as="h2" id="serenity-editorial-intro-title">{content.editorial_intro_heading}</ScrollWipeText>
+            <Link href="/homes">{content.editorial_intro_link_label} <ArrowUpRight size={17} aria-hidden="true" /></Link>
+          </div>
+          <div className="serenity-editorial-intro__statement">
+            <ScrollWipeText as="p">{content.editorial_intro_statement_one}</ScrollWipeText>
+            <ScrollWipeText as="p">{content.editorial_intro_statement_two}</ScrollWipeText>
+          </div>
+        </section>
+
+        {photoPreviews.length > 0 ? (
+          <section className="serenity-editorial-photo-preview" aria-label="Serenity house photo previews">
+            <SerenityPhotoPreviewRail photos={photoPreviews} duration={marqueeDuration} />
+          </section>
+        ) : null}
+
+        <HomepageHowItWorks copy={howItWorksCopy} media={howItWorksMedia} />
+
+        <section className="serenity-editorial-services" aria-labelledby="serenity-editorial-services-title">
+          <div className="serenity-editorial-services__heading">
+            <ScrollWipeText as="h2" id="serenity-editorial-services-title" tone="light">{content.editorial_services_heading}</ScrollWipeText>
+            <ScrollWipeText as="p" tone="light">{content.editorial_services_description}</ScrollWipeText>
+          </div>
+          <div className="serenity-editorial-services__grid">
+            {content.editorial_services.map((service, index) => <Link href={["/homes", "/corporate-stays", "/contact"][index]} key={index}>
+              <div className="serenity-editorial-services__meta" aria-hidden="true">
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <ArrowUpRight size={18} strokeWidth={1.5} />
+              </div>
+              <ScrollWipeText as="h3" tone="light">{service.title}</ScrollWipeText>
+              <p>{service.description}</p>
+            </Link>)}
+          </div>
+        </section>
+
+        <section className="serenity-editorial-social" aria-labelledby="serenity-editorial-social-title">
+          <h2 id="serenity-editorial-social-title">{content.editorial_social_heading}</h2>
+          <div>
+            <Link href="/homes"><span className="serenity-editorial-social__number" aria-hidden="true">01</span><span>{content.editorial_social_houses_label}</span><ArrowUpRight size={20} strokeWidth={1.5} aria-hidden="true" /></Link>
+            <Link href="/about"><span className="serenity-editorial-social__number" aria-hidden="true">02</span><span>{content.editorial_social_story_label}</span><ArrowUpRight size={20} strokeWidth={1.5} aria-hidden="true" /></Link>
+            <Link href="/contact"><span className="serenity-editorial-social__number" aria-hidden="true">03</span><span>{content.editorial_social_contact_label}</span><ArrowUpRight size={20} strokeWidth={1.5} aria-hidden="true" /></Link>
+          </div>
+        </section>
+      </div>
 
     </div>
   );

@@ -128,16 +128,16 @@ export const PUBLIC_PAGE_COPY_FIELDS = [
   { page: "Homes", key: "homesHeroAccent", label: "Page heading highlighted word", value: "Homes" },
   { page: "Homes", key: "homesHeroLead", label: "Page introduction", value: "Fully furnished private homes for work, family and longer stays. Find the space that feels right for you." },
   { page: "Homes", key: "homesAsideLead", label: "Collection introduction", value: "Explore each home's photos, features and room layout before you choose your stay." },
-  { page: "Homes", key: "homesComfortTitle", label: "Comfort heading", value: "Stay in comfort." },
-  { page: "Homes", key: "homesComfortLead", label: "Comfort introduction", value: "Everything you need to arrive easily and feel at home." },
-  { page: "Homes", key: "homesFeature1Title", label: "Comfort card 1 heading", value: "Private whole homes" },
-  { page: "Homes", key: "homesFeature1Lead", label: "Comfort card 1 description", value: "Room to cook, work, rest and live at your own pace." },
-  { page: "Homes", key: "homesFeature2Title", label: "Comfort card 2 heading", value: "Flexible stays" },
-  { page: "Homes", key: "homesFeature2Lead", label: "Comfort card 2 description", value: "A practical base for families, relocations and project teams." },
-  { page: "Homes", key: "homesFeature3Title", label: "Comfort card 3 heading", value: "Everyday essentials" },
-  { page: "Homes", key: "homesFeature3Lead", label: "Comfort card 3 description", value: "Furnished spaces with kitchens, laundries and off-street parking." },
-  { page: "Homes", key: "homesFeature4Title", label: "Comfort card 4 heading", value: "Local support" },
-  { page: "Homes", key: "homesFeature4Lead", label: "Comfort card 4 description", value: "One responsive point of contact from enquiry to checkout." },
+  { page: "Homes", key: "homesComfortTitle", label: "Booking steps heading", value: "Book your stay in four steps." },
+  { page: "Homes", key: "homesComfortLead", label: "Booking steps introduction", value: "Choose your home, select your dates, pay securely and receive confirmation." },
+  { page: "Homes", key: "homesFeature1Title", label: "Booking step 1 heading", value: "Select the house" },
+  { page: "Homes", key: "homesFeature1Lead", label: "Booking step 1 description", value: "Explore our furnished homes and choose the one that suits your stay." },
+  { page: "Homes", key: "homesFeature2Title", label: "Booking step 2 heading", value: "Select date to book" },
+  { page: "Homes", key: "homesFeature2Lead", label: "Booking step 2 description", value: "Choose your check-in and checkout dates, then review the available rate." },
+  { page: "Homes", key: "homesFeature3Title", label: "Booking step 3 heading", value: "Payment" },
+  { page: "Homes", key: "homesFeature3Lead", label: "Booking step 3 description", value: "Enter your guest details, review the total and pay securely online." },
+  { page: "Homes", key: "homesFeature4Title", label: "Booking step 4 heading", value: "Confirmation" },
+  { page: "Homes", key: "homesFeature4Lead", label: "Booking step 4 description", value: "Receive your booking confirmation by email. Arrival details follow before check-in." },
   { page: "Long Term Stays", key: "longTermTitle", label: "Page heading", value: "Weekly and Monthly Furnished Accommodation" },
   { page: "Long Term Stays", key: "longTermLead", label: "Page introduction", value: "Serenity Stays offers furnished accommodation for relocation housing, long-term project teams, insurance replacement accommodation, and temporary family stays." },
 ] as const;
@@ -155,13 +155,28 @@ export function corporateBookingWording(text: string): string {
 
 export const defaultPublicPageCopy = (): PublicPageCopy => Object.fromEntries(PUBLIC_PAGE_COPY_FIELDS.map(({ key, value }) => [key, value])) as PublicPageCopy;
 
+const previousHomesBookingCopy: Partial<Record<PublicPageCopyKey, string>> = {
+  homesComfortTitle: "Stay in comfort.",
+  homesComfortLead: "Everything you need to arrive easily and feel at home.",
+  homesFeature1Title: "Private whole homes",
+  homesFeature1Lead: "Room to cook, work, rest and live at your own pace.",
+  homesFeature2Title: "Flexible stays",
+  homesFeature2Lead: "A practical base for families, relocations and project teams.",
+  homesFeature3Title: "Everyday essentials",
+  homesFeature3Lead: "Furnished spaces with kitchens, laundries and off-street parking.",
+  homesFeature4Title: "Local support",
+  homesFeature4Lead: "One responsive point of contact from enquiry to checkout.",
+};
+
 export function normalizePublicPageCopy(value: unknown): PublicPageCopy {
   const defaults = defaultPublicPageCopy();
   if (!value || typeof value !== "object" || Array.isArray(value)) return defaults;
   const raw = value as Record<string, unknown>;
   for (const field of PUBLIC_PAGE_COPY_FIELDS) {
     const text = raw[field.key];
-    if (typeof text === "string" && text.trim()) defaults[field.key] = corporateBookingWording(text.trim().slice(0, 1000));
+    if (typeof text === "string" && text.trim() && text.trim() !== previousHomesBookingCopy[field.key]) {
+      defaults[field.key] = corporateBookingWording(text.trim().slice(0, 1000));
+    }
   }
   return defaults;
 }

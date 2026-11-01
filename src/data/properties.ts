@@ -78,6 +78,7 @@ export type Property = {
   bookingRequestRequired: boolean;
   petsAllowed: boolean;
   corporateBookingAllowed: boolean;
+  corporateDiscount: number;
   minimumCorporateStay: number;
   minimumCorporateHouses: number;
   maximumCorporateHouses: number;
@@ -169,7 +170,7 @@ const localPropertyLibrary: Property[] = [
     petPolicy: "Pet-friendly. Pets must be declared before arrival.",
     parkingType: "Free parking",
     nightlyPrice: 240,
-    cleaningFee: 0,
+    cleaningFee: 100,
     petFee: 45,
     extraGuestFee: 20,
     extraGuestThreshold: 4,
@@ -190,6 +191,7 @@ const localPropertyLibrary: Property[] = [
     bookingRequestRequired: false,
     petsAllowed: true,
     corporateBookingAllowed: true,
+    corporateDiscount: 10,
     minimumCorporateStay: 2,
     minimumCorporateHouses: 1,
     maximumCorporateHouses: 3,
@@ -291,7 +293,7 @@ const localPropertyLibrary: Property[] = [
     petPolicy: "Pet-friendly. Pets must be declared before arrival.",
     parkingType: "Free on-site parking",
     nightlyPrice: 290,
-    cleaningFee: 0,
+    cleaningFee: 100,
     petFee: 45,
     extraGuestFee: 20,
     extraGuestThreshold: 6,
@@ -312,6 +314,7 @@ const localPropertyLibrary: Property[] = [
     bookingRequestRequired: false,
     petsAllowed: true,
     corporateBookingAllowed: true,
+    corporateDiscount: 10,
     minimumCorporateStay: 2,
     minimumCorporateHouses: 1,
     maximumCorporateHouses: 3,
@@ -451,7 +454,7 @@ const localPropertyLibrary: Property[] = [
     petPolicy: "Pet-friendly. Pets must be declared before arrival.",
     parkingType: "Free street parking",
     nightlyPrice: 270,
-    cleaningFee: 0,
+    cleaningFee: 100,
     petFee: 45,
     extraGuestFee: 20,
     extraGuestThreshold: 5,
@@ -472,6 +475,7 @@ const localPropertyLibrary: Property[] = [
     bookingRequestRequired: false,
     petsAllowed: true,
     corporateBookingAllowed: true,
+    corporateDiscount: 10,
     minimumCorporateStay: 2,
     minimumCorporateHouses: 1,
     maximumCorporateHouses: 3,
