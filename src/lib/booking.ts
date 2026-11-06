@@ -155,7 +155,7 @@ export const calculatePrice = (property: Property, checkIn?: string, checkout?: 
   const extraGuests = Math.max(0, totalStayingGuests(guests) - property.extraGuestThreshold);
   const extraGuestFee = extraGuests * property.extraGuestFee * nights;
   const configuredDiscount = Number(property.corporateDiscount ?? 10);
-  const discountPercent = corporate && Number.isFinite(configuredDiscount) ? Math.min(100, Math.max(0, configuredDiscount)) : 0;
+  const discountPercent = corporate && property.corporateDiscountEnabled === true && Number.isFinite(configuredDiscount) ? Math.min(100, Math.max(0, configuredDiscount)) : 0;
   const discount = Math.round(nightlySubtotal * discountPercent) / 100;
   const total = Math.round((nightlySubtotal - discount + cleaningFee + petFee + extraGuestFee) * 100) / 100;
   return {

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, CarFront, FileText, PawPrint, Plug, WashingMachine, Wifi } from "lucide-react";
-import SerenityHeroImage from "./SerenityHeroImage";
+import SerenityHeroImage, { type SerenityHeroSlide } from "./SerenityHeroImage";
 import SerenityPhotoPreviewRail from "./SerenityPhotoPreviewRail";
 import ScrollWipeText from "./ScrollWipeText";
 import StayHighlightIcon from "./StayHighlightIcon";
@@ -33,8 +33,7 @@ export type SerenityEditorialPreviewImage = {
 };
 
 type SerenityEditorialHomeProps = {
-  heroImage: string;
-  heroAlt: string;
+  heroSlides: SerenityHeroSlide[];
   houses: SerenityEditorialHouse[];
   photoPreviews: SerenityEditorialPreviewImage[];
   content: EditorialHomepageContent;
@@ -52,8 +51,7 @@ const stayEssentials = [
 ] as const;
 
 export default function SerenityEditorialHome({
-  heroImage,
-  heroAlt,
+  heroSlides,
   houses,
   photoPreviews,
   content,
@@ -77,7 +75,7 @@ export default function SerenityEditorialHome({
   return (
     <div className="serenity-editorial-home">
       <section className="serenity-editorial-hero" aria-labelledby="serenity-editorial-title">
-        <SerenityHeroImage key={heroImage} src={heroImage} alt={heroAlt} />
+        <SerenityHeroImage slides={heroSlides} />
         <div className="serenity-editorial-hero__content">
           <h1 id="serenity-editorial-title" data-mobile-size={mobileHeadlineSize}>
             {headlineLines.map((line, index) => <span key={index}>{line}</span>)}

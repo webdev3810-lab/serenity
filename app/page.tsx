@@ -48,14 +48,20 @@ export default async function Home() {
   });
 
   const heroHouse = houses.find((house) => house.slug === "serenity-7") ?? houses[0];
-  const restoredHeroMedia = homepageHeroMedia.find(
+  const restoredHeroImage = homepageHeroMedia.find(
     (media) => media.media_type === "image" && isApprovedHomepageMediaSource(media.public_url),
   );
-  const heroImage = restoredHeroMedia
-    ? { src: restoredHeroMedia.public_url, alt: restoredHeroMedia.alt_text || "Serenity furnished homes in Pakenham" }
-    : heroHouse
+  const heroImage = restoredHeroImage
+    ? { src: restoredHeroImage.public_url, alt: restoredHeroImage.alt_text || "Serenity furnished homes in Pakenham" }
+    : heroHouse?.image
       ? { src: heroHouse.image, alt: heroHouse.imageAlt }
-      : undefined;
+      : { src: "/serenity-7-hero-poster.jpg", alt: "Serenity 7 furnished home exterior" };
+  const heroSlides = [
+    { src: heroImage.src, alt: heroImage.alt, type: "image" as const },
+    ...homepageHeroMedia
+      .filter((media) => media.id !== restoredHeroImage?.id && isApprovedHomepageMediaSource(media.public_url))
+      .map((media) => ({ src: media.public_url, alt: media.alt_text || "Serenity furnished home", type: media.media_type })),
+  ];
   const photoPreviews: SerenityEditorialPreviewImage[] = homepageProperties.flatMap((property) => {
     const propertyName = displayName(property.name);
     const imagesBySource = new Map(
@@ -83,8 +89,7 @@ export default async function Home() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(lodgingBusinessJsonLd) }} />
       <SerenityEditorialHome
-        heroImage={heroImage?.src || ""}
-        heroAlt={heroImage?.alt || "Serenity furnished home interior"}
+        heroSlides={heroSlides}
         houses={houses}
         photoPreviews={photoPreviews}
         content={editorialContent}

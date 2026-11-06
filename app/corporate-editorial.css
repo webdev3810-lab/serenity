@@ -518,7 +518,7 @@ body:has(.corporate-editorial-page) .public-site > main {
 
 .corporate-enquiry-type {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
   padding: 0.4rem;
   border-radius: 0.85rem;
@@ -833,6 +833,69 @@ body:has(.corporate-editorial-page) .public-site > main {
   color: #e7cf99;
   font-size: 0.74rem;
   font-weight: 600;
+}
+
+.corporate-editorial-page > .corporate-partner-invite {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  margin: 0;
+  padding: clamp(1.5rem, 3vw, 3rem);
+  border: 1px solid #d5e2e8;
+  border-radius: 1.25rem;
+  background: #edf3f6;
+}
+
+.corporate-partner-invite__eyebrow {
+  color: var(--corp-green);
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.corporate-editorial-page .corporate-partner-invite h2 {
+  max-width: none;
+  margin: 0.45rem 0 0.75rem;
+  color: var(--corp-green);
+  font-size: clamp(2rem, 3vw, 3.25rem);
+  line-height: 1;
+}
+
+.corporate-partner-invite p {
+  max-width: 42rem;
+  margin: 0;
+  color: #344b58;
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-size: clamp(0.95rem, 1.15vw, 1.1rem);
+  line-height: 1.55;
+}
+
+.corporate-partner-invite__action {
+  display: inline-flex;
+  min-height: 3.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.9rem 1.4rem;
+  border-radius: 0.75rem;
+  background: var(--corp-green);
+  color: #fff;
+  font-family: var(--font-poppins), Arial, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.corporate-partner-invite__action:is(:hover, :focus-visible) {
+  background: #164663;
+}
+
+.corporate-partner-invite__action svg {
+  flex: none;
 }
 
 .corporate-editorial-page .corporate-editorial-enquiry,
@@ -1200,6 +1263,15 @@ body:has(.corporate-editorial-page) .public-site > main {
 }
 
 @media (max-width: 760px) {
+  .corporate-editorial-page > .corporate-partner-invite {
+    grid-template-columns: 1fr;
+  }
+
+  .corporate-partner-invite__action {
+    justify-self: start;
+    white-space: normal;
+  }
+
   .corporate-insurance__paths,
   .corporate-insurance__homes-grid {
     grid-template-columns: 1fr;

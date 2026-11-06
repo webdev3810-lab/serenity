@@ -36,7 +36,7 @@ export function PropertyShowcase({ property, images, onOpenPhotos, onOpenAmeniti
     { id: "house-host", label: "Your host", Icon: Users },
     ...(property.floorPlan ? [{ id: "floor-plan", label: "Floor plan", Icon: Map }] : []),
     { id: "availability", label: "Dates & prices", Icon: CalendarDays },
-    { id: "location", label: "Location", Icon: MapPin },
+    { id: "location-heading", label: "Location", Icon: MapPin },
   ];
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const navIds = nav.map(({ id }) => id).join("|");

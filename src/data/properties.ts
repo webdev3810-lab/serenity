@@ -79,6 +79,7 @@ export type Property = {
   petsAllowed: boolean;
   corporateBookingAllowed: boolean;
   corporateDiscount: number;
+  corporateDiscountEnabled: boolean;
   minimumCorporateStay: number;
   minimumCorporateHouses: number;
   maximumCorporateHouses: number;
@@ -192,6 +193,7 @@ const localPropertyLibrary: Property[] = [
     petsAllowed: true,
     corporateBookingAllowed: true,
     corporateDiscount: 10,
+    corporateDiscountEnabled: false,
     minimumCorporateStay: 2,
     minimumCorporateHouses: 1,
     maximumCorporateHouses: 3,
@@ -315,6 +317,7 @@ const localPropertyLibrary: Property[] = [
     petsAllowed: true,
     corporateBookingAllowed: true,
     corporateDiscount: 10,
+    corporateDiscountEnabled: false,
     minimumCorporateStay: 2,
     minimumCorporateHouses: 1,
     maximumCorporateHouses: 3,
@@ -476,6 +479,7 @@ const localPropertyLibrary: Property[] = [
     petsAllowed: true,
     corporateBookingAllowed: true,
     corporateDiscount: 10,
+    corporateDiscountEnabled: false,
     minimumCorporateStay: 2,
     minimumCorporateHouses: 1,
     maximumCorporateHouses: 3,

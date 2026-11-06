@@ -93,6 +93,7 @@ export type Database = {
           adjacent_houses_allowed: boolean;
           long_term_stays_allowed: boolean;
           corporate_discount: number;
+          corporate_discount_enabled: boolean;
           corporate_approval_required: boolean;
           corporate_deposit_required: boolean;
           corporate_online_payment: boolean;

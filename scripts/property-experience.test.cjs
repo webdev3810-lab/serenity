@@ -23,7 +23,26 @@ test('date ranges survive Australian daylight saving and reject invalid dates',(
 test('extra guests count adults and children per night; pet fee is once and infants excluded',()=>{const p=calculatePrice(property,'2026-12-01','2026-12-04',{adults:3,children:1,infants:2,pets:2});assert.equal(p.extraGuestFee,120);assert.equal(p.petFee,40);assert.equal(p.cleaningFee,50);assert.equal(p.total,810);});
 test('weekly and monthly stays charge cleaning once',()=>{const week=calculatePrice(property,'2026-12-01','2026-12-08',{...guests,pets:1});assert.equal(week.discount,0);assert.equal(week.tax,0);assert.equal(week.total,1490);const month=calculatePrice(property,'2026-12-01','2026-12-29',guests);assert.equal(month.discount,0);assert.equal(month.tax,0);assert.equal(month.total,5650);});
 test('admin cleaning fee changes the AUD total without changing nightly rates',()=>{const base=calculatePrice({...property,cleaningFee:100},'2026-12-01','2026-12-03',guests);const edited=calculatePrice({...property,cleaningFee:75.25},'2026-12-01','2026-12-03',guests);assert.equal(base.total,500);assert.equal(edited.total,475.25);assert.equal(calculatePrice({...property,cleaningFee:0},'2026-12-01','2026-12-03',guests).total,400);assert.equal(calculatePrice({...property,cleaningFee:100},undefined,undefined,guests).cleaningFee,0);});
-test('corporate discount reduces accommodation only and respects the configured rate',()=>{const p={...property,corporateDiscount:10};const stayGuests={adults:3,children:0,infants:0,pets:0};const direct=calculatePrice(p,'2026-12-01','2026-12-03',stayGuests);const corporate=calculatePrice(p,'2026-12-01','2026-12-03',stayGuests,true);assert.equal(direct.total,490);assert.equal(direct.discount,0);assert.equal(corporate.nightlySubtotal,400);assert.equal(corporate.extraGuestFee,40);assert.equal(corporate.cleaningFee,50);assert.equal(corporate.discount,40);assert.equal(corporate.total,450);assert.match(corporate.discountLabel,/10%/);assert.equal(calculatePrice(property,'2026-12-01','2026-12-03',stayGuests,true).discount,40);assert.equal(calculatePrice({...p,corporateDiscount:0},'2026-12-01','2026-12-03',stayGuests,true).total,490);assert.equal(calculatePrice({...p,corporateDiscount:20},'2026-12-01','2026-12-03',stayGuests,true).total,410);});
+test('corporate discount is off by default and applies the saved rate only when enabled',()=>{
+  const p={...property,corporateDiscount:10,corporateDiscountEnabled:false};
+  const stayGuests={adults:3,children:0,infants:0,pets:0};
+  const direct=calculatePrice(p,'2026-12-01','2026-12-03',stayGuests);
+  const disabled=calculatePrice(p,'2026-12-01','2026-12-03',stayGuests,true);
+  const enabled=calculatePrice({...p,corporateDiscountEnabled:true},'2026-12-01','2026-12-03',stayGuests,true);
+  assert.equal(direct.total,490);
+  assert.equal(disabled.total,490);
+  assert.equal(disabled.discount,0);
+  assert.equal(disabled.discountLabel,'');
+  assert.equal(enabled.nightlySubtotal,400);
+  assert.equal(enabled.extraGuestFee,40);
+  assert.equal(enabled.cleaningFee,50);
+  assert.equal(enabled.discount,40);
+  assert.equal(enabled.total,450);
+  assert.match(enabled.discountLabel,/10%/);
+  assert.equal(calculatePrice(property,'2026-12-01','2026-12-03',stayGuests,true).discount,0);
+  assert.equal(calculatePrice({...p,corporateDiscountEnabled:true,corporateDiscount:0},'2026-12-01','2026-12-03',stayGuests,true).total,490);
+  assert.equal(calculatePrice({...p,corporateDiscountEnabled:true,corporateDiscount:20},'2026-12-01','2026-12-03',stayGuests,true).total,410);
+});
 test('guest validation enforces totals, each category, allowed flags and whole counts',()=>{assert.equal(validateGuestCapacity(property,{adults:4,children:2,infants:2,pets:2}),'');for(const g of [{adults:0},{adults:7},{children:5},{infants:3},{pets:3},{adults:1.5},{children:-1},{adults:NaN}])assert.notEqual(validateGuestCapacity(property,{...guests,...g}),'');assert.notEqual(validateGuestCapacity({...property,petsAllowed:false},{...guests,pets:1}),'');assert.notEqual(validateGuestCapacity({...property,maximumChildren:0},{...guests,children:1}),'');assert.notEqual(validateGuestCapacity({...property,minimumGuests:3},guests),'');});
 test('CMS rejects contradictory capacity, invalid room data, duplicate or invalid rates',()=>{for(const change of [{minimum_guests:7,max_guests:6},{maximum_adults:7,max_guests:6},{minimum_guests:5,maximum_adults:2,maximum_children:2},{extra_guest_fee:-1},{date_prices:[{price_date:'2026-02-30',nightly_price:200}]},{date_prices:[{price_date:'2026-12-24',nightly_price:200},{price_date:'2026-12-24',nightly_price:300}]},{bed_arrangements:[{room:'Room',bedTypes:[{type:'invented',quantity:1}]}]}])assert.ok(validatePropertyContent(change).length);});
 test('amenities retain unknown labels and explicit allowlisted metadata',()=>{const result=normalizeAmenities(['Wi-Fi','Unusual amenity','wi-fi'],[{label:'Unusual amenity',id:'custom:stable',icon:'trees',group:'outdoor'}]);assert.equal(result.length,2);assert.equal(result[0].id,'wifi');assert.deepEqual(result[1],{label:'Unusual amenity',id:'custom:stable',icon:'trees',group:'outdoor'});const safe=normalizeAmenities(['Custom'],[{label:'Custom',icon:'<script>',group:'__proto__'}])[0];assert.equal(safe.icon,'check');assert.equal(safe.group,'other');});

@@ -20,6 +20,7 @@ export function GuestsPricingEditor({ draft, setDraft }: { draft: Row; setDraft:
     extraGuestFee: Number(draft.extra_guest_fee),
     extraGuestThreshold: Number(draft.extra_guest_threshold),
     corporateDiscount: Number(draft.corporate_discount ?? 10),
+    corporateDiscountEnabled: draft.corporate_discount_enabled === true,
     minimumGuests: Number(draft.minimum_guests),
     maxGuests: Number(draft.max_guests),
     maximumAdults: Number(draft.maximum_adults),
@@ -67,6 +68,10 @@ export function GuestsPricingEditor({ draft, setDraft }: { draft: Row; setDraft:
         <Toggle label="Infants allowed" checked={Number(draft.maximum_infants) > 0} onChange={(value) => field("maximum_infants", value ? 1 : 0)} />
         <Toggle label="Pets allowed" checked={draft.pets_allowed !== false} onChange={(value) => setDraft((row) => ({ ...row, pets_allowed: value, maximum_pets: value ? Math.max(1, Number(row.maximum_pets)) : 0 }))} />
       </div>
+      <div className="rounded-xl border border-[var(--admin-border)] p-4">
+        <Toggle label="Apply corporate accommodation discount" checked={draft.corporate_discount_enabled === true} onChange={(value) => field("corporate_discount_enabled", value)} />
+        <p className="mt-2 text-sm text-[var(--admin-muted)]">Off by default. When on, the percentage above applies to accommodation in new corporate bookings.</p>
+      </div>
       <p className="text-sm text-[var(--admin-muted)]">The cleaning service is charged once per booked house and stay. Extra guests and pets are charged only when applicable. No separate tax is added at checkout.</p>
       <details open className="rounded-xl border border-[var(--admin-border)] p-4">
         <summary className="cursor-pointer font-medium">Live example at the default rate</summary>
@@ -84,7 +89,7 @@ export function GuestsPricingEditor({ draft, setDraft }: { draft: Row; setDraft:
         {error && <p className="admin-notice is-error" role="status">{error}</p>}
         <dl className="admin-example-price">
           {examples.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{formatAud(value)}</dd></div>)}
-          <div><dt>Corporate accommodation discount ({property.corporateDiscount}%)</dt><dd>−{formatAud(corporatePrice.discount)}</dd></div>
+          <div><dt>Corporate accommodation discount ({property.corporateDiscountEnabled ? `${property.corporateDiscount}%` : "off"})</dt><dd>{property.corporateDiscountEnabled ? `−${formatAud(corporatePrice.discount)}` : formatAud(0)}</dd></div>
           <div><dt>Corporate total</dt><dd>{formatAud(corporatePrice.total)}</dd></div>
         </dl>
         <p className="text-sm text-[var(--admin-muted)]">Illustration only. Date overrides and promotion codes are not included in this example.</p>

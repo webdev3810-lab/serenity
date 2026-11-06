@@ -1,4 +1,4 @@
-import { AIRBNB_URL, ORANI_ENHANCED_EXTERIOR, ORANI_ENHANCED_INTERIORS, ORANI_PHOTOS, ORANI_PREVIEW_IMAGE, SPECIALIST_SUITES_IMAGE, SPECIALIST_SUITES_PHOTOS, SPECIALIST_SUITES_URL } from "@/app/other-businesses/listing";
+import { AIRBNB_URL, ORANI_ENHANCED_EXTERIOR, ORANI_ENHANCED_INTERIORS, ORANI_PHOTOS, ORANI_PREVIEW_IMAGE, SPECIALIST_SUITES_IMAGE, SPECIALIST_SUITES_ORIGINAL_IMAGE, SPECIALIST_SUITES_PHOTOS, SPECIALIST_SUITES_URL } from "@/app/other-businesses/listing";
 
 export const OTHER_BUSINESSES_PAGE_KEY = "other-businesses";
 export type BusinessKey = "airbnb" | "specialistSuites";
@@ -28,7 +28,7 @@ export const DEFAULT_OTHER_BUSINESSES: OtherBusinessesContent = {
       name: "Casa de Vacacion", cardLocation: "Orani, Bataan · Philippines",
       cardDescription: "Your private retreat in Bataan. Slow down and settle into an entire two-bedroom holiday home, with space to reconnect, explore Orani or simply take a well-earned break.",
       cardFacts: ["Entire private home", "Wi-Fi and laundry", "Explore Bataan"], cardCta: "View Casa de Vacacion", cardExternalCta: "Check Airbnb availability",
-      cardImage: { src: ORANI_PREVIEW_IMAGE, alt: "Illustrative tropical Philippines coastal scene, not the rental property", label: "Illustrative Philippines scenery" },
+      cardImage: { src: ORANI_PREVIEW_IMAGE, alt: "Color-enhanced aerial view of the Mount Samat Memorial Cross and forested hills in Bataan", label: "Mount Samat · Bataan" },
       externalUrl: AIRBNB_URL, actionUrl: AIRBNB_URL, introEyebrow: "Casa de Vacacion · Orani, Bataan", introTitle: "Your next stay", introAccent: "starts here.",
       introDescription: "A private place to pause, reconnect and explore Bataan at your own pace.", introPrimaryCta: "Explore the home", introSecondaryCta: "View on Airbnb",
       featureEyebrow: "Furnished private home · Bataan", featureTitle: "Casa de", featureAccent: "Vacacion", featureLead: "Your Private Retreat in Bataan",
@@ -99,6 +99,16 @@ export function normalizeOtherBusinesses(value: unknown): OtherBusinessesContent
         const row = readRecord(Array.isArray(current) ? current[index] : null);
         return { title: readText(row.title, item.title), detail: readText(row.detail, item.detail) };
       });
+    }
+    if (key === "airbnb" && ["/orani-philippines-preview-v1.jpg", "/mount-samat-memorial-cross-sunset.webp"].includes(business.cardImage.src)) {
+      business.cardImage = { ...defaults.cardImage };
+    }
+    if (key === "specialistSuites") {
+      for (const field of ["cardImage", "featureImage"] as const) {
+        if (business[field].src === SPECIALIST_SUITES_ORIGINAL_IMAGE) {
+          business[field] = { ...business[field], src: SPECIALIST_SUITES_IMAGE };
+        }
+      }
     }
     businesses[key] = business;
   }

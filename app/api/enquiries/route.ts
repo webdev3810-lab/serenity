@@ -13,7 +13,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const isInsuranceQuestion = body.enquiryType === "insurance_question";
     const isCorporateQuestion = body.enquiryType === "corporate_question";
-    const isShortEnquiry = isInsuranceQuestion || isCorporateQuestion;
+    const isPartnerApplication = body.enquiryType === "partner_application";
+    const isShortEnquiry = isInsuranceQuestion || isCorporateQuestion || isPartnerApplication;
     const companyName = String(body.companyName ?? "").trim() || (isInsuranceQuestion ? "Private insurance enquiry" : "");
     const contactName = String(body.contactName ?? "").trim();
     const email = String(body.email ?? "").trim().toLowerCase();
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     const notes = String(body.notes ?? "").trim();
     const idempotencyKey = String(request.headers.get("Idempotency-Key") ?? body.idempotencyKey ?? "").trim();
     if (!companyName || !contactName || !email) return NextResponse.json({ error: isInsuranceQuestion ? "Contact name and email are required." : "Company, contact name, and business email are required." }, { status: 400 });
-    if (isShortEnquiry && !notes) return NextResponse.json({ error: "Enter your accommodation question." }, { status: 400 });
+    if (isShortEnquiry && !notes) return NextResponse.json({ error: isPartnerApplication ? "Tell us about your company and booking needs." : "Enter your accommodation question." }, { status: 400 });
     if (!isShortEnquiry && (!arrival || !departure)) return NextResponse.json({ error: "Arrival and departure are required for a stay enquiry." }, { status: 400 });
     if (!/^\S+@\S+\.\S+$/.test(email)) return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
     if (!isShortEnquiry && departure <= arrival) return NextResponse.json({ error: "Departure must be after arrival." }, { status: 400 });
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
       departure: departure || null,
       guests: body.guests ?? "",
       houses_needed: isShortEnquiry ? "0" : String(housesNeeded),
-      purpose: isInsuranceQuestion ? "Insurance accommodation quote" : isCorporateQuestion ? "Corporate question" : body.purpose ?? "",
+      purpose: isInsuranceQuestion ? "Insurance accommodation quote" : isPartnerApplication ? "Partner ID request" : isCorporateQuestion ? "Partner booking question" : body.purpose ?? "",
       notes,
       property_ids: propertyIds,
       abn,
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
       }
       throw error;
     }
-    const kind = isInsuranceQuestion ? "insurance" : isCorporateQuestion ? "question" : "stay";
+    const kind = isInsuranceQuestion ? "insurance" : isPartnerApplication ? "partner" : isCorporateQuestion ? "question" : "stay";
     const deliveries = await Promise.allSettled([
       notifyCorporateEnquiry({ id: data.id, reference: data.reference, company: companyName, contact: contactName, email, phone, arrival, departure, houses: propertySlugs, notes, kind }),
       acknowledgeCorporateEnquiry({ id: data.id, reference: data.reference, contact: contactName, email, kind }),

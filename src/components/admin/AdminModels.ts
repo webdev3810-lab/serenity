@@ -67,6 +67,7 @@ export const emptyProperty = (): Row => ({
   adjacent_houses_allowed: true,
   long_term_stays_allowed: true,
   corporate_discount: 10,
+  corporate_discount_enabled: false,
   corporate_approval_required: false,
   corporate_deposit_required: false,
   corporate_online_payment: true,

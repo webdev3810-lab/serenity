@@ -161,6 +161,7 @@ function mapProperty(row: ContentRow, images: ContentRow[], amenities: ContentRo
     petsAllowed: row.pets_allowed !== false,
     corporateBookingAllowed: row.corporate_booking_allowed !== false,
     corporateDiscount: Number(row.corporate_discount ?? 10),
+    corporateDiscountEnabled: row.corporate_discount_enabled === true,
     minimumCorporateStay: Number(row.minimum_corporate_stay ?? 2),
     minimumCorporateHouses: Number(row.minimum_corporate_houses ?? 1),
     maximumCorporateHouses: Number(row.maximum_corporate_houses ?? 3),

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="assets/gsap.min.js"></script>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #464644; }
+      #root { width: 100%; height: 100%; }
+      .clip { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+      #serenity-7 { z-index: 1; }
+      #serenity-9 { z-index: 2; opacity: 0; }
+      #serenity-11 { z-index: 3; opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-199x"
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="17"
+      data-width="1920"
+      data-height="1080"
+    >
+      <video data-hf-id="hf-w4bm" id="serenity-7" class="clip" data-start="0" data-duration="8" data-track-index="0" src="assets/serenity-7-walk-in.mp4" muted playsinline></video>
+      <video data-hf-id="hf-s9lr" id="serenity-9" class="clip" data-start="7.5" data-duration="5" data-track-index="1" src="assets/serenity-9-living.mp4" muted playsinline></video>
+      <video data-hf-id="hf-s11d" id="serenity-11" class="clip" data-start="12" data-duration="5" data-track-index="2" src="assets/serenity-11-dining.mp4" muted playsinline></video>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#serenity-9", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "sine.inOut" }, 7.5);
+      tl.fromTo("#serenity-11", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "sine.inOut" }, 12);
+      window.__timelines.main = tl;
+    </script>
+  </body>
+</html>
