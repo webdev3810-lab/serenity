@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, MapPin, ShieldCheck } from "lucide-react";
 import HomepageReviewsSection from "@/src/components/homepage/HomepageReviewsSection";
 import { SerenityLocationMap } from "@/src/components/SerenityLocationMap";
 import type { Property } from "@/src/data/properties";
@@ -114,25 +114,38 @@ export function AboutPage({ properties, mapUrl, media, copy }: { properties: Pro
           <span>03 / Your host</span>
         </div>
         <div className="about-story-host__content">
-          <div className="about-story-host__intro">
-            <p className="about-story-eyebrow">A local point of contact</p>
-            <h2 id="about-story-host-title">{copy.aboutHostTitle}</h2>
-            <p>{copy.aboutHostLead}</p>
-          </div>
           <div className="about-story-host__profile">
-            <div className="about-story-host__name">
-              <strong>{copy.aboutHostName}</strong>
-              <span>Host</span>
+            <div className="about-story-host__identity">
+              <p className="about-story-eyebrow">Your local host</p>
+              <div className="about-story-host__name">
+                <strong>{copy.aboutHostName}</strong>
+                <span className="about-story-host__status">Superhost <small>on Airbnb</small></span>
+              </div>
             </div>
             <dl className="about-story-host__metrics" aria-label="Francis’s hosting profile">
               <div><dt>Reviews</dt><dd>{copy.aboutHostReviews}</dd></div>
               <div><dt>Rating</dt><dd>{copy.aboutHostRating}<span aria-label="stars">★</span></dd></div>
               <div><dt>Years hosting</dt><dd>{copy.aboutHostYears}</dd></div>
             </dl>
-            <div className="about-story-host__details">
-              <p>{copy.aboutHostLocation}</p>
-              <p>{copy.aboutHostVerification}</p>
+          </div>
+          <div className="about-story-host__intro">
+            <div>
+              <p className="about-story-eyebrow">A local point of contact</p>
+              <h2 id="about-story-host-title">{copy.aboutHostTitle}</h2>
+              <p className="about-story-host__lead">{copy.aboutHostLead}</p>
             </div>
+            <div className="about-story-host__details">
+              <p><MapPin size={21} aria-hidden="true" />{copy.aboutHostLocation}</p>
+              <p><ShieldCheck size={21} aria-hidden="true" />{copy.aboutHostVerification}</p>
+            </div>
+            <a
+              className="about-story-host__profile-link"
+              href="https://www.airbnb.com.au/users/profile/1468487805588048135?previous_page_name=PdpHomeMarketplace"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View profile on Airbnb <ArrowUpRight size={17} aria-hidden="true" />
+            </a>
           </div>
         </div>
       </section>

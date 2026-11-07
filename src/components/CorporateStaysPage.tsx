@@ -406,10 +406,10 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
         <section className="corporate-coordinators" aria-labelledby="corporate-coordinators-title">
           <h2 id="corporate-coordinators-title">{copy.corporateCoordinatorsTitle}</h2>
           <ul className="corporate-coordinators__grid">
-            <li><FileText size={32} strokeWidth={1.7} aria-hidden="true" /><span>{copy.corporateCoordinator1}</span></li>
-            <li><FileText size={32} strokeWidth={1.7} aria-hidden="true" /><span>{copy.corporateCoordinator2}</span></li>
-            <li><CreditCard size={32} strokeWidth={1.7} aria-hidden="true" /><span>{copy.corporateCoordinator3}</span></li>
-            <li><CalendarDays size={32} strokeWidth={1.7} aria-hidden="true" /><span>{copy.corporateCoordinator4}</span></li>
+            <li><Link href="/corporate-stays/coordinator-guide#property-information"><FileText size={32} strokeWidth={1.7} aria-hidden="true" /><span>{copy.corporateCoordinator1}</span><ArrowUpRight className="corporate-coordinators__arrow" size={18} aria-hidden="true" /></Link></li>
+            <li><Link href="/corporate-stays/coordinator-guide#inclusions-and-terms"><FileText size={32} strokeWidth={1.7} aria-hidden="true" /><span>{copy.corporateCoordinator2}</span><ArrowUpRight className="corporate-coordinators__arrow" size={18} aria-hidden="true" /></Link></li>
+            <li><Link href="/corporate-stays/coordinator-guide#billing-requirements"><CreditCard size={32} strokeWidth={1.7} aria-hidden="true" /><span>{copy.corporateCoordinator3}</span><ArrowUpRight className="corporate-coordinators__arrow" size={18} aria-hidden="true" /></Link></li>
+            <li><Link href="/corporate-stays/coordinator-guide#stay-extensions"><CalendarDays size={32} strokeWidth={1.7} aria-hidden="true" /><span>{copy.corporateCoordinator4}</span><ArrowUpRight className="corporate-coordinators__arrow" size={18} aria-hidden="true" /></Link></li>
           </ul>
         </section>
         <div className="corporate-insurance__homes">
@@ -688,16 +688,24 @@ export function CorporateStaysPage({ today, properties, media, copy }: { today: 
       </section>
 
       <section className="corporate-editorial-closing bg-white text-white">
-        <div className="container max-w-[92rem] px-5 py-20 sm:px-8 sm:py-28 lg:flex lg:items-end lg:justify-between lg:gap-16 lg:px-12">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white block mb-6">Personalised guest support</span>
-            <h2 className="max-w-3xl">{copy.corporateClosingTitle}</h2>
+        <div className="container corporate-editorial-closing__layout">
+          <div className="corporate-editorial-closing__heading">
+            <span>Personalised guest support</span>
+            <h2>{copy.corporateClosingTitle}</h2>
           </div>
-          <div className="mt-10 max-w-sm lg:mt-0">
-            <p className="text-base leading-relaxed text-white">{copy.corporateClosingLead}</p>
-            <div className="mt-8 space-y-4 text-sm font-medium tracking-wide text-white">
-              <p className="flex items-center gap-4"><Phone size={18} className="text-white" /> <a href={`tel:${contact.phoneNumber.replace(/[^+\d]/g, "")}`} className="hover:underline transition-colors">{contact.phoneNumber}</a></p>
-              <p className="flex items-center gap-4"><Mail size={18} className="text-white" /> <a href={`mailto:${contact.contactEmail}`} className="break-words hover:underline transition-colors">{contact.contactEmail}</a></p>
+          <div className="corporate-editorial-closing__details">
+            <p>{copy.corporateClosingLead}</p>
+            <div className="corporate-editorial-closing__links">
+              <a href={`tel:${contact.phoneNumber.replace(/[^+\d]/g, "")}`}>
+                <Phone size={20} aria-hidden="true" />
+                <span>{contact.phoneNumber}</span>
+                <ArrowUpRight size={19} aria-hidden="true" />
+              </a>
+              <a href={`mailto:${contact.contactEmail}`}>
+                <Mail size={20} aria-hidden="true" />
+                <span>{contact.contactEmail}</span>
+                <ArrowUpRight size={19} aria-hidden="true" />
+              </a>
             </div>
           </div>
         </div>

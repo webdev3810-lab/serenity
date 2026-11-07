@@ -528,7 +528,6 @@ body:has(.corporate-editorial-page) .public-site > main,
   .contact-story-masthead,
   .contact-story-methods > :first-child,
   .contact-story-nearby__heading,
-  .contact-story-closing,
   .houses-editorial-heading,
   .houses-editorial-comfort__card:not(.houses-editorial-comfort__card--soft),
   .policy-editorial-masthead,
@@ -549,7 +548,6 @@ body:has(.corporate-editorial-page) .public-site > main,
   .contact-story-masthead,
   .contact-story-methods > :first-child,
   .contact-story-nearby__heading,
-  .contact-story-closing,
   .houses-editorial-heading,
   .houses-editorial-comfort__card:not(.houses-editorial-comfort__card--soft),
   .policy-editorial-masthead,
@@ -1060,12 +1058,42 @@ body:has(.corporate-editorial-page) .public-site > main,
   padding-inline: var(--public-card-gutter);
 }
 
-.public-site .about-story-host {
-  padding-inline: var(--public-card-gutter);
+.public-site .about-story-page > .about-story-host {
+  padding-inline: 0;
+  border-radius: 0 !important;
+  background: transparent;
+  box-shadow: none;
+}
+
+.public-site .about-story-page > .about-story-stats {
+  box-shadow: none;
+}
+
+.public-site .contact-story-page > .contact-story-methods {
+  border-radius: 0 !important;
+  background: transparent;
+  box-shadow: none;
+}
+
+.public-site .contact-story-page > .contact-story-nearby {
+  overflow: visible;
+  border-radius: 0 !important;
+  background: transparent;
+  box-shadow: none;
+}
+
+.public-site .contact-story-page .contact-story-nearby__grid {
+  padding: 0;
+  background: transparent;
 }
 
 .public-site .corporate-editorial-page > section:not(.corporate-editorial-hero):not(.corporate-editorial-benefits) {
   padding-inline: var(--public-card-gutter);
+}
+
+.public-site .corporate-editorial-page .corporate-editorial-booking .corporate-partner-direct {
+  width: calc(100% + 2 * var(--public-card-gutter));
+  margin-inline: calc(-1 * var(--public-card-gutter));
 }
 
 .public-site :is(.about-story-hero__copy, .corporate-editorial-hero__copy, .contact-story-hero__copy) {
@@ -1081,7 +1109,6 @@ body:has(.corporate-editorial-page) .public-site > main,
 .public-site .about-story-principles__heading h2,
 .public-site .corporate-editorial-page :is(.corporate-editorial-enquiry, .corporate-editorial-booking, .corporate-editorial-faq, .corporate-editorial-closing) h2,
 .public-site .contact-story-enquiry__intro h2,
-.public-site .contact-story-closing h2,
 .public-site .contact-story-location__heading h2 {
   font-size: clamp(3.25rem, 5.4vw, 6rem);
 }
@@ -2001,7 +2028,6 @@ body:has(.corporate-editorial-page) .public-site > main,
   .public-site .about-story-intro__statement h2,
   .public-site .about-story-principles__heading h2,
   .public-site .contact-story-enquiry__intro h2,
-  .public-site .contact-story-closing h2,
   .public-site .contact-story-location__heading h2 {
     font-size: clamp(2.25rem, 7.5vw, 3.2rem);
   }
@@ -2043,11 +2069,11 @@ body:has(.corporate-editorial-page) .public-site > main,
 }
 
 .public-site .about-story-host__name strong {
-  font-size: clamp(2.4rem, 3.5vw, 3.6rem);
+  font-size: clamp(3rem, 4.5vw, 4.75rem);
 }
 
 .public-site .about-story-host__metrics dd {
-  font-size: clamp(1.8rem, 2.4vw, 2.6rem);
+  font-size: clamp(2.2rem, 2.9vw, 3rem);
 }
 
 .public-site .about-story-page :is(
@@ -2056,7 +2082,7 @@ body:has(.corporate-editorial-page) .public-site > main,
   .about-story-intro__details p,
   .about-story-principles__heading p,
   .about-story-principle p,
-  .about-story-host__intro > p:last-child,
+  .about-story-host__lead,
   .homepage-reviews-description
 ) {
   font-size: clamp(1rem, 1.2vw, 1.2rem);
@@ -2104,7 +2130,7 @@ body:has(.corporate-editorial-page) .public-site > main,
 
 .public-site .about-story-heading,
 .public-site .corporate-editorial-masthead,
-.public-site .contact-story-page :is(.contact-story-masthead, .contact-story-nearby__heading, .contact-story-closing) {
+.public-site .contact-story-page :is(.contact-story-masthead, .contact-story-nearby__heading) {
   border-radius: 1.25rem;
 }
 
@@ -2207,8 +2233,7 @@ body:has(.corporate-editorial-page) .public-site > main,
 .public-site .contact-story-page :is(
   .contact-story-enquiry__intro h2,
   .contact-story-location__heading h2,
-  .contact-story-nearby__heading h2,
-  .contact-story-closing h2
+  .contact-story-nearby__heading h2
 ) {
   font-size: clamp(2.65rem, 4vw, 4.5rem);
   line-height: 1.02;
@@ -2258,8 +2283,7 @@ body:has(.corporate-editorial-page) .public-site > main,
   .public-site .contact-story-page :is(
     .contact-story-enquiry__intro h2,
     .contact-story-location__heading h2,
-    .contact-story-nearby__heading h2,
-    .contact-story-closing h2
+    .contact-story-nearby__heading h2
   ) {
     font-size: clamp(2.2rem, 7vw, 3rem);
   }
@@ -2545,7 +2569,7 @@ body:has(.corporate-editorial-page) .public-site > main,
     .about-story-intro__details p,
     .about-story-principles__heading p,
     .about-story-principle p,
-    .about-story-host__intro > p:last-child,
+    .about-story-host__lead,
     .homepage-reviews-description
   ) {
     font-size: 1.25rem;
@@ -2613,8 +2637,7 @@ body:has(.corporate-editorial-page) .public-site > main,
     .contact-story-methods > :is(a, div) > span,
     .contact-story-enquiry__note,
     .contact-story-location__links,
-    .serenity-editorial-faq__contact,
-    .contact-story-closing__links
+    .serenity-editorial-faq__contact
   ) {
     font-size: 1.125rem;
   }

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { ArrowUpRight, ChevronDown } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Mail, MapPin, PhoneCall } from "lucide-react";
 import { SerenityLocationMap } from "@/src/components/SerenityLocationMap";
 import { useContactSettings } from "@/src/context/ContactSettingsContext";
 import { DEFAULT_CONTACT_SETTINGS } from "@/src/lib/siteSettings";
@@ -33,12 +33,6 @@ export function ContactEditorialPage({ faqContent, media, copy, properties }: { 
   const [preferredHouse, setPreferredHouse] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const phoneHref = `tel:${(contact.phoneNumber || DEFAULT_CONTACT_SETTINGS.phoneNumber).replace(/[^+\d]/g, "")}`;
-  const socialLinks = [
-    ["Facebook", contact.facebookUrl],
-    ["Instagram", contact.instagramUrl],
-    ["LinkedIn", contact.linkedinUrl],
-  ].filter(([, href]) => href);
-
   const submitContact = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitting(true);
@@ -99,16 +93,19 @@ export function ContactEditorialPage({ faqContent, media, copy, properties }: { 
 
       {contact.contactPublished && <section className="contact-story-methods" aria-label="Ways to contact Serenity">
         <a href={phoneHref}>
+          <PhoneCall className="contact-story-methods__icon" size={26} strokeWidth={1.5} aria-hidden="true" />
           <small>01 / Call us</small>
           <strong>{contact.phoneNumber}</strong>
           <span>Speak with the local team <ArrowUpRight size={17} aria-hidden="true" /></span>
         </a>
         <a href={`mailto:${contact.contactEmail}`}>
+          <Mail className="contact-story-methods__icon" size={26} strokeWidth={1.5} aria-hidden="true" />
           <small>02 / Email us</small>
           <strong>{contact.contactEmail}</strong>
           <span>Send the details of your stay <ArrowUpRight size={17} aria-hidden="true" /></span>
         </a>
         {contact.publicAddress && <div>
+          <MapPin className="contact-story-methods__icon" size={26} strokeWidth={1.5} aria-hidden="true" />
           <small>03 / Find us</small>
           <strong>{contact.publicAddress}</strong>
           <span>We&apos;re here 24/7 — message us anytime, any day.</span>
@@ -210,16 +207,6 @@ export function ContactEditorialPage({ faqContent, media, copy, properties }: { 
         </div>
       </section>
 
-      <section className="contact-story-closing" aria-label="More ways to connect">
-        <div>
-          <span className="contact-story-eyebrow">Prefer another way?</span>
-          <h2>{copy.contactClosingTitle}</h2>
-        </div>
-        <div className="contact-story-closing__links">
-          {socialLinks.map(([label, href]) => <a key={label} href={href} target="_blank" rel="noopener noreferrer">{label} <ArrowUpRight size={17} aria-hidden="true" /></a>)}
-          <Link href="/book-now">Book now <ArrowUpRight size={17} aria-hidden="true" /></Link>
-        </div>
-      </section>
     </main>
   );
 }
