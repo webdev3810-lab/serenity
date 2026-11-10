@@ -147,6 +147,19 @@
 .admin-availability-summary span { color: var(--admin-muted); font-size: 12px; }
 .admin-availability-summary strong { font-size: 24px; font-weight: 650; line-height: 1.15; }
 .admin-availability-summary p { padding: 14px 20px; color: var(--admin-muted); font-size: 12px; line-height: 1.55; }
+.admin-availability-toolbar { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 18px; padding: 18px 20px; border-bottom: 1px solid var(--admin-border); }
+.admin-availability-toolbar-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.admin-availability-toolbar-title h3 { color: var(--admin-text); font-size: 18px; font-weight: 650; }
+.admin-availability-toolbar-title p { margin-top: 2px; color: var(--admin-muted); font-size: 12px; }
+.admin-availability-toolbar-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
+.admin-availability-toolbar-controls label { display: grid; gap: 5px; min-width: 150px; color: var(--admin-muted); font-size: 11px; font-weight: 650; }
+.admin-availability-toolbar-controls .admin-field { min-height: 40px; color: var(--admin-text); font-size: 13px; }
+.admin-availability-date-jump { display: grid; gap: 5px; }
+.admin-availability-date-jump > label { min-width: 0; }
+.admin-availability-date-jump > div { display: flex; gap: 6px; }
+.admin-availability-date-jump .admin-field { min-width: 150px; }
+.admin-availability-month-controls { display: flex; align-items: center; gap: 6px; }
+.admin-availability-instruction { padding: 10px 20px; border-bottom: 1px solid var(--admin-border); background: var(--admin-surface-alt); color: var(--admin-muted); font-size: 12px; line-height: 1.45; }
 .admin-availability-pick-guide { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border: 1px solid var(--admin-accent); border-radius: 12px; background: var(--admin-nav-active-bg); color: var(--admin-text); }
 .admin-availability-pick-guide > svg { flex: none; color: var(--admin-nav-active-text); }
 .admin-availability-pick-guide > div { flex: 1; min-width: 0; }
@@ -259,6 +272,13 @@ body .admin-theme-context button.admin-availability-cell { border-radius: 0 !imp
   .admin-availability-summary p { grid-column: 1 / -1; border-top: 1px solid var(--admin-border); }
 }
 @media(max-width:600px) {
+  .admin-availability-toolbar { padding: 16px; }
+  .admin-availability-toolbar-controls { width: 100%; }
+  .admin-availability-toolbar-controls label { flex: 1 1 140px; }
+  .admin-availability-date-jump { flex: 1 1 180px; }
+  .admin-availability-date-jump .admin-field { min-width: 0; width: 100%; }
+  .admin-availability-month-controls { width: 100%; justify-content: space-between; }
+  .admin-availability-instruction { padding-inline: 16px; }
   .admin-availability-summary > div { padding: 11px 12px; }
   .admin-availability-summary strong { font-size: 19px; }
   .admin-availability-summary span { font-size: 10px; }

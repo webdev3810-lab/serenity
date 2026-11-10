@@ -39,19 +39,20 @@ export function AppShell({ children, contactSettings }: { children: React.ReactN
 function Header({ pathname }: { pathname: string | null }) {
   const [hidden, setHidden] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [aboutMenuOpen, setAboutMenuOpen] = useState(false);
+  const [infoMenuOpen, setInfoMenuOpen] = useState(false);
   const [currentHash, setCurrentHash] = useState("");
-  const aboutMenuRef = useRef<HTMLDivElement>(null);
+  const infoMenuRef = useRef<HTMLDivElement>(null);
   const links = [
     { label: "Home", href: "/" },
     { label: "Our Homes", href: "/homes" },
     { label: "Insurance & Corporate", href: "/corporate-stays" },
-    { label: "About", href: "/about" },
+    { label: "Info", href: "/about" },
     { label: "Contact", href: "/contact" },
     { label: "Other Businesses", href: "/other-businesses" },
   ];
-  const aboutLinks = [
-    { label: "Guest Info", href: "/guest-information" },
+  const infoLinks = [
+    { label: "Guest", href: "/guest-information" },
+    { label: "About", href: "/about" },
   ];
   const partnerBookingHref = "/corporate-stays#corporate-booking";
 
@@ -66,13 +67,13 @@ function Header({ pathname }: { pathname: string | null }) {
   }, [pathname]);
 
   useEffect(() => {
-    if (!aboutMenuOpen) return;
+    if (!infoMenuOpen) return;
     const closeOnOutsideClick = (event: PointerEvent) => {
-      if (!aboutMenuRef.current?.contains(event.target as Node)) setAboutMenuOpen(false);
+      if (!infoMenuRef.current?.contains(event.target as Node)) setInfoMenuOpen(false);
     };
     document.addEventListener("pointerdown", closeOnOutsideClick);
     return () => document.removeEventListener("pointerdown", closeOnOutsideClick);
-  }, [aboutMenuOpen]);
+  }, [infoMenuOpen]);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -128,43 +129,33 @@ function Header({ pathname }: { pathname: string | null }) {
         {links.map(({ label, href }, index) => {
           const active = isCurrent(href);
           if (href === "/about") {
-            const groupActive = active || aboutLinks.some((item) => isCurrent(item.href));
+            const groupActive = active || infoLinks.some((item) => isCurrent(item.href));
             return (
               <div
                 key={href}
-                ref={aboutMenuRef}
+                ref={infoMenuRef}
                 className="serenity-editorial-nav__about"
-                data-open={aboutMenuOpen ? "true" : undefined}
-                onMouseEnter={() => setAboutMenuOpen(true)}
-                onMouseLeave={() => setAboutMenuOpen(false)}
+                data-open={infoMenuOpen ? "true" : undefined}
+                onMouseEnter={() => setInfoMenuOpen(true)}
+                onMouseLeave={() => setInfoMenuOpen(false)}
                 onBlur={(event) => {
-                  if (!event.currentTarget.contains(event.relatedTarget)) setAboutMenuOpen(false);
+                  if (!event.currentTarget.contains(event.relatedTarget)) setInfoMenuOpen(false);
                 }}
                 onKeyDown={(event) => {
                   if (event.key === "Escape") {
-                    setAboutMenuOpen(false);
-                    aboutMenuRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+                    setInfoMenuOpen(false);
+                    infoMenuRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
                   }
                 }}
               >
-                <Link href={href} aria-current={active ? "page" : undefined} onClick={() => setAboutMenuOpen(false)}>
+                <button type="button" className="serenity-editorial-nav__info-trigger" aria-expanded={infoMenuOpen} aria-controls="serenity-info-menu" data-active={groupActive ? "true" : undefined} onClick={() => setInfoMenuOpen(true)}>
                   <span className="serenity-editorial-nav__item-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
                   <span>{label}</span>
-                </Link>
-                <button
-                  type="button"
-                  className="serenity-editorial-nav__about-toggle"
-                  aria-label="Show About links"
-                  aria-expanded={aboutMenuOpen}
-                  aria-controls="serenity-about-menu"
-                  data-active={groupActive ? "true" : undefined}
-                  onClick={() => setAboutMenuOpen(true)}
-                >
                   <ChevronDown size={14} aria-hidden="true" />
                 </button>
-                <div id="serenity-about-menu" className="serenity-editorial-nav__about-menu" hidden={!aboutMenuOpen}>
-                  {aboutLinks.map((item) => (
-                    <Link key={item.href} href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined} onClick={() => setAboutMenuOpen(false)}>
+                <div id="serenity-info-menu" className="serenity-editorial-nav__about-menu" hidden={!infoMenuOpen}>
+                  {infoLinks.map((item) => (
+                    <Link key={item.href} href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined} onClick={() => setInfoMenuOpen(false)}>
                       <span>{item.label}</span>
                       <ChevronRight size={15} aria-hidden="true" />
                     </Link>
@@ -212,7 +203,7 @@ function Header({ pathname }: { pathname: string | null }) {
             href,
             ariaLabel: `Go to ${label}`,
             active: isCurrent(href),
-            children: href === "/about" ? aboutLinks.map((item) => ({ ...item, active: isCurrent(item.href) })) : undefined,
+            children: href === "/about" ? infoLinks.map((item) => ({ ...item, active: isCurrent(item.href) })) : undefined,
           }))}
           partnerBookingHref={partnerBookingHref}
           partnerBookingActive={isCurrent(partnerBookingHref)}

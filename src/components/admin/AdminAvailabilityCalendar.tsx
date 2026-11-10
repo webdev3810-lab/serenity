@@ -71,7 +71,11 @@ async function jsonRequest(url: string, options: RequestInit) {
 export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents, reload, startBlockSelection = false }: { properties: Row[]; bookings: Row[]; calendarEvents: Row[]; reload: () => Promise<void>; startBlockSelection?: boolean }) {
   const { confirm } = useAdminWorkspace();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
   const [month, setMonth] = useState(() => todayIso().slice(0, 7));
+  const [selectedHouseId, setSelectedHouseId] = useState("all");
+  const [focusedDate, setFocusedDate] = useState(() => todayIso());
+  const [dateDraft, setDateDraft] = useState(() => todayIso());
   const [selection, setSelection] = useState<Selection | null>(null);
   const [pricingPicking, setPricingPicking] = useState(false);
   const [pricingSelection, setPricingSelection] = useState<{ propertyId: string; date?: string } | null>(null);
@@ -102,26 +106,40 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
   const [bookingEditorDirty, setBookingEditorDirty] = useState(false);
   useDirtyGuard(selectedBlockDates.length > 0 || selectedUnblockDates.length > 0);
   const houses = useMemo(() => properties.filter((property) => property.slug && property.published !== false), [properties]);
+  const activeHouseId = selectedHouseId === "all" || houses.some((house) => String(house.id) === selectedHouseId) ? selectedHouseId : "all";
+  const visibleHouses = useMemo(() => activeHouseId === "all" ? houses : houses.filter((house) => String(house.id) === activeHouseId), [houses, activeHouseId]);
   const monthStart = new Date(`${month}-01T00:00:00Z`);
   const numberOfDays = new Date(Date.UTC(monthStart.getUTCFullYear(), monthStart.getUTCMonth() + 1, 0)).getUTCDate();
   const dates = Array.from({ length: numberOfDays }, (_, index) => `${month}-${String(index + 1).padStart(2, "0")}`);
   const today = todayIso();
-  const centerToday = useCallback(() => {
+  const centerDate = useCallback((date: string) => {
     const scroller = scrollRef.current;
-    const heading = scroller?.querySelector<HTMLElement>(`[data-calendar-date="${today}"]`);
+    const heading = scroller?.querySelector<HTMLElement>(`[data-calendar-date="${date}"]`);
     if (!scroller || !heading) return;
     const pinnedWidth = scroller.querySelector<HTMLElement>(".admin-availability-corner")?.getBoundingClientRect().width ?? 0;
     const headingLeft = heading.getBoundingClientRect().left - scroller.getBoundingClientRect().left + scroller.scrollLeft;
     const visibleDateWidth = Math.max(0, scroller.clientWidth - pinnedWidth);
     scroller.scrollLeft = Math.max(0, headingLeft - pinnedWidth - (visibleDateWidth - heading.getBoundingClientRect().width) / 2);
-  }, [today]);
+  }, []);
   useLayoutEffect(() => {
-    if (month === today.slice(0, 7) && houses.length) centerToday();
-  }, [month, today, houses.length, centerToday]);
+    if (month === focusedDate.slice(0, 7) && visibleHouses.length) centerDate(focusedDate);
+  }, [month, focusedDate, visibleHouses.length, centerDate]);
+  const showMonth = (nextMonth: string) => {
+    setMonth(nextMonth);
+    setFocusedDate(`${nextMonth}-01`);
+    setDateDraft(`${nextMonth}-01`);
+  };
+  const jumpToDate = (date: string) => {
+    if (!date) return;
+    setMonth(date.slice(0, 7));
+    setFocusedDate(date);
+    setDateDraft(date);
+    centerDate(date);
+  };
   const firstOpenDate = (() => {
     for (let offset = 0; offset < 366; offset++) {
       const date = addDays(today, offset);
-      const property = houses.find((house) => getDayStatus(house, date, bookings, calendarEvents).kind === "available");
+      const property = visibleHouses.find((house) => getDayStatus(house, date, bookings, calendarEvents).kind === "available");
       if (property) return { propertyId: String(property.id), date };
     }
     return null;
@@ -131,7 +149,7 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
   const selectedStatus = selection && selectedProperty ? getDayStatus(selectedProperty, selection.date, bookings, calendarEvents) : null;
   const selectedRate = selection && selectedProperty ? nightlyRate(selectedProperty, selection.date) : null;
   const counts = { available: 0, booked: 0, blocked: 0 };
-  for (const property of houses) for (const date of dates) {
+  for (const property of visibleHouses) for (const date of dates) {
     const kind = getDayStatus(property, date, bookings, calendarEvents).kind;
     if (kind === "available") counts.available++;
     else if (kind === "booking") counts.booked++;
@@ -313,24 +331,32 @@ export function AdminAvailabilityCalendar({ properties, bookings, calendarEvents
 
   return <div className="space-y-5">
     <header className="admin-page-header flex flex-wrap items-end justify-between gap-4">
-      <div><p className="admin-eyebrow">Availability / daily operations</p><h2 className="admin-page-title">Calendar</h2><p className="admin-page-description">Nightly prices and availability across all homes. Select blocked nights to unblock several at once.</p></div>
+      <div><p className="admin-eyebrow">Availability / daily operations</p><h2 className="admin-page-title">Calendar</h2><p className="admin-page-description">See what is available, booked, or blocked. Choose a date to view details or make a manual booking.</p></div>
       <div className="flex flex-wrap gap-2">
         <button type="button" className="admin-button inline-flex items-center gap-2" onClick={() => void reload()}><RefreshCw size={16} /> Refresh</button>
-        {houses.length > 0 && <button type="button" className={`admin-button inline-flex items-center gap-2 ${pricingPicking ? "admin-button-primary" : ""}`} aria-pressed={pricingPicking} onClick={() => { setPricingPicking((current) => !current); setBlockPicking(false); setUnblockPicking(false); setRangeAnchor(null); setUnblockRangeAnchor(null); setSelection(null); setAction(null); setPickerError(""); }}><Pencil size={16} /> {pricingPicking ? "Done editing prices" : "Edit prices"}</button>}
+        {houses.length > 0 && <button type="button" className={`admin-button inline-flex items-center gap-2 ${pricingPicking ? "admin-button-primary" : ""}`} aria-pressed={pricingPicking} onClick={() => { setPricingPicking((current) => !current); setBlockPicking(false); setUnblockPicking(false); setRangeAnchor(null); setUnblockRangeAnchor(null); setSelection(null); setAction(null); setPickerError(""); }}><Pencil size={16} /> {pricingPicking ? "Done editing rates" : "Edit rates"}</button>}
         {firstOpenDate && <button type="button" className={`admin-button inline-flex items-center gap-2 ${blockPicking ? "admin-button-primary" : ""}`} aria-pressed={blockPicking} aria-label={blockPicking ? "Exit block date selection" : "Block dates"} onClick={toggleBlockPicking}><LockKeyhole size={16} /> Block dates</button>}
         {houses.length > 0 && <button type="button" className={`admin-button inline-flex items-center gap-2 ${unblockPicking ? "admin-button-primary" : ""}`} aria-pressed={unblockPicking} aria-label={unblockPicking ? "Exit unblock date selection" : "Unblock dates"} onClick={toggleUnblockPicking}><LockKeyholeOpen size={16} /> Unblock dates</button>}
-        {firstOpenDate && <button type="button" className="admin-button admin-button-primary inline-flex items-center gap-2" onClick={() => { setMonth(firstOpenDate.date.slice(0, 7)); setPricingPicking(false); setBlockPicking(false); setUnblockPicking(false); setRangeAnchor(null); setUnblockRangeAnchor(null); openDate(firstOpenDate.propertyId, firstOpenDate.date, "booking"); }}><Plus size={16} /> Manual booking</button>}
+        {firstOpenDate && <button type="button" className="admin-button admin-button-primary inline-flex items-center gap-2" onClick={() => { jumpToDate(firstOpenDate.date); setPricingPicking(false); setBlockPicking(false); setUnblockPicking(false); setRangeAnchor(null); setUnblockRangeAnchor(null); openDate(firstOpenDate.propertyId, firstOpenDate.date, "booking"); }}><Plus size={16} /> Add booking</button>}
       </div>
     </header>
     {!houses.length ? <div className="admin-card p-8 text-sm text-[var(--admin-muted)]">No published houses are available to show on the calendar.</div> : <>
-      <div className="admin-availability-summary"><div><span>Available nights</span><strong>{counts.available}</strong></div><div><span>Booked nights</span><strong>{counts.booked}</strong></div><div><span>Blocked nights</span><strong>{counts.blocked}</strong></div><p>Across {houses.length} {houses.length === 1 ? "house" : "houses"} in {monthLabel(month)}. Prices are nightly rates before fees and tax.</p></div>
+      <div className="admin-availability-summary"><div><span>Available house-nights</span><strong>{counts.available}</strong></div><div><span>Booked house-nights</span><strong>{counts.booked}</strong></div><div><span>Blocked house-nights</span><strong>{counts.blocked}</strong></div><p>{visibleHouses.length} {visibleHouses.length === 1 ? "house" : "houses"} shown in {monthLabel(month)}. Each count represents one night in one house.</p></div>
       {pricingPicking && <div className="admin-availability-pick-guide" role="status"><Pencil size={18} aria-hidden="true" /><div><strong>Choose a date to edit its price</strong><p>Set a price for one night or a range. Click a house’s default rate to change its usual price. Dates marked “Special rate” keep their own price.</p></div></div>}
       <section className="admin-card overflow-hidden" aria-label="House availability calendar">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--admin-border)] px-4 py-4 sm:px-6"><div className="flex items-center gap-3"><CalendarDays size={20} className="text-[var(--admin-accent)]" aria-hidden="true" /><div><h3 className="text-lg font-semibold">{monthLabel(month)}</h3><p className="text-xs text-[var(--admin-muted)]">Scroll sideways to see every date</p></div></div><div className="flex items-center gap-2"><button type="button" className="admin-button min-h-10 px-3" onClick={() => setMonth(shiftMonth(month, -1))} aria-label="Previous month"><ChevronLeft size={17} /></button><button type="button" className="admin-button min-h-10 px-3 text-sm" onClick={() => { if (month === today.slice(0, 7)) centerToday(); else setMonth(today.slice(0, 7)); }}>Today</button><button type="button" className="admin-button min-h-10 px-3" onClick={() => setMonth(shiftMonth(month, 1))} aria-label="Next month"><ChevronRight size={17} /></button></div></div>
+        <div className="admin-availability-toolbar">
+          <div className="admin-availability-toolbar-title"><CalendarDays size={20} className="text-[var(--admin-accent)]" aria-hidden="true" /><div><h3>{monthLabel(month)}</h3><p>Choose a house and date to focus the calendar.</p></div></div>
+          <div className="admin-availability-toolbar-controls">
+            <label>House<select className="admin-field" value={activeHouseId} onChange={(event) => setSelectedHouseId(event.target.value)}><option value="all">All houses</option>{houses.map((house) => <option value={String(house.id)} key={house.id}>{String(house.name).replace(/\s+-\s+Whole$/, "")}</option>)}</select></label>
+            <div className="admin-availability-date-jump"><label htmlFor="admin-availability-date">Jump to date</label><div><input id="admin-availability-date" ref={dateInputRef} className="admin-field" type="date" value={dateDraft} onChange={(event) => setDateDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") jumpToDate(dateInputRef.current?.value ?? dateDraft); }} /><button type="button" className="admin-button min-h-10 px-3 text-sm" onClick={() => jumpToDate(dateInputRef.current?.value ?? dateDraft)}>Go</button></div></div>
+            <div className="admin-availability-month-controls" aria-label="Calendar month"><button type="button" className="admin-button min-h-10 px-3" onClick={() => showMonth(shiftMonth(month, -1))} aria-label="Previous month"><ChevronLeft size={17} /></button><button type="button" className="admin-button min-h-10 px-3 text-sm" onClick={() => jumpToDate(today)}>Today</button><button type="button" className="admin-button min-h-10 px-3" onClick={() => showMonth(shiftMonth(month, 1))} aria-label="Next month"><ChevronRight size={17} /></button></div>
+          </div>
+        </div>
+        <p className="admin-availability-instruction">Scroll sideways for other dates. Click a night for its booking and rate details; use the buttons above to block, unblock, or change rates.</p>
         <div className="admin-availability-scroll" ref={scrollRef}><div className="admin-availability-grid" style={{ gridTemplateColumns: `190px repeat(${dates.length}, minmax(100px, 1fr))` }}>
           <div className="admin-availability-corner">Homes <span>· AUD / night</span></div>
           {dates.map((date) => <div key={date} data-calendar-date={date} className={`admin-availability-day-heading ${date === today ? "is-today" : ""}`}><span>{new Intl.DateTimeFormat("en-AU", { weekday: "short", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`))}</span><strong>{Number(date.slice(-2))}</strong></div>)}
-          {houses.map((property) => <div className="admin-availability-row" key={property.id} style={{ display: "contents" }}><div className="admin-availability-house"><strong>{String(property.name).replace(/\s+-\s+Whole$/, "")}</strong><button type="button" className="admin-availability-default-rate" aria-label={`Edit default nightly rate for ${property.name}, currently ${formatAud(Number(property.nightly_price ?? 0))}`} onClick={() => setPricingSelection({ propertyId: String(property.id) })}>Default {formatAud(Number(property.nightly_price ?? 0))}<Pencil size={11} aria-hidden="true" /></button></div>{dates.map((date) => {
+          {visibleHouses.map((property) => <div className="admin-availability-row" key={property.id} style={{ display: "contents" }}><div className="admin-availability-house"><strong>{String(property.name).replace(/\s+-\s+Whole$/, "")}</strong><button type="button" className="admin-availability-default-rate" aria-label={`Edit default nightly rate for ${property.name}, currently ${formatAud(Number(property.nightly_price ?? 0))}`} onClick={() => setPricingSelection({ propertyId: String(property.id) })}>Default {formatAud(Number(property.nightly_price ?? 0))}<Pencil size={11} aria-hidden="true" /></button></div>{dates.map((date) => {
             const status = getDayStatus(property, date, bookings, calendarEvents);
             const rate = nightlyRate(property, date);
             const key = blockDateKey({ propertyId: String(property.id), date });

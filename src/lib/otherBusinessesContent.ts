@@ -28,13 +28,13 @@ export const DEFAULT_OTHER_BUSINESSES: OtherBusinessesContent = {
       name: "Casa de Vacacion", cardLocation: "Orani, Bataan · Philippines",
       cardDescription: "Your private retreat in Bataan. Slow down and settle into an entire two-bedroom holiday home, with space to reconnect, explore Orani or simply take a well-earned break.",
       cardFacts: ["Entire private home", "Wi-Fi and laundry", "Explore Bataan"], cardCta: "View Casa de Vacacion", cardExternalCta: "Check Airbnb availability",
-      cardImage: { src: ORANI_PREVIEW_IMAGE, alt: "Color-enhanced aerial view of the Mount Samat Memorial Cross and forested hills in Bataan", label: "Mount Samat · Bataan" },
+      cardImage: { src: ORANI_PREVIEW_IMAGE, alt: "AI-enhanced front view of Casa de Vacacion with gardens on both sides", label: "" },
       externalUrl: AIRBNB_URL, actionUrl: AIRBNB_URL, introEyebrow: "Casa de Vacacion · Orani, Bataan", introTitle: "Your next stay", introAccent: "starts here.",
       introDescription: "A private place to pause, reconnect and explore Bataan at your own pace.", introPrimaryCta: "Explore the home", introSecondaryCta: "View on Airbnb",
       featureEyebrow: "Furnished private home · Bataan", featureTitle: "Casa de", featureAccent: "Vacacion", featureLead: "Your Private Retreat in Bataan",
       featureParagraphs: ["Slow down, settle in and enjoy a place of your own. Our two-bedroom holiday home in Orani offers a peaceful setting for reconnecting with loved ones, exploring Bataan or simply taking a well-earned break.", "Enjoy the privacy of an entire home, with Wi-Fi to keep you connected and laundry facilities for everyday convenience. Whether you’re returning to the Philippines or discovering somewhere new, make yourself at home."],
       featureSignoff: "A little time away. A place to call your own.", featureCta: "Book on Airbnb", featureLocation: "Orani, Bataan, Philippines",
-      featureImage: { src: ORANI_ENHANCED_EXTERIOR, alt: "AI-enhanced landscape version of the Casa de Vacacion exterior", label: "" }, featureImageNote: "AI-enhanced exterior · see current photos on Airbnb",
+      featureImage: { src: ORANI_ENHANCED_EXTERIOR, alt: "AI-enhanced front view of Casa de Vacacion with gardens on both sides", label: "" }, featureImageNote: "",
       facts: [{ title: "Entire private home", detail: "Up to 2 guests" }, { title: "Two bedrooms", detail: "Two beds · one bathroom" }, { title: "Everyday comforts", detail: "Wi-Fi & laundry" }],
       galleryEyebrow: "A look around", galleryTitle: "Room to settle in.", galleryDescription: "Explore enhanced previews of the living areas and kitchen. For current, unedited property photos and house rules, open the Airbnb listing.",
       galleryImages: ORANI_ENHANCED_INTERIORS.map((image) => ({ ...image })), galleryDisclosure: "These interior images are AI-enhanced from property photos. View the Airbnb listing for the current, unedited photos.",
@@ -100,12 +100,24 @@ export function normalizeOtherBusinesses(value: unknown): OtherBusinessesContent
         return { title: readText(row.title, item.title), detail: readText(row.detail, item.detail) };
       });
     }
-    if (key === "airbnb" && ["/orani-philippines-preview-v1.jpg", "/mount-samat-memorial-cross-sunset.webp"].includes(business.cardImage.src)) {
-      business.cardImage = { ...defaults.cardImage };
+    if (key === "airbnb") {
+      if (["/orani-philippines-preview-v1.jpg", "/mount-samat-memorial-cross-sunset.webp", "/mount-samat-aerial-enhanced.webp", "/orani-exterior-enhanced-v2.jpg", "/orani-exterior-garden-v3.jpg", "/orani-exterior-garden-v4.jpg", "/orani-exterior-garden-v6.jpg", "/orani-exterior-garden-v8.jpg", "/orani-exterior-garden-v9.jpg"].includes(business.cardImage.src)) {
+        business.cardImage = { ...defaults.cardImage };
+      }
+      if (["/orani-exterior-enhanced-v2.jpg", "/orani-exterior-garden-v3.jpg", "/orani-exterior-garden-v4.jpg", "/orani-exterior-garden-v6.jpg", "/orani-exterior-garden-v8.jpg", "/orani-exterior-garden-v9.jpg"].includes(business.featureImage.src)) {
+        business.featureImage = { ...defaults.featureImage };
+      }
+      business.galleryImages = business.galleryImages.map((image, index) =>
+        image.src === ["/orani-living-enhanced-v1.jpg", "/orani-kitchen-enhanced-v1.jpg", "/orani-living-second-enhanced-v1.jpg"][index]
+          ? { ...image, src: defaults.galleryImages[index].src }
+          : image,
+      );
+      if (business.cardImage.label === "AI-enhanced exterior") business.cardImage = { ...business.cardImage, label: "" };
+      if (business.featureImageNote === "AI-enhanced exterior · see current photos on Airbnb") business.featureImageNote = "";
     }
     if (key === "specialistSuites") {
       for (const field of ["cardImage", "featureImage"] as const) {
-        if (business[field].src === SPECIALIST_SUITES_ORIGINAL_IMAGE) {
+        if ([SPECIALIST_SUITES_ORIGINAL_IMAGE, "/specialist-suites-exterior-enhanced.webp", "/specialist-suites-exterior-front-v2.webp"].includes(business[field].src)) {
           business[field] = { ...business[field], src: SPECIALIST_SUITES_IMAGE };
         }
       }

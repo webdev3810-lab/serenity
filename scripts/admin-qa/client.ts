@@ -1,6 +1,7 @@
 // Never imports credentials or connects to Supabase.
 export function createSupabaseBrowserClient() {
-  return { from(table: string) {
+  const channel = { on() { return channel; }, subscribe() { return channel; } };
+  return { channel: () => channel, removeChannel: () => Promise.resolve(), from(table: string) {
     let single = false;
     let start = 0; let end = Infinity;
     const query = {

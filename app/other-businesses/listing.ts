@@ -1,14 +1,15 @@
 export const AIRBNB_URL = "https://www.airbnb.com.au/rooms/1227325251646971600";
-export const ORANI_ENHANCED_EXTERIOR = "/orani-exterior-enhanced-v2.jpg";
-export const ORANI_PREVIEW_IMAGE = "/mount-samat-aerial-enhanced.webp";
+const uploadedMediaBase = "https://goobbsmkluehjzfzzyvi.supabase.co/storage/v1/object/public/property-images/other-businesses";
+export const ORANI_ENHANCED_EXTERIOR = `${uploadedMediaBase}/casa-de-vacacion/exterior-garden-v9.jpg`;
+export const ORANI_PREVIEW_IMAGE = ORANI_ENHANCED_EXTERIOR;
 export const ORANI_ENHANCED_INTERIORS = [
-  { src: "/orani-living-enhanced-v1.jpg", alt: "AI-enhanced view of the Casa de Vacacion living room", label: "Living area" },
-  { src: "/orani-kitchen-enhanced-v1.jpg", alt: "AI-enhanced view of the Casa de Vacacion kitchen and laundry area", label: "Kitchen & laundry" },
-  { src: "/orani-living-second-enhanced-v1.jpg", alt: "AI-enhanced second view of the Casa de Vacacion living room", label: "Living area · second view" },
+  { src: `${uploadedMediaBase}/casa-de-vacacion/living-enhanced-v1.jpg`, alt: "AI-enhanced view of the Casa de Vacacion living room", label: "Living area" },
+  { src: `${uploadedMediaBase}/casa-de-vacacion/kitchen-enhanced-v1.jpg`, alt: "AI-enhanced view of the Casa de Vacacion kitchen and laundry area", label: "Kitchen & laundry" },
+  { src: `${uploadedMediaBase}/casa-de-vacacion/living-second-enhanced-v1.jpg`, alt: "AI-enhanced second view of the Casa de Vacacion living room", label: "Living area · second view" },
 ] as const;
 export const SPECIALIST_SUITES_URL = "https://specialistsuiteshub.com.au/";
 export const SPECIALIST_SUITES_ORIGINAL_IMAGE = "https://jiuvzvqeoguxjprpltsf.supabase.co/storage/v1/object/public/site-media/benefits/a47efbb3-b90d-4342-a8ed-fa65cf8d4301-front.webp";
-export const SPECIALIST_SUITES_IMAGE = "/specialist-suites-exterior-enhanced.webp";
+export const SPECIALIST_SUITES_IMAGE = `${uploadedMediaBase}/specialist-suites/exterior-front-v2.webp`;
 
 const suiteImageBase = "https://jiuvzvqeoguxjprpltsf.supabase.co/storage/v1/object/public/suite-images/";
 

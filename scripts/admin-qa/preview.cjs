@@ -35,6 +35,6 @@ webpack({ mode:'development', devtool:false, entry:path.join(here,'entry.tsx'), 
    else if(url.pathname==='/api/admin/calendar/connections')json={properties:houses.map(h=>({...h,connections:connections.filter(c=>c.property_id===h.id),conflicts:[],directBlocks:[],calendarItems:[]}))};
    else if(url.pathname.startsWith('/api/'))json={error:'No fixture is defined for this endpoint.'};
    if(json!==undefined){res.setHeader('Content-Type','application/json');res.end(JSON.stringify(json));return;}
-   res.setHeader('Content-Type','text/html');res.end('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Serenity · isolated synthetic fixture</title><link rel="stylesheet" href="/styles.css"></head><body><div id="root"></div><script src="/bundle.js"></script></body></html>');
+   res.setHeader('Content-Type','text/html');res.end('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Serenity · isolated synthetic fixture</title><link rel="stylesheet" href="/styles.css"></head><body><div id="root"></div><script>window.process={env:{}};</script><script src="/bundle.js"></script></body></html>');
  });server.listen(4107,'127.0.0.1',()=>console.log('Read-only synthetic component preview: http://127.0.0.1:4107/admin'));
 });

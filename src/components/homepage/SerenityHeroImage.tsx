@@ -43,34 +43,24 @@ export default function SerenityHeroImage({ slides }: { slides: SerenityHeroSlid
   return (
     <>
       <div className="serenity-editorial-hero__media" data-state={state}>
-        <Image
-          className="serenity-editorial-hero__base-image"
-          src={firstSlide.src}
-          alt={firstSlide.alt}
-          aria-hidden={activeSlide !== 0}
-          fill
-          preload
-          sizes="100vw"
-          unoptimized={firstSlide.src.includes("a0.muscache.com") || firstSlide.src.includes(".supabase.co/")}
-          onLoad={() => setState("loaded")}
-          onError={() => setState("error")}
-        />
-        {slides.slice(1).map((slide, slideIndex) => {
-          const index = slideIndex + 1;
+        {slides.map((slide, index) => {
           const isActive = index === activeSlide;
 
           return slide.type === "image" ? (
             <Image
               key={`${slide.src}-${index}`}
-              className="serenity-editorial-hero__slide-image"
+              className={index === 0 ? "serenity-editorial-hero__base-image" : "serenity-editorial-hero__slide-image"}
               data-active={isActive}
               src={slide.src}
               alt={isActive ? slide.alt : ""}
               aria-hidden={!isActive}
               fill
-              loading="eager"
+              preload={index === 0}
+              loading={index === 0 ? undefined : "eager"}
               sizes="100vw"
               unoptimized={slide.src.includes("a0.muscache.com") || slide.src.includes(".supabase.co/")}
+              onLoad={index === 0 ? () => setState("loaded") : undefined}
+              onError={index === 0 ? () => setState("error") : undefined}
             />
           ) : (
             <video
@@ -80,12 +70,14 @@ export default function SerenityHeroImage({ slides }: { slides: SerenityHeroSlid
               data-active={isActive}
               muted
               playsInline
-              preload="auto"
-              poster={firstSlide.src}
+              autoPlay={isActive}
+              loop={slides.length === 1}
+              preload={index === 0 ? "auto" : "metadata"}
               aria-hidden="true"
               tabIndex={-1}
+              onLoadedData={index === 0 ? () => setState("loaded") : undefined}
               onEnded={() => { if (isActive) goToNextSlide(); }}
-              onError={() => { if (isActive) goToNextSlide(); }}
+              onError={() => { if (index === 0) setState("error"); else if (isActive) goToNextSlide(); }}
             >
               <source src={slide.src} />
             </video>

@@ -238,7 +238,7 @@
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: clamp(15rem, 20vw, 20rem) clamp(4.75rem, 7vw, 6.5rem);
+  grid-template-rows: clamp(18rem, 28vw, 22rem) clamp(4.75rem, 7vw, 6.5rem);
   gap: .4rem;
   overflow: hidden;
   background: #fff;

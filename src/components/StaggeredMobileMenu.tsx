@@ -134,7 +134,6 @@ export default function StaggeredMobileMenu({
                             <ChevronDown size={19} aria-hidden="true" />
                           </summary>
                           <div className="serenity-staggered-menu__subnav-links">
-                            <Link href={item.href} aria-current={item.active ? "page" : undefined} onClick={onClose}>About Serenity</Link>
                             {item.children.map((child) => (
                               <Link key={child.href} href={child.href} aria-current={child.active ? "page" : undefined} onClick={onClose}>{child.label}</Link>
                             ))}
